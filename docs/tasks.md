@@ -26,13 +26,13 @@ Tasks are organized by implementation phase and dependency order. Each task is m
   - Configure ESLint and Prettier
   - Set up Git hooks and CI/CD
 
-- [ ] **1.1.2** Create core directory structure
+- [x] **1.1.2** Create core directory structure
   - Set up `/src/core/`, `/src/modules/`, `/src/commands/` directories
   - Create `/modules/` directory for built-in modules
   - Set up `/templates/` and `/config/` directories
   - Initialize `/tests/` structure
 
-- [ ] **1.1.3** Set up development tooling
+- [x] **1.1.3** Set up development tooling
   - Configure Jest for testing
   - Set up development scripts (build, test, lint)
   - Create development environment configuration
