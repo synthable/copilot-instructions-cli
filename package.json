@@ -1,5 +1,5 @@
 {
-  "name": "copilot-instruction-cli",
+  "name": "copilot-instructions-builder",
   "version": "1.0.0",
   "description": "Modular CLI for building GitHub Copilot instruction sets",
   "type": "module",
@@ -7,8 +7,7 @@
     "copilot-instructions": "./src/core/cli.js"
   },
   "scripts": {
-    "start": "node src/core/cli.js",
-    "test": "node --test test/"
+
   },
   "keywords": [
     "github-copilot",
@@ -19,6 +18,6 @@
   "author": "synthable",
   "license": "MIT",
   "engines": {
-    "node": ">=16.0.0"
+    "node": ">=18.0.0"
   }
 }
