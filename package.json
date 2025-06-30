@@ -7,7 +7,7 @@
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "bin": {
-    "copilot-instructions": "./dist/core/cli.js"
+    "copilot-instructions": "./dist/cli.js"
   },
   "files": [
     "dist",
@@ -16,10 +16,10 @@
     "LICENSE"
   ],
   "scripts": {
-    "build": "tsc",
+    "build": "tsc --pretty",
     "build:watch": "tsc --watch",
-    "dev": "tsx src/core/cli.ts",
-    "start": "node dist/core/cli.js",
+    "dev": "tsx src/cli.ts",
+    "start": "node dist/cli.js",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
