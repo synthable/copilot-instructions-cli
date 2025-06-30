@@ -2,6 +2,12 @@
 
 # Copilot Instructions Builder CLI
 
+[![CI](https://github.com/synthable/copilot-instructions-builder/workflows/CI/badge.svg)](https://github.com/synthable/copilot-instructions-builder/actions/workflows/ci.yml)
+[![Security](https://github.com/synthable/copilot-instructions-builder/workflows/Security/badge.svg)](https://github.com/synthable/copilot-instructions-builder/actions/workflows/security.yml)
+[![npm version](https://badge.fury.io/js/copilot-instructions-builder.svg)](https://badge.fury.io/js/copilot-instructions-builder)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Node.js Version](https://img.shields.io/badge/node-%3E%3D18.0.0-brightgreen.svg)](https://nodejs.org/)
+
 A powerful CLI application for building GitHub Copilot instruction files from modular, hierarchical components. Create sophisticated instruction sets using a three-tier architecture: **Base Instructions** → **Domain-Specific Layers** → **Task-Specific Modules**.
 
 ## 🚀 Features
@@ -204,6 +210,7 @@ Each instruction module follows a standardized JSON format:
 ```
 
 Supports:
+
 - Simple variables: `{{VAR}}`
 - Default values: `{{VAR || 'default'}}`
 - Function calls: `{{func(args)}}`
@@ -231,29 +238,25 @@ Create a [`copilot-instructions.config.js`](./docs/builder-config.md) file:
 module.exports = {
   profiles: {
     development: {
-      modules: [
-        'programming-fundamentals',
-        'frontend/react',
-        'ui-components'
-      ],
+      modules: ['programming-fundamentals', 'frontend/react', 'ui-components'],
       variables: {
         PROJECT_NAME: 'My App',
-        FRAMEWORK: 'React'
-      }
+        FRAMEWORK: 'React',
+      },
     },
     production: {
       modules: [
         'programming-fundamentals',
         'frontend/react',
         'ui-components',
-        'performance-optimization'
-      ]
-    }
+        'performance-optimization',
+      ],
+    },
   },
   output: {
     file: '.copilot-instructions.md',
-    template: 'default'
-  }
+    template: 'default',
+  },
 };
 ```
 
