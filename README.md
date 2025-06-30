@@ -324,6 +324,29 @@ npm run test:integration
 npm run test:performance
 ```
 
+### Environment Variables
+
+This project uses `.env` files to manage environment-specific variables.
+
+-   **`.env.development`**: This file is for your local development environment. It should contain your actual secret keys, database URLs, etc. **This file is included in `.gitignore` and should not be committed to the repository.**
+    To get started, you can copy the example file:
+    ```bash
+    cp .env.example .env.development
+    ```
+    Then, edit `.env.development` with your specific settings.
+
+-   **`.env.example`**: This file serves as a template for `.env.development`. It lists all the environment variables that the project expects, along with placeholder values. You can use this file as a reference to create your own `.env.development` file. **This file should be committed to the repository.**
+
+### Debugging with VS Code
+
+This project includes pre-configured VS Code launch configurations in `.vscode/launch.json` to facilitate debugging.
+
+-   **Debugging the CLI**:
+    To debug the main CLI application (`src/cli.ts`), open the "Run and Debug" view in VS Code (usually accessible via the bug icon in the activity bar or `Ctrl+Shift+D` / `Cmd+Shift+D`). Select the "Debug CLI" configuration from the dropdown and click the play button (Start Debugging). This will launch the CLI with the debugger attached, allowing you to set breakpoints, inspect variables, and step through the code.
+
+-   **Debugging Tests**:
+    To debug Jest tests, select the "Debug Tests" configuration from the "Run and Debug" view. This configuration runs Jest with the `--runInBand` option, which is crucial for the debugger to correctly attach to the test processes. You can set breakpoints directly in your test files (`*.test.ts`) or in the source code being tested.
+
 ## 🔧 Advanced Features
 
 ### Error Handling
