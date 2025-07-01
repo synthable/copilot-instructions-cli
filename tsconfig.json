@@ -9,7 +9,7 @@
 
     // Output
     "outDir": "./dist",
-    "rootDir": "./src",
+    "rootDir": "./",
     "declaration": true,
     "declarationMap": true,
     "sourceMap": true,
@@ -55,7 +55,7 @@
     "incremental": true,
     "tsBuildInfoFile": "./dist/.tsbuildinfo"
   },
-  "include": ["src/**/*", "src/__tests__/**/*"],
+  "include": ["src/**/*", "src/__tests__/**/*", "tests/**/*", "jest.setup.ts"],
   "exclude": [
     "node_modules",
     "dist",
