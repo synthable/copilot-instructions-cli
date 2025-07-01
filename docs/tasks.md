@@ -42,13 +42,13 @@ Tasks are organized by implementation phase and dependency order. Each task is m
 
 **Priority**: P0 | **Effort**: M | **Dependencies**: 1.1
 
-- [ ] **1.2.1** Define module schema and validation
+- [x] **1.2.1** Define module schema and validation
   - Create JSON schema for module structure
   - Implement module validation using Ajv or similar
   - Create TypeScript interfaces for modules
   - Add schema validation tests
 
-- [ ] **1.2.2** Implement module loader
+- [x] **1.2.2** Implement module loader
   - Create [`ModuleLoader`](../src/modules/loader.js) class
   - Implement file system module discovery
   - Add module caching mechanisms

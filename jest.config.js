@@ -14,7 +14,7 @@ export default {
   testMatch: [
     '**/src/**/__tests__/**/*.test.ts',
     '**/src/**/*.test.ts',
-    '**/test/**/*.test.ts',
+    '**/tests/**/*.test.ts',
   ],
   collectCoverageFrom: [
     'src/**/*.ts',
@@ -24,4 +24,5 @@ export default {
   coverageDirectory: 'coverage',
   coverageReporters: ['text', 'lcov', 'html'],
   rootDir: '.',
+  setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
 };
