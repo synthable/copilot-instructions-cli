@@ -4,19 +4,46 @@
  */
 
 import { main } from '../index';
+import * as fs from 'fs';
+import * as path from 'path';
 
 describe('CLI Builder Tool', () => {
+  beforeEach(() => {
+    // Ensure test modules directory exists for the main function
+    const testModulesPath = path.resolve(__dirname, '../modules');
+    if (!fs.existsSync(testModulesPath)) {
+      fs.mkdirSync(testModulesPath, { recursive: true });
+    }
+  });
+
   test('main function should be defined', () => {
     expect(main).toBeDefined();
     expect(typeof main).toBe('function');
   });
 
-  test('main function should execute without throwing', () => {
-    // Mock console.log to prevent output during tests
+  test('main function should execute without throwing', async () => {
+    // Mock console methods to prevent output during tests
     const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
+    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
 
-    expect(() => main()).not.toThrow();
+    // Execute main function and wait for completion
+    await expect(main()).resolves.not.toThrow();
 
     consoleSpy.mockRestore();
+    consoleErrorSpy.mockRestore();
+  });
+
+  test('main function should handle module loading gracefully', async () => {
+    const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
+    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
+
+    // Run main function
+    await main();
+
+    // Verify it completed without throwing
+    expect(consoleSpy).toHaveBeenCalled();
+
+    consoleSpy.mockRestore();
+    consoleErrorSpy.mockRestore();
   });
 });

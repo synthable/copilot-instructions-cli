@@ -2,7 +2,11 @@
 import * as fs from 'fs/promises';
 import * as path from 'path';
 import { pathToFileURL } from 'url';
-import { ModuleDiscoveryError, ModuleLoadError, ModuleNotFoundError } from './module-loader-errors'; // Import custom errors
+import {
+  ModuleDiscoveryError,
+  ModuleLoadError,
+  ModuleNotFoundError,
+} from './module-loader-errors'; // Import custom errors
 
 export interface ModuleLoaderOptions {
   baseDir?: string;
@@ -23,11 +27,15 @@ export class ModuleLoader {
     this.baseDir = path.resolve(options?.baseDir || './src/modules');
     this.moduleSuffix = options?.moduleSuffix || '.module.ts';
     this.moduleCache = new Map<string, Module>();
-    console.log(`ModuleLoader initialized. Base directory: ${this.baseDir}, Module suffix: ${this.moduleSuffix}`);
+    console.log(
+      `ModuleLoader initialized. Base directory: ${this.baseDir}, Module suffix: ${this.moduleSuffix}`
+    );
   }
 
   async discoverModules(): Promise<string[]> {
-    console.log(`Discovering modules in: ${this.baseDir} with suffix ${this.moduleSuffix}`);
+    console.log(
+      `Discovering modules in: ${this.baseDir} with suffix ${this.moduleSuffix}`
+    );
     try {
       await fs.access(this.baseDir); // Check if baseDir exists and is accessible
       const entries = await fs.readdir(this.baseDir, { withFileTypes: true });
@@ -45,7 +53,9 @@ export class ModuleLoader {
       if (error.code === 'ENOENT') {
         // This specific case means the directory itself was not found.
         // While fs.access should catch this, readdir might also report it.
-        console.warn(`Module directory not found: ${this.baseDir}. Returning empty list as per current design, but consider throwing ModuleDiscoveryError.`);
+        console.warn(
+          `Module directory not found: ${this.baseDir}. Returning empty list as per current design, but consider throwing ModuleDiscoveryError.`
+        );
         // Option 1: Return empty (current behavior for ENOENT)
         return [];
         // Option 2: Throw a custom error (more strict)
@@ -57,7 +67,7 @@ export class ModuleLoader {
     }
   }
 
-  async loadModule<T extends Module = Module>(modulePath: string): Promise<T> { // Changed to Promise<T> instead of Promise<T | null>
+  async loadModule<T extends Module = Module>(modulePath: string): Promise<T> {
     const absolutePath = path.resolve(modulePath);
     let moduleUrl: string | undefined;
 
@@ -98,7 +108,10 @@ export class ModuleLoader {
         throw error;
       }
       // For other errors (syntax errors in module, import issues not caught by fs.access)
-      console.error(`Failed to load module from ${absolutePath} (URL: ${moduleUrl || 'N/A'}):`, error);
+      console.error(
+        `Failed to load module from ${absolutePath} (URL: ${moduleUrl || 'N/A'}):`,
+        error
+      );
       throw new ModuleLoadError(absolutePath, error);
     }
   }

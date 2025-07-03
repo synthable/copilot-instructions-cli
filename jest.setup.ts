@@ -5,10 +5,10 @@
 import '@jest/globals';
 
 // Configure Jest environment for ESM modules
-import { jest, afterEach } from '@jest/globals';
+import { jest, afterEach, beforeEach } from '@jest/globals';
 
-// Global test timeout (30 seconds)
-jest.setTimeout(30000);
+// Global test timeout (10 seconds to prevent hanging)
+jest.setTimeout(10000);
 
 // Suppress console logs during tests unless explicitly needed
 const originalConsole = global.console;
@@ -20,7 +20,21 @@ global.console = {
   error: originalConsole.error, // Keep errors visible
 };
 
-// Reset console after each test
+// Setup for each test
+beforeEach(() => {
+  // Clear any existing timers
+  jest.clearAllTimers();
+});
+
+// Cleanup after each test
 afterEach(() => {
   jest.clearAllMocks();
+  jest.restoreAllMocks();
+  // Force cleanup of any pending promises or timers
+  jest.runOnlyPendingTimers();
+  jest.clearAllTimers();
 });
+
+// Note: Jest handles cleanup automatically at the end of test runs.
+// Using Jest APIs in process exit handlers can lead to unexpected behavior.
+// All cleanup is properly handled by the afterEach hook above.

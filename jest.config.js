@@ -25,4 +25,11 @@ export default {
   coverageReporters: ['text', 'lcov', 'html'],
   rootDir: '.',
   setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
+  // Prevent hanging tests and environment teardown issues
+  testTimeout: 10000,
+  forceExit: true,
+  detectOpenHandles: true,
+  // Ensure proper cleanup
+  clearMocks: true,
+  restoreMocks: true,
 };
