@@ -43,6 +43,14 @@ export interface SearchCriteria {
 }
 
 /**
+ * State object for tracking search progress
+ */
+interface SearchState {
+  candidateIds: Set<string> | undefined;
+  indexBasedSearch: boolean;
+}
+
+/**
  * Registry error classes extending the existing error hierarchy
  */
 export class ModuleRegistryError extends ModuleLoaderError {
@@ -179,144 +187,25 @@ export class ModuleRegistry {
    * @returns Array of matching modules
    */
   findModules(criteria: SearchCriteria): ModuleSchema[] {
-    let candidateIds: Set<string> | undefined;
-    let indexBasedSearch = false;
-
-    // Start with the most restrictive search to minimize candidates
+    // Handle exact ID match - most restrictive case
     if (criteria.id) {
-      // Exact ID match - most restrictive
       const module = this.modules.get(criteria.id);
       return module ? [module] : [];
     }
 
-    if (criteria.type) {
-      console.log(`[DEBUG] Searching for type: ${criteria.type}`);
-      const typeIndexSet = this.typeIndex.get(criteria.type);
-      console.log(
-        `[DEBUG] Type index contains:`,
-        typeIndexSet ? Array.from(typeIndexSet) : 'undefined'
-      );
-      console.log(
-        `[DEBUG] Current candidateIds:`,
-        candidateIds ? Array.from(candidateIds) : 'undefined'
-      );
-      candidateIds = this.intersectSets(candidateIds, typeIndexSet);
-      indexBasedSearch = true;
-      console.log(
-        `[DEBUG] candidateIds after type intersection:`,
-        candidateIds ? Array.from(candidateIds) : 'undefined'
-      );
-    }
-
-    if (criteria.category) {
-      candidateIds = this.intersectSets(
-        candidateIds,
-        this.categoryIndex.get(criteria.category)
-      );
-      indexBasedSearch = true;
-    }
-
-    if (criteria.tags) {
-      if (criteria.tags.all && criteria.tags.all.length > 0) {
-        // AND operation - module must have all specified tags
-        for (const tag of criteria.tags.all) {
-          candidateIds = this.intersectSets(
-            candidateIds,
-            this.tagIndex.get(tag)
-          );
-          if (!candidateIds || candidateIds.size === 0) break;
-        }
-        indexBasedSearch = true;
-      }
-
-      if (criteria.tags.any && criteria.tags.any.length > 0) {
-        // OR operation - module must have at least one of the specified tags
-        const tagUnion = new Set<string>();
-        for (const tag of criteria.tags.any) {
-          const taggedModules = this.tagIndex.get(tag);
-          if (taggedModules) {
-            taggedModules.forEach(id => tagUnion.add(id));
-          }
-        }
-        candidateIds = this.intersectSets(candidateIds, tagUnion);
-        indexBasedSearch = true;
-      }
-    }
-
-    if (criteria.dependencies && criteria.dependencies.length > 0) {
-      for (const dep of criteria.dependencies) {
-        candidateIds = this.intersectSets(
-          candidateIds,
-          this.dependencyIndex.get(dep)
-        );
-        if (!candidateIds || candidateIds.size === 0) break;
-      }
-      indexBasedSearch = true;
-    }
-
-    if (criteria.conflicts && criteria.conflicts.length > 0) {
-      for (const conflict of criteria.conflicts) {
-        candidateIds = this.intersectSets(
-          candidateIds,
-          this.conflictIndex.get(conflict)
-        );
-        if (!candidateIds || candidateIds.size === 0) break;
-      }
-      indexBasedSearch = true;
-    }
+    // Apply index-based filters to get candidate set
+    const searchState = this.applyIndexFilters(criteria);
 
     // If index-based search was performed but no candidates found, return empty
-    if (indexBasedSearch && !candidateIds) {
+    if (searchState.indexBasedSearch && !searchState.candidateIds) {
       return [];
     }
 
-    // If no index-based filtering was applied, search all modules
-    if (!candidateIds) {
-      candidateIds = new Set(this.modules.keys());
-    }
+    // Get final candidate set
+    const finalCandidates = this.getFinalCandidateSet(searchState.candidateIds);
 
-    // Apply remaining filters that require full module inspection
-    const results: ModuleSchema[] = [];
-    for (const id of Array.from(candidateIds)) {
-      const module = this.modules.get(id);
-      if (!module) continue;
-
-      if (
-        criteria.name &&
-        !module.name.toLowerCase().includes(criteria.name.toLowerCase())
-      ) {
-        continue;
-      }
-
-      if (
-        criteria.description &&
-        !module.metadata.description
-          .toLowerCase()
-          .includes(criteria.description.toLowerCase())
-      ) {
-        continue;
-      }
-
-      if (
-        criteria.author &&
-        !module.metadata.author
-          .toLowerCase()
-          .includes(criteria.author.toLowerCase())
-      ) {
-        continue;
-      }
-
-      if (
-        criteria.version &&
-        !this.matchesVersionPattern(module.version, criteria.version)
-      ) {
-        continue;
-      }
-
-      results.push(module);
-    }
-
-    return results;
+    // Apply property-based filters and return results
+    return this.applyPropertyFilters(criteria, finalCandidates);
   }
 
   /**
@@ -701,6 +590,321 @@ export class ModuleRegistry {
 
     const regex = new RegExp(`^${regexPattern}$`);
     return regex.test(version);
+  }
+
+  /**
+   * Applies index-based filters to narrow down candidates
+   * @param criteria Search criteria containing index-searchable fields
+   * @returns Search state with candidate IDs and index search flag
+   */
+  private applyIndexFilters(criteria: SearchCriteria): SearchState {
+    const state: SearchState = {
+      candidateIds: undefined,
+      indexBasedSearch: false,
+    };
+
+    // Apply type filter
+    state.candidateIds = this.applyTypeFilter(
+      criteria.type,
+      state.candidateIds
+    );
+    if (criteria.type) {
+      state.indexBasedSearch = true;
+    }
+
+    // Apply category filter
+    state.candidateIds = this.applyCategoryFilter(
+      criteria.category,
+      state.candidateIds
+    );
+    if (criteria.category) {
+      state.indexBasedSearch = true;
+    }
+
+    // Apply tag filters
+    const tagResult = this.applyTagFilters(criteria.tags, state.candidateIds);
+    state.candidateIds = tagResult.candidateIds;
+    if (tagResult.indexBasedSearch) {
+      state.indexBasedSearch = true;
+    }
+
+    // Apply dependency filters
+    state.candidateIds = this.applyDependencyFilters(
+      criteria.dependencies,
+      state.candidateIds
+    );
+    if (criteria.dependencies && criteria.dependencies.length > 0) {
+      state.indexBasedSearch = true;
+    }
+
+    // Apply conflict filters
+    state.candidateIds = this.applyConflictFilters(
+      criteria.conflicts,
+      state.candidateIds
+    );
+    if (criteria.conflicts && criteria.conflicts.length > 0) {
+      state.indexBasedSearch = true;
+    }
+
+    return state;
+  }
+
+  /**
+   * Applies type filter to candidate set
+   * @param type Module type to filter by
+   * @param candidateIds Current candidate set
+   * @returns Updated candidate set
+   */
+  private applyTypeFilter(
+    type: ModuleType | undefined,
+    candidateIds: Set<string> | undefined
+  ): Set<string> | undefined {
+    if (!type) return candidateIds;
+
+    console.log(`[DEBUG] Searching for type: ${type}`);
+    const typeIndexSet = this.typeIndex.get(type);
+    console.log(
+      `[DEBUG] Type index contains:`,
+      typeIndexSet ? Array.from(typeIndexSet) : 'undefined'
+    );
+    console.log(
+      `[DEBUG] Current candidateIds:`,
+      candidateIds ? Array.from(candidateIds) : 'undefined'
+    );
+    const result = this.intersectSets(candidateIds, typeIndexSet);
+    console.log(
+      `[DEBUG] candidateIds after type intersection:`,
+      result ? Array.from(result) : 'undefined'
+    );
+    return result;
+  }
+
+  /**
+   * Applies category filter to candidate set
+   * @param category Category to filter by
+   * @param candidateIds Current candidate set
+   * @returns Updated candidate set
+   */
+  private applyCategoryFilter(
+    category: Category | undefined,
+    candidateIds: Set<string> | undefined
+  ): Set<string> | undefined {
+    if (!category) return candidateIds;
+
+    return this.intersectSets(candidateIds, this.categoryIndex.get(category));
+  }
+
+  /**
+   * Applies tag filters (both all/any operations) to candidate set
+   * @param tags Tag criteria with all/any operations
+   * @param candidateIds Current candidate set
+   * @returns Object with updated candidate set and index search flag
+   */
+  private applyTagFilters(
+    tags: { all?: string[]; any?: string[] } | undefined,
+    candidateIds: Set<string> | undefined
+  ): { candidateIds: Set<string> | undefined; indexBasedSearch: boolean } {
+    if (!tags) {
+      return { candidateIds, indexBasedSearch: false };
+    }
+
+    let updatedCandidates = candidateIds;
+    let indexBasedSearch = false;
+
+    // Handle 'all' tags (AND operation)
+    if (tags.all && tags.all.length > 0) {
+      updatedCandidates = this.applyAllTagsFilter(tags.all, updatedCandidates);
+      indexBasedSearch = true;
+    }
+
+    // Handle 'any' tags (OR operation)
+    if (tags.any && tags.any.length > 0) {
+      updatedCandidates = this.applyAnyTagsFilter(tags.any, updatedCandidates);
+      indexBasedSearch = true;
+    }
+
+    return { candidateIds: updatedCandidates, indexBasedSearch };
+  }
+
+  /**
+   * Applies 'all' tags filter (AND operation)
+   * @param allTags Tags that must all be present
+   * @param candidateIds Current candidate set
+   * @returns Updated candidate set
+   */
+  private applyAllTagsFilter(
+    allTags: string[],
+    candidateIds: Set<string> | undefined
+  ): Set<string> | undefined {
+    let updatedCandidates = candidateIds;
+
+    // AND operation - module must have all specified tags
+    for (const tag of allTags) {
+      updatedCandidates = this.intersectSets(
+        updatedCandidates,
+        this.tagIndex.get(tag)
+      );
+      if (!updatedCandidates || updatedCandidates.size === 0) break;
+    }
+
+    return updatedCandidates;
+  }
+
+  /**
+   * Applies 'any' tags filter (OR operation)
+   * @param anyTags Tags where at least one must be present
+   * @param candidateIds Current candidate set
+   * @returns Updated candidate set
+   */
+  private applyAnyTagsFilter(
+    anyTags: string[],
+    candidateIds: Set<string> | undefined
+  ): Set<string> | undefined {
+    // OR operation - module must have at least one of the specified tags
+    const tagUnion = new Set<string>();
+    for (const tag of anyTags) {
+      const taggedModules = this.tagIndex.get(tag);
+      if (taggedModules) {
+        taggedModules.forEach(id => tagUnion.add(id));
+      }
+    }
+    return this.intersectSets(candidateIds, tagUnion);
+  }
+
+  /**
+   * Applies dependency filters to candidate set
+   * @param dependencies Dependencies to filter by
+   * @param candidateIds Current candidate set
+   * @returns Updated candidate set
+   */
+  private applyDependencyFilters(
+    dependencies: string[] | undefined,
+    candidateIds: Set<string> | undefined
+  ): Set<string> | undefined {
+    if (!dependencies || dependencies.length === 0) return candidateIds;
+
+    let updatedCandidates = candidateIds;
+    for (const dep of dependencies) {
+      updatedCandidates = this.intersectSets(
+        updatedCandidates,
+        this.dependencyIndex.get(dep)
+      );
+      if (!updatedCandidates || updatedCandidates.size === 0) break;
+    }
+    return updatedCandidates;
+  }
+
+  /**
+   * Applies conflict filters to candidate set
+   * @param conflicts Conflicts to filter by
+   * @param candidateIds Current candidate set
+   * @returns Updated candidate set
+   */
+  private applyConflictFilters(
+    conflicts: string[] | undefined,
+    candidateIds: Set<string> | undefined
+  ): Set<string> | undefined {
+    if (!conflicts || conflicts.length === 0) return candidateIds;
+
+    let updatedCandidates = candidateIds;
+    for (const conflict of conflicts) {
+      updatedCandidates = this.intersectSets(
+        updatedCandidates,
+        this.conflictIndex.get(conflict)
+      );
+      if (!updatedCandidates || updatedCandidates.size === 0) break;
+    }
+    return updatedCandidates;
+  }
+
+  /**
+   * Gets the final candidate set for property filtering
+   * @param candidateIds Candidate IDs from index filtering
+   * @returns Final candidate set (all modules if no candidates)
+   */
+  private getFinalCandidateSet(
+    candidateIds: Set<string> | undefined
+  ): Set<string> {
+    // If no index-based filtering was applied, search all modules
+    if (!candidateIds) {
+      return new Set(this.modules.keys());
+    }
+    return candidateIds;
+  }
+
+  /**
+   * Applies property-based filters that require full module inspection
+   * @param criteria Search criteria containing property filters
+   * @param candidateIds Final candidate set to filter
+   * @returns Array of modules matching all criteria
+   */
+  private applyPropertyFilters(
+    criteria: SearchCriteria,
+    candidateIds: Set<string>
+  ): ModuleSchema[] {
+    const results: ModuleSchema[] = [];
+
+    for (const id of Array.from(candidateIds)) {
+      const module = this.modules.get(id);
+      if (!module) continue;
+
+      if (!this.matchesPropertyFilters(module, criteria)) {
+        continue;
+      }
+
+      results.push(module);
+    }
+
+    return results;
+  }
+
+  /**
+   * Checks if a module matches all property-based criteria
+   * @param module Module to check
+   * @param criteria Search criteria
+   * @returns true if module matches all property criteria
+   */
+  private matchesPropertyFilters(
+    module: ModuleSchema,
+    criteria: SearchCriteria
+  ): boolean {
+    // Name filter
+    if (
+      criteria.name &&
+      !module.name.toLowerCase().includes(criteria.name.toLowerCase())
+    ) {
+      return false;
+    }
+
+    // Description filter
+    if (
+      criteria.description &&
+      !module.metadata.description
+        .toLowerCase()
+        .includes(criteria.description.toLowerCase())
+    ) {
+      return false;
+    }
+
+    // Author filter
+    if (
+      criteria.author &&
+      !module.metadata.author
+        .toLowerCase()
+        .includes(criteria.author.toLowerCase())
+    ) {
+      return false;
+    }
+
+    // Version filter
+    if (
+      criteria.version &&
+      !this.matchesVersionPattern(module.version, criteria.version)
+    ) {
+      return false;
+    }
+
+    return true;
   }
 
   /**
