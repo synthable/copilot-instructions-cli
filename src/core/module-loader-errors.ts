@@ -39,7 +39,12 @@ export class ModuleLoadError extends ModuleLoaderError {
 
 export class ModuleNotFoundError extends ModuleLoadError {
   constructor(modulePath: string) {
-    super(modulePath, new Error(`Module file not found at ${modulePath}. Ensure the path is correct and the file exists.`));
+    super(
+      modulePath,
+      new Error(
+        `Module file not found at ${modulePath}. Ensure the path is correct and the file exists.`
+      )
+    );
     this.name = this.constructor.name; // Explicitly set name for this specific subclass
   }
 }
