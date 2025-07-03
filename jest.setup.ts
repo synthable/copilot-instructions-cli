@@ -35,8 +35,6 @@ afterEach(() => {
   jest.clearAllTimers();
 });
 
-// Global cleanup on exit
-process.on('exit', () => {
-  jest.clearAllMocks();
-  jest.restoreAllMocks();
-});
+// Note: Jest handles cleanup automatically at the end of test runs.
+// Using Jest APIs in process exit handlers can lead to unexpected behavior.
+// All cleanup is properly handled by the afterEach hook above.

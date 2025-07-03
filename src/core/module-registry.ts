@@ -114,9 +114,6 @@ export class ModuleRegistry {
     this.conflictIndex = new Map();
     this._moduleLoader = moduleLoader || new ModuleLoader();
 
-    console.log(
-      'ModuleRegistry initialized with comprehensive indexing system'
-    );
     // Note: _moduleLoader available for future extensions
     void this._moduleLoader;
   }

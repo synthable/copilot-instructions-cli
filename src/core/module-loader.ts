@@ -68,7 +68,6 @@ export class ModuleLoader {
   }
 
   async loadModule<T extends Module = Module>(modulePath: string): Promise<T> {
-    // Changed to Promise<T> instead of Promise<T | null>
     const absolutePath = path.resolve(modulePath);
     let moduleUrl: string | undefined;
 
