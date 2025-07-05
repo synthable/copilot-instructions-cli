@@ -19,15 +19,15 @@ This document outlines the atomic tasks and subtasks required to build the proje
 
 #### **Task 1: Setup Project Structure & Types**
 
-*   **Subtask 1.1: Initialize Project Environment**
+*   [x] **Subtask 1.1: Initialize Project Environment**
     *   Create the root project directory: `copilot-instructions-builder`.
     *   Navigate into the directory and run `npm init -y`.
 
-*   **Subtask 1.2: Install Dependencies**
+*   [x] **Subtask 1.2: Install Dependencies**
     *   Install runtime dependencies: `npm install commander gray-matter fs-extra glob`.
     *   Install development dependencies: `npm install -D typescript @types/node @types/fs-extra @types/glob ts-node nodemon`.
 
-*   **Subtask 1.3: Configure TypeScript for ES Modules**
+*   [x] **Subtask 1.3: Configure TypeScript for ES Modules**
     *   Generate the configuration file: `npx tsc --init`.
     *   Modify `tsconfig.json` with the following properties:
         ```json
@@ -41,7 +41,7 @@ This document outlines the atomic tasks and subtasks required to build the proje
         }
         ```
 
-*   **Subtask 1.4: Configure `package.json` for CLI Operations**
+*   [x] **Subtask 1.4: Configure `package.json` for CLI Operations**
     *   Add `"type": "module"` to the top level of `package.json`.
     *   Add the `scripts` property:
         ```json
@@ -52,11 +52,11 @@ This document outlines the atomic tasks and subtasks required to build the proje
         "bin": { "instructions-builder": "./dist/cli.js" }
         ```
 
-*   **Subtask 1.5: Define Core Types**
+*   [x] **Subtask 1.5: Define Core Types**
     *   Create the file `src/types/index.ts`.
     *   In this file, `export` the `ModuleTier`, `ModuleMetadata`, `IndexedModule`, `Module`, and `PersonaFile` types as defined in the master project plan.
 
-*   **Subtask 1.6: Setup Directory Skeleton**
+*   [] **Subtask 1.6: Setup Directory Skeleton**
     *   Create source code directories: `mkdir -p src/commands src/core src/types src/utils`.
     *   Create default module directories: `mkdir -p instructions-modules/foundation instructions-modules/principle instructions-modules/technology instructions-modules/execution`.
     *   Create the personas directory: `mkdir personas`.
