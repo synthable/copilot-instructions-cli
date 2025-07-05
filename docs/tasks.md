@@ -113,16 +113,16 @@ This document outlines the atomic tasks and subtasks required to build the proje
 
 #### **Task 4: Instruction Compilation Engine**
 
-*   **Subtask 4.1: Implement the `build` Command**
+*   [x] **Subtask 4.1: Implement the `build` Command**
     *   Create `src/commands/build.ts`.
     *   Define the `build [personaFile]` command and all its options.
 
-*   **Subtask 4.2: Implement Configuration Logic**
+*   [] **Subtask 4.2: Implement Configuration Logic**
     *   In the `build` command's action handler, implement the precedence logic:
         1.  Load the Persona file if the `[personaFile]` argument is provided.
         2.  Create a final configuration object by overwriting the Persona file's values with any provided CLI options.
 
-*   **Subtask 4.3: Implement Module Resolution Logic**
+*   [] **Subtask 4.3: Implement Module Resolution Logic**
     *   In the `build` command's action handler:
         1.  Determine the final `modulesPath`.
         2.  Iterate through each tier in the correct order (`foundation` -> `principle` -> `technology` -> `execution`).
@@ -131,7 +131,7 @@ This document outlines the atomic tasks and subtasks required to build the proje
         5.  Parse each resolved file using a `parseFullModule` function (which includes content).
         6.  Collect all resolved `Module` objects.
 
-*   **Subtask 4.4: Implement Compilation & Output Logic**
+*   [] **Subtask 4.4: Implement Compilation & Output Logic**
     *   Create a `compile(modules: Module[]): string` function in `src/core/compiler.ts`.
     *   This function will group the modules by tier and concatenate their `content` in the strict four-tier order.
     *   In the `build` command, call this function and write the final compiled string to the output file specified in the configuration.
