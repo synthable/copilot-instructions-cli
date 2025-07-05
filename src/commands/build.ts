@@ -413,8 +413,10 @@ export function createBuildCommand(): Command {
   const command = new Command('build');
 
   command
-    .description('Build instruction modules into a compiled output file')
-    .argument('[personaFile]', 'optional persona configuration file')
+    .description(
+      'Compile instruction modules into a single output file, using a persona config and/or CLI options.'
+    )
+    .argument('[personaFile]', 'optional persona configuration file (JSON)')
     .option('-o, --output <file>', 'output file path')
     .option('-m, --modules-path <path>', 'path to modules directory')
     .option(
@@ -431,6 +433,16 @@ export function createBuildCommand(): Command {
     .option(
       '--optional-modules <modules...>',
       'optional modules to include if available'
+    )
+    .addHelpText(
+      'after',
+      `
+Examples:
+  $ instructions-builder build persona.json
+  $ instructions-builder build -o output.md --modules-path ./custom-modules --foundation basics
+  $ instructions-builder build --header "# Copilot Instructions" --footer "---"
+  $ instructions-builder build --modules module1 module2 --optional-modules extra1 extra2
+`
     )
     .action(async (personaFile: string | undefined, options: BuildOptions) => {
       try {

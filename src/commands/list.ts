@@ -187,11 +187,23 @@ export function createListCommand(): Command {
   const command = new Command('list');
 
   command
-    .description('List modules from the index, optionally filtered by tier')
+    .description(
+      'Display a table of modules from the index, with optional filtering by tier.'
+    )
     .option('-f, --foundation', 'include foundation tier modules')
     .option('-p, --principle', 'include principle tier modules')
     .option('-t, --technology', 'include technology tier modules')
     .option('-e, --execution', 'include execution tier modules')
+    .addHelpText(
+      'after',
+      `
+Examples:
+  $ instructions-builder list
+  $ instructions-builder list --foundation
+  $ instructions-builder list --principle --technology
+  $ instructions-builder list --modules-path ./custom-modules
+`
+    )
     .action(async (options: ListOptions) => {
       try {
         await executeListOperation(options);

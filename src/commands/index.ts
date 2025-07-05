@@ -224,7 +224,17 @@ export function createIndexCommand(): Command {
   const command = new Command('index');
 
   command
-    .description('Scan and index all module markdown files')
+    .description(
+      'Scan all instruction modules and generate a searchable index for fast lookup and discovery.'
+    )
+    .addHelpText(
+      'after',
+      `
+Examples:
+  $ instructions-builder index
+  $ instructions-builder index --modules-path ./custom-modules
+`
+    )
     .action(async () => {
       try {
         await executeIndexOperation();

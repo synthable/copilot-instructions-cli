@@ -241,7 +241,9 @@ export function createSearchCommand(): Command {
   const command = new Command('search');
 
   command
-    .description('Search modules by query in name and description fields')
+    .description(
+      'Search modules by keyword in their name and description fields, with optional tier filtering.'
+    )
     .argument(
       '<query>',
       'search query to match against module name and description'
@@ -250,6 +252,16 @@ export function createSearchCommand(): Command {
     .option('-p, --principle', 'include principle tier modules')
     .option('-t, --technology', 'include technology tier modules')
     .option('-e, --execution', 'include execution tier modules')
+    .addHelpText(
+      'after',
+      `
+Examples:
+  $ instructions-builder search authentication
+  $ instructions-builder search "test coverage" --technology
+  $ instructions-builder search async --foundation --principle
+  $ instructions-builder search error --modules-path ./custom-modules
+`
+    )
     .action(async (query: string, options: SearchOptions) => {
       try {
         await executeSearchOperation(query, options);
