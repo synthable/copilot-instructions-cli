@@ -30,14 +30,17 @@ export interface ModuleMetadata {
   /** The tier this module belongs to */
   tier: ModuleTier;
 
+  /** Human-readable name of the module */
+  name: string;
+
   /** Grouping identifier for organizing related modules */
   subject: string;
 
+  /** Human-readable description of the module's purpose */
+  description: string;
+
   /** Optional tags for enhanced searchability and categorization */
   tags?: string[];
-
-  /** Optional human-readable description of the module's purpose */
-  description?: string;
 
   /** Optional list of module IDs that this module depends on */
   dependencies?: string[];

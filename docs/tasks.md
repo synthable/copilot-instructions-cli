@@ -56,7 +56,7 @@ This document outlines the atomic tasks and subtasks required to build the proje
     *   Create the file `src/types/index.ts`.
     *   In this file, `export` the `ModuleTier`, `ModuleMetadata`, `IndexedModule`, `Module`, and `PersonaFile` types as defined in the master project plan.
 
-*   [] **Subtask 1.6: Setup Directory Skeleton**
+*   [x] **Subtask 1.6: Setup Directory Skeleton**
     *   Create source code directories: `mkdir -p src/commands src/core src/types src/utils`.
     *   Create default module directories: `mkdir -p instructions-modules/foundation instructions-modules/principle instructions-modules/technology instructions-modules/execution`.
     *   Create the personas directory: `mkdir personas`.
@@ -65,7 +65,7 @@ This document outlines the atomic tasks and subtasks required to build the proje
 
 #### **Task 2: Module Indexing System**
 
-*   **Subtask 2.1: Implement File System & Parser Utilities**
+*   [x] **Subtask 2.1: Implement File System & Parser Utilities**
     *   Create `src/utils/file-system.ts` and `src/core/parser.ts`.
     *   In `file-system.ts`, implement and `export` a function to recursively find all `.md` files in a directory.
     *   In `parser.ts`, implement `parseModuleMetadata(filePath, modulesPath)`. This function must:
@@ -76,7 +76,7 @@ This document outlines the atomic tasks and subtasks required to build the proje
         5.  Derive `subject` from the intermediate path and validate its depth (max 2 levels).
         6.  Return a complete `IndexedModule` object.
 
-*   **Subtask 2.2: Implement the `index` Command**
+*   [] **Subtask 2.2: Implement the `index` Command**
     *   Create `src/commands/index.ts`.
     *   Define the `index` command using `commander`.
     *   Implement the command's action handler to:
