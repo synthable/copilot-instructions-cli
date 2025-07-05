@@ -76,7 +76,7 @@ This document outlines the atomic tasks and subtasks required to build the proje
         5.  Derive `subject` from the intermediate path and validate its depth (max 2 levels).
         6.  Return a complete `IndexedModule` object.
 
-*   [] **Subtask 2.2: Implement the `index` Command**
+*   [x] **Subtask 2.2: Implement the `index` Command**
     *   Create `src/commands/index.ts`.
     *   Define the `index` command using `commander`.
     *   Implement the command's action handler to:
@@ -91,7 +91,7 @@ This document outlines the atomic tasks and subtasks required to build the proje
 
 #### **Task 3: Module Listing & Searching**
 
-*   **Subtask 3.1: Implement the `list` Command**
+*   [] **Subtask 3.1: Implement the `list` Command**
     *   Create `src/commands/list.ts`.
     *   Define the `list` command and its four boolean tier flags.
     *   Implement the action handler to:
@@ -100,7 +100,7 @@ This document outlines the atomic tasks and subtasks required to build the proje
         3.  Filter the in-memory array of modules based on which tier flags were provided.
         4.  Display the filtered results using `console.table()`, formatted to clearly show the full module identifier, name, and description.
 
-*   **Subtask 3.2: Implement the `search` Command**
+*   [] **Subtask 3.2: Implement the `search` Command**
     *   Create `src/commands/search.ts`.
     *   Define the `search <query>` command and its four boolean tier flags.
     *   Implement the action handler to:
