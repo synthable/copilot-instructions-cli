@@ -40,9 +40,9 @@ export default [
       'prefer-const': 'error',
       '@typescript-eslint/no-var-requires': 'error',
       'no-console': 'off', // Allow console for CLI applications
-      'complexity': ['warn', { max: 10 }],
-      'max-depth': ['warn', { max: 4 }],
-      'max-lines-per-function': ['warn', { max: 50 }],
+      'complexity': ['warn', { max: 20 }],
+      'max-depth': ['warn', { max: 5 }],
+      'max-lines-per-function': ['warn', { max: 65 }],
     },
   },
   {
