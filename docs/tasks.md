@@ -91,7 +91,7 @@ This document outlines the atomic tasks and subtasks required to build the proje
 
 #### **Task 3: Module Listing & Searching**
 
-*   [] **Subtask 3.1: Implement the `list` Command**
+*   [x] **Subtask 3.1: Implement the `list` Command**
     *   Create `src/commands/list.ts`.
     *   Define the `list` command and its four boolean tier flags.
     *   Implement the action handler to:
