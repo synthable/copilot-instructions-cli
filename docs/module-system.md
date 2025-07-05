@@ -28,6 +28,16 @@
 
 ---
 
+## System Relationships Diagram
+
+```mermaid
+graph TD
+  A[Markdown Module<br>(.md with YAML)] --> B[Module Index<br>(JSON)]
+  B --> C[Persona File<br>(.persona.json)]
+  C --> D[Compiled Output]
+  A --> D
+```
+
 ## Data Structures
 
 ```typescript

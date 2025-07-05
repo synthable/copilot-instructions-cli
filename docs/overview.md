@@ -32,3 +32,9 @@ Each tier ensures logical, layered compilation from abstract principles to actio
 - `instructions-modules.index.json`: Pre-compiled index for fast module lookup.
 
 For detailed architecture, module system, and usage, see the other documentation files in this directory.
+
+## Future Enhancements
+
+- Online module registry (planned)
+- Namespaces & versioning (planned)
+- Interactive persona builder (planned)

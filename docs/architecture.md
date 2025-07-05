@@ -60,10 +60,10 @@ copilot-instructions-builder/
 
 ```mermaid
 graph TD
-    A[Foundation<br>(Universal Truths)]
-    B[Principle<br>(Best Practices)]
-    C[Technology<br>(Specific Knowledge)]
-    D[Execution<br>(Playbooks)]
+    A[Foundation<br>Universal Truths]
+    B[Principle<br>Best Practices]
+    C[Technology<br>Specific Knowledge]
+    D[Execution<br>Playbooks]
     A --> B --> C --> D
 ```
 
