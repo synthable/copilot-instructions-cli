@@ -117,7 +117,7 @@ This document outlines the atomic tasks and subtasks required to build the proje
     *   Create `src/commands/build.ts`.
     *   Define the `build [personaFile]` command and all its options.
 
-*   [] **Subtask 4.2: Implement Configuration Logic**
+*   [x] **Subtask 4.2: Implement Configuration Logic**
     *   In the `build` command's action handler, implement the precedence logic:
         1.  Load the Persona file if the `[personaFile]` argument is provided.
         2.  Create a final configuration object by overwriting the Persona file's values with any provided CLI options.
