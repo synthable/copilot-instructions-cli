@@ -100,7 +100,7 @@ This document outlines the atomic tasks and subtasks required to build the proje
         3.  Filter the in-memory array of modules based on which tier flags were provided.
         4.  Display the filtered results using `console.table()`, formatted to clearly show the full module identifier, name, and description.
 
-*   [] **Subtask 3.2: Implement the `search` Command**
+*   [x] **Subtask 3.2: Implement the `search` Command**
     *   Create `src/commands/search.ts`.
     *   Define the `search <query>` command and its four boolean tier flags.
     *   Implement the action handler to:
