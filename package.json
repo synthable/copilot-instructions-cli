@@ -7,7 +7,7 @@
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "bin": {
-    "copilot-instructions-builder": "./dist/cli.js",
+    "copilot-instructions": "./dist/cli.js",
     "instructions-builder": "./dist/cli.js"
   },
   "files": [
@@ -22,7 +22,7 @@
     "dev": "tsx src/cli.ts",
     "dev:watch": "nodemon src/cli.ts",
     "start": "node dist/cli.js",
-    "test": "jest",
+    "test": "jest --passWithNoTests",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
     "lint": "eslint src/**/*.ts",

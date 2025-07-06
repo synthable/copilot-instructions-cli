@@ -18,7 +18,7 @@ const program = new Command();
 
 // Configure the main program
 program
-  .name('instructions-builder')
+  .name('copilot-instructions')
   .description('Modular CLI for building GitHub Copilot instruction sets')
   .version('1.0.0')
   .option(
