@@ -1,5 +1,10 @@
 # Copilot Instructions Builder CLI
 
+[![npm version](https://img.shields.io/npm/v/copilot-instructions-builder.svg)](https://www.npmjs.com/package/copilot-instructions-builder)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Node.js Version](https://img.shields.io/node/v/copilot-instructions-builder.svg)](https://nodejs.org)
+[![Documentation](https://img.shields.io/badge/docs-available-brightgreen.svg)](./docs)
+
 A modular, extensible CLI for building GitHub Copilot instruction files from reusable components. This tool enables developers to create, manage, and share AI assistant instructions using a four-tier, versionable module system.
 
 ---
@@ -19,9 +24,10 @@ The Copilot Instructions Builder CLI transforms monolithic prompt files into a *
 
 - **Modular instruction system**: Compose instructions from reusable modules
 - **Four-tier architecture**: Logical layering from abstract principles to actionable steps
-- **Versionable and shareable**: Track modules/personas in version control
+- **Versionable and shareable**: Track modules/personas in version control (⚠️ **Not yet implemented**)
 - **Customizable personas**: Tailor AI assistants for any workflow or technology
 - **CLI-driven and config-driven**: Flexible usage for all workflows
+- **Searchable module index**: Quickly find relevant modules by keyword or tier
 
 ---
 
@@ -36,7 +42,7 @@ The CLI uses a layered architecture for clarity and scalability:
 
 Modules are compiled in this order, ensuring logical, layered output.
 
-For a detailed architectural plan, see [`docs/architecture-plan.md`](docs/architecture-plan.md) and [`docs/architecture.md`](docs/architecture.md).
+For detailed architectural insights, see [`docs/overview.md`](docs/overview.md) and [`docs/architecture.md`](docs/architecture.md).
 
 ---
 
@@ -62,23 +68,39 @@ See [`docs/module-system.md`](docs/module-system.md) for data structures and exa
 ### CLI Commands
 
 ```bash
-# Initialize project config
-copilot-instructions init
+# Index modules (run after adding/removing modules)
+copilot-instructions index
 
-# List modules
-copilot-instructions list [--foundation] [--principle] [--technology] [--execution] [--tags react,frontend]
+# List modules (with optional tier filters)
+copilot-instructions list [-f] [-p] [-t] [-e]
 
-# Build instructions from modules
+# Search modules by keyword (with optional tier filters)
+copilot-instructions search "api development" [-f] [-p] [-t] [-e]
+
+# Build instructions from modules (specify modules by tier or use globs)
 copilot-instructions build --foundation programming-fundamentals --principle frontend/react --execution ui-components
 
-# Build from persona file
+# Build from persona file (uses all config in the persona JSON)
 copilot-instructions build ./personas/my-persona.json
 
-# Search modules
-copilot-instructions search "api development"
+# Build with advanced options
+copilot-instructions build -o result.md -m ./custom-modules --header "# Title" --footer "---" --include-attribution --optional-modules extra1 extra2
 ```
 
-See [`docs/usage.md`](docs/usage.md) for full CLI details and best practices.
+#### Command Options
+
+- `-m, --modules-path <path>`: Path to modules directory (overrides default).
+- `-o, --output <file>`: Output file path.
+- `--header <text>` / `--footer <text>`: Custom header/footer in output.
+- `--include-attribution`: Include module source attribution in output.
+- `-f, --foundation <modules...>`: Specify modules by tier.
+- `-p, --principle <modules...>`: Specify modules by tier.
+- `-t, --technology <modules...>`: Specify modules by tier.
+- `-e, --execution <modules...>`: Specify modules by tier.
+- `--modules <modules...>`: Specify modules directly.
+- `--optional-modules <modules...>`: Include modules if available, skip if missing.
+
+See [`docs/usage.md`](docs/usage.md) for full CLI details, examples, and best practices.
 
 ---
 
@@ -87,16 +109,18 @@ See [`docs/usage.md`](docs/usage.md) for full CLI details and best practices.
 ```
 copilot-instructions-builder/
 ├── src/
-│   ├── core/           # Core engine, CLI, algorithms
-│   ├── modules/        # Module discovery, loading, registry
-│   ├── commands/       # CLI commands
-│   ├── utils/          # Utilities, logging, errors
-│   └── algorithms/     # Graph/topological algorithms
-├── modules/            # Built-in instruction modules
-├── templates/          # Output templates
-├── config/             # Config schema and defaults
-├── tests/              # Unit/integration tests
-└── docs/               # Documentation
+│   ├── cli.ts              # CLI entry point
+│   ├── core/               # Core engine, parser, resolver
+│   ├── commands/           # CLI commands (build, index, list, search)
+│   ├── types/              # TypeScript types
+│   └── utils/              # Utilities (file-system, helpers)
+├── instructions-modules/   # Instruction modules (by tier)
+├── personas/               # Persona definition files
+├── docs/                   # Documentation
+├── instructions-modules.index.json # Module index (generated)
+├── package.json
+├── tsconfig.json
+└── README.md
 ```
 
 ---
@@ -109,6 +133,26 @@ copilot-instructions-builder/
 - **Error handling tests**: Graceful failure, recovery
 
 See [`docs/tasks.md`](docs/tasks.md) for implementation roadmap and testing priorities.
+
+---
+
+## 📖 Documentation
+
+- **Getting Started**
+  - [Quick Start Guide](./docs/quickstart.md) - Get up and running in 5 minutes
+  - [Overview](./docs/overview.md) - Project vision and concepts
+- **User Guides**
+  - [Usage Guide](./docs/usage.md) - Detailed command reference
+  - [Module System](./docs/module-system.md) - Understanding modules
+  - [Module Development](./docs/module-development.md) - Creating effective modules
+- **Reference**
+  - [Architecture](./docs/architecture.md) - System design
+  - [API Documentation](./docs/api.md) - Programmatic usage
+  - [4-Tier Model](./docs/4-tier-model.md) - Detailed tier system
+- **Help**
+  - [FAQ](./docs/faq.md) - Common questions answered
+  - [Troubleshooting](./docs/troubleshooting.md) - Problem solutions
+  - [Examples](./docs/examples.md) - Sample modules and personas
 
 ---
 

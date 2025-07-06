@@ -3,14 +3,17 @@
 ## Workflows
 
 ### Project-Local Workflow (Default)
+
 - The `instructions-modules` directory is inside the project.
 - Recommended for collaborative, version-controlled development.
 
 ### Centralized (Global) Workflow
+
 - Maintain a master modules directory (e.g., `~/.instructions-modules`).
 - Reference it from multiple projects using the `--modules-path` CLI option or the `modulesPath` property in a persona file.
 
 ### Configuration Precedence
+
 1. CLI option (`--modules-path`)
 2. Persona file setting (`modulesPath`)
 3. Default (`./instructions-modules`)
@@ -26,56 +29,69 @@
 ### Commands
 
 #### `index`
+
 - **Purpose:** Scan the module directory and create/update the index file.
-- **Usage:**  
-  - `cli index`
-  - `cli index --modules-path ~/.instructions-modules`
+- **Usage:**
+  - `copilot-instructions index`
+  - `copilot-instructions index -m ~/.instructions-modules`
 - **Note:** Run this whenever modules are added, removed, or their frontmatter changes.
 
 #### `list`
+
 - **Purpose:** Display available modules from the index.
-- **Usage:**  
-  - `cli list`
-  - `cli list --foundation`
-  - `cli list --foundation --technology`
-- **Options:** `--foundation`, `--principle`, `--technology`, `--execution`
+- **Usage:**
+  - `copilot-instructions list`
+  - `copilot-instructions list -f`
+  - `copilot-instructions list -p -t`
+- **Options:** `-f, --foundation`, `-p, --principle`, `-t, --technology`, `-e, --execution`
 
 #### `search <query>`
+
 - **Purpose:** Search modules from the index.
-- **Usage:**  
-  - `cli search "hooks"`
-  - `cli search --technology "hooks"`
-- **Options:** `--foundation`, `--principle`, `--technology`, `--execution`
+- **Usage:**
+  - `copilot-instructions search "hooks"`
+  - `copilot-instructions search -t "hooks"`
+- **Options:** `-f, --foundation`, `-p, --principle`, `-t, --technology`, `-e, --execution`
 
 #### `build [personaFile]`
+
 - **Purpose:** Compile instructions into a final output file.
-- **Usage:**  
-  - `cli build ./personas/my-persona.json`
-  - `cli --output "temp.md" --foundation "reasoning/*"`
-- **Options:**  
-  - `--output <path>`
+- **Usage:**
+  - `copilot-instructions build ./personas/my-persona.json`
+  - `copilot-instructions build -o "temp.md" --foundation "reasoning/*"`
+- **Options:**
+  - `-o, --output <path>`
+  - `-m, --modules-path <path>`
   - `--foundation <modules...>`
   - `--principle <modules...>`
   - `--technology <modules...>`
   - `--execution <modules...>`
+  - `--modules <modules...>`
+  - `--optional-modules <modules...>`
+  - `--include-attribution`
+  - `--header <text>`
+  - `--footer <text>`
 
 ---
 
 ## Practical Example
 
 **Build a persona:**
+
 ```bash
-cli build ./personas/secure-react-developer.persona.json
+copilot-instructions build ./personas/secure-react-developer.persona.json
 ```
 
 **List all technology modules:**
+
 ```bash
-cli list --technology
+copilot-instructions list --technology
 ```
 
 **Search for modules about "hooks":**
+
 ```bash
-cli search --technology "hooks"
+copilot-instructions search --technology "hooks"
 ```
 
 ---
