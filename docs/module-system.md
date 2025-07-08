@@ -4,7 +4,7 @@
 
 ### Module
 
-- **Definition:** The atomic unit of instruction—a single Markdown file with focused guidance and YAML frontmatter for metadata (`name`, `description`).
+- **Definition:** The atomic unit of AI instruction—a single Markdown file with focused guidance and YAML frontmatter for metadata (`name`, `description`).
 - **Purpose:** Enables modular, reusable, and maintainable instruction sets.
 
 ### Tier

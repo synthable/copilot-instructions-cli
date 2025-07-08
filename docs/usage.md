@@ -55,7 +55,7 @@
 
 #### `build [personaFile]`
 
-- **Purpose:** Compile instructions into a final output file.
+- **Purpose:** Compile instruction modules into a single output file to prompt an **AI assistant**.
 - **Usage:**
   - `copilot-instructions build ./personas/my-persona.json`
   - `copilot-instructions build -o "temp.md" --foundation "reasoning/*"`
