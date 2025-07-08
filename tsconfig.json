@@ -29,6 +29,7 @@
     "noPropertyAccessFromIndexSignature": true,
     "noUncheckedIndexedAccess": true,
     "exactOptionalPropertyTypes": true,
+    "typeRoots": ["./node_modules/@types", "./src/types"],
 
     // Error Checking
     "noUnusedLocals": true,

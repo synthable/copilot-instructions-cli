@@ -98,7 +98,7 @@ function filterModulesByTiers(
 /**
  * Performs case-insensitive search on module name and description
  */
-function searchModules(
+export function searchModules(
   modules: IndexedModule[],
   query: string
 ): IndexedModule[] {

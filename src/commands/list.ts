@@ -68,7 +68,7 @@ async function readIndexFile(): Promise<IndexedModule[]> {
 /**
  * Determines which tiers to include based on the provided flags
  */
-function getSelectedTiers(options: ListOptions): ModuleTier[] {
+export function getSelectedTiers(options: ListOptions): ModuleTier[] {
   const selectedTiers: ModuleTier[] = [];
 
   if (options.foundation) selectedTiers.push('foundation');
@@ -87,7 +87,7 @@ function getSelectedTiers(options: ListOptions): ModuleTier[] {
 /**
  * Filters modules by the selected tiers
  */
-function filterModulesByTiers(
+export function filterModulesByTiers(
   modules: IndexedModule[],
   selectedTiers: ModuleTier[]
 ): IndexedModule[] {
@@ -97,7 +97,9 @@ function filterModulesByTiers(
 /**
  * Prepares module data for console.table() display
  */
-function prepareTableData(modules: IndexedModule[]): Record<string, any>[] {
+export function prepareTableData(
+  modules: IndexedModule[]
+): Record<string, any>[] {
   return modules.map(module => ({
     ID: module.id,
     Tier: module.tier,

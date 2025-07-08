@@ -50,7 +50,7 @@ interface FinalConfig {
 /**
  * Loads and parses a persona file from the given path
  */
-async function loadPersonaFile(
+export async function loadPersonaFile(
   personaFilePath: string
 ): Promise<PersonaFile | null> {
   try {
@@ -77,7 +77,7 @@ async function loadPersonaFile(
 /**
  * Converts persona file configuration to build options format
  */
-function personaToOptions(persona: PersonaFile): Partial<BuildOptions> {
+export function personaToOptions(persona: PersonaFile): Partial<BuildOptions> {
   const options: Partial<BuildOptions> = {};
 
   // Map output configuration
@@ -114,7 +114,7 @@ function personaToOptions(persona: PersonaFile): Partial<BuildOptions> {
 /**
  * Merges persona file options with CLI options, giving precedence to CLI options
  */
-function mergeConfigurations(
+export function mergeConfigurations(
   personaOptions: Partial<BuildOptions>,
   cliOptions: BuildOptions
 ): FinalConfig {
@@ -158,7 +158,7 @@ function mergeConfigurations(
  * @param config - Final configuration for compilation options
  * @returns Compiled instruction content as a string
  */
-function compileModules(
+export function compileModules(
   resolutionResult: TierOrderedResolutionResult,
   config: FinalConfig
 ): string {

@@ -3,6 +3,7 @@ import js from '@eslint/js';
 import tseslint from '@typescript-eslint/eslint-plugin';
 import tsparser from '@typescript-eslint/parser';
 import prettier from 'eslint-plugin-prettier';
+import vitest from 'eslint-plugin-vitest';
 
 export default [
   js.configs.recommended,
@@ -47,45 +48,24 @@ export default [
   },
   {
     files: ['**/*.{test,spec}.{ts,tsx}', '**/__tests__/**/*.{ts,tsx}'],
-    languageOptions: {
-      parser: tsparser,
-      parserOptions: {
-        ecmaVersion: 2022,
-        sourceType: 'module',
-        project: './tsconfig.json',
-      },
-      globals: {
-        console: 'readonly',
-        process: 'readonly',
-        Buffer: 'readonly',
-        __dirname: 'readonly',
-        __filename: 'readonly',
-        global: 'readonly',
-        module: 'readonly',
-        require: 'readonly',
-        exports: 'readonly',
-        // Jest globals
-        describe: 'readonly',
-        test: 'readonly',
-        it: 'readonly',
-        expect: 'readonly',
-        beforeAll: 'readonly',
-        beforeEach: 'readonly',
-        afterAll: 'readonly',
-        afterEach: 'readonly',
-        jest: 'readonly',
-      },
-    },
     plugins: {
-      '@typescript-eslint': tseslint,
-      prettier: prettier,
+      vitest,
     },
     rules: {
+      ...vitest.configs.recommended.rules,
       'prettier/prettier': 'error',
       '@typescript-eslint/no-explicit-any': 'off',
       '@typescript-eslint/no-non-null-assertion': 'off',
       'max-lines-per-function': 'off',
     },
+    languageOptions: {
+      globals: {
+        ...vitest.environments.env.globals,
+        // Workaround for a persistent ESLint 'no-undef' error for the NodeJS type.
+        // This is needed even with "types": ["node"] in tsconfig.json and aligned Node versions.
+        NodeJS: 'readonly',
+      }
+    }
   },
   {
     ignores: [

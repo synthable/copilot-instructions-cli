@@ -34,4 +34,9 @@ program.addCommand(createSearchCommand());
 program.addCommand(createBuildCommand());
 
 // Parse command line arguments
-program.parse(process.argv);
+// This is wrapped in a check to prevent it from running during tests
+if (process.env['NODE_ENV'] !== 'test') {
+  program.parse(process.argv);
+}
+
+export { program };
