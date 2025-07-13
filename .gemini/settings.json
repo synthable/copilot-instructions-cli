@@ -1,0 +1,18 @@
+{
+  "theme": "GitHub",
+  "mcpServers": {
+    "dockerMcpGateway": {
+      "command": "docker",
+      "args": ["mcp", "gateway", "run"]
+    },
+    "openmemory": {
+      "command": "npx",
+      "args": ["-y", "openmemory"],
+      "env": {
+        "OPENMEMORY_API_KEY": "${OPENMEMORY_API_KEY}",
+        "CLIENT_NAME": "gemini-cli"
+      }
+    }
+  },
+  "preferredEditor": "vscode"
+}
