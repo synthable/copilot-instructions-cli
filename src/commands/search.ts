@@ -19,7 +19,10 @@ interface SearchOptions {
  * @param options - The command options.
  * @param options.tier - The tier to filter by.
  */
-export async function handleSearch(query: string, options: SearchOptions) {
+export async function handleSearch(
+  query: string,
+  options: SearchOptions
+): Promise<void> {
   const spinner = ora('Scanning for modules...').start();
   try {
     const allModules = await scanModules();

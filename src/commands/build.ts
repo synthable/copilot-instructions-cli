@@ -61,10 +61,10 @@ export async function handleBuild(personaFilePath: string): Promise<void> {
         .join('\n');
       outputParts.push(filteredContent);
       if (index < resolvedModules.length - 1) {
-        outputParts.push('\n---\n');
         if (personaConfig.attributions) {
           outputParts.push(`[Attribution: ${module.id}]\n`);
         }
+        outputParts.push('\n---\n');
       }
     });
     const finalContent = outputParts.join('');

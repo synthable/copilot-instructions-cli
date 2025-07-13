@@ -18,7 +18,7 @@ interface ListOptions {
  * @param options - The command options.
  * @param options.tier - The tier to filter by.
  */
-export async function handleList(options: ListOptions) {
+export async function handleList(options: ListOptions): Promise<void> {
   const spinner = ora('Scanning for modules...').start();
   try {
     const allModules = await scanModules();

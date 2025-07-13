@@ -21,5 +21,4 @@ export function handleError(error: unknown, spinner?: Ora): void {
   if (error instanceof Error) {
     console.error(chalk.red(error.message));
   }
-  process.exit(1);
 }
