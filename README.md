@@ -54,6 +54,18 @@ Searches for modules by name or description.
 
 ````bash
 copilot-instructions search "React"
+```
+
+### `create-persona`
+
+Creates a new persona configuration file.
+
+**Example:**
+
+```bash
+copilot-instructions create-persona
+```
+
 ### `validate [path]`
 
 Validates all modules and persona files, or a specific file or directory.

@@ -4,6 +4,7 @@ import { handleBuild } from './commands/build.js';
 import { handleList } from './commands/list.js';
 import { handleSearch } from './commands/search.js';
 import { handleValidate } from './commands/validate.js';
+import { handleCreatePersona } from './commands/create-persona.js';
 
 const program = new Command();
 
@@ -51,6 +52,46 @@ program
   `
   )
   .action(handleValidate);
+
+program
+  .command('create-persona')
+  .description('Creates a new persona configuration file.')
+  .argument('<name>', 'The name for the new persona.')
+  .argument(
+    '[description]',
+    'A short description for the persona.',
+    name => `A persona description for ${name}.`
+  )
+  .option(
+    '--no-attributions',
+    'Do not include attributions in the persona file.'
+  )
+  .option(
+    '-p, --persona-output <path>',
+    'The path where the persona file will be saved.',
+    name => `./${name}.persona.jsonc`
+  )
+  .option(
+    '-b, --build-output <file>',
+    'The file name for the generated persona markdown (sets the "output" property).',
+    name => `./dist/${name}.md`
+  )
+  .option(
+    '-t, --template <name>',
+    'The name of a template file (e.g., "code-critic") from ./templates/persona to use as a base.'
+  )
+  .addHelpText(
+    'after',
+    `
+  Examples:
+    $ copilot-instructions create-persona "My New Persona"
+    $ copilot-instructions create-persona "My New Persona" "A description of my persona."
+    $ copilot-instructions create-persona "My New Persona" --persona-output ./personas/my-new-persona.persona.jsonc --build-output ./dist/my-new-persona.md
+    $ copilot-instructions create-persona "My New Persona" --no-attributions
+    $ copilot-instructions create-persona "My New Persona" --template code-critic
+  `
+  )
+  .action(handleCreatePersona);
 
 // Asynchronous execution wrapper
 async function main() {
