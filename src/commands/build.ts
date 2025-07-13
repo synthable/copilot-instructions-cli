@@ -10,18 +10,21 @@ import ora from 'ora';
 import { handleError } from '../utils/error-handler.js';
 import type { PersonaConfig } from '../types/index.js';
 import { scanModules, validatePersona } from '../core/module-service.js';
+import { parse } from 'jsonc-parser';
 
 /**
  * Handles the 'build' command.
  * @param personaFilePath - The path to the persona configuration file.
  */
-export async function handleBuild(personaFilePath: string) {
+export async function handleBuild(personaFilePath: string): Promise<void> {
   const spinner = ora('Starting build process...').start();
   try {
     // 1. Read and parse persona file
     spinner.text = `Reading persona file: ${personaFilePath}`;
     const personaFileContent = await fs.readFile(personaFilePath, 'utf8');
-    const personaConfig: PersonaConfig = JSON.parse(personaFileContent);
+    const personaConfig: PersonaConfig = parse(
+      personaFileContent
+    ) as PersonaConfig;
 
     // 2. Validate persona file
     spinner.text = 'Validating persona file...';
@@ -52,7 +55,11 @@ export async function handleBuild(personaFilePath: string) {
 
     const outputParts: string[] = [];
     resolvedModules.forEach((module, index) => {
-      outputParts.push(module.content);
+      const filteredContent = module.content
+        .split('\n')
+        .map(line => line.replace(/\s*\/\/.*$/, ''))
+        .join('\n');
+      outputParts.push(filteredContent);
       if (index < resolvedModules.length - 1) {
         outputParts.push('\n---\n');
         if (personaConfig.attributions) {
@@ -65,7 +72,9 @@ export async function handleBuild(personaFilePath: string) {
     // 5. Write to output file
     const defaultOutput = `${path.basename(
       personaFilePath,
-      '.persona.json'
+      personaFilePath.endsWith('.persona.jsonc')
+        ? '.persona.jsonc'
+        : '.persona.json'
     )}.md`;
     const outputPath = path.resolve(
       process.cwd(),

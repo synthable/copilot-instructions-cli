@@ -57,7 +57,7 @@
 
 - **Purpose:** Compile instruction modules into a single output file to prompt an **AI assistant**.
 - **Usage:**
-  - `copilot-instructions build ./personas/my-persona.json`
+  - `copilot-instructions build ./personas/my-persona.jsonc`
   - `copilot-instructions build -o "temp.md" --foundation "reasoning/*"`
 - **Options:**
   - `-o, --output <path>`

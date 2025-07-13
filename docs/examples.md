@@ -22,15 +22,15 @@ See: `examples/modules/execution/implement/add-authentication.md`
 
 ### Full-Stack Developer
 
-See: `examples/personas/fullstack-developer.persona.json`
+See: `examples/personas/fullstack-developer.persona.jsonc`
 
 ### Security-Focused Developer
 
-See: `examples/personas/security-focused.persona.json`
+See: `examples/personas/security-focused.persona.jsonc`
 
 ### DevOps Engineer
 
-See: `examples/personas/devops-engineer.persona.json`
+See: `examples/personas/devops-engineer.persona.jsonc`
 
 ## Use Case Scenarios
 

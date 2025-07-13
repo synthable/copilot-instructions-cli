@@ -60,7 +60,7 @@ copilot-instructions index
 
 ### 4. Create a Persona
 
-Create `personas/quality-focused-developer.persona.json`:
+Create `personas/quality-focused-developer.persona.jsonc`:
 
 ```json
 {

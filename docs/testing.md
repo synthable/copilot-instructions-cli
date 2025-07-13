@@ -48,7 +48,7 @@ This document outlines the testing strategy for the Instructions Composer projec
 - **Goal:** To test the entire application from the user's perspective, simulating real-world scenarios. For our CLI, this means invoking the command and verifying its behavior.
 - **Location:** E2E tests will be placed in a dedicated `tests/e2e` directory.
 - **What to Test:**
-  - Core user workflows (e.g., `instructions-builder build --persona <persona> --output <file>`).
+  - Core user workflows (e.g., `instructions-builder build --persona <persona.jsonc> --output <file>`).
   - Handling of command-line arguments, options, and flags.
   - Correctness of stdout, stderr, and exit codes.
   - File system side-effects (e.g., creating output files).

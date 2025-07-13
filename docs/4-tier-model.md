@@ -11,7 +11,7 @@ The core purpose of this tool is to act as a **Persona Builder**. By combining m
 - **Module:** The atomic unit of instruction. A single markdown file containing a focused piece of guidance and YAML frontmatter for metadata (`name`, `description`).
 - **Tier:** The module's high-level scope and, most importantly, its **compilation priority**. This is determined by the module's top-level directory.
 - **Subject:** The module's specific topic, represented by a directory path within a tier. This path can have a maximum depth of two directories to balance organization with simplicity.
-- **Persona File:** A self-contained JSON file (`*.persona.json`) that defines a single build. It specifies one output file and the modules required to create it.
+- **Persona File:** A self-contained JSON file (`*.persona.jsonc`) that defines a single build. It specifies one output file and the modules required to create it.
 - **Module Path:** The location of the root modules directory (default: `./instructions-modules`).
 - **Module Index:** A pre-compiled JSON cache of all module metadata (`instructions-modules.index.json`), used to accelerate the `list` and `search` commands.
 
