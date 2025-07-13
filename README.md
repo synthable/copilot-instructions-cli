@@ -52,9 +52,28 @@ Searches for modules by name or description.
 
 **Example:**
 
-```bash
+````bash
 copilot-instructions search "React"
-```
+### `validate [path]`
+
+Validates all modules and persona files, or a specific file or directory.
+
+**Arguments:**
+
+*   `path`: (Optional) The path to a specific file or directory to validate.
+
+**Examples:**
+
+```bash
+# Validate all modules and personas
+copilot-instructions validate
+
+# Validate a specific module
+copilot-instructions validate ./instructions-modules/foundation/logic/if-then-statements.md
+
+# Validate a specific persona
+copilot-instructions validate ./personas/my-persona.jsonc
+````
 
 ## Persona File Format
 
