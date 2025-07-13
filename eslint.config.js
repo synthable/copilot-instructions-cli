@@ -2,7 +2,7 @@ import js from '@eslint/js';
 import tseslint from '@typescript-eslint/eslint-plugin';
 import tsparser from '@typescript-eslint/parser';
 import prettier from 'eslint-plugin-prettier';
-import vitest from 'eslint-plugin-vitest';
+import vitest from '@vitest/eslint-plugin';
 import globals from 'globals';
 
 export default [
@@ -49,6 +49,11 @@ export default [
       '@typescript-eslint/no-explicit-any': 'off',
       '@typescript-eslint/no-non-null-assertion': 'off',
       'max-lines-per-function': 'off',
+    },
+    settings: {
+      vitest: {
+        typecheck: true,
+      },
     },
     languageOptions: {
       globals: {
