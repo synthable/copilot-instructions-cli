@@ -1,6 +1,6 @@
 # Module Authoring & Development Guide
 
-- [Module Authoring \& Development Guide](#module-authoring--development-guide)
+- [Module Authoring & Development Guide](#module-authoring--development-guide)
   - [1. Introduction](#1-introduction)
   - [2. Module Structure](#2-module-structure)
     - [2.1. YAML Frontmatter](#21-yaml-frontmatter)
@@ -128,7 +128,7 @@ Follow this systematic process to create new, high-quality modules. This workflo
 
 ### Step 1: Deconstruct the Concept
 
-- Identify the Core Concept: What is the single, atomic idea this module will represent?
+- Identify the Core Concept: What is the single, atomic idea this module will represent? Before you begin, review the [existing module library](../instructions-modules/README.md:1) to ensure your concept is not redundant.
 - Formulate the Primary Directive: What is the one command it gives the AI?
 - Outline the Process: What are the logical steps to achieve this directive?
 - Define the Constraints: How could this rule be misinterpreted? What are the explicit anti-patterns to forbid?
