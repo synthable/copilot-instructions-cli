@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { Argument, Command } from 'commander';
+import { Argument, Command, Option } from 'commander';
 import { handleBuild } from './commands/build.js';
 import { handleList } from './commands/list.js';
 import { handleSearch } from './commands/search.js';
@@ -27,14 +27,42 @@ program
 program
   .command('list')
   .description('Lists all available instruction modules.')
-  .option('-t, --tier <name>', 'Filter the list by a specific tier')
+  .addOption(
+    new Option('-t, --tier <name>', 'Filter by tier').choices([
+      'foundation',
+      'principle',
+      'technology',
+      'execution',
+    ])
+  )
+  .addHelpText(
+    'after',
+    `
+  Examples:
+    $ copilot-instructions list
+    $ copilot-instructions list --tier foundation
+  `
+  )
   .action(handleList);
 
 program
   .command('search')
   .description('Searches for modules by name or description.')
   .argument('<query>', 'The text to search for.')
-  .option('-t, --tier <name>', 'Restrict the search to a specific tier.')
+  .addOption(
+    new Option(
+      '-t, --tier <name>',
+      'Restrict the search to a specific tier.'
+    ).choices(['foundation', 'principle', 'technology', 'execution'])
+  )
+  .addHelpText(
+    'after',
+    `
+  Examples:
+    $ copilot-instructions search "logic"
+    $ copilot-instructions search "reasoning" --tier foundation
+  `
+  )
   .action(handleSearch);
 
 program
@@ -46,7 +74,7 @@ program
   .addHelpText(
     'after',
     `
-    Examples:
+  Examples:
     $ copilot-instructions validate
     $ copilot-instructions validate ./modules/my-module.md
     $ copilot-instructions validate ./personas/my-persona.persona.jsonc

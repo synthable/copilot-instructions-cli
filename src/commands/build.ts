@@ -1,3 +1,4 @@
+/* eslint-disable max-lines-per-function */
 /**
  * @module commands/build
  * @description Command to build a persona from a configuration file.

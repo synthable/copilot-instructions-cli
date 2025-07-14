@@ -50,8 +50,11 @@ export async function handleList(options: ListOptions): Promise<void> {
       return;
     }
 
+    const maxWidth = process.stdout.columns || 80;
     const table = new Table({
       head: ['Layer', 'Tier/Subject', 'Name', 'Description'],
+      colWidths: [8, 40, 24, maxWidth - (8 + 40 + 24 + 6)], // 6 for table borders/padding
+      wordWrap: true,
       style: { head: ['cyan'] },
     });
 

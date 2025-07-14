@@ -1,3 +1,4 @@
+/* eslint-disable max-lines-per-function */
 /**
  * @module commands/search
  * @description Command to search for modules.
@@ -61,15 +62,18 @@ export async function handleSearch(
       return;
     }
 
+    const maxWidth = process.stdout.columns || 80;
     const table = new Table({
-      head: ['Tier/Subject', 'Name', 'Description', 'Layer'],
+      head: ['Layer', 'Tier/Subject', 'Name', 'Description'],
+      colWidths: [8, 40, 24, maxWidth - (8 + 40 + 24 + 6)], // 6 for table borders/padding
+      wordWrap: true,
       style: { head: ['cyan'] },
     });
 
     results.forEach(m => {
       const subjectPath = m.subject ? `${m.tier}/${m.subject}` : m.tier;
       const layer = m.layer !== undefined ? m.layer.toString() : 'N/A';
-      table.push([subjectPath, m.name, m.description, layer]);
+      table.push([layer, subjectPath, m.name, m.description]);
     });
 
     console.log(table.toString());
