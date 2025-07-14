@@ -33,6 +33,8 @@ A module should be:
 
 This principle means we use specific, descriptive filenames (e.g., `deductive-reasoning.md`) and strictly avoid generic "bucket" files (e.g., `basics.md`). The module file system is a **library of specific concepts**, and the persona file is the **composition tool** used to assemble them.
 
+A complete, categorized list of all available modules can be found in the [`instructions-modules/README.md`](../instructions-modules/README.md:1) file.
+
 ## 3. The Grand Architecture: The Four-Tier System
 
 The module system is organized into a four-tier hierarchy. This structure creates a "waterfall of abstraction," guiding the AI from the most universal rules of thought down to the most concrete actions. For maximum effectiveness, personas should always be assembled in the `Foundation -> Principle -> Technology -> Execution` order.
