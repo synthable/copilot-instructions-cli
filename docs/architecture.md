@@ -1,88 +1,62 @@
-# Architecture
+# Architecture Overview
 
-## Four-Tier System
+## 1. Introduction
 
-The Copilot Instructions Builder CLI is structured around a layered, four-tier architecture. Each tier represents a different level of abstraction and rate of change, ensuring a logical flow from universal principles to concrete actions.
+This document details the internal architecture of the `copilot-instructions` CLI tool. It is intended for developers who want to understand how the system is structured, how the different components interact, and the design principles that guide its development.
 
-### 1. Foundation
+## 2. Guiding Principles
 
-- **Analogy:** Laws of Physics
-- **Purpose:** This tier contains universal, domain-agnostic truths of logic, reasoning, and systematic thinking. These modules are abstract and provide the foundational principles that guide all other instructions. They change rarely, if ever.
-- **Examples:** Deductive reasoning, systems thinking, bias awareness.
+The architecture is designed around established software engineering principles to ensure the codebase is maintainable, scalable, and easy to reason about:
 
-### 2. Principle
+- **Modularity & Separation of Concerns (SoC):** Each component of the application has a distinct responsibility. For example, the logic for parsing files is separate from the logic that defines the CLI commands.
+- **Single Responsibility Principle (SRP):** Functions and modules are kept small and focused on a single task.
+- **Dependency Inversion:** High-level modules (like command handlers) depend on abstractions (like the `Module` interface or function signatures), not on the low-level implementation details of other modules. This decouples the components and makes them easier to test.
 
-- **Analogy:** Engineering Blueprints
-- **Purpose:** This tier builds on the foundation with established software engineering principles, methodologies, and patterns. These are best practices that are generally technology-agnostic but specific to the domain of software development.
-- **Examples:** Test-driven development (TDD), SOLID principles, separation of concerns.
+## 3. High-Level Architecture
 
-### 3. Technology
+The application can be broken down into three main layers:
 
-- **Analogy:** Tool Manual
-- **Purpose:** This tier provides specific knowledge about particular tools, languages, frameworks, or platforms. These modules are highly specific and are likely to be updated as technologies evolve.
-- **Examples:** Python PEP8 standards, React Hooks guidelines, AWS IAM policies.
+1.  **CLI Entry Point & Command Registration (`src/index.ts`):** This is the outermost layer. Its sole responsibility is to initialize the `commander.js` framework, define the structure of the CLI commands (e.g., `build`, `list`), and link them to their corresponding handler functions. It does not contain any business logic.
 
-### 4. Execution
+2.  **Command Handlers (`src/commands/*.ts`):** This layer contains the logic for each individual CLI command. Each command file (e.g., `build.ts`, `list.ts`) exports an asynchronous handler function that takes the user's input (arguments and options) and orchestrates the steps needed to execute the command. These handlers are responsible for user feedback (spinners, error messages) and coordinating calls to the core services.
 
-- **Analogy:** Assembly Instructions
-- **Purpose:** This is the most concrete tier, providing step-by-step playbooks for specific, immediate tasks. These instructions are highly detailed and guide the user through a particular workflow.
-- **Examples:** Creating a new API endpoint, refactoring a React component, auditing a smart contract.
+3.  **Core Services (`src/core/*.ts`):** This is the heart of the application. It contains the shared business logic that is used by multiple commands. The primary service is the `ModuleService`, which is responsible for all interactions with the `instructions-modules/` directory.
 
----
+## 4. Key Components & Data Flow
 
-## Directory Structure
+### 4.1. `ModuleService` (`src/core/module-service.ts`)
 
-The directory structure enforces the four-tier hierarchy and organizes modules for clarity and scalability.
+- **Responsibility:** To be the single source of truth for discovering, parsing, and providing access to all available instruction modules.
+- **Key Functionality:** The `scanModules()` function is the primary public method. It performs the following steps:
+  1.  Recursively traverses the `instructions-modules/` directory to find all `*.md` files.
+  2.  For each file, it calls a private helper function to parse the file content.
+  3.  The parsing function reads the file, uses `gray-matter` to separate the YAML frontmatter from the Markdown content, and derives the module's `id`, `tier`, and `subject` from its file path.
+  4.  It validates the frontmatter to ensure the required `name` and `description` fields are present.
+  5.  It returns a `Map<string, Module>`, which provides an efficient, O(1) lookup for modules by their unique ID.
 
-```plaintext
-copilot-instructions-builder/
-├── personas/
-│   └── secure-react-developer.persona.json
-│
-├── instructions-modules/
-│   ├── foundation/
-│   │   └── reasoning/
-│   │       └── 1-systems-thinking.md
-│   ├── principle/
-│   │   └── security/
-│   │       └── 1-owasp-top-10.md
-│   ├── technology/
-│   │   └── framework/
-│   │       └── react/
-│   │           └── 1-hooks-rules.md
-│   └── execution/
-│       └── playbook/
-│           └── create-new-component/
-│               └── 1-define-props-first.md
-│
-└── instructions-modules.index.json
-```
+### 4.2. Data Structures (`src/types/index.ts`)
 
----
+- **Responsibility:** To provide a single, centralized location for all custom type definitions and interfaces used throughout the application.
+- **Key Interfaces:**
+  - `Module`: Represents a single, parsed instruction module. It is the canonical data structure for a module within the application.
+  - `PersonaConfig`: Represents the structure of a `*.persona.jsonc` file.
 
-## Architectural Diagram
+By centralizing these types, we ensure data consistency and leverage TypeScript's static analysis capabilities across the entire codebase.
 
-```mermaid
-graph TD
-    A[Foundation<br>Universal Truths]
-    B[Principle<br>Best Practices]
-    C[Technology<br>Specific Knowledge]
-    D[Execution<br>Playbooks]
-    A --> B --> C --> D
-```
+### 4.3. Data Flow for the `build` Command
 
----
+To illustrate how the components interact, here is the data flow for the `build` command:
 
-## Compilation Flow
+1.  **`index.ts`** receives the `build` command and invokes `handleBuild()` from `src/commands/build.ts`, passing the persona file path.
+2.  **`handleBuild()`** orchestrates the process:
+    a. It shows a spinner to the user.
+    b. It reads the user-provided `*.persona.jsonc` file.
+    c. It uses `jsonc-parser` to parse the file content into a `PersonaConfig` object.
+    d. It validates the `PersonaConfig` object using `validatePersona()` from the `ModuleService`.
+    e. It calls `scanModules()` from the `ModuleService` to get a map of all available modules.
+    f. It iterates through the `modules` array in the `PersonaConfig` and uses the module IDs to look up the full `Module` objects from the map returned by the service.
+    g. It assembles the `content` of the resolved modules into a single string, adding separators and attributions as specified in the `PersonaConfig`.
+    h. It writes the final string to the appropriate output file.
+    i. It updates the user with success or failure messages.
 
-The CLI compiles modules in a specific order to ensure that the final instruction set is coherent and logically structured. The process follows the architectural tiers from most abstract to most concrete:
-
-1.  **Foundation First:** The compilation process begins with the **Foundation** modules. These provide the core logic and reasoning principles that underpin all subsequent instructions. Because they are universal, they form the base of any instruction set.
-
-2.  **Layering Principles:** Next, the **Principle** modules are layered on top. These introduce established software engineering best practices, building upon the abstract concepts from the foundation with domain-specific guidelines.
-
-3.  **Adding Technology:** After principles, **Technology** modules are incorporated. This step tailors the instruction set to a specific tech stack, providing rules and standards for the languages, frameworks, and tools being used.
-
-4.  **Finalizing with Execution:** Finally, **Execution** modules are added. These provide concrete, step-by-step playbooks for specific tasks, ensuring that the final output is not only well-principled and technologically sound but also immediately actionable.
-
-This layered approach guarantees that every persona or instruction set is built on a solid foundation of abstract reasoning, refined by established principles, tailored to specific technologies, and equipped with clear, actionable steps.
+This decoupled architecture makes the system robust and easy to extend. To add a new command, a developer only needs to create a new file in `src/commands/` and register it in `src/index.ts`, without modifying any of the core service logic.

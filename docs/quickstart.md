@@ -24,16 +24,11 @@ npm run build
 npm link
 ```
 
-## Your First Persona
+## Creating Your First Module
 
-### 1. Initialize Module Directory
+You can create a module manually or use the CLI:
 
-```bash
-# Create default module structure
-copilot-instructions init
-```
-
-### 2. Create Your First Module
+### Manual Creation
 
 Create `instructions-modules/principle/code-quality/clean-code.md`:
 
@@ -52,13 +47,21 @@ tags: ['quality', 'best-practices']
 - Follow the DRY principle
 ```
 
-### 3. Index Your Modules
+### Using the CLI
 
 ```bash
-copilot-instructions index
+copilot-instructions create-module principle code-quality "Clean Code Principles" "Fundamental principles for writing clean, maintainable code"
 ```
 
-### 4. Create a Persona
+Options:
+
+- `-l, --layer <number>`: Specify layer for foundation modules (0-5).
+
+## Creating a Persona
+
+You can create a persona manually or use the CLI:
+
+### Manual Creation
 
 Create `personas/quality-focused-developer.persona.jsonc`:
 
@@ -71,13 +74,105 @@ Create `personas/quality-focused-developer.persona.jsonc`:
 }
 ```
 
-### 5. Build Your Instructions
+### Using the CLI
 
 ```bash
-copilot-instructions build personas/quality-focused-developer.persona.json
+copilot-instructions create-persona "Quality-Focused Developer" "A developer who prioritizes code quality"
 ```
 
-Congratulations! You've created your first Copilot instructions file at `.github/copilot-instructions.md`.
+Options:
+
+- `--no-attributions`: Exclude attributions in the persona file.
+- `-p, --persona-output <path>`: Output path for persona file.
+- `-b, --build-output <file>`: Output file for generated markdown.
+- `-t, --template <name>`: Use a template from `./templates/persona`.
+
+## Building Instructions
+
+```bash
+copilot-instructions build personas/quality-focused-developer.persona.jsonc
+```
+
+## CLI Reference
+
+### build
+
+Builds a persona instruction file from a `.persona.json` configuration.
+
+```bash
+copilot-instructions build <personaFile>
+```
+
+- `<personaFile>`: Path to the persona configuration file.
+
+### list
+
+Lists all available instruction modules.
+
+```bash
+copilot-instructions list
+copilot-instructions list --tier foundation
+```
+
+Options:
+
+- `-t, --tier <name>`: Filter by tier (`foundation`, `principle`, `technology`, `execution`).
+
+### search
+
+Searches for modules by name or description.
+
+```bash
+copilot-instructions search "logic"
+copilot-instructions search "reasoning" --tier foundation
+```
+
+Options:
+
+- `-t, --tier <name>`: Restrict search to a specific tier.
+
+### validate
+
+Validates all modules and persona files, or a specific file/directory.
+
+```bash
+copilot-instructions validate
+copilot-instructions validate ./modules/my-module.md
+copilot-instructions validate ./personas/my-persona.persona.jsonc
+```
+
+### create-module
+
+Creates a new instruction module file.
+
+```bash
+copilot-instructions create-module <tier> <subject> <name> [description]
+```
+
+Options:
+
+- `-l, --layer <number>`: Layer for foundation modules (0-5).
+
+### create-persona
+
+Creates a new persona configuration file.
+
+```bash
+copilot-instructions create-persona <name> [description] [options]
+```
+
+Options:
+
+- `--no-attributions`
+- `-p, --persona-output <path>`
+- `-b, --build-output <file>`
+- `-t, --template <name>`
+
+## Advanced Usage
+
+- **Filtering:** Use `--tier` to filter modules in `list` and `search`.
+- **Templates:** Use `--template` in `create-persona` to base your persona on a template from `./templates/persona`.
+- **Validation:** Use `validate` to check modules and personas for errors before building.
 
 ## Next Steps
 
