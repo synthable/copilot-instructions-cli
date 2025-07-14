@@ -30,12 +30,13 @@ export default [
       '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
       '@typescript-eslint/explicit-function-return-type': 'warn',
       '@typescript-eslint/no-explicit-any': 'warn',
+      'no-undef': 'off', // 'no-undef' is handled by TypeScript
       'prefer-const': 'error',
       '@typescript-eslint/no-var-requires': 'error',
       'no-console': 'off', // Allow console for CLI applications
       'complexity': ['warn', { max: 20 }],
       'max-depth': ['warn', { max: 5 }],
-      'max-lines-per-function': ['warn', { max: 75 }],
+      'max-lines-per-function': ['warn', { max: 50, skipBlankLines: true, skipComments: true }],
     },
   },
   {
