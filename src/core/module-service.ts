@@ -82,7 +82,9 @@ export async function scanModules(): Promise<Map<string, Module>> {
     await fs.access(MODULES_ROOT_DIR);
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (error) {
-    throw new Error('instructions-modules directory not found.');
+    throw new Error(
+      `The 'instructions-modules' directory was not found at '${MODULES_ROOT_DIR}'. Please create it, or use the 'create-module' command to get started.`
+    );
   }
   const files = await findMarkdownFiles(MODULES_ROOT_DIR);
   const modules = await Promise.all(files.map(file => parseModuleFile(file)));
