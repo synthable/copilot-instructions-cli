@@ -1,98 +1,156 @@
-// src/index.ts
-// Previous content might be here, or it might be a new file effectively.
+#!/usr/bin/env node
+import { Argument, Command, Option } from 'commander';
+import { handleBuild } from './commands/build.js';
+import { handleList } from './commands/list.js';
+import { handleSearch } from './commands/search.js';
+import { handleValidate } from './commands/validate.js';
+import { handleCreateModule } from './commands/create-module.js';
+import { handleCreatePersona } from './commands/create-persona.js';
 
-console.log('Application starting...');
+const program = new Command();
 
-// Add example usage for ModuleLoader below
+program
+  .name('copilot-instructions')
+  .description(
+    'A CLI for building and managing AI persona instructions from modular files.'
+  )
+  .version(require('../package.json').version); // Dynamically derived version
 
-// --- ModuleLoader Example ---
-import { ModuleLoader } from './core/module-loader';
-import {
-  ModuleDiscoveryError,
-  ModuleLoadError,
-} from './core/module-loader-errors';
-import * as path from 'path';
+program
+  .command('build')
+  .description(
+    'Builds a persona instruction file from a .persona.json configuration.'
+  )
+  .argument('<personaFile>', 'Path to the persona configuration file.')
+  .action(handleBuild);
 
-export async function main() {
-  console.log('--- Running ModuleLoader Example ---');
+program
+  .command('list')
+  .description('Lists all available instruction modules.')
+  .addOption(
+    new Option('-t, --tier <name>', 'Filter by tier').choices([
+      'foundation',
+      'principle',
+      'technology',
+      'execution',
+    ])
+  )
+  .addHelpText(
+    'after',
+    `
+  Examples:
+    $ copilot-instructions list
+    $ copilot-instructions list --tier foundation
+  `
+  )
+  .action(handleList);
 
-  // Define a directory for example modules relative to src/
-  // For a real application, this path would be more robustly determined.
-  const exampleModulesPath = path.resolve(__dirname, 'modules'); // Assumes a 'modules' directory sibling to 'core'
+program
+  .command('search')
+  .description('Searches for modules by name or description.')
+  .argument('<query>', 'The text to search for.')
+  .addOption(
+    new Option(
+      '-t, --tier <name>',
+      'Restrict the search to a specific tier.'
+    ).choices(['foundation', 'principle', 'technology', 'execution'])
+  )
+  .addHelpText(
+    'after',
+    `
+  Examples:
+    $ copilot-instructions search "logic"
+    $ copilot-instructions search "reasoning" --tier foundation
+  `
+  )
+  .action(handleSearch);
 
-  console.log(`Attempting to load modules from: ${exampleModulesPath}`);
+program
+  .command('validate')
+  .description(
+    'Validates all modules and persona files, or a specific file/directory.'
+  )
+  .argument('[path]', 'Optional path to a specific file or directory.')
+  .addHelpText(
+    'after',
+    `
+  Examples:
+    $ copilot-instructions validate
+    $ copilot-instructions validate ./modules/my-module.md
+    $ copilot-instructions validate ./personas/my-persona.persona.jsonc
+  `
+  )
+  .action(handleValidate);
 
-  const loader = new ModuleLoader({
-    baseDir: exampleModulesPath, // Or use default './src/modules' if that's where you'd put them
-    moduleSuffix: '.example.ts', // Using a specific suffix for these examples
-  });
+program
+  .command('create-module')
+  .description('Creates a new instruction module file.')
+  .addArgument(
+    new Argument(
+      '<tier>',
+      'The tier for the new module (e.g., foundation).'
+    ).choices(['foundation', 'principle', 'technology', 'execution'])
+  )
+  .argument(
+    '<subject>',
+    'The subject path within the tier (e.g., logic/reasoning).'
+  )
+  .argument('<name>', 'The name for the new module (e.g., "My New Module").')
+  .argument(
+    '[description]',
+    'A short description for the module.',
+    name => `A module description for ${name}.`
+  )
+  .option(
+    '-l, --layer <number>',
+    'The layer for foundation modules (0-5).',
+    value => parseInt(value, 10)
+  )
+  .action(handleCreateModule);
 
-  try {
-    const discoveredModules = await loader.discoverModules();
-    console.log(`Discovered ${discoveredModules.length} example module(s):`);
-    discoveredModules.forEach(modPath => console.log(` - ${modPath}`));
+program
+  .command('create-persona')
+  .description('Creates a new persona configuration file.')
+  .argument('<name>', 'The name for the new persona.')
+  .argument(
+    '[description]',
+    'A short description for the persona.',
+    name => `A persona description for ${name}.`
+  )
+  .option(
+    '--no-attributions',
+    'Do not include attributions in the persona file.'
+  )
+  .option(
+    '-p, --persona-output <path>',
+    'The path where the persona file will be saved.',
+    name => `./${name}.persona.jsonc`
+  )
+  .option(
+    '-b, --build-output <file>',
+    'The file name for the generated persona markdown (sets the "output" property).',
+    name => `./dist/${name}.md`
+  )
+  .option(
+    '-t, --template <name>',
+    'The name of a template file (e.g., "code-critic") from ./templates/persona to use as a base.'
+  )
+  .addHelpText(
+    'after',
+    `
+  Examples:
+    $ copilot-instructions create-persona "My New Persona"
+    $ copilot-instructions create-persona "My New Persona" "A description of my persona."
+    $ copilot-instructions create-persona "My New Persona" --persona-output ./personas/my-new-persona.persona.jsonc --build-output ./dist/my-new-persona.md
+    $ copilot-instructions create-persona "My New Persona" --no-attributions
+    $ copilot-instructions create-persona "My New Persona" --template code-critic
+  `
+  )
+  .action(handleCreatePersona);
 
-    if (discoveredModules.length === 0) {
-      console.log(
-        `No example modules found. To test loading, create a file like:`
-      );
-      console.log(
-        `${path.join(exampleModulesPath, 'myTest.example.ts')} with content like:`
-      );
-      console.log('export const message = "Hello from myTest module!";');
-      console.log(
-        'export default function greet() { console.log("Greet from default export!"); }'
-      );
-    }
-
-    for (const modulePath of discoveredModules) {
-      try {
-        console.log(`Attempting to load module: ${modulePath}`);
-        // Define an expected structure for the example modules if possible
-        type ExampleModule = {
-          message?: string;
-          default?: () => void;
-          value?: number;
-        };
-        const module = await loader.loadModule<ExampleModule>(modulePath);
-
-        console.log(`Successfully loaded: ${modulePath}`);
-        if (module.default && typeof module.default === 'function') {
-          module.default();
-        }
-        if (module.message) {
-          console.log(`Message from module: ${module.message}`);
-        }
-        if (module.value !== undefined) {
-          console.log(`Value from module: ${module.value}`);
-        }
-        console.log('---');
-      } catch (e) {
-        if (e instanceof ModuleLoadError) {
-          console.error(`Error loading module ${e.modulePath}: ${e.message}`);
-        } else {
-          console.error(
-            `An unexpected error occurred while loading ${modulePath}:`,
-            e
-          );
-        }
-      }
-    }
-  } catch (e) {
-    if (e instanceof ModuleDiscoveryError) {
-      console.error(
-        `Error discovering modules from ${e.directoryPath}: ${e.message}`
-      );
-    } else {
-      console.error('An unexpected error occurred during module discovery:', e);
-    }
-  }
-  console.log('--- ModuleLoader Example Finished ---');
+// Asynchronous execution wrapper
+async function main() {
+  await program.parseAsync(process.argv);
 }
 
-// Only run main() if this file is executed directly (not imported in tests)
-if (require.main === module) {
-  main().catch(error => {
-    console.error('Unhandled error in main execution:', error);
-  });
-}
+main();
