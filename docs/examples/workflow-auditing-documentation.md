@@ -18,17 +18,17 @@ This workflow will guide you through creating the persona file and using it to a
 
 First, we need to define the persona. This file combines foundational reasoning principles with the specific principle of documentation accuracy and the playbook for performing an audit.
 
-Create a new file at `personas/doc-auditor.persona.json` and add the following content:
+Create a new file at `personas/doc-auditor.persona.jsonc` and add the following content:
 
-```json
+```jsonc
 {
   "output": "doc-audit-instructions.md",
   "foundation": [
-    "logic/1-deductive-reasoning",
-    "critical-thinking/1-assumption-analysis"
+    "reasoning/deductive-reasoning",
+    "judgment/evaluating-evidence",
   ],
   "principle": ["documentation/1-docs-must-match-code"],
-  "execution": ["playbook/audit-documentation/1-verify-and-comment"]
+  "execution": ["playbook/audit-documentation/1-verify-and-comment"],
 }
 ```
 
@@ -45,7 +45,7 @@ You are now ready to use your new specialist AI.
 Run the `build` command to create the instruction set for your auditor persona. This reads your new persona file and compiles the content of all the specified modules into a single file.
 
 ```bash
-copilot-instructions build personas/doc-auditor.persona.json
+copilot-instructions build personas/doc-auditor.persona.jsonc
 ```
 
 This command will create a new file named `doc-audit-instructions.md` in your project root.
