@@ -14,7 +14,7 @@ program
   .description(
     'A CLI for building and managing AI persona instructions from modular files.'
   )
-  .version('0.1.0'); // Initial pre-release version
+  .version(require('../package.json').version); // Dynamically derived version
 
 program
   .command('build')
