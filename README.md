@@ -56,6 +56,16 @@ Searches for modules by name or description.
 copilot-instructions search "React"
 ```
 
+### `create-module`
+
+Creates a new instruction module.
+
+**Example:**
+
+```bash
+copilot-instructions create-module
+```
+
 ### `create-persona`
 
 Creates a new persona configuration file.

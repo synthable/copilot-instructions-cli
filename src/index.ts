@@ -1,9 +1,10 @@
 #!/usr/bin/env node
-import { Command } from 'commander';
+import { Argument, Command } from 'commander';
 import { handleBuild } from './commands/build.js';
 import { handleList } from './commands/list.js';
 import { handleSearch } from './commands/search.js';
 import { handleValidate } from './commands/validate.js';
+import { handleCreateModule } from './commands/create-module.js';
 import { handleCreatePersona } from './commands/create-persona.js';
 
 const program = new Command();
@@ -52,6 +53,32 @@ program
   `
   )
   .action(handleValidate);
+
+program
+  .command('create-module')
+  .description('Creates a new instruction module file.')
+  .addArgument(
+    new Argument(
+      '<tier>',
+      'The tier for the new module (e.g., foundation).'
+    ).choices(['foundation', 'principle', 'technology', 'execution'])
+  )
+  .argument(
+    '<subject>',
+    'The subject path within the tier (e.g., logic/reasoning).'
+  )
+  .argument('<name>', 'The name for the new module (e.g., "My New Module").')
+  .argument(
+    '[description]',
+    'A short description for the module.',
+    name => `A module description for ${name}.`
+  )
+  .option(
+    '-l, --layer <number>',
+    'The layer for foundation modules (0-5).',
+    value => parseInt(value, 10)
+  )
+  .action(handleCreateModule);
 
 program
   .command('create-persona')
