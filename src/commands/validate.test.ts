@@ -25,6 +25,7 @@ import { handleError } from '../utils/error-handler.js';
 vi.mock('fs', () => ({
   promises: {
     stat: vi.fn(),
+    readFile: vi.fn(),
   },
 }));
 
@@ -120,10 +121,12 @@ describe('handleValidate', () => {
     it('should validate a single module file', async () => {
       // Arrange
       const filePath = 'my-module.md';
+      const fileContent = 'mock module content';
       vi.mocked(fs.stat).mockResolvedValue({
         isFile: () => true,
         isDirectory: () => false,
       } as any);
+      vi.mocked(fs.readFile).mockResolvedValue(fileContent);
       vi.mocked(coreValidateModuleFile).mockResolvedValue({
         filePath,
         isValid: true,
@@ -135,10 +138,7 @@ describe('handleValidate', () => {
 
       // Assert
       expect(fs.stat).toHaveBeenCalledWith(filePath);
-      expect(coreValidateModuleFile).toHaveBeenCalledWith(
-        filePath,
-        expect.any(String)
-      );
+      expect(coreValidateModuleFile).toHaveBeenCalledWith(filePath);
       // expect(mockConsoleLog).toHaveBeenCalledWith(
       //   expect.stringContaining('Passed: 1')
       // );

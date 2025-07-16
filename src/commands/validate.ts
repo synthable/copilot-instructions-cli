@@ -12,8 +12,6 @@ import { validatePersonaFile as coreValidatePersonaFile } from '../core/persona-
 import { validateModuleFile as coreValidateModuleFile } from '../core/module-service.js';
 import { handleError } from '../utils/error-handler.js';
 
-const MODULES_ROOT_DIR = path.resolve(process.cwd(), 'instructions-modules');
-
 /**
  * Represents the result of a single file validation.
  */
@@ -30,7 +28,7 @@ async function validateModuleFile(
 ): Promise<ValidationResult> {
   spinner.start(`Validating module ${filePath}`);
   try {
-    const result = await coreValidateModuleFile(filePath, MODULES_ROOT_DIR);
+    const result = await coreValidateModuleFile(filePath);
     if (!result.isValid) {
       if (verbose) {
         spinner.fail(chalk.red(`Validation failed for module: ${filePath}`));
