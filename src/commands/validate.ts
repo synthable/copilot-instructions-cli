@@ -8,14 +8,9 @@ import path from 'path';
 import chalk from 'chalk';
 import ora, { type Ora } from 'ora';
 import { glob } from 'glob';
-import matter from 'gray-matter';
-import {
-  validateFrontmatter,
-  validatePersona,
-} from '../core/module-service.js';
+import { validatePersonaFile as coreValidatePersonaFile } from '../core/persona-service.js';
+import { validateModuleFile as coreValidateModuleFile } from '../core/module-service.js';
 import { handleError } from '../utils/error-handler.js';
-import type { PersonaConfig } from '../types/index.js';
-import { parse } from 'jsonc-parser';
 
 const MODULES_ROOT_DIR = path.resolve(process.cwd(), 'instructions-modules');
 
@@ -35,18 +30,7 @@ async function validateModuleFile(
 ): Promise<ValidationResult> {
   spinner.start(`Validating module ${filePath}`);
   try {
-    const fileContent = await fs.readFile(filePath, 'utf8');
-    const { data } = matter(fileContent);
-
-    const relativePath = path.relative(MODULES_ROOT_DIR, filePath);
-    if (relativePath.startsWith('..')) {
-      throw new Error(
-        'Module files must be located within the instructions-modules directory.'
-      );
-    }
-    const tier = relativePath.split(path.sep)[0];
-
-    const result = validateFrontmatter(data, tier);
+    const result = await coreValidateModuleFile(filePath, MODULES_ROOT_DIR);
     if (!result.isValid) {
       if (verbose) {
         spinner.fail(chalk.red(`Validation failed for module: ${filePath}`));
@@ -58,6 +42,14 @@ async function validateModuleFile(
         );
       }
     }
+    return result;
+  } catch (err) {
+    spinner.fail(chalk.red(`Error validating module: ${filePath}`));
+    return {
+      filePath,
+      isValid: false,
+      errors: [err instanceof Error ? err.message : String(err)],
+    };
   }
 }
 
@@ -68,10 +60,7 @@ async function validatePersonaFile(
 ): Promise<ValidationResult> {
   spinner.start(`Validating persona ${filePath}`);
   try {
-    const fileContent = await fs.readFile(filePath, 'utf8');
-    const personaConfig: PersonaConfig = parse(fileContent);
-    const result = validatePersona(personaConfig);
-
+    const result = await coreValidatePersonaFile(filePath);
     if (!result.isValid) {
       if (verbose) {
         spinner.fail(chalk.red(`Validation failed for persona: ${filePath}`));
@@ -83,18 +72,40 @@ async function validatePersonaFile(
         );
       }
     }
+    return result;
+  } catch (err) {
+    spinner.fail(chalk.red(`Error validating persona: ${filePath}`));
+    return {
+      filePath,
+      isValid: false,
+      errors: [err instanceof Error ? err.message : String(err)],
+    };
   }
 }
 
+async function validateAll(
   spinner: Ora,
   verbose?: boolean
+): Promise<ValidationResult[]> {
   spinner.start('Finding files to validate...');
-  const files = await glob(
-    `{instructions-modules/**/*.md,**/*.persona.json,**/*.persona.jsonc}`,
-    {
-      nodir: true,
-      ignore: 'node_modules/**',
-    }
+  let files: string[] = [];
+  try {
+    files = await glob(
+      `{instructions-modules/**/*.md,**/*.persona.json,**/*.persona.jsonc}`,
+      {
+        nodir: true,
+        ignore: 'node_modules/**',
+      }
+    );
+  } catch {
+    spinner.fail('Error finding files to validate.');
+    return [];
+  }
+
+  // Exclude instructions-modules/README.md from validation
+  files = files.filter(
+    file =>
+      path.resolve(file) !== path.resolve('instructions-modules/README.md')
   );
 
   if (files.length === 0) {
@@ -103,8 +114,14 @@ async function validatePersonaFile(
   }
   spinner.succeed(`Found ${files.length} files to validate.`);
 
+  // Parallelize validation for performance
+  const results = await Promise.all(
+    files.map(file =>
+      file.endsWith('.md')
         ? validateModuleFile(file, spinner, verbose)
         : validatePersonaFile(file, spinner, verbose)
+    )
+  );
   return results;
 }
 
@@ -113,8 +130,7 @@ function printValidationResults(results: ValidationResult[]): void {
   const passedFiles = results.filter(r => r.isValid).length;
   const failedFiles = totalFiles - passedFiles;
 
-  console.log('\n');
-  console.log(chalk.bold('Validation Results:'));
+  console.log(chalk.bold('\nValidation Results:'));
   console.log('-------------------');
   console.log(chalk.green(`Passed: ${passedFiles}`));
   console.log(chalk.red(`Failed: ${failedFiles}`));
@@ -164,9 +180,21 @@ async function validateDirectory(
   verbose?: boolean
 ): Promise<ValidationResult[]> {
   spinner.text = `Scanning directory: ${dirPath}`;
-  const files = await glob(`${dirPath}/**/*.{md,persona.json,persona.jsonc}`, {
-    nodir: true,
-  });
+  let files: string[] = [];
+  try {
+    files = await glob(`${dirPath}/**/*.{md,persona.json,persona.jsonc}`, {
+      nodir: true,
+    });
+  } catch {
+    spinner.fail(`Error scanning directory: ${dirPath}`);
+    return [];
+  }
+
+  // Exclude instructions-modules/README.md from validation
+  files = files.filter(
+    file =>
+      path.resolve(file) !== path.resolve('instructions-modules/README.md')
+  );
 
   if (files.length === 0) {
     spinner.warn(

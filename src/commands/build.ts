@@ -21,7 +21,8 @@ import chalk from 'chalk';
 import ora from 'ora';
 import { handleError } from '../utils/error-handler.js';
 import type { PersonaConfig } from '../types/index.js';
-import { scanModules, validatePersona } from '../core/module-service.js';
+import { scanModules } from '../core/module-service.js';
+import { validatePersona } from '../core/persona-service.js';
 import { parse } from 'jsonc-parser';
 
 /**

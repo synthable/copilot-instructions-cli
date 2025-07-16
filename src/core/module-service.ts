@@ -8,10 +8,100 @@ import path from 'path';
 import matter from 'gray-matter';
 import { glob } from 'glob';
 import { fileURLToPath } from 'url';
-import type { Module, PersonaConfig } from '../types/index.js';
+import type { Module } from '../types/index.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const MODULES_ROOT_DIR = path.resolve(__dirname, '../../instructions-modules');
+
+/**
+ * Supported schema types for instruction modules.
+ */
+export type SchemaType =
+  | 'procedure'
+  | 'specification'
+  | 'pattern'
+  | 'checklist'
+  | 'data';
+
+/**
+ * Defines the required section order for each schema type.
+ */
+const schemaSectionOrder: Record<SchemaType, string[]> = {
+  procedure: ['Primary Directive', 'Process', 'Constraints'],
+  specification: [
+    'Core Concept',
+    'Key Rules',
+    'Best Practices',
+    'Anti-Patterns',
+  ],
+  pattern: [
+    'Summary',
+    'Core Principles',
+    'Advantages / Use Cases',
+    'Disadvantages / Trade-offs',
+  ],
+  checklist: ['Objective', 'Items'],
+  data: ['Description'], // Data requires a code block after Description
+};
+
+/**
+ * Represents a validation error.
+ */
+export interface ValidationError {
+  message: string;
+}
+
+/**
+ * Extracts section headers from module body content.
+ * Section headers are assumed to be "## SectionName".
+ * @param body - The markdown body content.
+ * @returns Array of section names.
+ */
+function extractSections(body: string): string[] {
+  const sectionMatches = [...body.matchAll(/^##\s+(.+)$/gm)];
+  return sectionMatches.map(m => m[1].trim());
+}
+
+/**
+ * Represents the frontmatter structure for modules.
+ */
+export interface ModuleFrontmatter {
+  schema?: SchemaType;
+  tier?: string;
+  name?: string;
+  description?: string;
+  [key: string]: string | number | boolean | null | undefined;
+}
+
+/**
+ * Parses frontmatter and body from markdown content.
+ * @param content - The markdown file content.
+ * @returns Parsed frontmatter and body.
+ */
+function parseFrontmatter(content: string): {
+  frontmatter: ModuleFrontmatter;
+  body: string;
+} {
+  let parsed: matter.GrayMatterFile<string>;
+  try {
+    parsed = matter(content);
+  } catch (e: unknown) {
+    if (isError(e)) {
+      throw new Error(`Frontmatter parsing error: ${e.message}`);
+    }
+    throw new Error('Unknown error during frontmatter parsing');
+  }
+  const frontmatter: ModuleFrontmatter = parsed.data as ModuleFrontmatter;
+  const body = parsed.content.trim();
+  return { frontmatter, body };
+}
+
+/**
+ * Type guard for Error objects.
+ */
+function isError(e: unknown): e is Error {
+  return typeof e === 'object' && e !== null && 'message' in e;
+}
 
 /**
  * Recursively finds all markdown files in a directory.
@@ -75,23 +165,37 @@ async function parseModuleFile(filePath: string): Promise<Module> {
  * @returns A promise that resolves to a map of module IDs to Module objects.
  * @throws An error if the instructions-modules directory is not found.
  */
-export async function scanModules(): Promise<Map<string, Module>> {
+export async function scanModules(
+  moduleIds?: string[]
+): Promise<Map<string, Module>> {
   const moduleMap = new Map<string, Module>();
-  // Check if MODULES_ROOT_DIR exists
   try {
     await fs.access(MODULES_ROOT_DIR);
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  } catch (error) {
+  } catch {
     throw new Error(
       `The 'instructions-modules' directory was not found at '${MODULES_ROOT_DIR}'. Please create it, or use the 'create-module' command to get started.`
     );
   }
-  const files = await findMarkdownFiles(MODULES_ROOT_DIR);
-  const modules = await Promise.all(files.map(file => parseModuleFile(file)));
 
-  for (const module of modules) {
-    moduleMap.set(module.id, module);
+  if (moduleIds) {
+    const moduleFiles = moduleIds.map(id =>
+      path.resolve(MODULES_ROOT_DIR, `${id}.md`)
+    );
+    const modules = await Promise.all(
+      moduleFiles.map(file => parseModuleFile(file))
+    );
+    for (const module of modules) {
+      moduleMap.set(module.id, module);
+    }
+  } else {
+    const files = await findMarkdownFiles(MODULES_ROOT_DIR);
+    const modules = await Promise.all(files.map(file => parseModuleFile(file)));
+
+    for (const module of modules) {
+      moduleMap.set(module.id, module);
+    }
   }
+
   return moduleMap;
 }
 
@@ -144,6 +248,16 @@ export function validateFrontmatter(
     }
   }
 
+  // Schema field validation
+  if (!frontmatter.schema) {
+    errors.push('Missing schema in frontmatter');
+  } else if (
+    typeof frontmatter.schema !== 'string' ||
+    !(frontmatter.schema in schemaSectionOrder)
+  ) {
+    errors.push(`Invalid schema: ${frontmatter.schema}`);
+  }
+
   return {
     isValid: errors.length === 0,
     errors,
@@ -151,72 +265,135 @@ export function validateFrontmatter(
 }
 
 /**
- * Represents the result of a persona file validation.
+ * Validates the section order and required sections for a module schema.
+ * @param schema - The schema type.
+ * @param body - The markdown body content.
+ * @returns Array of validation error messages.
  */
-export interface PersonaValidationResult {
-  /**
-   * Whether the persona file is valid.
-   */
+function validateSections(schema: SchemaType, body: string): string[] {
+  const errors: string[] = [];
+  const requiredSections = schemaSectionOrder[schema];
+  const actualSections = extractSections(body);
+
+  requiredSections.forEach((section, idx) => {
+    if (!actualSections[idx] || actualSections[idx] !== section) {
+      errors.push(
+        `Section "${section}" missing or out of order (expected at position ${idx + 1})`
+      );
+    }
+  });
+
+  if (actualSections.length > requiredSections.length) {
+    errors.push(
+      `Extra section(s) found: ${actualSections
+        .slice(requiredSections.length)
+        .join(', ')}`
+    );
+  }
+
+  return errors;
+}
+
+/**
+ * Validates the data schema for modules of type 'data'.
+ * Ensures ## Description section and a code block after it.
+ * @param body - The markdown body content.
+ * @returns Array of validation error messages.
+ */
+function validateDataSchema(body: string): string[] {
+  const errors: string[] = [];
+  const descriptionIdx = body.indexOf('## Description');
+  const codeBlockMatch = body.match(/```[\s\S]+?```/);
+  if (descriptionIdx === -1) {
+    errors.push('Missing ## Description section for data schema');
+  } else if (!codeBlockMatch) {
+    errors.push('Missing code block after ## Description for data schema');
+  }
+  return errors;
+}
+
+/**
+ * Validates a module's schema and structure.
+ * Throws an error if validation fails.
+ * @param content - The markdown file content.
+ */
+export function validateModuleSchema(content: string): void {
+  const { frontmatter, body } = parseFrontmatter(content);
+  let errors: string[] = [];
+
+  // Validate frontmatter fields
+  const frontmatterResult = validateFrontmatter(
+    frontmatter,
+    frontmatter.tier ?? ''
+  );
+  if (!frontmatterResult.isValid) {
+    errors = errors.concat(frontmatterResult.errors);
+  }
+
+  // Validate schema sections if schema is present and valid
+  if (
+    frontmatter.schema &&
+    typeof frontmatter.schema === 'string' &&
+    frontmatter.schema in schemaSectionOrder
+  ) {
+    errors = errors.concat(
+      validateSections(frontmatter.schema as SchemaType, body)
+    );
+    if (frontmatter.schema === 'data') {
+      errors = errors.concat(validateDataSchema(body));
+    }
+  }
+
+  if (errors.length > 0) {
+    throw new Error(
+      'Module validation failed:\n' + errors.map(e => `- ${e}`).join('\n')
+    );
+  }
+}
+
+/**
+ * Represents the result of a single file validation.
+ */
+export interface ValidationResult {
+  filePath: string;
   isValid: boolean;
-  /**
-   * An array of fields that are missing or invalid.
-   */
   errors: string[];
 }
 
 /**
- * Validates a persona object.
- * @param persona - The persona object to validate.
- * @returns A result indicating if the persona is valid and which fields are missing or invalid.
+ * Validates a module file (.md) and returns a ValidationResult.
+ * @param filePath - Path to the module file.
+ * @param tierRootDir - Root directory for modules.
+ * @returns ValidationResult
  */
-export function validatePersona(
-  persona: PersonaConfig
-): PersonaValidationResult {
-  const errors: string[] = [];
+export async function validateModuleFile(
+  filePath: string,
+  tierRootDir: string = MODULES_ROOT_DIR
+): Promise<ValidationResult> {
+  try {
+    const fileContent = await fs.readFile(filePath, 'utf8');
+    const { data } = matter(fileContent);
 
-  // Field: name
-  if (!persona.name || typeof persona.name !== 'string') {
-    errors.push('The "name" field is required and must be a non-empty string.');
+    const relativePath = path.relative(tierRootDir, filePath);
+    if (relativePath.startsWith('..')) {
+      return {
+        filePath,
+        isValid: false,
+        errors: [
+          'Module files must be located within the instructions-modules directory.',
+        ],
+      };
+    }
+    const tier = relativePath.split(path.sep)[0];
+
+    const result = validateFrontmatter(data, tier);
+    if (!result.isValid) {
+      return { filePath, isValid: false, errors: result.errors };
+    }
+    return { filePath, isValid: true, errors: [] };
+  } catch (e) {
+    const err = e as Error;
+    const error = `Failed to read or parse module ${filePath}: ${err.message}`;
+    return { filePath, isValid: false, errors: [error] };
   }
-
-  // Field: description
-  if (
-    persona.description !== undefined &&
-    (typeof persona.description !== 'string' ||
-      persona.description.trim() === '')
-  ) {
-    errors.push('The "description" field must be a non-empty string.');
-  }
-
-  // Field: output
-  if (
-    persona.output !== undefined &&
-    (typeof persona.output !== 'string' || persona.output.trim() === '')
-  ) {
-    errors.push('The "output" field must be a non-empty string.');
-  }
-
-  // Field: modules
-  if (!persona.modules) {
-    errors.push('The "modules" field is required.');
-  } else if (!Array.isArray(persona.modules) || persona.modules.length === 0) {
-    errors.push('The "modules" field must be a non-empty array.');
-  } else if (
-    persona.modules.some(m => typeof m !== 'string' || m.trim() === '')
-  ) {
-    errors.push('All items in the "modules" array must be non-empty strings.');
-  }
-
-  // Field: attributions
-  if (
-    persona.attributions !== undefined &&
-    typeof persona.attributions !== 'boolean'
-  ) {
-    errors.push('The "attributions" field must be a boolean.');
-  }
-
-  return {
-    isValid: errors.length === 0,
-    errors,
-  };
 }
