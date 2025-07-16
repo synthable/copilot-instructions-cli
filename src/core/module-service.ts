@@ -52,17 +52,6 @@ export interface ValidationError {
 }
 
 /**
- * Extracts section headers from module body content.
- * Section headers are assumed to be "## SectionName".
- * @param body - The markdown body content.
- * @returns Array of section names.
- */
-function extractSections(body: string): string[] {
-  const sectionMatches = [...body.matchAll(/^##\s+(.+)$/gm)];
-  return sectionMatches.map(m => m[1].trim());
-}
-
-/**
  * Represents the frontmatter structure for modules.
  */
 export interface ModuleFrontmatter {
@@ -74,60 +63,52 @@ export interface ModuleFrontmatter {
 }
 
 /**
- * Parses frontmatter and body from markdown content.
- * @param content - The markdown file content.
- * @returns Parsed frontmatter and body.
+ * Represents the result of a single file validation.
  */
-function parseFrontmatter(content: string): {
-  frontmatter: ModuleFrontmatter;
-  body: string;
-} {
-  let parsed: matter.GrayMatterFile<string>;
-  try {
-    parsed = matter(content);
-  } catch (e: unknown) {
-    if (isError(e)) {
-      throw new Error(`Frontmatter parsing error: ${e.message}`);
-    }
-    throw new Error('Unknown error during frontmatter parsing');
-  }
-  const frontmatter: ModuleFrontmatter = parsed.data as ModuleFrontmatter;
-  const body = parsed.content.trim();
-  return { frontmatter, body };
+export interface ValidationResult {
+  filePath: string;
+  isValid: boolean;
+  errors: string[];
 }
 
 /**
- * Type guard for Error objects.
+ * Represents the result of a frontmatter validation.
  */
-function isError(e: unknown): e is Error {
-  return typeof e === 'object' && e !== null && 'message' in e;
+export interface FrontmatterValidationResult {
+  isValid: boolean;
+  errors: string[];
 }
 
 /**
- * Recursively finds all markdown files in a directory.
- * @param dir - The directory to search.
- * @returns A promise that resolves to an array of file paths.
+ * Extracts section headers from module body content.
+ * Section headers are assumed to be "## SectionName".
+ * @param body - The markdown body content.
+ * @returns Array of section names.
  */
-async function findMarkdownFiles(dir: string): Promise<string[]> {
-  const pattern = `${dir}/**/*.md`;
-  return await glob(pattern, { nodir: true });
+function extractSections(body: string): string[] {
+  const sectionMatches = [...body.matchAll(/^##\s+(.+)$/gm)];
+  return sectionMatches.map(m => m[1].trim());
 }
 
 /**
- * Parses a single module file into a Module object.
- * @param filePath - The path to the module file.
- * @returns A promise that resolves to a Module object.
- * @throws An error if the module file is missing required frontmatter.
+ * Parses the content of a module file into a structured Module object.
+ * This function is pure and does not perform file I/O.
+ *
+ * @param filePath - The absolute path to the module file.
+ * @param fileContent - The string content of the module file.
+ * @returns A Module object.
+ * @throws An error if frontmatter is invalid.
  */
-async function parseModuleFile(filePath: string): Promise<Module> {
-  const fileContent = await fs.readFile(filePath, 'utf8');
-  const { data, content } = matter(fileContent);
+function parseModule(filePath: string, fileContent: string): Module {
+  const { data: frontmatter, content } = matter(fileContent);
 
   const relativePath = path.relative(MODULES_ROOT_DIR, filePath);
-  const parts = relativePath.split(path.sep);
+  const id = relativePath.replace(/\\/g, '/').replace(/\.md$/, '');
+  const parts = id.split('/');
   const tier = parts[0];
+  const subject = parts.slice(1, -1).join('/');
 
-  const validationResult = validateFrontmatter(data, tier);
+  const validationResult = validateFrontmatter(frontmatter, tier);
   if (!validationResult.isValid) {
     throw new Error(
       `Module validation failed for ${filePath}: ${validationResult.errors.join(
@@ -136,39 +117,58 @@ async function parseModuleFile(filePath: string): Promise<Module> {
     );
   }
 
-  const fileName = parts[parts.length - 1];
-  const subject = parts.slice(1, -1).join('/');
-  const id = `${tier}/${subject ? subject + '/' : ''}${path.basename(
-    fileName,
-    '.md'
-  )}`;
-
   const module: Module = {
     id,
     tier,
     subject,
-    name: data.name as string,
-    description: data.description as string,
+    name: frontmatter.name as string,
+    description: frontmatter.description as string,
     content: content.trim(),
     filePath,
   };
 
-  if (data.layer !== undefined && typeof data.layer === 'number') {
-    module.layer = data.layer;
+  if (
+    frontmatter.layer !== undefined &&
+    typeof frontmatter.layer === 'number'
+  ) {
+    module.layer = frontmatter.layer;
   }
 
   return module;
 }
 
 /**
+ * Reads a module file from disk and parses it into a Module object.
+ * @param filePath - The path to the module file.
+ * @returns A promise that resolves to a Module object.
+ */
+async function loadModule(filePath: string): Promise<Module> {
+  const fileContent = await fs.readFile(filePath, 'utf8');
+  return parseModule(filePath, fileContent);
+}
+
+/**
+ * Gets the file paths for modules, either from a list of IDs or by scanning the directory.
+ * @param moduleIds - Optional array of module IDs.
+ * @returns A promise that resolves to an array of file paths.
+ */
+async function getModuleFilePaths(moduleIds?: string[]): Promise<string[]> {
+  if (moduleIds && moduleIds.length > 0) {
+    return moduleIds.map(id => path.resolve(MODULES_ROOT_DIR, `${id}.md`));
+  }
+  const pattern = `${MODULES_ROOT_DIR}/**/*.md`;
+  return glob(pattern, { nodir: true });
+}
+
+/**
  * Scans the module directory and returns a map of all found modules.
+ * @param moduleIds - Optional array of module IDs to load. If not provided, all modules are scanned.
  * @returns A promise that resolves to a map of module IDs to Module objects.
  * @throws An error if the instructions-modules directory is not found.
  */
 export async function scanModules(
   moduleIds?: string[]
 ): Promise<Map<string, Module>> {
-  const moduleMap = new Map<string, Module>();
   try {
     await fs.access(MODULES_ROOT_DIR);
   } catch {
@@ -177,45 +177,21 @@ export async function scanModules(
     );
   }
 
-  if (moduleIds) {
-    const moduleFiles = moduleIds.map(id =>
-      path.resolve(MODULES_ROOT_DIR, `${id}.md`)
-    );
-    const modules = await Promise.all(
-      moduleFiles.map(file => parseModuleFile(file))
-    );
-    for (const module of modules) {
-      moduleMap.set(module.id, module);
-    }
-  } else {
-    const files = await findMarkdownFiles(MODULES_ROOT_DIR);
-    const modules = await Promise.all(files.map(file => parseModuleFile(file)));
+  const filesToParse = await getModuleFilePaths(moduleIds);
+  const modules = await Promise.all(filesToParse.map(loadModule));
 
-    for (const module of modules) {
-      moduleMap.set(module.id, module);
-    }
+  const moduleMap = new Map<string, Module>();
+  for (const module of modules) {
+    moduleMap.set(module.id, module);
   }
 
   return moduleMap;
 }
 
 /**
- * Represents the result of a frontmatter validation.
- */
-export interface FrontmatterValidationResult {
-  /**
-   * Whether the frontmatter is valid.
-   */
-  isValid: boolean;
-  /**
-   * An array of validation error messages.
-   */
-  errors: string[];
-}
-
-/**
  * Validates the frontmatter of a module file.
  * @param frontmatter - The frontmatter object to validate.
+ * @param tier - The tier of the module.
  * @returns A result indicating if the frontmatter is valid and which fields are missing.
  */
 export function validateFrontmatter(
@@ -224,7 +200,6 @@ export function validateFrontmatter(
 ): FrontmatterValidationResult {
   const errors: string[] = [];
 
-  // Generic field validation
   for (const field of ['name', 'description']) {
     const value = frontmatter[field];
     if (value === undefined || value === null) {
@@ -234,7 +209,6 @@ export function validateFrontmatter(
     }
   }
 
-  // Tier-specific validation
   if (tier === 'foundation') {
     const layer = frontmatter.layer;
     if (layer === undefined || layer === null) {
@@ -248,7 +222,6 @@ export function validateFrontmatter(
     }
   }
 
-  // Schema field validation
   if (!frontmatter.schema) {
     errors.push('Missing schema in frontmatter');
   } else if (
@@ -278,7 +251,9 @@ function validateSections(schema: SchemaType, body: string): string[] {
   requiredSections.forEach((section, idx) => {
     if (!actualSections[idx] || actualSections[idx] !== section) {
       errors.push(
-        `Section "${section}" missing or out of order (expected at position ${idx + 1})`
+        `Section "${section}" missing or out of order (expected at position ${
+          idx + 1
+        })`
       );
     }
   });
@@ -313,68 +288,56 @@ function validateDataSchema(body: string): string[] {
 }
 
 /**
- * Validates a module's schema and structure.
- * Throws an error if validation fails.
- * @param content - The markdown file content.
+ * Validates a module's content against its schema and structure.
+ * @param fileContent - The markdown content of the module.
+ * @param tier - The tier of the module, used for tier-specific validation.
+ * @returns A validation result object.
  */
-export function validateModuleSchema(content: string): void {
-  const { frontmatter, body } = parseFrontmatter(content);
-  let errors: string[] = [];
+export function validateModuleContent(
+  fileContent: string,
+  tier: string
+): Omit<ValidationResult, 'filePath'> {
+  const errors: string[] = [];
+  try {
+    const { data: frontmatter, content: body } = matter(fileContent);
 
-  // Validate frontmatter fields
-  const frontmatterResult = validateFrontmatter(
-    frontmatter,
-    frontmatter.tier ?? ''
-  );
-  if (!frontmatterResult.isValid) {
-    errors = errors.concat(frontmatterResult.errors);
-  }
+    const frontmatterResult = validateFrontmatter(frontmatter, tier);
+    errors.push(...frontmatterResult.errors);
 
-  // Validate schema sections if schema is present and valid
-  if (
-    frontmatter.schema &&
-    typeof frontmatter.schema === 'string' &&
-    frontmatter.schema in schemaSectionOrder
-  ) {
-    errors = errors.concat(
-      validateSections(frontmatter.schema as SchemaType, body)
-    );
-    if (frontmatter.schema === 'data') {
-      errors = errors.concat(validateDataSchema(body));
+    if (
+      frontmatterResult.isValid &&
+      frontmatter.schema &&
+      typeof frontmatter.schema === 'string' &&
+      frontmatter.schema in schemaSectionOrder
+    ) {
+      const schema = frontmatter.schema as SchemaType;
+      const trimmedBody = body.trim();
+      errors.push(...validateSections(schema, trimmedBody));
+      if (schema === 'data') {
+        errors.push(...validateDataSchema(trimmedBody));
+      }
     }
-  }
 
-  if (errors.length > 0) {
-    throw new Error(
-      'Module validation failed:\n' + errors.map(e => `- ${e}`).join('\n')
-    );
+    return { isValid: errors.length === 0, errors };
+  } catch (e) {
+    const err = e as Error;
+    return {
+      isValid: false,
+      errors: [`Failed to parse module content: ${err.message}`],
+    };
   }
-}
-
-/**
- * Represents the result of a single file validation.
- */
-export interface ValidationResult {
-  filePath: string;
-  isValid: boolean;
-  errors: string[];
 }
 
 /**
  * Validates a module file (.md) and returns a ValidationResult.
  * @param filePath - Path to the module file.
- * @param tierRootDir - Root directory for modules.
- * @returns ValidationResult
+ * @returns A promise resolving to a ValidationResult.
  */
 export async function validateModuleFile(
-  filePath: string,
-  tierRootDir: string = MODULES_ROOT_DIR
+  filePath: string
 ): Promise<ValidationResult> {
   try {
-    const fileContent = await fs.readFile(filePath, 'utf8');
-    const { data } = matter(fileContent);
-
-    const relativePath = path.relative(tierRootDir, filePath);
+    const relativePath = path.relative(MODULES_ROOT_DIR, filePath);
     if (relativePath.startsWith('..')) {
       return {
         filePath,
@@ -384,13 +347,12 @@ export async function validateModuleFile(
         ],
       };
     }
-    const tier = relativePath.split(path.sep)[0];
 
-    const result = validateFrontmatter(data, tier);
-    if (!result.isValid) {
-      return { filePath, isValid: false, errors: result.errors };
-    }
-    return { filePath, isValid: true, errors: [] };
+    const fileContent = await fs.readFile(filePath, 'utf8');
+    const tier = relativePath.split(path.sep)[0];
+    const { isValid, errors } = validateModuleContent(fileContent, tier);
+
+    return { filePath, isValid, errors };
   } catch (e) {
     const err = e as Error;
     const error = `Failed to read or parse module ${filePath}: ${err.message}`;

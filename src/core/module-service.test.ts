@@ -6,8 +6,8 @@ import matter from 'gray-matter';
 import {
   scanModules,
   validateFrontmatter,
-  validateModuleSchema,
   validateModuleFile,
+  validateModuleContent,
 } from './module-service.js';
 
 // Mock dependencies
@@ -92,87 +92,131 @@ describe('validateFrontmatter', () => {
   });
 });
 
-describe('validateModuleSchema', () => {
-  it('should not throw for a valid module', () => {
-    const content = `---
-name: Valid Module
-description: A valid module.
+describe('validateModuleContent', () => {
+  it('should return valid for a correct module', () => {
+    const fileContent = `---
+name: Test
+description: Test desc
 schema: procedure
-tier: execution
 ---
 ## Primary Directive
-Do this.
+Test
 ## Process
-How to do it.
+Test
 ## Constraints
-What to avoid.
+Test
 `;
     vi.mocked(matter).mockReturnValue({
       data: {
-        name: 'Valid Module',
-        description: 'A valid module.',
+        name: 'Test',
+        description: 'Test desc',
         schema: 'procedure',
-        tier: 'execution',
       },
       content: `
 ## Primary Directive
-Do this.
+Test
 ## Process
-How to do it.
+Test
 ## Constraints
-What to avoid.
-      `.trim(),
+Test
+`,
     } as any);
-    expect(() => validateModuleSchema(content)).not.toThrow();
+    const result = validateModuleContent(fileContent, 'execution');
+    expect(result.isValid).toBe(true);
+    expect(result.errors).toHaveLength(0);
   });
 
-  it('should throw for invalid frontmatter', () => {
-    const content = `---
-name: Invalid Module
+  it('should return invalid for missing frontmatter fields', () => {
+    const fileContent = `---
+name: Test
 ---
-`;
-    vi.mocked(matter).mockReturnValue({
-      data: { name: 'Invalid Module' },
-      content: '',
-    } as any);
-    expect(() => validateModuleSchema(content)).toThrow(
-      /Module validation failed/
-    );
-  });
-
-  it('should throw for incorrect section order', () => {
-    const content = `---
-name: Invalid Section Order
-description: A module with invalid section order.
-schema: procedure
-tier: execution
----
-## Process
-How to do it.
 ## Primary Directive
-Do this.
-## Constraints
-What to avoid.
+Test
 `;
     vi.mocked(matter).mockReturnValue({
       data: {
-        name: 'Invalid Section Order',
-        description: 'A module with invalid section order.',
+        name: 'Test',
+      },
+      content: `
+## Primary Directive
+Test
+`,
+    } as any);
+    const result = validateModuleContent(fileContent, 'execution');
+    expect(result.isValid).toBe(false);
+    expect(result.errors).toContain('Missing required field: description');
+  });
+
+  it('should return invalid for incorrect section order', () => {
+    const fileContent = `---
+name: Test
+description: Test desc
+schema: procedure
+---
+## Process
+Test
+## Primary Directive
+Test
+## Constraints
+Test
+`;
+    vi.mocked(matter).mockReturnValue({
+      data: {
+        name: 'Test',
+        description: 'Test desc',
         schema: 'procedure',
-        tier: 'execution',
       },
       content: `
 ## Process
-How to do it.
+Test
 ## Primary Directive
-Do this.
+Test
 ## Constraints
-What to avoid.
-      `.trim(),
+Test
+`,
     } as any);
-    expect(() => validateModuleSchema(content)).toThrow(
-      /Section "Primary Directive" missing or out of order/
+    const result = validateModuleContent(fileContent, 'execution');
+    expect(result.isValid).toBe(false);
+    expect(result.errors).toContain(
+      'Section "Primary Directive" missing or out of order (expected at position 1)'
     );
+  });
+
+  it('should return invalid for extra sections', () => {
+    const fileContent = `---
+name: Test
+description: Test desc
+schema: procedure
+---
+## Primary Directive
+Test
+## Process
+Test
+## Constraints
+Test
+## Extra Section
+This should not be here.
+`;
+    vi.mocked(matter).mockReturnValue({
+      data: {
+        name: 'Test',
+        description: 'Test desc',
+        schema: 'procedure',
+      },
+      content: `
+## Primary Directive
+Test
+## Process
+Test
+## Constraints
+Test
+## Extra Section
+This should not be here.
+`,
+    } as any);
+    const result = validateModuleContent(fileContent, 'execution');
+    expect(result.isValid).toBe(false);
+    expect(result.errors).toContain('Extra section(s) found: Extra Section');
   });
 });
 
@@ -204,17 +248,24 @@ Test
         schema: 'procedure',
         layer: 1,
       },
-      content: 'Body',
+      content: `
+## Primary Directive
+Test
+## Process
+Test
+## Constraints
+Test
+`,
     } as any);
 
-    const result = await validateModuleFile(filePath, MODULES_ROOT_DIR);
+    const result = await validateModuleFile(filePath);
     expect(result.isValid).toBe(true);
     expect(result.errors).toHaveLength(0);
   });
 
   it('should return invalid if file is outside the root directory', async () => {
     const filePath = '/some/other/dir/test.md';
-    const result = await validateModuleFile(filePath, MODULES_ROOT_DIR);
+    const result = await validateModuleFile(filePath);
     expect(result.isValid).toBe(false);
     expect(result.errors[0]).toContain(
       'Module files must be located within the instructions-modules directory.'
@@ -233,7 +284,7 @@ name: Test
       content: '',
     } as any);
 
-    const result = await validateModuleFile(filePath, MODULES_ROOT_DIR);
+    const result = await validateModuleFile(filePath);
     expect(result.isValid).toBe(false);
     expect(result.errors).toContain('Missing required field: description');
   });
@@ -242,7 +293,7 @@ name: Test
     const filePath = path.join(MODULES_ROOT_DIR, 'foundation/logic/test.md');
     vi.mocked(fs.readFile).mockRejectedValue(new Error('File not found'));
 
-    const result = await validateModuleFile(filePath, MODULES_ROOT_DIR);
+    const result = await validateModuleFile(filePath);
     expect(result.isValid).toBe(false);
     expect(result.errors[0]).toContain('Failed to read or parse module');
   });
