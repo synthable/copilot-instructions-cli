@@ -4,6 +4,17 @@
  * @description Command to build a persona from a configuration file.
  */
 
+/**
+ * Options for the build command.
+ */
+export interface BuildOptions {
+  personaFilePath: string;
+  /**
+   * If true, enables verbose output.
+   */
+  verbose?: boolean;
+}
+
 import { promises as fs } from 'fs';
 import path from 'path';
 import chalk from 'chalk';
@@ -15,11 +26,19 @@ import { parse } from 'jsonc-parser';
 
 /**
  * Handles the 'build' command.
- * @param personaFilePath - The path to the persona configuration file.
+ * @param options - The command options.
+ * @param options.personaFilePath - The path to the persona configuration file.
+ * @param options.verbose - If true, enables verbose output.
  */
-export async function handleBuild(personaFilePath: string): Promise<void> {
+export async function handleBuild(options: BuildOptions): Promise<void> {
+  const { personaFilePath, verbose } = options;
   const spinner = ora('Starting build process...').start();
   try {
+    if (verbose) {
+      console.log(
+        chalk.gray(`[verbose] Reading persona file: ${personaFilePath}`)
+      );
+    }
     // 1. Read and parse persona file
     spinner.text = `Reading persona file: ${personaFilePath}`;
     const personaFileContent = await fs.readFile(personaFilePath, 'utf8');
@@ -29,6 +48,9 @@ export async function handleBuild(personaFilePath: string): Promise<void> {
 
     // 2. Validate persona file
     spinner.text = 'Validating persona file...';
+    if (verbose) {
+      console.log(chalk.gray('[verbose] Validating persona file...'));
+    }
     const validationResult = validatePersona(personaConfig);
     if (!validationResult.isValid) {
       spinner.fail(chalk.red('Persona file validation failed.'));
@@ -41,11 +63,19 @@ export async function handleBuild(personaFilePath: string): Promise<void> {
 
     // 3. Scan for all available modules
     spinner.start('Scanning for available instruction modules...');
-    const allModules = await scanModules();
+    if (verbose) {
+      console.log(
+        chalk.gray('[verbose] Scanning for modules required by persona...')
+      );
+    }
+    const allModules = await scanModules(personaConfig.modules);
     spinner.succeed('Module scan complete.');
 
     // 4. Resolve and assemble modules
     spinner.start('Assembling persona instructions...');
+    if (verbose) {
+      console.log(chalk.gray('[verbose] Resolving and assembling modules...'));
+    }
     const resolvedModules = personaConfig.modules.map(id => {
       const module = allModules.get(id);
       if (!module) {
@@ -56,6 +86,11 @@ export async function handleBuild(personaFilePath: string): Promise<void> {
 
     const outputParts: string[] = [];
     resolvedModules.forEach((module, index) => {
+      if (verbose) {
+        console.log(
+          chalk.gray(`[verbose] Adding module content: ${module.id}`)
+        );
+      }
       const filteredContent = module.content
         .split('\n')
         .map(line => line.replace(/\s*\/\/.*$/, ''))
@@ -81,6 +116,9 @@ export async function handleBuild(personaFilePath: string): Promise<void> {
       process.cwd(),
       personaConfig.output || defaultOutput
     );
+    if (verbose) {
+      console.log(chalk.gray(`[verbose] Writing output to: ${outputPath}`));
+    }
     await fs.mkdir(path.dirname(outputPath), { recursive: true });
     await fs.writeFile(outputPath, finalContent);
 
@@ -89,6 +127,9 @@ export async function handleBuild(personaFilePath: string): Promise<void> {
         `Successfully built persona '${personaConfig.name}' to ${outputPath}`
       )
     );
+    if (verbose) {
+      console.log(chalk.gray('[verbose] Build process complete.'));
+    }
   } catch (error) {
     handleError(error, spinner);
   }

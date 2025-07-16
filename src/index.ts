@@ -6,6 +6,7 @@ import { handleSearch } from './commands/search.js';
 import { handleValidate } from './commands/validate.js';
 import { handleCreateModule } from './commands/create-module.js';
 import { handleCreatePersona } from './commands/create-persona.js';
+import pkg from '../package.json' with { type: 'json' };
 
 const program = new Command();
 
@@ -14,7 +15,8 @@ program
   .description(
     'A CLI for building and managing AI persona instructions from modular files.'
   )
-  .version(require('../package.json').version); // Dynamically derived version
+  .version(pkg.version) // Dynamically derived version, fixed for TypeScript/ESLint
+  .option('-v, --verbose', 'Enable verbose output');
 
 program
   .command('build')
@@ -22,7 +24,11 @@ program
     'Builds a persona instruction file from a .persona.json configuration.'
   )
   .argument('<personaFile>', 'Path to the persona configuration file.')
-  .action(handleBuild);
+  .option('-v, --verbose', 'Enable verbose output')
+  .action((personaFile, options) => {
+    const verbose = options.verbose || program.opts().verbose;
+    handleBuild({ personaFilePath: personaFile, verbose });
+  });
 
 program
   .command('list')
@@ -35,6 +41,7 @@ program
       'execution',
     ])
   )
+  .option('-v, --verbose', 'Enable verbose output')
   .addHelpText(
     'after',
     `
@@ -43,7 +50,10 @@ program
     $ copilot-instructions list --tier foundation
   `
   )
-  .action(handleList);
+  .action(options => {
+    const verbose = options.verbose || program.opts().verbose;
+    handleList({ ...options, verbose });
+  });
 
 program
   .command('search')
@@ -71,6 +81,7 @@ program
     'Validates all modules and persona files, or a specific file/directory.'
   )
   .argument('[path]', 'Optional path to a specific file or directory.')
+  .option('-v, --verbose', 'Enable verbose output')
   .addHelpText(
     'after',
     `
@@ -80,7 +91,10 @@ program
     $ copilot-instructions validate ./personas/my-persona.persona.jsonc
   `
   )
-  .action(handleValidate);
+  .action((path, options) => {
+    const verbose = options.verbose || program.opts().verbose;
+    handleValidate({ targetPath: path, verbose });
+  });
 
 program
   .command('create-module')

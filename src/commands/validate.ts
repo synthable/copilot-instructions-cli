@@ -30,7 +30,8 @@ interface ValidationResult {
 
 async function validateModuleFile(
   filePath: string,
-  spinner: Ora
+  spinner: Ora,
+  verbose?: boolean
 ): Promise<ValidationResult> {
   spinner.start(`Validating module ${filePath}`);
   try {
@@ -47,22 +48,23 @@ async function validateModuleFile(
 
     const result = validateFrontmatter(data, tier);
     if (!result.isValid) {
-      spinner.fail(chalk.red(`Validation failed for module: ${filePath}`));
-      return { filePath, isValid: false, errors: result.errors };
+      if (verbose) {
+        spinner.fail(chalk.red(`Validation failed for module: ${filePath}`));
+      }
+    } else {
+      if (verbose) {
+        spinner.succeed(
+          chalk.green(`Validation passed for module: ${filePath}`)
+        );
+      }
     }
-    spinner.succeed(chalk.green(`Validation passed for module: ${filePath}`));
-    return { filePath, isValid: true, errors: [] };
-  } catch (e) {
-    const err = e as Error;
-    const error = `Failed to read or parse module ${filePath}: ${err.message}`;
-    spinner.fail(chalk.red(error));
-    return { filePath, isValid: false, errors: [error] };
   }
 }
 
 async function validatePersonaFile(
   filePath: string,
-  spinner: Ora
+  spinner: Ora,
+  verbose?: boolean
 ): Promise<ValidationResult> {
   spinner.start(`Validating persona ${filePath}`);
   try {
@@ -71,20 +73,21 @@ async function validatePersonaFile(
     const result = validatePersona(personaConfig);
 
     if (!result.isValid) {
-      spinner.fail(chalk.red(`Validation failed for persona: ${filePath}`));
-      return { filePath, isValid: false, errors: result.errors };
+      if (verbose) {
+        spinner.fail(chalk.red(`Validation failed for persona: ${filePath}`));
+      }
+    } else {
+      if (verbose) {
+        spinner.succeed(
+          chalk.green(`Validation passed for persona: ${filePath}`)
+        );
+      }
     }
-    spinner.succeed(chalk.green(`Validation passed for persona: ${filePath}`));
-    return { filePath, isValid: true, errors: [] };
-  } catch (e) {
-    const err = e as Error;
-    const error = `Failed to read or parse persona ${filePath}: ${err.message}`;
-    spinner.fail(chalk.red(error));
-    return { filePath, isValid: false, errors: [error] };
   }
 }
 
-async function validateAll(spinner: Ora): Promise<ValidationResult[]> {
+  spinner: Ora,
+  verbose?: boolean
   spinner.start('Finding files to validate...');
   const files = await glob(
     `{instructions-modules/**/*.md,**/*.persona.json,**/*.persona.jsonc}`,
@@ -100,17 +103,8 @@ async function validateAll(spinner: Ora): Promise<ValidationResult[]> {
   }
   spinner.succeed(`Found ${files.length} files to validate.`);
 
-  const results: ValidationResult[] = [];
-  for (const file of files) {
-    if (file.endsWith('.md')) {
-      results.push(await validateModuleFile(file, spinner));
-    } else if (
-      file.endsWith('.persona.json') ||
-      file.endsWith('.persona.jsonc')
-    ) {
-      results.push(await validatePersonaFile(file, spinner));
-    }
-  }
+        ? validateModuleFile(file, spinner, verbose)
+        : validatePersonaFile(file, spinner, verbose)
   return results;
 }
 
@@ -142,16 +136,17 @@ function printValidationResults(results: ValidationResult[]): void {
 
 async function validateFile(
   filePath: string,
-  spinner: Ora
+  spinner: Ora,
+  verbose?: boolean
 ): Promise<ValidationResult> {
   if (filePath.endsWith('.md')) {
-    return validateModuleFile(filePath, spinner);
+    return validateModuleFile(filePath, spinner, verbose);
   }
   if (
     filePath.endsWith('.persona.json') ||
     filePath.endsWith('.persona.jsonc')
   ) {
-    return validatePersonaFile(filePath, spinner);
+    return validatePersonaFile(filePath, spinner, verbose);
   }
 
   const error = `Unsupported file type: ${filePath}. Please provide a .md, .persona.json, or .persona.jsonc file.`;
@@ -165,7 +160,8 @@ async function validateFile(
 
 async function validateDirectory(
   dirPath: string,
-  spinner: Ora
+  spinner: Ora,
+  verbose?: boolean
 ): Promise<ValidationResult[]> {
   spinner.text = `Scanning directory: ${dirPath}`;
   const files = await glob(`${dirPath}/**/*.{md,persona.json,persona.jsonc}`, {
@@ -179,33 +175,51 @@ async function validateDirectory(
     return [];
   }
 
-  const results: ValidationResult[] = [];
-  for (const file of files) {
-    results.push(await validateFile(file, spinner));
-  }
-  return results;
+  // Parallelize validation for performance
+  return Promise.all(files.map(file => validateFile(file, spinner, verbose)));
 }
 
 /**
  * Handles the 'validate' command.
- * @param targetPath - Optional path to a specific file or directory.
+ * @param options - The command options.
+ * @param options.targetPath - Optional path to a specific file or directory.
+ * @param options.verbose - If true, enables verbose output.
  */
-export async function handleValidate(targetPath?: string): Promise<void> {
+export interface ValidateOptions {
+  targetPath?: string;
+  verbose?: boolean;
+}
+export async function handleValidate(
+  options: ValidateOptions = {}
+): Promise<void> {
+  const { targetPath, verbose } = options;
   const spinner = ora('Starting validation...').start();
   let results: ValidationResult[] = [];
 
   try {
+    if (verbose) {
+      console.log(chalk.gray('[verbose] Starting validation process...'));
+      if (targetPath) {
+        console.log(chalk.gray(`[verbose] Target path: ${targetPath}`));
+      }
+    }
     if (!targetPath) {
-      results = await validateAll(spinner);
+      results = await validateAll(spinner, verbose);
     } else {
       const stats = await fs.stat(targetPath);
       if (stats.isFile()) {
-        results.push(await validateFile(targetPath, spinner));
+        results.push(await validateFile(targetPath, spinner, verbose));
       } else if (stats.isDirectory()) {
-        results = await validateDirectory(targetPath, spinner);
+        results = await validateDirectory(targetPath, spinner, verbose);
       }
     }
 
+    spinner.stop();
+    if (verbose) {
+      console.log(
+        chalk.gray('[verbose] Validation complete. Printing results...')
+      );
+    }
     printValidationResults(results);
   } catch (error) {
     if (
