@@ -21,7 +21,7 @@ import chalk from 'chalk';
 import ora from 'ora';
 import { handleError } from '../utils/error-handler.js';
 import type { PersonaConfig } from '../types/index.js';
-import { scanModules } from '../core/module-service.js';
+import { scanModules, validateModuleFile } from '../core/module-service.js';
 import { validatePersona } from '../core/persona-service.js';
 import { parse } from 'jsonc-parser';
 
@@ -77,13 +77,23 @@ export async function handleBuild(options: BuildOptions): Promise<void> {
     if (verbose) {
       console.log(chalk.gray('[verbose] Resolving and assembling modules...'));
     }
-    const resolvedModules = personaConfig.modules.map(id => {
-      const module = allModules.get(id);
-      if (!module) {
-        throw new Error(`Module with ID '${id}' not found.`);
-      }
-      return module;
-    });
+    const resolvedModules = await Promise.all(
+      personaConfig.modules.map(async id => {
+        const module = allModules.get(id);
+        if (!module) {
+          throw new Error(`Module with ID '${id}' not found.`);
+        }
+        const validationResult = await validateModuleFile(module.filePath);
+        if (!validationResult.isValid) {
+          spinner.fail(chalk.red(`Module validation failed for ${module.id}.`));
+          validationResult.errors.forEach(error =>
+            console.error(chalk.yellow(`- ${error}`))
+          );
+          process.exit(1);
+        }
+        return module;
+      })
+    );
 
     const outputParts: string[] = [];
     resolvedModules.forEach((module, index) => {
@@ -97,14 +107,17 @@ export async function handleBuild(options: BuildOptions): Promise<void> {
         .map(line => line.replace(/\s*\/\/.*$/, ''))
         .join('\n');
       outputParts.push(filteredContent);
+
+      if (personaConfig.attributions) {
+        outputParts.push(`\n[Attribution: ${module.id}]`);
+      }
+
       if (index < resolvedModules.length - 1) {
-        if (personaConfig.attributions) {
-          outputParts.push(`[Attribution: ${module.id}]\n`);
-        }
-        outputParts.push('\n---\n');
+        outputParts.push('\n\n---\n');
       }
     });
-    const finalContent = outputParts.join('');
+
+    const finalContent = outputParts.join('').trim();
 
     // 5. Write to output file
     const defaultOutput = `${path.basename(
