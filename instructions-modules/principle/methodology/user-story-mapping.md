@@ -1,12 +1,12 @@
 ---
 name: 'User Story Mapping'
 description: "A technique for expressing requirements from the user's perspective, focusing on value rather than technical implementation."
-layer: null
 tags:
   - agile
   - user story
   - requirements
   - product management
+layer: null
 ---
 
 # User Story Mapping

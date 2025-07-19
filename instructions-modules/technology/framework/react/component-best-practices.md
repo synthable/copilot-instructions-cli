@@ -6,6 +6,7 @@ tags:
   - components
   - best-practices
   - state-management
+layer: null
 ---
 
 # React Component Best Practices
@@ -32,4 +33,3 @@ You MUST build React components that are small, reusable, and follow best practi
 - Do NOT create large, monolithic components that handle many different responsibilities.
 - Do NOT use array indexes as keys for lists if the list's order can change, as this can lead to bugs and performance issues.
 - State should be co-located with the components that use it as much as possible. Avoid placing all state at the top level of the application.
-layer: null

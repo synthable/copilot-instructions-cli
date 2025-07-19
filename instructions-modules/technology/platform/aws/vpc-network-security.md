@@ -6,6 +6,7 @@ tags:
   - vpc
   - networking
   - security
+layer: null
 ---
 
 # VPC Network Security
@@ -33,4 +34,3 @@ You MUST design and configure AWS VPCs with a defense-in-depth approach, using p
 - Security groups MUST NOT have wide-open inbound rules (e.g., allowing all traffic from `0.0.0.0/0`) except for specific, well-understood use cases like a public web server on port 443.
 - The default Network ACL allows all traffic. It MUST be modified to provide a layer of defense.
 - Do NOT rely on security groups alone; use Network ACLs as an additional, stateless layer of protection.
-layer: null

@@ -6,6 +6,7 @@ tags:
   - quality
   - refactoring
   - clean code
+layer: null
 ---
 
 # Boy Scout Rule
@@ -30,4 +31,3 @@ Whenever you work on a piece of code, you MUST leave it in a better state than y
 - The cleanup MUST be small and related to the code you are already working on.
 - Do NOT embark on a large-scale refactoring under the guise of the Boy Scout Rule.
 - The primary goal is still to complete your original task; the cleanup is a secondary benefit.
-layer: null

@@ -1,28 +1,40 @@
 ---
 name: 'Necessary and Sufficient Conditions'
-description: 'A key logical distinction for precise analysis of requirements and outcomes.'
+description: 'A core logical framework for precisely analyzing the relationship between conditions and outcomes.'
+tier: foundation
 layer: 0
-tags:
-  - logic
-  - requirements
-  - causality
-  - precision
+schema: specification
+authors:
+  - 'Jane Doe <jane.doe@example.com>'
 ---
 
-# Necessary and Sufficient Conditions
+## Core Concept
 
-## Primary Directive
+This framework defines the precise logical relationship between a condition (A) and an outcome (B), which is critical for accurate requirement analysis and reasoning.
 
-You MUST correctly distinguish between necessary conditions (what is required for an outcome) and sufficient conditions (what guarantees an outcome) in all analysis.
+## Key Rules
 
-## Process
+- **Necessary Condition:**
+  - **Definition:** A condition `A` is **necessary** for an outcome `B` if `B` cannot happen without `A`.
+  - **Logical Form:** `If B, then A`. (The outcome implies the condition was met).
+  - **Example:** Having fuel (`A`) is a necessary condition for a car to run (`B`). If the car is running, you can be certain it has fuel.
 
-1.  **Identify the Condition and Outcome:** For any stated relationship (e.g., "If A, then B"), identify 'A' as the condition and 'B' as the outcome.
-2.  **Test for Necessity:** Ask, "Can outcome 'B' happen without condition 'A'?" If the answer is NO, then 'A' is a necessary condition.
-3.  **Test for Sufficiency:** Ask, "Does condition 'A' always guarantee outcome 'B'?" If the answer is YES, then 'A' is a sufficient condition.
-4.  **State the Relationship Precisely:** Use precise language in your output. For example, "A is required for B, but does not guarantee it," or "A is one of several ways to achieve B."
+- **Sufficient Condition:**
+  - **Definition:** A condition `A` is **sufficient** for an outcome `B` if `A`'s presence guarantees that `B` will happen.
+  - **Logical Form:** `If A, then B`. (The condition guarantees the outcome).
+  - **Example:** Being on a scheduled flight from New York to London (`A`) is a sufficient condition to travel from America to Europe (`B`).
 
-## Constraints
+- **Necessary and Sufficient Condition:**
+  - **Definition:** A condition `A` is both necessary and sufficient for `B` if `B` happens if and only if `A` happens.
+  - **Logical Form:** `A if and only if B` (A <=> B).
+  - **Example:** Winning the lottery (`A`) is a necessary and sufficient condition for being the lottery winner (`B`).
 
-- Do NOT assume a condition is sufficient just because it is necessary.
-- Do NOT confuse correlation with a necessary or sufficient condition.
+## Best Practices
+
+- When analyzing requirements, explicitly state whether a condition is necessary, sufficient, or both.
+- Use this framework to identify and clarify flawed or ambiguous logic in a problem statement.
+
+## Anti-Patterns
+
+- **Confusing Necessary with Sufficient:** The most common logical error. (e.g., "Having fuel is sufficient for a car to run" is false; the battery could be dead).
+- **Assuming a Condition is Both:** Do not assume a condition is both necessary and sufficient unless it can be proven.

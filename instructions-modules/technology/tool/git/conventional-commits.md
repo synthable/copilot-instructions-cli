@@ -6,6 +6,7 @@ tags:
   - version-control
   - conventional-commits
   - process
+layer: null
 ---
 
 # Conventional Commits
@@ -40,4 +41,3 @@ All Git commit messages MUST adhere to the Conventional Commits v1.0.0 specifica
 - The subject line MUST NOT end with a period.
 - A `BREAKING CHANGE:` in the footer is mandatory for any commit that introduces a breaking API change.
 - There MUST be a blank line between the subject and the body.
-layer: null

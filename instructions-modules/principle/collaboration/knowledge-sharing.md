@@ -6,6 +6,7 @@ tags:
   - mentorship
   - documentation
   - knowledge management
+layer: null
 ---
 
 # Knowledge Sharing
@@ -26,4 +27,3 @@ You MUST operate in a way that actively shares knowledge and improves the collec
 - Do NOT provide a "magic" solution without explaining how it works.
 - Do NOT hoard information. If you use an external source or a specific piece of knowledge to derive an answer, you MUST cite or reference it.
 - The generated knowledge artifacts (e.g., documentation) MUST be clear and easy for others to find and understand.
-layer: null

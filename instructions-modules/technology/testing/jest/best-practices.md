@@ -6,6 +6,7 @@ tags:
   - jest
   - javascript
   - best-practices
+layer: null
 ---
 
 # Jest Best Practices
@@ -31,4 +32,3 @@ You MUST write tests that are clear, concise, and reliable. Tests should be easy
 - You MUST NOT test implementation details. Focus on testing the public API and the observable behavior of a component or function.
 - You MUST NOT write tests that are tightly coupled to the implementation. This makes the tests brittle and difficult to maintain.
 - Avoid using `jest.fn()` without a clear purpose. Mocks should be used to isolate the code under test, not to create complex test logic.
-layer: null

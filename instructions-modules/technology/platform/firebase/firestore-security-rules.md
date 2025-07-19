@@ -6,6 +6,7 @@ tags:
   - firestore
   - security
   - database
+layer: null
 ---
 
 # Firestore Security Rules
@@ -28,4 +29,3 @@ You MUST write and enforce Firestore security rules to protect your data from un
 - Do NOT trust the client. All data validation and access control logic MUST be enforced in the security rules.
 - Security rules are not filters. Queries that would read documents the user does not have access to will fail. Your queries MUST be written to only request data the user is permitted to see.
 - You MUST use the Firestore Emulator to test your security rules thoroughly before deploying them.
-layer: null

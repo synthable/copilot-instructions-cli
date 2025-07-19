@@ -5,6 +5,7 @@ tags:
   - security
   - authorization
   - defaults
+layer: null
 ---
 
 # Fail-Safe Defaults
@@ -25,4 +26,3 @@ The default access control setting for any resource MUST be to deny access. Acce
 - A system MUST NOT grant access just because there is no rule denying it.
 - Do NOT use a "blacklist" approach where you deny access to specific things and allow everything else. You MUST use a "whitelist" approach where you allow access to specific things and deny everything else.
 - In the case of an error or failure during an access check, the system MUST default to denying access.
-layer: null

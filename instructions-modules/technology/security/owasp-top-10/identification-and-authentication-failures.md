@@ -6,6 +6,7 @@ tags:
   - owasp
   - authentication
   - session-management
+layer: null
 ---
 
 # Identification and Authentication Failures
@@ -31,4 +32,3 @@ You MUST implement strong authentication and session management controls to prot
 - You MUST NOT allow authentication to be bypassed.
 - You MUST NOT send session identifiers over unencrypted channels.
 - You MUST NOT use default credentials in any environment.
-layer: null

@@ -6,6 +6,7 @@ tags:
   - deployment
   - hosting
   - platform
+layer: null
 ---
 
 # Vercel Deployment Best Practices
@@ -35,4 +36,3 @@ You MUST configure Vercel deployments to be secure, performant, and cost-effecti
 - Sensitive environment variables MUST NOT be exposed to the browser. They should only be used in server-side code (e.g., `getServerSideProps` in Next.js).
 - The build process MUST NOT contain any commands that require interactive input.
 - Do NOT disable Vercel's automatic optimizations (like image optimization) without a specific, justified reason.
-layer: null

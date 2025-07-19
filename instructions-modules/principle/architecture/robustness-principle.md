@@ -6,6 +6,7 @@ tags:
   - design principle
   - robustness
   - postels law
+layer: null
 ---
 
 # Robustness Principle (Postel's Law)
@@ -30,4 +31,3 @@ When sending data or requests, you MUST be strict and precise in your output. Wh
 - Do NOT send non-standard or malformed data, even if you are tolerant of receiving it.
 - Do NOT silently accept and process input that is fundamentally invalid or poses a security risk.
 - You MUST clearly define what constitutes a "minor deviation" versus a critical error in input.
-layer: null

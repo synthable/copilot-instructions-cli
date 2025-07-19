@@ -7,6 +7,7 @@ tags:
   - javascript
   - typescript
   - mocking
+layer: null
 ---
 
 # Vitest Mocking
@@ -28,4 +29,3 @@ You MUST use mocks to create isolated, deterministic tests. Vitest's mocking sys
 - You MUST NOT mock modules that are not direct dependencies of the code under test. This can lead to complex and brittle tests.
 - You MUST NOT forget to restore mocks after each test, as this can cause tests to interfere with each other.
 - You MUST NOT use mocks to make assertions about the internal implementation of a function or component.
-layer: null

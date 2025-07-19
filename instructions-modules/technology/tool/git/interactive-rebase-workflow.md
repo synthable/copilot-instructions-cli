@@ -6,6 +6,7 @@ tags:
   - version-control
   - rebase
   - process
+layer: null
 ---
 
 # Interactive Rebase Workflow
@@ -32,4 +33,3 @@ Before merging a feature branch into the main branch (`main`, `develop`), you MU
 - You MUST NOT rebase a branch that has been shared with and is being worked on by other developers, as rewriting history will cause significant problems for them. This workflow is for your own feature branches before merging.
 - Each commit in the final, rebased history MUST be a single, logical change that passes all tests.
 - Do NOT squash unrelated changes into a single commit. A feature and a separate bug fix should remain as two distinct commits.
-layer: null

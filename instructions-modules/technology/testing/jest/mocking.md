@@ -6,6 +6,7 @@ tags:
   - jest
   - javascript
   - mocking
+layer: null
 ---
 
 # Jest Mocking
@@ -27,4 +28,3 @@ You MUST use mocks to isolate the unit of code under test from its dependencies.
 - You MUST NOT mock everything. Only mock the dependencies that are necessary to isolate the code under test.
 - You MUST NOT mock the code you are trying to test. The purpose of a mock is to control dependencies, not to replace the subject under test.
 - You MUST NOT use mocks to test implementation details. Mocks should be used to verify interactions with dependencies, not to assert the internal state of the code under test.
-layer: null

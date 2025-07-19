@@ -5,6 +5,7 @@ tags:
   - firebase
   - authentication
   - security
+layer: null
 ---
 
 # Firebase Authentication Best Practices
@@ -27,4 +28,3 @@ You MUST implement Firebase Authentication securely by enabling appropriate sign
 - Do NOT store sensitive user data in custom claims, as they are readable by the client. Store only authorization-related roles or flags.
 - Do NOT disable the "One account per email address" setting unless you have a specific, well-understood reason to allow multiple accounts with the same email.
 - The Firebase Admin SDK MUST be initialized with a service account and used only in a trusted server environment, never on the client.
-layer: null

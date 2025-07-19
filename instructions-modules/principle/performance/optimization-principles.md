@@ -6,6 +6,7 @@ tags:
   - optimization
   - quality
   - measurement
+layer: null
 ---
 
 # Optimization Principles
@@ -28,4 +29,3 @@ You MUST approach performance optimization systematically by first measuring to 
 - Do NOT sacrifice code clarity and maintainability for negligible performance gains.
 - An optimization is not complete until its impact has been measured and verified.
 - Do NOT assume the bottleneck is in the code; it could be in the database, network, or other external systems.
-layer: null

@@ -6,6 +6,7 @@ tags:
   - resilience
   - fault tolerance
   - high availability
+layer: null
 ---
 
 # Fault Tolerance Design
@@ -27,4 +28,3 @@ You MUST design systems to be fault-tolerant, ensuring they can remain operation
 - A system is NOT fault-tolerant if it requires manual intervention to recover from a common component failure.
 - Do NOT have single points of failure (SPOFs) for any critical system path.
 - Redundancy MUST be implemented across physical failure domains (e.g., different servers, racks, or availability zones).
-layer: null

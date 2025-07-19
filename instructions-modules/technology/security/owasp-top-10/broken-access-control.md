@@ -5,6 +5,7 @@ tags:
   - security
   - owasp
   - access-control
+layer: null
 ---
 
 # Broken Access Control
@@ -27,4 +28,3 @@ You MUST enforce a robust access control system where user permissions are verif
 - You MUST NOT expose internal identifiers (e.g., database primary keys) in URLs or API responses. Use indirect object references (e.g., UUIDs) that are mapped to the internal identifiers on the server.
 - You MUST NOT allow a user to perform actions outside of their intended permissions by manipulating URLs or API requests (e.g., changing an `id` parameter to access another user's data).
 - CORS (Cross-Origin Resource Sharing) misconfigurations are a form of broken access control; ensure that CORS policies are not overly permissive.
-layer: null

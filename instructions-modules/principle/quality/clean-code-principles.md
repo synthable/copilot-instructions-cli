@@ -1,15 +1,15 @@
 ---
 name: 'Clean Code Principles'
 description: 'A set of fundamental principles for writing human-readable, understandable, and maintainable code.'
+schema: procedure
 tags:
   - quality
   - readability
   - maintainability
   - simplicity
   - clean code
+layer: null
 ---
-
-# Clean Code Principles
 
 ## Primary Directive
 

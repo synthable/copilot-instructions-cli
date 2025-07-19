@@ -6,6 +6,7 @@ tags:
   - owasp
   - cryptography
   - data-protection
+layer: null
 ---
 
 # Cryptographic Failures
@@ -28,4 +29,3 @@ You MUST protect all sensitive data, both in transit and at rest, using strong, 
 - You MUST NOT store sensitive data in cleartext.
 - You MUST NOT invent your own cryptographic algorithms or protocols. Rely on well-vetted, industry-standard libraries and implementations.
 - Error messages MUST NOT contain sensitive information.
-layer: null

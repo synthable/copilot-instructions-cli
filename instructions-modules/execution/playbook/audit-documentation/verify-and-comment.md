@@ -1,6 +1,7 @@
 ---
 name: 'Playbook: Verify and Comment Documentation'
 description: 'A step-by-step process for auditing documentation against a codebase.'
+layer: null
 ---
 
 ## Primary Directive
@@ -30,4 +31,3 @@ Audit project's documentation file(s) against its codebase and comment out any h
 - You MUST ONLY wrap hallucinated features in `<!-- HALLUCINATION: ... -->` comment blocks.
 - You MUST NOT modify or comment out features that exist in the codebase.
 - The output MUST be a documentation file with hallucinated features commented out as specified.
-layer: null

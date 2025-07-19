@@ -1,6 +1,7 @@
 ---
 name: 'Generate New Persona Module'
 description: "A playbook for generating a new, complete persona file from a user's concept."
+layer: null
 ---
 
 ## Primary Directive
@@ -25,4 +26,3 @@ You MUST generate a complete, well-structured persona file based on the user's p
 - Do not invent concepts or behaviors not implied by the user's request.
 - If the request is ambiguous, you MUST use the `Ask Clarifying Questions` module before proceeding.
 - Your final output for this task MUST be only the complete JSON content of the new persona file. Do not wrap it in conversational text.
-layer: null

@@ -6,6 +6,7 @@ tags:
   - database
   - performance
   - sql
+layer: null
 ---
 
 # PostgreSQL Query Optimization
@@ -31,4 +32,3 @@ You MUST write efficient PostgreSQL queries that leverage indexes and appropriat
 - Do NOT run queries in a loop (N+1 problem). Use a `JOIN` or a subquery with `IN` to fetch related data in a single query.
 - Do NOT use functions on indexed columns in a `WHERE` clause (e.g., `WHERE lower(email) = '...'`), as this prevents the database from using the index. Instead, use a function-based index or modify the query.
 - A query is not considered "done" until its execution plan has been reviewed and deemed efficient.
-layer: null

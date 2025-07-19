@@ -1,28 +1,27 @@
 ---
 name: 'Problem Deconstruction'
-description: 'The rule of breaking large, complex problems into smaller, more manageable, and mutually exclusive parts.'
+description: 'The process of breaking large, complex problems into smaller, more manageable, and mutually exclusive parts.'
+tier: foundation
 layer: 1
-tags:
-  - breakdown
-  - divide and conquer
-  - analysis
-  - MECE
+schema: procedure
+authors:
+  - 'Jane Doe <jane.doe@example.com>'
 ---
-
-# Problem Deconstruction
 
 ## Primary Directive
 
-You MUST break down any large, complex, or ambiguous problem into smaller, well-defined, and solvable sub-problems.
+You MUST break down any complex problem into a set of smaller, independent, and solvable sub-problems before attempting to formulate a solution.
 
 ## Process
 
-1.  **Identify Major Components:** Identify the primary, high-level components of the problem.
-2.  **Sub-divide Recursively:** For each component, determine if it is "atomic" (can be solved directly). If not, break it down further into its own sub-components.
-3.  **Apply MECE Principle:** Ensure that the resulting sub-problems are Mutually Exclusive (non-overlapping) and Collectively Exhaustive (cover all aspects of the original problem).
-4.  **Address Sub-Problems:** Formulate a plan to address each atomic sub-problem sequentially or in parallel.
+1.  **Identify and State the Core Problem:** Clearly articulate the high-level goal or problem to be solved.
+2.  **Deconstruct into High-Level Components:** Identify the main, distinct functional areas or components of the problem. These should be as independent as possible. (e.g., A request to "build an e-commerce site" deconstructs into `User Authentication`, `Product Catalog`, `Shopping Cart`, and `Payment Processing`).
+3.  **Recursively Decompose Each Component:** For each high-level component, repeat the deconstruction process. Break it down into smaller, more granular sub-problems. (e.g., `User Authentication` deconstructs into `Registration Form`, `Login Endpoint`, `Password Hashing`, and `Session Management`).
+4.  **Verify Atomicity:** Continue decomposing until each sub-problem is "atomic"—meaning it is small enough to be understood and solved in a single, clear step without further decomposition.
+5.  **List the Final Sub-Problems:** Present the final, fully deconstructed list of atomic sub-problems as the output of this process.
 
 ## Constraints
 
-- Do NOT attempt to solve a complex problem in a single step.
-- The deconstruction process MUST continue until all resulting sub-problems are concrete and actionable.
+- Do NOT leave sub-problems with overlapping responsibilities. The final components should be mutually exclusive.
+- Do NOT stop deconstructing prematurely. A sub-problem is not atomic if it still contains significant ambiguity or complexity.
+- Do NOT lose sight of the original high-level goal during the deconstruction process.

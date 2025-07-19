@@ -6,6 +6,7 @@ tags:
   - owasp
   - dependency-management
   - supply-chain
+layer: null
 ---
 
 # Vulnerable and Outdated Components
@@ -27,4 +28,3 @@ You MUST systematically manage all third-party and open-source components in the
 - You MUST NOT use any software component with a known critical or high-severity vulnerability in a production environment.
 - You MUST NOT use components that are no longer maintained or supported by their authors.
 - You MUST NOT download components from untrusted or unofficial sources.
-layer: null

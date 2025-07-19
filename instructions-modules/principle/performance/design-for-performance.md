@@ -5,6 +5,7 @@ tags:
   - performance
   - architecture
   - optimization
+layer: null
 ---
 
 # Design for Performance
@@ -24,4 +25,3 @@ You MUST design systems with performance as a primary consideration, not an afte
 
 - Do NOT prematurely optimize. Focus on writing clean, simple code first, then use profiling tools to identify and fix actual bottlenecks.
 - Performance goals MUST be specific and measurable. "The system should be fast" is not a valid requirement.
-layer: null

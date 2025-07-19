@@ -5,6 +5,7 @@ tags:
   - reliability
   - resilience
   - fault tolerance
+layer: null
 ---
 
 # Design for Reliability
@@ -24,4 +25,3 @@ You MUST design systems for reliability by implementing fault tolerance, gracefu
 
 - Do NOT assume that network calls to other services will always succeed.
 - The system MUST NOT fail completely when a non-essential feature fails.
-layer: null

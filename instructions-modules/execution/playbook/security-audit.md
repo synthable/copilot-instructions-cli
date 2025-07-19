@@ -6,6 +6,7 @@ tags:
   - audit
   - playbook
   - vulnerability-assessment
+layer: null
 ---
 
 # Perform Security Audit
@@ -40,4 +41,3 @@ You MUST systematically review the application's codebase, dependencies, and con
 - You MUST NOT rely solely on automated tools. Manual review is essential for identifying complex vulnerabilities and business logic flaws.
 - The audit report MUST be objective and based on verifiable evidence. Avoid speculation.
 - The report MUST NOT include sensitive data (e.g., passwords, API keys) discovered during the audit.
-layer: null

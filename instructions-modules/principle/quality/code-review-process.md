@@ -6,6 +6,7 @@ tags:
   - code review
   - collaboration
   - process
+layer: null
 ---
 
 # Code Review Process
@@ -27,4 +28,3 @@ You MUST advocate for and follow a structured code review process to improve cod
 - Do NOT approve a code review that has failing automated checks.
 - Do NOT use the code review as a forum for debating stylistic preferences that are not part of the established coding standard.
 - A review MUST NOT be a simple "Looks Good To Me" (LGTM). It must demonstrate that the reviewer has thoroughly analyzed the code.
-layer: null

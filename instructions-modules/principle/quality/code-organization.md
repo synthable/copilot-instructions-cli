@@ -7,6 +7,7 @@ tags:
   - organization
   - encapsulation
   - dependency management
+layer: null
 ---
 
 # Code Organization
@@ -28,4 +29,3 @@ You MUST structure the codebase to be clear, logically organized, and maintainab
 - Do NOT create "God Objects" or modules that know too much about other parts of the system.
 - Do NOT expose internal state or implementation details through public interfaces.
 - Avoid circular dependencies between modules.
-layer: null

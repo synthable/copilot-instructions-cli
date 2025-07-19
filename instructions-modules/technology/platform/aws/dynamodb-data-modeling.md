@@ -7,6 +7,7 @@ tags:
   - nosql
   - data-modeling
   - database
+layer: null
 ---
 
 # DynamoDB Data Modeling
@@ -31,4 +32,3 @@ You MUST design DynamoDB data models based on the specific access patterns of yo
 - Do NOT use a relational, multi-table design approach with DynamoDB.
 - Your choice of Partition Key MUST avoid "hot partitions" by distributing write and read traffic evenly.
 - Scans are expensive and slow. You MUST design your keys and indexes to avoid the need for `Scan` operations in your application's critical path.
-layer: null

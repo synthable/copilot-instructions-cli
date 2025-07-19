@@ -6,6 +6,7 @@ tags:
   - behavioral
   - observer
   - pub-sub
+layer: null
 ---
 
 # Observer Pattern
@@ -26,4 +27,3 @@ You MUST use the Observer pattern to define a one-to-many dependency between obj
 - The Subject MUST NOT have direct knowledge of the concrete observer classes, only the Observer interface.
 - The communication between the Subject and its Observers MUST be one-way (Subject to Observers).
 - The Subject and Observers MUST be loosely coupled.
-layer: null

@@ -6,6 +6,7 @@ tags:
   - release management
   - feature flag
   - methodology
+layer: null
 ---
 
 # Feature Toggles (Feature Flags)
@@ -27,4 +28,3 @@ You MUST use feature toggles to decouple the deployment of code from the release
 - The application MUST be able to start and run correctly regardless of whether a feature toggle is on or off.
 - Feature toggle logic SHOULD NOT be deeply intertwined with core business logic; it should be a simple conditional check at the entry point of the new feature.
 - Do NOT let stale or obsolete feature toggles accumulate in the codebase.
-layer: null

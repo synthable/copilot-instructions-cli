@@ -6,6 +6,7 @@ tags:
   - generics
   - types
   - reusability
+layer: null
 ---
 
 # Effective Generics
@@ -28,4 +29,3 @@ You MUST use generics to create reusable and type-safe functions, classes, and c
 - Do NOT use `any` when a generic type parameter would provide better type safety.
 - Do NOT use a generic type if the function does not use the type in a way that creates a link between the input and output. If the type is not used, the function is not truly generic.
 - Generic constraints MUST be as minimal as possible to allow for maximum flexibility while ensuring type safety.
-layer: null

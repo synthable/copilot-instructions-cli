@@ -7,6 +7,7 @@ tags:
   - database
   - data-modeling
   - nosql
+layer: null
 ---
 
 # Firestore Data Modeling
@@ -29,4 +30,3 @@ You MUST design your Firestore data model to optimize for your application's spe
 - Do NOT try to model your data like a relational database with join tables. Embrace denormalization.
 - When you denormalize data, you MUST have a strategy for keeping the duplicated data in sync (often using a Cloud Function to update all instances when the source data changes).
 - Firestore queries are shallow by default; they only retrieve documents from the collection being queried, not from any subcollections.
-layer: null

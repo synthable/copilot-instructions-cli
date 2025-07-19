@@ -6,6 +6,7 @@ tags:
   - owasp
   - integrity
   - supply-chain
+layer: null
 ---
 
 # Software and Data Integrity Failures
@@ -26,4 +27,3 @@ You MUST protect the integrity of all software and data in the system against un
 - You MUST NOT download or use software components without verifying their integrity.
 - You MUST NOT deserialize untrusted data without proper safeguards.
 - You MUST NOT allow critical data to be modified without authorization.
-layer: null

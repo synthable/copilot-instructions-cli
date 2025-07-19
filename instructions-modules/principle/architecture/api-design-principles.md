@@ -6,6 +6,7 @@ tags:
   - api-design
   - rest
   - usability
+layer: null
 ---
 
 # API Design Principles
@@ -33,4 +34,3 @@ You MUST design APIs that are consistent, predictable, and easy for client devel
 - Do NOT use `GET` or `POST` to perform unsafe operations like updates or deletions.
 - The API MUST NOT expose internal implementation details in its responses.
 - Error responses MUST have a consistent, predictable format that provides useful information to the client.
-layer: null

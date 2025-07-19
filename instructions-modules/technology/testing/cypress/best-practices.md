@@ -6,6 +6,7 @@ tags:
   - cypress
   - e2e
   - best-practices
+layer: null
 ---
 
 # Cypress Best Practices
@@ -27,4 +28,3 @@ You MUST write end-to-end (E2E) tests that are stable, readable, and focused on 
 - You MUST NOT write tests that are overly long or complex. Break down complex workflows into smaller, more manageable tests.
 - You MUST NOT rely on CSS classes or element IDs for selectors, as these are subject to change. Use `data-cy` attributes instead.
 - You MUST NOT test functionality that is already covered by unit or integration tests. E2E tests should focus on the interactions between different parts of your system.
-layer: null

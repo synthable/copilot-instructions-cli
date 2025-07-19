@@ -5,6 +5,7 @@ tags:
   - design-pattern
   - creational
   - factory
+layer: null
 ---
 
 # Factory Pattern
@@ -26,4 +27,3 @@ You MUST use the Factory Pattern to encapsulate the logic for creating objects, 
 - You MUST NOT expose the concrete constructors of the objects to the client. The client should only know about the common interface and the factory.
 - You MUST NOT add business logic to the factory. The factory's sole responsibility is to create objects.
 - The factory method MUST always return an object that conforms to the common interface.
-layer: null

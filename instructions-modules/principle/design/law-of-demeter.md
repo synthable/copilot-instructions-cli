@@ -6,6 +6,7 @@ tags:
   - oop
   - coupling
   - lod
+layer: null
 ---
 
 # Law of Demeter (Principle of Least Knowledge)
@@ -33,4 +34,3 @@ It MUST NOT chain these calls to access objects deep within another object's str
 - Do NOT traverse through multiple objects to get to a piece of data or functionality (e.g., `a.getB().getC().doSomething()`).
 - A method SHOULD NOT talk to "strangers," only to its "immediate friends."
 - You MUST prefer to tell an object to do something for you rather than asking it for its internal state and then operating on that state.
-layer: null

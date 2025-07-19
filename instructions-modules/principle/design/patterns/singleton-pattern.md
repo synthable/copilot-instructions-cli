@@ -5,6 +5,7 @@ tags:
   - design-pattern
   - creational
   - singleton
+layer: null
 ---
 
 # Singleton Pattern
@@ -24,4 +25,3 @@ You MUST use the Singleton Pattern when it is essential to have exactly one inst
 - You MUST NOT use the Singleton Pattern to solve the problem of global access to configuration or resources. Use dependency injection instead, as it is more flexible and testable.
 - You MUST be aware that singletons can make unit testing difficult, as they introduce global state. Mocks may be required to isolate components that depend on a singleton.
 - In a multi-threaded environment, you MUST ensure that the singleton's instantiation is thread-safe. This may require using locks or other synchronization mechanisms.
-layer: null

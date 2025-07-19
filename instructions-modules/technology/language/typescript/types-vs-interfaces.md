@@ -6,6 +6,7 @@ tags:
   - types
   - interfaces
   - best-practices
+layer: null
 ---
 
 # Types vs. Interfaces
@@ -32,4 +33,3 @@ You MUST use the appropriate tool (`type` or `interface`) for defining types in 
 - Do NOT use `type` to define a shape that is meant to be extended or implemented by a class; use `interface`.
 - Do NOT use an `interface` to define a union or tuple type; you MUST use `type`.
 - While `type` can be used for object shapes, `interface` is generally preferred for its better error messages and support for declaration merging.
-layer: null

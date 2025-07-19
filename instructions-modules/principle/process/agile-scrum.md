@@ -6,6 +6,7 @@ tags:
   - agile
   - scrum
   - project-management
+layer: null
 ---
 
 # Agile (Scrum)
@@ -28,4 +29,3 @@ You MUST operate within the Scrum framework to deliver value iteratively and inc
 - The roles of Product Owner, Scrum Master, and Development Team MUST be clearly defined and respected.
 - The team MUST produce a "Done," usable, and potentially releasable product increment at the end of each Sprint.
 - All work MUST be visible in the Product and Sprint Backlogs.
-layer: null

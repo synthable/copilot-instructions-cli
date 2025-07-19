@@ -6,6 +6,7 @@ tags:
   - playbook
   - planning
   - project-management
+layer: null
 ---
 
 # Playbook: Plan a Feature
@@ -38,4 +39,3 @@ You MUST break down a feature request or user story into a detailed, actionable 
 - The plan MUST NOT contain vague or ambiguous steps like "implement the feature."
 - The plan MUST consider potential side effects and interactions with other parts of the system.
 - The final output MUST be a clear, ordered list of steps.
-layer: null

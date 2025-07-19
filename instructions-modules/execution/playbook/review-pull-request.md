@@ -7,6 +7,7 @@ tags:
   - code-review
   - quality
   - process
+layer: null
 ---
 
 # Playbook: Review a Pull Request
@@ -41,4 +42,3 @@ You MUST provide structured, constructive, and actionable feedback on a pull req
 - Do NOT approve a PR that has unresolved blocking issues.
 - The review MUST be timely to avoid blocking the author.
 - Focus on the changes within the PR's scope. Do not demand unrelated refactoring.
-layer: null

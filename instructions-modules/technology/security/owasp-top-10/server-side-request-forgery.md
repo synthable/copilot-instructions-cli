@@ -5,6 +5,7 @@ tags:
   - security
   - owasp
   - ssrf
+layer: null
 ---
 
 # Server-Side Request Forgery (SSRF)
@@ -25,4 +26,3 @@ You MUST prevent the application from making unintended network requests to an a
 - You MUST NOT trust a URL provided by any user, even an authenticated one.
 - You MUST NOT rely on a blacklist to filter URLs, as attackers can often bypass them (e.g., using URL shorteners or DNS trickery). A whitelist is required.
 - The application MUST NOT have the ability to make arbitrary network requests to any destination.
-layer: null

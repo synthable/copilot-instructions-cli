@@ -7,6 +7,7 @@ tags:
   - refactoring
   - testing
   - quality
+layer: null
 ---
 
 # Playbook: Refactor a Component
@@ -36,4 +37,3 @@ You MUST safely improve the internal structure of a piece of code without changi
 - Refactoring MUST NOT change the existing functionality.
 - You MUST NOT begin refactoring if the existing tests are failing.
 - Each small refactoring step MUST leave the code in a working state.
-layer: null

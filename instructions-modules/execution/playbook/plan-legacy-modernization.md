@@ -7,6 +7,7 @@ tags:
   - refactoring
   - modernization
   - playbook
+layer: null
 ---
 
 # Plan Legacy Modernization
@@ -29,4 +30,3 @@ Given a description of a legacy monolithic system, you MUST generate a safe, inc
 - The modernization plan MUST be incremental. A "big bang" rewrite is not a valid strategy.
 - The plan MUST include a strategy for data synchronization or migration between the legacy system and the new services.
 - Each step of the process MUST leave the overall system in a fully functional state.
-layer: null

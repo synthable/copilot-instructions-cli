@@ -8,6 +8,7 @@ tags:
   - automation
   - process
   - methodology
+layer: null
 ---
 
 # Continuous Integration & Delivery (CI/CD)
@@ -34,4 +35,3 @@ You MUST implement and maintain a fully automated CI/CD pipeline to ensure that 
 - Do NOT perform manual deployments to production environments. The process MUST be automated and repeatable.
 - The build artifact MUST NOT be changed between environments; only its configuration should change.
 - The CI/CD process MUST include a comprehensive suite of automated tests that cover all critical paths and use cases.
-layer: null

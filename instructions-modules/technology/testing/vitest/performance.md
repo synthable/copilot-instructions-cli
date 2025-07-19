@@ -7,6 +7,7 @@ tags:
   - javascript
   - typescript
   - performance
+layer: null
 ---
 
 # Vitest Performance
@@ -28,4 +29,3 @@ You MUST write tests that are optimized for speed and efficiency. A fast test su
 - You MUST NOT introduce shared state between tests, as this will cause them to fail when run in parallel.
 - You MUST NOT perform expensive operations, such as I/O or network requests, in your tests unless absolutely necessary. Mock these dependencies instead.
 - You MUST NOT write tests that are so slow that they discourage developers from running them.
-layer: null

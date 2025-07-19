@@ -6,6 +6,7 @@ tags:
   - api-gateway
   - serverless
   - architecture
+layer: null
 ---
 
 # API Gateway Integration Patterns
@@ -35,4 +36,3 @@ You MUST choose the appropriate API Gateway integration pattern based on the bac
 - Do NOT use the older, non-proxy "Lambda Custom" integration unless you have a specific need to use API Gateway's mapping templates to transform the request or response. Lambda Proxy is simpler and more powerful for most use cases.
 - When using AWS Service Integration, the IAM role for API Gateway MUST have the minimum necessary permissions to call the target service's API.
 - Sensitive data transformation logic MUST NOT be placed in API Gateway mapping templates; it should be handled in a Lambda function for better security and maintainability.
-layer: null

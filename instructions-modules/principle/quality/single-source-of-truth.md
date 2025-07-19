@@ -6,6 +6,7 @@ tags:
   - data
   - architecture
   - ssot
+layer: null
 ---
 
 # Single Source of Truth (SSoT)
@@ -26,4 +27,3 @@ Every piece of data or knowledge in a system MUST have a single, authoritative, 
 - Do NOT store the same piece of mutable data in more than one location.
 - Do NOT rely on manual processes to keep duplicated data in sync.
 - If you create a copy of data (e.g., for caching), it MUST be treated as a read-only, non-authoritative replica.
-layer: null
