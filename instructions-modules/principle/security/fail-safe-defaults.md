@@ -1,4 +1,5 @@
 ---
+tier: principle
 name: 'Fail-Safe Defaults'
 description: 'The principle that, unless a subject is given explicit access to an object, it should be denied access. This is the foundation of a secure system.'
 tags:

@@ -1,4 +1,5 @@
 ---
+tier: technology
 name: 'Jest Mocking'
 description: 'A guide to effectively using mocking in Jest to isolate components and functions for focused testing.'
 tags:

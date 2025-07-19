@@ -1,4 +1,5 @@
 ---
+tier: technology
 name: 'Jest Snapshot Testing'
 description: 'Guidelines for using snapshot tests in Jest to verify the output of UI components and large data structures.'
 tags:

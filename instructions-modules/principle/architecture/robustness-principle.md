@@ -1,4 +1,5 @@
 ---
+tier: principle
 name: "Robustness Principle (Postel's Law)"
 description: "A design principle for software implementation that states to 'be conservative in what you do, be liberal in what you accept from others.' This helps build resilient systems that can handle imperfect input."
 tags:

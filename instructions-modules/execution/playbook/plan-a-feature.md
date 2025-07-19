@@ -1,4 +1,5 @@
 ---
+tier: execution
 name: 'Plan a Feature'
 description: 'A playbook for taking a user story and breaking it down into a technical implementation plan with concrete steps.'
 tags:

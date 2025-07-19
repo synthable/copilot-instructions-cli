@@ -1,4 +1,5 @@
 ---
+tier: principle
 name: 'Chaos Engineering'
 description: 'The practice of proactively testing system resilience by introducing controlled, deliberate failures into a production environment.'
 tags:

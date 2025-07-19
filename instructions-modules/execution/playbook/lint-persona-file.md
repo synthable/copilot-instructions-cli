@@ -1,4 +1,5 @@
 ---
+tier: execution
 name: 'Lint Persona File'
 description: "A playbook to analyze a persona's module list and generate a comprehensive quality and consistency report."
 tags:

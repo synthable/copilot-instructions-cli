@@ -1,4 +1,5 @@
 ---
+tier: principle
 name: 'Composition Over Inheritance'
 description: 'The principle that systems should achieve polymorphic behavior and code reuse through composition (containing instances of other classes) rather than inheritance from a base class.'
 tags:

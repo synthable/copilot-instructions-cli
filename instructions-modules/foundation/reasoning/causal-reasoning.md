@@ -1,4 +1,5 @@
 ---
+tier: foundation
 name: 'Causal Reasoning'
 description: 'A process for determining cause-and-effect relationships, moving beyond mere correlation by identifying mechanisms.'
 layer: 1

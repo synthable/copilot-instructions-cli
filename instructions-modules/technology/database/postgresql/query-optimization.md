@@ -1,4 +1,5 @@
 ---
+tier: technology
 name: 'PostgreSQL Query Optimization'
 description: 'Directives for writing efficient and performant queries in PostgreSQL, focusing on indexing, joins, and query analysis.'
 tags:

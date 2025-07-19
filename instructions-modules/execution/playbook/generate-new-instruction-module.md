@@ -1,4 +1,5 @@
 ---
+tier: execution
 name: 'Generate New Instruction Module'
 description: "A playbook that orchestrates the creation of a new, well-structured instruction module based on a user's request."
 tags:

@@ -1,4 +1,5 @@
 ---
+tier: principle
 name: 'Command-Query Responsibility Segregation (CQRS)'
 description: 'The principle that separates methods that change state (Commands) from methods that read state (Queries). This can improve performance, scalability, and security.'
 tags:

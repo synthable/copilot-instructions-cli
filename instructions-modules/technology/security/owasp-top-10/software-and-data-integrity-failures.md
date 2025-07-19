@@ -1,4 +1,5 @@
 ---
+tier: technology
 name: 'Software and Data Integrity Failures'
 description: 'A set of rules to protect against software and data integrity failures by verifying the integrity of all code, data, and critical updates.'
 tags:

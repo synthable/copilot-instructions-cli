@@ -1,4 +1,5 @@
 ---
+tier: principle
 name: 'Escalation Protocol (Asking for Help)'
 description: 'A protocol for recognizing when to stop working alone and when to escalate a problem to a human user or another expert.'
 tags:

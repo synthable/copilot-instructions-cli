@@ -1,4 +1,5 @@
 ---
+tier: principle
 name: 'Defense in Depth'
 description: 'The strategy of protecting a system with multiple, redundant layers of security controls, such that if one layer fails, another is in place to thwart an attack.'
 tags:

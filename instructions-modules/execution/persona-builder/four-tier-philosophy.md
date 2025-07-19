@@ -1,4 +1,5 @@
 ---
+tier: execution
 name: 'Four-Tier Philosophy'
 description: 'The mandatory hierarchical order for persona module tiers: Foundation -> Principle -> Technology -> Execution.'
 tags:

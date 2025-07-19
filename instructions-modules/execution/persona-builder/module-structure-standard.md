@@ -1,4 +1,5 @@
 ---
+tier: execution
 name: 'Module Structure Standard'
 description: 'The mandatory three-section format for all instruction modules.'
 tags:

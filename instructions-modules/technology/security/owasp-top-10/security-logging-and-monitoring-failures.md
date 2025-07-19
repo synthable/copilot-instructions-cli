@@ -1,4 +1,5 @@
 ---
+tier: technology
 name: 'Security Logging and Monitoring Failures'
 description: 'A set of rules to ensure sufficient logging and monitoring is in place to detect and respond to security incidents in a timely manner.'
 tags:

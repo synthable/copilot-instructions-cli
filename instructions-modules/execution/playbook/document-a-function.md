@@ -1,4 +1,5 @@
 ---
+tier: execution
 name: 'Document a Function'
 description: 'A playbook for writing comprehensive documentation for a given function, including its parameters, return value, and potential errors.'
 tags:

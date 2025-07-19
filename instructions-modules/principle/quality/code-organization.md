@@ -1,4 +1,5 @@
 ---
+tier: principle
 name: 'Code Organization'
 description: 'Principles for structuring a codebase to ensure clarity, logical cohesion, and maintainability.'
 tags:

@@ -1,4 +1,5 @@
 ---
+tier: principle
 name: 'Technical Debt Management'
 description: 'A proactive process for identifying, tracking, and paying down technical debt to maintain long-term codebase health.'
 tags:

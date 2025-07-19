@@ -1,4 +1,5 @@
 ---
+tier: foundation
 name: 'One-Way vs. Two-Way Doors'
 description: 'A framework for classifying decisions based on their reversibility.'
 layer: 3

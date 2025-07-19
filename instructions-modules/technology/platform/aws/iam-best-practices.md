@@ -1,4 +1,5 @@
 ---
+tier: technology
 name: 'AWS IAM Best Practices'
 description: 'A set of security best practices for managing users, groups, roles, and permissions in AWS Identity and Access Management (IAM).'
 tags:

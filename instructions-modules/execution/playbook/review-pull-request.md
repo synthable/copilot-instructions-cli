@@ -1,4 +1,5 @@
 ---
+tier: execution
 name: 'Review a Pull Request'
 description: 'A playbook that uses a checklist to provide structured, constructive feedback on a pull request.'
 tags:

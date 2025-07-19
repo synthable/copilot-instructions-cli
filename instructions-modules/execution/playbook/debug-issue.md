@@ -1,4 +1,5 @@
 ---
+tier: execution
 name: 'Debug an Issue'
 description: 'A systematic playbook for debugging, leveraging foundational modules like root-cause-analysis and causal-reasoning.'
 tags:

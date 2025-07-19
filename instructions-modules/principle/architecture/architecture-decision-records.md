@@ -1,4 +1,5 @@
 ---
+tier: principle
 name: 'Architecture Decision Records (ADRs)'
 description: 'The practice of documenting significant architectural decisions, their context, and their consequences in a lightweight text file.'
 tags:

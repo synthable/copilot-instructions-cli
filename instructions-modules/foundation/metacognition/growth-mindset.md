@@ -1,4 +1,5 @@
 ---
+tier: foundation
 name: 'Growth Mindset'
 description: "The principle of viewing challenges as opportunities to learn and grow, rather than as threats to one's competence."
 layer: 4

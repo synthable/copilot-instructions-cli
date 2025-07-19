@@ -1,4 +1,5 @@
 ---
+tier: technology
 name: 'Firestore Data Modeling'
 description: 'Principles for structuring data in Firestore for scalability and efficient querying, focusing on collections, documents, and subcollections.'
 tags:

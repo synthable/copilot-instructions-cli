@@ -1,4 +1,5 @@
 ---
+tier: technology
 name: 'AWS Lambda Best Practices'
 description: 'A set of best practices for writing, configuring, and deploying efficient, secure, and cost-effective AWS Lambda functions.'
 tags:

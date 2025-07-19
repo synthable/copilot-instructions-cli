@@ -1,4 +1,5 @@
 ---
+tier: execution
 name: 'Generate New Persona Module'
 description: "A playbook for generating a new, complete persona file from a user's concept."
 layer: null

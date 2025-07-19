@@ -1,4 +1,5 @@
 ---
+tier: foundation
 name: 'Analogical Reasoning'
 description: 'Using knowledge and experience from one domain to solve a problem in another.'
 layer: 1

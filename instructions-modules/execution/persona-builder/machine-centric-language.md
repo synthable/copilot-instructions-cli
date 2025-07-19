@@ -1,4 +1,5 @@
 ---
+tier: execution
 name: 'Machine-Centric Language'
 description: 'A style guide for using imperative, unambiguous, and direct language suitable for programming an AI.'
 tags:

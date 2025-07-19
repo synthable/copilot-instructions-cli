@@ -1,4 +1,5 @@
 ---
+tier: technology
 name: 'DynamoDB Data Modeling'
 description: 'A module on how to model data effectively for DynamoDB, focusing on single-table design, access patterns, and choosing the right keys and indexes.'
 tags:

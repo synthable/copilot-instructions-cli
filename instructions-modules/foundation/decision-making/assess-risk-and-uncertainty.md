@@ -1,4 +1,5 @@
 ---
+tier: foundation
 name: 'Assess Risk and Uncertainty'
 description: 'A process to differentiate between risk (known probabilities) and uncertainty (unknown probabilities).'
 layer: 3

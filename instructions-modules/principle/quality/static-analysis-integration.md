@@ -1,4 +1,5 @@
 ---
+tier: principle
 name: 'Static Analysis Integration'
 description: 'The principle of using automated tools to identify potential issues in code before it is executed.'
 tags:

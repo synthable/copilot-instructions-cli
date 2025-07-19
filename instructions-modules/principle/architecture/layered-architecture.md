@@ -1,4 +1,5 @@
 ---
+tier: principle
 name: 'Layered Architecture'
 description: 'An architectural pattern that organizes software into horizontal layers, each with a specific responsibility. Layers can only communicate with adjacent layers.'
 tags:

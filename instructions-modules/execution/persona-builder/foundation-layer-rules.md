@@ -1,4 +1,5 @@
 ---
+tier: execution
 name: 'Foundation Layer Rules'
 description: "The rule that Foundation modules must be ordered by their 'layer' metadata, from lowest to highest."
 tags:

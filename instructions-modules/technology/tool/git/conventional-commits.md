@@ -1,4 +1,5 @@
 ---
+tier: technology
 name: 'Conventional Commits'
 description: 'A strict format for writing commit messages that creates an explicit and machine-readable commit history.'
 tags:

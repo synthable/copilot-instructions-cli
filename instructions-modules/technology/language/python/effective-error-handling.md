@@ -1,4 +1,5 @@
 ---
+tier: technology
 name: 'Effective Python Error Handling'
 description: 'Directives on using try/except/finally blocks correctly and creating custom exceptions.'
 tags:

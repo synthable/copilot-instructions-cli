@@ -1,4 +1,5 @@
 ---
+tier: principle
 name: 'User Story Mapping'
 description: "A technique for expressing requirements from the user's perspective, focusing on value rather than technical implementation."
 tags:

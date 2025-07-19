@@ -1,4 +1,5 @@
 ---
+tier: principle
 name: 'Code Review Process'
 description: 'The principle of implementing a thorough peer review process to catch issues before they enter the codebase.'
 tags:

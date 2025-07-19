@@ -1,4 +1,5 @@
 ---
+tier: principle
 name: 'Observer Pattern'
 description: 'A behavioral design pattern where an object, named the subject, maintains a list of its dependents, called observers, and notifies them automatically of any state changes.'
 tags:

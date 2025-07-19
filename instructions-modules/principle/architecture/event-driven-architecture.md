@@ -1,4 +1,5 @@
 ---
+tier: principle
 name: 'Event-Driven Architecture'
 description: 'An architectural style where components communicate through asynchronous events, enabling loose coupling and high scalability.'
 tags:

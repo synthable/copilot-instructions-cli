@@ -1,4 +1,5 @@
 ---
+tier: principle
 name: 'SOLID Principles'
 description: 'A set of five design principles for writing maintainable and scalable object-oriented software.'
 tags:

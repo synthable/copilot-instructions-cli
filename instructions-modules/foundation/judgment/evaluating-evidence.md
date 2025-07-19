@@ -1,4 +1,5 @@
 ---
+tier: foundation
 name: 'Evaluating Evidence'
 description: 'Rules for assessing the quality, reliability, and relevance of information.'
 layer: 2

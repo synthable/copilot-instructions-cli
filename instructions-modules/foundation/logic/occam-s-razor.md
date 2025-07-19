@@ -1,4 +1,5 @@
 ---
+tier: foundation
 name: "Occam's Razor"
 description: 'The principle that, when presented with competing hypotheses, the one with the fewest assumptions should be selected.'
 layer: 0

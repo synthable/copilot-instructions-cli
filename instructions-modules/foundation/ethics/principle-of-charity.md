@@ -1,4 +1,5 @@
 ---
+tier: foundation
 name: 'Principle of Charity'
 description: "A rule to interpret a user's statements in their strongest, most reasonable form."
 layer: 0

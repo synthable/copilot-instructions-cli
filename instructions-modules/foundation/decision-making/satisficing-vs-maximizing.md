@@ -1,4 +1,5 @@
 ---
+tier: foundation
 name: 'Satisficing vs. Maximizing'
 description: "A rule to understand when a 'good enough' solution is superior to striving for a perfect one."
 layer: 3

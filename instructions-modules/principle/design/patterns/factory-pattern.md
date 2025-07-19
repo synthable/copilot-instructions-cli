@@ -1,4 +1,5 @@
 ---
+tier: principle
 name: 'Factory Pattern'
 description: 'A guide to using the Factory Pattern to create objects without exposing the instantiation logic to the client.'
 tags:

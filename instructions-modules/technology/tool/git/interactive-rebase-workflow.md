@@ -1,4 +1,5 @@
 ---
+tier: technology
 name: 'Interactive Rebase Workflow'
 description: 'A process for cleaning up commit history using interactive rebase before merging a feature branch.'
 tags:

@@ -1,4 +1,5 @@
 ---
+tier: technology
 name: 'Vulnerable and Outdated Components'
 description: 'A set of rules for managing third-party components to prevent the use of software with known vulnerabilities.'
 tags:

@@ -1,4 +1,5 @@
 ---
+tier: principle
 name: 'KISS Principle (Keep It Simple, Stupid)'
 description: 'The design principle that states that most systems work best if they are kept simple rather than made complicated.'
 tags:

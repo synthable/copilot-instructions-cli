@@ -1,4 +1,5 @@
 ---
+tier: technology
 name: 'VPC Network Security'
 description: 'A guide to securing an AWS Virtual Private Cloud (VPC) using security groups, network ACLs, and public/private subnets.'
 tags:

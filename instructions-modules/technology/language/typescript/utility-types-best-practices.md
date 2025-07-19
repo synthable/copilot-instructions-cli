@@ -1,4 +1,5 @@
 ---
+tier: technology
 name: 'Utility Types Best Practices'
 description: "A guide to effectively using TypeScript's built-in utility types (Partial, Pick, Omit, Record, etc.) to manipulate and create new types."
 tags:

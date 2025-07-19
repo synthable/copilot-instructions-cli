@@ -1,4 +1,5 @@
 ---
+tier: principle
 name: 'Principle of Least Astonishment'
 description: "A rule that a system's components should behave in a way that users expect, without surprising them. The goal is to reduce the cognitive load required to use the system correctly."
 tags:

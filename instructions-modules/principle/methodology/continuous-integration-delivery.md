@@ -1,4 +1,5 @@
 ---
+tier: principle
 name: 'Continuous Integration & Delivery (CI/CD)'
 description: 'A set of practices that automate the integration, building, testing, and deployment of software to enable rapid and reliable releases.'
 tags:

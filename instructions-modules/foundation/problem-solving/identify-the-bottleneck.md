@@ -1,4 +1,5 @@
 ---
+tier: foundation
 name: 'Identify the Bottleneck'
 description: 'A process for analyzing a system to find the single constraint that limits its overall performance.'
 layer: 1

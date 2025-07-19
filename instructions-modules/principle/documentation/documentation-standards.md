@@ -1,4 +1,5 @@
 ---
+tier: principle
 name: 'Documentation Standards'
 description: 'A set of standards for writing and maintaining clear, accurate, and useful documentation for a software project.'
 tags:

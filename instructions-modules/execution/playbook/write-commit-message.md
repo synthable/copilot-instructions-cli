@@ -1,4 +1,5 @@
 ---
+tier: execution
 name: 'Write a Commit Message'
 description: 'A playbook for writing a well-formed Git commit message following the Conventional Commits standard.'
 tags:

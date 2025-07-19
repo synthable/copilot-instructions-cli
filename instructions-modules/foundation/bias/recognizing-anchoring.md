@@ -1,4 +1,5 @@
 ---
+tier: foundation
 name: 'Recognizing Anchoring Bias'
 description: 'A rule to avoid over-relying on the first piece of information received.'
 layer: 1

@@ -1,4 +1,5 @@
 ---
+tier: foundation
 name: Tree of Thoughts
 description: A framework for complex problem-solving that explores multiple reasoning paths simultaneously, evaluates their viability, and pursues only the most promising ones.
 layer: 1

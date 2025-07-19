@@ -1,4 +1,5 @@
 ---
+tier: principle
 name: 'Fault Tolerance Design'
 description: 'Principles for designing systems that can continue to function correctly despite the failure of one or more of their components.'
 tags:

@@ -1,4 +1,5 @@
 ---
+tier: foundation
 name: 'Divergent Thinking (Brainstorming)'
 description: 'Generates a wide variety of possible solutions to a problem without initial judgment or criticism.'
 layer: 1

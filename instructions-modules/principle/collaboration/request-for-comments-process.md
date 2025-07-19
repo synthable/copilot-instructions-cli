@@ -1,4 +1,5 @@
 ---
+tier: principle
 name: 'Request for Comments (RFC) Process'
 description: 'A formal process for proposing and building consensus on significant technical changes by inviting feedback from a wide audience.'
 tags:

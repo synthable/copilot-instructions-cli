@@ -1,4 +1,5 @@
 ---
+tier: principle
 name: 'Code Review Checklist'
 description: 'A systematic checklist for reviewing code, focusing on readability, maintainability, and correctness.'
 tags:

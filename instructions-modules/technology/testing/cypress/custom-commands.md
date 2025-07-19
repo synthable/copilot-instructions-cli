@@ -1,4 +1,5 @@
 ---
+tier: technology
 name: 'Cypress Custom Commands'
 description: 'A guide to creating and using custom commands in Cypress to promote reusable and readable test code.'
 tags:

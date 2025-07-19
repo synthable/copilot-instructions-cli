@@ -1,4 +1,5 @@
 ---
+tier: principle
 name: 'Hexagonal Architecture (Ports and Adapters)'
 description: 'An architectural pattern that isolates the application core from external services through well-defined interfaces (ports) and implementations (adapters).'
 tags:

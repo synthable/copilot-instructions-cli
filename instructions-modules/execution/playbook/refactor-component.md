@@ -1,4 +1,5 @@
 ---
+tier: execution
 name: 'Refactor a Component'
 description: 'A step-by-step process for safely refactoring a piece of code, emphasizing that tests must pass before and after.'
 tags:

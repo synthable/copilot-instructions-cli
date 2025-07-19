@@ -1,4 +1,5 @@
 ---
+tier: principle
 name: 'Design for Scalability'
 description: 'The principle of designing systems that can handle increased load by adding resources, typically horizontally.'
 tags:

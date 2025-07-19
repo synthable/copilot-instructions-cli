@@ -1,4 +1,5 @@
 ---
+tier: principle
 name: 'Clean Code Principles'
 description: 'A set of fundamental principles for writing human-readable, understandable, and maintainable code.'
 schema: procedure
