@@ -4,4 +4,3 @@ description: 'Instructions for correctly applying the Rules of Hooks in React co
 ---
 
 This is the content for the React Rules of Hooks.
-layer: null

@@ -29,4 +29,3 @@ You MUST write code that is clean, simple, and easy for a human to read and main
 - Do NOT use obscure or overly clever language features when a simpler alternative exists.
 - Do NOT leave commented-out code in the codebase.
 - Code MUST be self-explanatory. Add comments only to explain the "why," not the "what."
-layer: null

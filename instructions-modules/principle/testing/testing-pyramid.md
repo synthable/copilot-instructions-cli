@@ -24,4 +24,3 @@ You MUST advocate for and implement a balanced testing strategy that follows the
 - Do NOT write E2E tests for logic that can be verified with a unit or integration test.
 - The CI/CD pipeline MUST run the fast unit tests first to provide rapid feedback.
 - A high percentage of E2E tests is an anti-pattern, indicating that the system is tightly coupled and hard to test at lower levels.
-layer: null

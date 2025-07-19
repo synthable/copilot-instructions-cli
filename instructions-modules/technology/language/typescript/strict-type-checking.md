@@ -27,4 +27,3 @@ You MUST enable and adhere to TypeScript's strict mode (`"strict": true`) in the
 - The `"strict": true` flag MUST NOT be disabled in any production-level project.
 - Do NOT use the `@ts-ignore` comment to suppress type errors. If a type error exists, you MUST fix the underlying type issue.
 - The `any` type should be avoided whenever possible. Use the `unknown` type for values where the type is not known at compile time and perform type-checking before use.
-layer: null
