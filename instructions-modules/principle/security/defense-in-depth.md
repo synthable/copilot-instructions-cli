@@ -29,3 +29,4 @@ You MUST design systems with multiple, independent layers of security controls. 
 - Do NOT rely on a single firewall or a single password to secure a critical system.
 - Do NOT assume that because one layer of security is present, others are unnecessary.
 - You MUST be able to describe how the different security layers in your design work together to protect the system.
+layer: null

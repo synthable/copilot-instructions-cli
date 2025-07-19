@@ -31,3 +31,4 @@ When designing or modifying any system, you MUST partition it into distinct, loo
 - Do NOT place unrelated logic within the same component (e.g., mixing database queries directly into a UI rendering function).
 - Do NOT create components that have multiple, unrelated responsibilities (i.e., "God Objects").
 - A component MUST NOT expose its internal workings; it should only expose the public interface for its specific concern.
+layer: null

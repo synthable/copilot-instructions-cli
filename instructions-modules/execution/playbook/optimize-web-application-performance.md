@@ -30,3 +30,4 @@ Given a web application, you MUST generate a prioritized list of actionable reco
 
 - Recommendations MUST be specific and actionable. "Improve the frontend" is not a valid recommendation.
 - The plan MUST prioritize optimizations based on expected impact (e.g., optimizing large images is often a high-impact, low-effort task).
+layer: null

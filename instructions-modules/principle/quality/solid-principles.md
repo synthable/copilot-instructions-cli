@@ -28,3 +28,4 @@ All object-oriented code and system design you produce MUST adhere to the five S
 - Do NOT create large classes that perform multiple, unrelated tasks (violates SRP).
 - Do NOT modify existing, stable classes to add new features; extend them instead (violates OCP).
 - Do NOT depend on concrete implementations; depend on abstractions (violates DIP).
+layer: null

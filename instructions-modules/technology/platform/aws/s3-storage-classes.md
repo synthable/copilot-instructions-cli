@@ -35,3 +35,4 @@ You MUST select the most cost-effective S3 storage class for an object based on 
 - Do NOT use Glacier Deep Archive for data that might need to be retrieved quickly.
 - The cost of retrieval MUST be considered. Infrequent Access and Glacier classes have a per-GB retrieval fee, which can be costly if used for frequently accessed data.
 - Lifecycle policies MUST be tested to ensure they are transitioning objects as expected.
+layer: null

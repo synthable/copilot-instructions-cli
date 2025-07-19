@@ -30,3 +30,4 @@ You will generate a complete, well-structured, and machine-centric instruction m
 - You MUST generate the content yourself based on your understanding of the concept. Do not ask the user to provide the content for the sections.
 - Do not invent concepts or directives not implied by the user's request. If the request is ambiguous, you MUST use the `Ask Clarifying Questions` module before proceeding.
 - Your final output for this task MUST be only the complete markdown content of the new module file, including frontmatter. Do not wrap it in conversational text.
+layer: null

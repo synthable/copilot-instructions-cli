@@ -25,3 +25,4 @@ You MUST favor the simplest solution that correctly and robustly solves the prob
 - Do NOT add functionality on the speculation that it might be needed in the future (see YAGNI).
 - Do NOT choose a complex design pattern if a simpler one suffices.
 - Do NOT mistake "clever" or "terse" code for "simple" code. Simple code is easy to understand.
+layer: null

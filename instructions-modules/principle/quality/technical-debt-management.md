@@ -27,3 +27,4 @@ You MUST proactively manage technical debt by identifying, tracking, and priorit
 - Do NOT treat technical debt as a low-priority "cleanup" task. It is a real liability that impacts future development.
 - Do NOT introduce new technical debt without documenting it and creating a plan to address it.
 - Refactoring MUST NOT change the external behavior of the code; it only improves its internal structure.
+layer: null

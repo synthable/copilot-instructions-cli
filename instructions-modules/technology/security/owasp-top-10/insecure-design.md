@@ -26,3 +26,4 @@ You MUST integrate security into the design and architecture of the application 
 - You MUST NOT treat security as a feature to be added after the application is built.
 - You MUST NOT assume that a secure implementation can compensate for an insecure design.
 - You MUST NOT rely on a single security control. Employ a layered defense (`Defense in Depth`).
+layer: null

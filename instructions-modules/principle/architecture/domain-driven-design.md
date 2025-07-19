@@ -27,3 +27,4 @@ You MUST model the software to match the business domain it represents, using a 
 
 - Do NOT use generic, technical terms (e.g., `Manager`, `Processor`, `Data`) for domain objects. Use the Ubiquitous Language.
 - Do NOT allow domain logic to leak into other layers of the application (e.g., presentation, data access).
+layer: null

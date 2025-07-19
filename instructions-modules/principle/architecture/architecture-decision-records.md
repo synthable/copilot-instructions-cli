@@ -27,3 +27,4 @@ For any significant architectural decision, you MUST generate an Architecture De
 - ADRs are for significant decisions that affect the entire system or cross-cutting concerns, not for minor implementation details.
 - The ADR MUST be immutable once its status is "Accepted." If the decision changes, a new ADR must be created to supersede the old one.
 - The language used MUST be objective and focused on technical trade-offs.
+layer: null

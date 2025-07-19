@@ -29,3 +29,4 @@ You MUST prevent SQL injection (SQLi) vulnerabilities by ensuring that user-supp
 - You MUST NOT trust any input, including input from authenticated users or internal services.
 - Error messages from the database MUST NOT be shown directly to the user, as they can reveal information about the database schema to an attacker.
 - Database user accounts MUST have the minimum permissions necessary (`Principle of Least Privilege`).
+layer: null

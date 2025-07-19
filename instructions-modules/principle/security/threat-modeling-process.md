@@ -32,3 +32,4 @@ When designing a new system or feature, you MUST perform a threat modeling analy
 - Threat modeling MUST be performed during the design phase, not after implementation.
 - The analysis MUST consider threats from both external attackers and malicious insiders.
 - Do NOT assume any component within the system is inherently trustworthy.
+layer: null

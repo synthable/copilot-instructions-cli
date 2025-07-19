@@ -25,3 +25,4 @@ You MUST design systems to be horizontally scalable, enabling them to handle inc
 
 - A system is not horizontally scalable if adding a new server instance requires manual configuration changes.
 - Do NOT store session state in the memory of an application server.
+layer: null

@@ -25,3 +25,4 @@ You MUST design components to be loosely coupled and easily testable in isolatio
 
 - Do NOT instantiate concrete dependencies directly within a class or function (e.g., `new DatabaseConnection()`).
 - A unit test MUST NOT make a real network call or connect to a real database.
+layer: null

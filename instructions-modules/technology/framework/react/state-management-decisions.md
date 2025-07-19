@@ -35,3 +35,4 @@ You MUST choose the appropriate state management tool for the job based on the c
 - Do NOT use `useContext` for state that is only needed by a few, closely-related components; passing props (prop drilling) is often simpler and more explicit in these cases.
 - Do NOT introduce an external state management library before determining that React's built-in hooks are insufficient for the task.
 - Always start with the simplest appropriate tool (`useState`) and refactor to more complex tools only when the application's needs justify it.
+layer: null

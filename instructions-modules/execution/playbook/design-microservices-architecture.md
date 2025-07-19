@@ -27,3 +27,4 @@ Given a set of business requirements, you MUST generate a high-level design for 
 - The proposed design MUST avoid creating a "distributed monolith" where services are chatty and tightly coupled.
 - The number of services should be justified; do not decompose the system more than necessary.
 - The design MUST include a plan for observability (logging, metrics, tracing) from day one.
+layer: null

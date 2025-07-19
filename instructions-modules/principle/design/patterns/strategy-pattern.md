@@ -26,3 +26,4 @@ You MUST use the Strategy pattern to define a family of interchangeable algorith
 - The Context class MUST NOT have any knowledge of the concrete implementation of any strategy. It only knows about the Strategy interface.
 - The algorithms MUST be interchangeable from the Context's perspective.
 - Do NOT implement the algorithms directly in the Context class. Encapsulate them in separate Strategy classes.
+layer: null

@@ -32,3 +32,4 @@ You MUST NOT continue to work on a problem indefinitely without making progress.
 
 - Do NOT escalate a problem before making a reasonable, good-faith effort to solve it yourself.
 - Do NOT present a vague request for help (e.g., "I'm stuck"). Your escalation MUST include the summary and a specific question.
+layer: null

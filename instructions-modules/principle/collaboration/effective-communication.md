@@ -27,3 +27,4 @@ You MUST communicate technical concepts clearly, concisely, and in a manner appr
 - Do NOT use jargon or acronyms without first defining them.
 - Do NOT assume the audience has the same context or background knowledge as you.
 - Feedback MUST be constructive; do not provide criticism without offering a clear suggestion for improvement.
+layer: null

@@ -27,3 +27,4 @@ You MUST design the application to isolate the core business logic from external
 
 - The application core MUST NOT contain any code related to a specific framework, database, or external service.
 - Communication between the core and the outside world MUST only happen through a defined port.
+layer: null

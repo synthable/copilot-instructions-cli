@@ -26,3 +26,4 @@ When designing systems with asynchronous or complex workflows, you MUST use an e
 - Producers of events MUST NOT have any knowledge of the consumers.
 - Events MUST represent a fact that has already occurred; they are immutable.
 - The system MUST be designed to handle eventual consistency, as there is no immediate response in an asynchronous flow.
+layer: null

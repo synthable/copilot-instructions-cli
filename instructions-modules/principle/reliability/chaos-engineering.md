@@ -27,3 +27,4 @@ You MUST advocate for and design a Chaos Engineering practice to build confidenc
 - Chaos Engineering experiments MUST be run in a production environment to be valid, as staging environments never perfectly replicate production conditions.
 - Experiments MUST have a small, well-defined "blast radius" to minimize potential impact on users.
 - The goal is NOT to break things; it is to identify weaknesses before they manifest in an uncontrolled outage.
+layer: null

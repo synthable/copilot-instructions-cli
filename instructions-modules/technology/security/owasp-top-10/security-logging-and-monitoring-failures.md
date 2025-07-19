@@ -28,3 +28,4 @@ You MUST implement comprehensive logging and monitoring to detect security incid
 - You MUST NOT fail to log significant security events.
 - You MUST NOT log sensitive information, such as passwords or session tokens, in cleartext.
 - Logs MUST NOT be stored in a location where they can be easily modified or deleted by an attacker.
+layer: null

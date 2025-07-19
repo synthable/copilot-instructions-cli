@@ -27,3 +27,4 @@ You MUST design systems as a suite of small, autonomous services, where each ser
 - Do NOT share a single database across multiple microservices.
 - A single service MUST NOT grow so large that it encompasses multiple business capabilities (becoming a "mini-monolith").
 - Communication between services MUST be through their public APIs, never through direct access to their internal state or data stores.
+layer: null

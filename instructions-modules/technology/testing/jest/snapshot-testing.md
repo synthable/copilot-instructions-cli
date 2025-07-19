@@ -27,3 +27,4 @@ You MUST use snapshot tests to verify the output of large, complex data structur
 - You MUST NOT blindly update snapshots without reviewing the changes. This defeats the purpose of snapshot testing.
 - You MUST NOT use snapshot tests for code with complex logic or many possible states. Snapshots are best suited for code with deterministic output.
 - You MUST NOT commit large, auto-generated snapshot files without a clear understanding of their contents.
+layer: null

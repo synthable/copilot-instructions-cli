@@ -27,3 +27,4 @@ You MUST use `try/except/finally` blocks to handle potential errors gracefully. 
 - Do NOT catch broad exceptions like `Exception` or `BaseException` unless you are at the top level of your application and intend to log the error before exiting.
 - Error messages in custom exceptions MUST be clear, informative, and describe the error condition precisely.
 - Avoid using exceptions for normal control flow.
+layer: null

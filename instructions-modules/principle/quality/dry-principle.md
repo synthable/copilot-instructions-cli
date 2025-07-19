@@ -25,3 +25,4 @@ You MUST NOT repeat logic or data. Every piece of knowledge or logic must have a
 
 - Do NOT make abstractions prematurely. A "rule of three" is a good heuristic: wait until you see a piece of logic repeated three times before abstracting it.
 - The abstraction MUST NOT be more complex than the duplication it replaces.
+layer: null

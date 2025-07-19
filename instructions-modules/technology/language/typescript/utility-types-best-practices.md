@@ -28,3 +28,4 @@ You MUST use TypeScript's built-in utility types to create new types from existi
 - Do NOT manually create a new type by copying properties from another type if `Pick` or `Omit` could be used instead.
 - Do NOT define an object with optional properties (`?:`) if the use case is better represented by `Partial<T>`.
 - You MUST choose the utility type that most clearly expresses your intent. For example, `Pick` is often clearer than multiple `Omit` calls.
+layer: null

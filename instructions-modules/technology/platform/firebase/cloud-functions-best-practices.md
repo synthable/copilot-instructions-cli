@@ -32,3 +32,4 @@ You MUST write Cloud Functions that are efficient, idempotent, and secure, manag
 - Do NOT hard-code secrets or API keys in your function code. Use environment configuration (`firebase functions:config:set`) to store them securely.
 - An HTTPS function MUST always terminate with an HTTP response (e.g., `res.send()`, `res.status().end()`).
 - A background function MUST always return a promise or a value to signal that it has finished its work.
+layer: null

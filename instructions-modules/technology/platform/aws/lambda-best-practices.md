@@ -31,3 +31,4 @@ You MUST develop and configure AWS Lambda functions to be small, single-purpose,
 - Do NOT use a single, overly permissive IAM role for all your Lambda functions.
 - The function's timeout MUST be configured to be slightly longer than its expected maximum execution time, but not excessively long, to avoid unnecessary costs.
 - Do NOT use Lambda for long-running, computationally intensive tasks; use AWS Fargate or EC2 for those workloads.
+layer: null

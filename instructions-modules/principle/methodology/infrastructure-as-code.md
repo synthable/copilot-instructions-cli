@@ -28,3 +28,4 @@ All infrastructure provisioning and management MUST be defined as code in declar
 - Do NOT make manual changes to infrastructure in production environments ("click-ops"). Any manual change creates configuration drift and MUST be reverted or codified.
 - Do NOT store sensitive information (e.g., passwords, API keys) directly in IaC files. Use a secure secrets management system.
 - The state of the infrastructure MUST be defined by the code, making the environment reproducible and disposable.
+layer: null

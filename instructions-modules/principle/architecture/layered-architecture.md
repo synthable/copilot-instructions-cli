@@ -31,3 +31,4 @@ You MUST structure applications into logical, horizontal layers, where each laye
 - A layer MUST NOT bypass the layer directly below it to communicate with deeper layers.
 - Business logic MUST NOT be placed in the Presentation Layer.
 - Database queries MUST NOT be placed in the Application or Presentation Layers.
+layer: null

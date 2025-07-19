@@ -26,3 +26,4 @@ You MUST separate the models and methods used to modify state (Commands) from th
 - A method that changes state (a Command) MUST NOT return a data body. It should typically return void or a status indicator (e.g., success, failure, ID of the created resource).
 - A method that reads state (a Query) MUST NOT have any observable side effects on the system's state.
 - Do NOT use the same data model for both writing and reading if their requirements diverge significantly.
+layer: null
