@@ -9,7 +9,6 @@ tags:
   - directive
   - process
   - constraints
-layer: null
 ---
 
 # Module Structure Standard

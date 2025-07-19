@@ -6,7 +6,6 @@ tags:
   - validation
   - ordering
   - tiers
-layer: null
 ---
 
 # Four-Tier Philosophy
