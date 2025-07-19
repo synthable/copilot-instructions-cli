@@ -1,4 +1,5 @@
 ---
+tier: technology
 name: 'React State Management Decisions'
 description: 'A decision-tree module for choosing between useState, useReducer, useContext, and external libraries.'
 tags:
@@ -6,6 +7,7 @@ tags:
   - state-management
   - hooks
   - decision-tree
+layer: null
 ---
 
 # React State Management Decisions

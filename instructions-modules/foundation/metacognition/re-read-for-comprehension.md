@@ -1,4 +1,5 @@
 ---
+tier: foundation
 name: 'Re-read for Comprehension'
 description: 'A meta-cognitive directive to re-read the entire prompt context from the beginning before generating a response to ensure no details or constraints are missed.'
 layer: 4

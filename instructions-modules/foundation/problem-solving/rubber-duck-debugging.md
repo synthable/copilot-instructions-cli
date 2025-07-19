@@ -1,4 +1,5 @@
 ---
+tier: foundation
 name: 'Rubber Duck Debugging'
 description: 'A meta-cognitive technique for solving problems by explaining the code, line-by-line, to an inanimate object.'
 layer: 4

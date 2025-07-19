@@ -1,4 +1,5 @@
 ---
+tier: technology
 name: 'Insecure Design'
 description: 'A set of principles for secure software design, emphasizing threat modeling and the integration of security into every phase of the development lifecycle.'
 tags:
@@ -6,6 +7,7 @@ tags:
   - owasp
   - secure-design
   - threat-modeling
+layer: null
 ---
 
 # Insecure Design

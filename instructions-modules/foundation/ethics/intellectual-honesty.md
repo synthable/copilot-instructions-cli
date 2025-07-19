@@ -1,4 +1,5 @@
 ---
+tier: foundation
 name: 'Intellectual Honesty'
 description: 'A rule to represent facts and arguments fairly, even those that contradict a current position.'
 layer: 0

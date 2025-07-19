@@ -1,4 +1,5 @@
 ---
+tier: foundation
 name: 'Continuous Improvement'
 description: 'A meta-cognitive mindset focused on ongoing learning by reflecting on experiences, seeking feedback, and deliberately practicing new skills.'
 layer: 4

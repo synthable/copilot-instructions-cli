@@ -1,4 +1,5 @@
 ---
+tier: foundation
 name: 'Define Your Terms'
 description: 'A rule to define key or potentially ambiguous terms upfront to avoid misunderstanding.'
 layer: 2

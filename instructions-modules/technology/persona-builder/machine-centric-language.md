@@ -1,4 +1,5 @@
 ---
+tier: technology
 name: 'Machine-Centric Language'
 description: 'A style guide for using imperative, unambiguous, and direct language suitable for programming an AI.'
 tags:
@@ -8,6 +9,7 @@ tags:
   - unambiguous
   - prompt engineering
   - clarity
+layer: null
 ---
 
 # Machine-Centric Language

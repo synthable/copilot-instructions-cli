@@ -1,4 +1,5 @@
 ---
+tier: technology
 name: 'Identification and Authentication Failures'
 description: 'A set of rules to prevent authentication failures by implementing strong identity and session management controls.'
 tags:
@@ -6,6 +7,7 @@ tags:
   - owasp
   - authentication
   - session-management
+layer: null
 ---
 
 # Identification and Authentication Failures

@@ -1,4 +1,5 @@
 ---
+tier: foundation
 name: 'Conditional Logic (If-Then)'
 description: 'Rules for correctly processing and evaluating conditional statements.'
 layer: 0

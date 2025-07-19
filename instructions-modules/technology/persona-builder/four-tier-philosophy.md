@@ -1,4 +1,5 @@
 ---
+tier: technology
 name: 'Four-Tier Philosophy'
 description: 'The mandatory hierarchical order for persona module tiers: Foundation -> Principle -> Technology -> Execution.'
 tags:
@@ -6,6 +7,7 @@ tags:
   - validation
   - ordering
   - tiers
+layer: null
 ---
 
 # Four-Tier Philosophy

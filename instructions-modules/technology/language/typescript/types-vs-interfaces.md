@@ -1,4 +1,5 @@
 ---
+tier: technology
 name: 'Types vs. Interfaces'
 description: 'A decision-making guide on when to use type aliases versus interface declarations for defining object shapes.'
 tags:
@@ -6,6 +7,7 @@ tags:
   - types
   - interfaces
   - best-practices
+layer: null
 ---
 
 # Types vs. Interfaces

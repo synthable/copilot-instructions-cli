@@ -1,4 +1,5 @@
 ---
+tier: technology
 name: 'Cryptographic Failures'
 description: 'A set of strict rules to prevent cryptographic failures by protecting data in transit and at rest using up-to-date, strong cryptographic algorithms and protocols.'
 tags:
@@ -6,6 +7,7 @@ tags:
   - owasp
   - cryptography
   - data-protection
+layer: null
 ---
 
 # Cryptographic Failures

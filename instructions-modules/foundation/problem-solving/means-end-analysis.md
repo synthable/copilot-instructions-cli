@@ -1,4 +1,5 @@
 ---
+tier: foundation
 name: 'Means-End Analysis'
 description: 'A process for systematically reducing the difference between the current state and the goal state.'
 layer: 1

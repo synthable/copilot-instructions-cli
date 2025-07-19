@@ -1,4 +1,5 @@
 ---
+tier: foundation
 name: 'Structured Arguments'
 description: 'Instructions to present information logically, typically by stating a claim, providing evidence, and then concluding.'
 layer: 2

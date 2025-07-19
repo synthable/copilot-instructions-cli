@@ -1,4 +1,5 @@
 ---
+tier: technology
 name: 'Firestore Security Rules'
 description: 'A critical guide for writing and testing Firestore security rules to protect data from unauthorized access.'
 tags:
@@ -6,6 +7,7 @@ tags:
   - firestore
   - security
   - database
+layer: null
 ---
 
 # Firestore Security Rules

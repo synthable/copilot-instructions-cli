@@ -1,4 +1,5 @@
 ---
+tier: principle
 name: 'Agile (Scrum)'
 description: 'An iterative and incremental framework for project management and software development, focused on delivering value in small increments (Sprints) and adapting to change.'
 tags:
@@ -6,6 +7,7 @@ tags:
   - agile
   - scrum
   - project-management
+layer: null
 ---
 
 # Agile (Scrum)

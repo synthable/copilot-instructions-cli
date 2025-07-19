@@ -1,4 +1,5 @@
 ---
+tier: technology
 name: 'Instruction Module Validation Rules'
 description: 'A set of strict validation rules to ensure that every instruction module is high-quality, well-structured, and machine-interpretable.'
 tags:
@@ -6,6 +7,7 @@ tags:
   - validation
   - quality
   - meta
+layer: null
 ---
 
 # Instruction Module Validation Rules

@@ -1,4 +1,5 @@
 ---
+tier: technology
 name: 'Module Structure Standard'
 description: 'The mandatory three-section format for all instruction modules.'
 tags:
@@ -9,6 +10,7 @@ tags:
   - directive
   - process
   - constraints
+layer: null
 ---
 
 # Module Structure Standard

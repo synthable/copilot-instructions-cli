@@ -1,4 +1,5 @@
 ---
+tier: technology
 name: 'Foundation Layer Rules'
 description: "The rule that Foundation modules must be ordered by their 'layer' metadata, from lowest to highest."
 tags:
@@ -6,6 +7,7 @@ tags:
   - layer
   - validation
   - ordering
+layer: null
 ---
 
 # Foundation Layer Rules

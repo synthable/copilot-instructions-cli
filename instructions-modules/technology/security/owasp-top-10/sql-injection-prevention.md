@@ -1,4 +1,5 @@
 ---
+tier: technology
 name: 'SQL Injection Prevention'
 description: 'A set of strict rules to prevent SQL injection vulnerabilities by never using dynamic query concatenation and always using parameterized queries.'
 tags:
@@ -6,6 +7,7 @@ tags:
   - owasp
   - sql-injection
   - database
+layer: null
 ---
 
 # SQL Injection Prevention

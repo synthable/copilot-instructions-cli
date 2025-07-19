@@ -1,4 +1,5 @@
 ---
+tier: principle
 name: 'Strategy Pattern'
 description: 'A behavioral design pattern that enables selecting an algorithm at runtime. It defines a family of algorithms, encapsulates each one, and makes them interchangeable.'
 tags:
@@ -6,6 +7,7 @@ tags:
   - behavioral
   - strategy
   - policy
+layer: null
 ---
 
 # Strategy Pattern

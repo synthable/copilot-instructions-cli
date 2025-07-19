@@ -1,4 +1,5 @@
 ---
+tier: execution
 name: 'Optimize Web Application Performance'
 description: 'A playbook that applies performance principles to a concrete goal of optimizing a web application.'
 tags:
@@ -6,6 +7,7 @@ tags:
   - web
   - optimization
   - playbook
+layer: null
 ---
 
 # Optimize Web Application Performance

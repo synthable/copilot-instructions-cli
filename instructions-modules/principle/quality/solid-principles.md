@@ -1,4 +1,5 @@
 ---
+tier: principle
 name: 'SOLID Principles'
 description: 'A set of five design principles for writing maintainable and scalable object-oriented software.'
 tags:
@@ -7,6 +8,7 @@ tags:
   - design principle
   - architecture
   - srp
+layer: null
 ---
 
 # SOLID Principles

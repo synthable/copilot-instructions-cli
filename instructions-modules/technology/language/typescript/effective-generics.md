@@ -1,4 +1,5 @@
 ---
+tier: technology
 name: 'Effective Generics'
 description: 'Best practices for using generics (<T>) to create reusable, type-safe functions, classes, and components.'
 tags:
@@ -6,6 +7,7 @@ tags:
   - generics
   - types
   - reusability
+layer: null
 ---
 
 # Effective Generics

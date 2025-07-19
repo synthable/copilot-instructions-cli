@@ -1,4 +1,5 @@
 ---
+tier: foundation
 name: Graph of Thoughts
 description: An advanced reasoning framework that models thoughts as nodes in a graph, allowing for complex, non-linear reasoning paths that can merge and diverge to solve highly interconnected problems.
 layer: 1

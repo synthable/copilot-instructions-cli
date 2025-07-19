@@ -1,4 +1,5 @@
 ---
+tier: foundation
 name: 'Using Heuristics'
 description: 'A directive to use rules of thumb and educated guesses to find approximate solutions when a problem is computationally expensive.'
 layer: 1

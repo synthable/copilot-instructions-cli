@@ -1,4 +1,5 @@
 ---
+tier: principle
 name: 'Knowledge Sharing'
 description: "Principles for actively mentoring, documenting, and sharing technical knowledge to improve a team's collective capability."
 tags:
@@ -6,6 +7,7 @@ tags:
   - mentorship
   - documentation
   - knowledge management
+layer: null
 ---
 
 # Knowledge Sharing

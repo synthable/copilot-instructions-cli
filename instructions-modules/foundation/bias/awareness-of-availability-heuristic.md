@@ -1,4 +1,5 @@
 ---
+tier: foundation
 name: 'Awareness of Availability Heuristic'
 description: 'Instructions to not overestimate the importance of information that comes to mind most easily.'
 layer: 1

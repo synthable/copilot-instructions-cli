@@ -1,10 +1,12 @@
 ---
+tier: technology
 name: 'Injection'
 description: 'A set of strict rules to prevent injection vulnerabilities by treating all user-supplied data as untrusted and using structured, safe APIs for all interpreter interactions.'
 tags:
   - security
   - owasp
   - injection
+layer: null
 ---
 
 # Injection

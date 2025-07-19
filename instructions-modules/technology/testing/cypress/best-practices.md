@@ -1,4 +1,5 @@
 ---
+tier: technology
 name: 'Cypress Best Practices'
 description: 'A guide to best practices for writing reliable, maintainable, and effective end-to-end tests with Cypress.'
 tags:
@@ -6,6 +7,7 @@ tags:
   - cypress
   - e2e
   - best-practices
+layer: null
 ---
 
 # Cypress Best Practices

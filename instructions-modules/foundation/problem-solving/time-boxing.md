@@ -1,4 +1,5 @@
 ---
+tier: foundation
 name: 'Time-boxing'
 description: 'A technique for managing effort and focus by allocating a fixed time period to a specific task or approach.'
 layer: 1

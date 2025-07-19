@@ -1,4 +1,5 @@
 ---
+tier: foundation
 name: 'Distinguishing Fact from Opinion'
 description: 'A core rule to clearly separate objective, verifiable facts from subjective opinions or beliefs.'
 layer: 4

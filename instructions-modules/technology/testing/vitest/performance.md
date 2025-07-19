@@ -1,4 +1,5 @@
 ---
+tier: technology
 name: 'Vitest Performance'
 description: 'Tips for writing performant tests in Vitest to ensure a fast and efficient testing cycle.'
 tags:
@@ -7,6 +8,7 @@ tags:
   - javascript
   - typescript
   - performance
+layer: null
 ---
 
 # Vitest Performance

@@ -1,4 +1,5 @@
 ---
+tier: principle
 name: 'Threat Modeling Process'
 description: 'A systematic process for identifying, assessing, and mitigating potential security threats during the design phase of a system.'
 tags:
@@ -6,6 +7,7 @@ tags:
   - threat modeling
   - risk assessment
   - process
+layer: null
 ---
 
 # Threat Modeling Process

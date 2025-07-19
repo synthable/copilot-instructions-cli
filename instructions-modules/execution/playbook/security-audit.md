@@ -1,4 +1,5 @@
 ---
+tier: execution
 name: 'Perform Security Audit'
 description: 'A playbook for conducting a comprehensive security audit of a codebase to identify and mitigate vulnerabilities.'
 tags:
@@ -6,6 +7,7 @@ tags:
   - audit
   - playbook
   - vulnerability-assessment
+layer: null
 ---
 
 # Perform Security Audit

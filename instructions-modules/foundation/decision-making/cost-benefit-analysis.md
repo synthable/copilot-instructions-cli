@@ -1,4 +1,5 @@
 ---
+tier: foundation
 name: 'Cost-Benefit Analysis'
 description: 'A formal framework for choosing an action by comparing its costs against its benefits.'
 layer: 3

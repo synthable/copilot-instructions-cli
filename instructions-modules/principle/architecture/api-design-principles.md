@@ -1,4 +1,5 @@
 ---
+tier: principle
 name: 'API Design Principles'
 description: 'Principles for designing clean, consistent, and easy-to-use APIs (e.g., RESTful conventions, idempotency).'
 tags:
@@ -6,6 +7,7 @@ tags:
   - api-design
   - rest
   - usability
+layer: null
 ---
 
 # API Design Principles

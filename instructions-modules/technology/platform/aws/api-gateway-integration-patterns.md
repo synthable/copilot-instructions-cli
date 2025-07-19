@@ -1,4 +1,5 @@
 ---
+tier: technology
 name: 'API Gateway Integration Patterns'
 description: 'A guide to different integration patterns for API Gateway, such as Lambda Proxy integration, HTTP integration, and AWS service integration.'
 tags:
@@ -6,6 +7,7 @@ tags:
   - api-gateway
   - serverless
   - architecture
+layer: null
 ---
 
 # API Gateway Integration Patterns

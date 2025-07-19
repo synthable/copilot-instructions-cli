@@ -1,6 +1,8 @@
 ---
+tier: principle
 name: 'Documentation Must Match Code'
 description: 'A core principle that documentation must accurately reflect the current implementation, not future aspirations.'
+layer: null
 ---
 
 ### Guiding Principle: Documentation Must Match Code

@@ -1,4 +1,5 @@
 ---
+tier: technology
 name: 'AWS S3 Storage Classes'
 description: 'A decision-making guide for selecting the appropriate Amazon S3 storage class based on access frequency and cost considerations.'
 tags:
@@ -7,6 +8,7 @@ tags:
   - storage
   - performance
   - cost-optimization
+layer: null
 ---
 
 # AWS S3 Storage Classes

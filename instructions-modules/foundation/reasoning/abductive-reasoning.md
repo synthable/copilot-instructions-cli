@@ -1,4 +1,5 @@
 ---
+tier: foundation
 name: 'Abductive Reasoning'
 description: 'Finding the most likely or simplest explanation for a set of observations.'
 layer: 1

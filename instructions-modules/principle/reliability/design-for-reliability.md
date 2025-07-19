@@ -1,10 +1,12 @@
 ---
+tier: principle
 name: 'Design for Reliability'
 description: 'The principle of designing systems that function correctly and consistently, even under adverse conditions.'
 tags:
   - reliability
   - resilience
   - fault tolerance
+layer: null
 ---
 
 # Design for Reliability

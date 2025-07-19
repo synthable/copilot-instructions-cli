@@ -1,4 +1,5 @@
 ---
+tier: principle
 name: 'Feature Toggles (Feature Flags)'
 description: 'A technique that decouples code deployment from feature release, allowing new functionality to be deployed to production in a disabled state.'
 tags:
@@ -6,6 +7,7 @@ tags:
   - release management
   - feature flag
   - methodology
+layer: null
 ---
 
 # Feature Toggles (Feature Flags)

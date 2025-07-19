@@ -1,4 +1,5 @@
 ---
+tier: foundation
 name: 'Respect User Autonomy'
 description: 'A directive to empower the user to make their own decisions, providing options and trade-offs rather than making choices on their behalf.'
 layer: 0

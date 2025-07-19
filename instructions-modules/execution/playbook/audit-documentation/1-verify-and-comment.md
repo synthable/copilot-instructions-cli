@@ -1,6 +1,8 @@
 ---
+tier: execution
 name: 'Playbook: Verify and Comment Documentation'
 description: 'A step-by-step process for auditing documentation against a codebase.'
+layer: null
 ---
 
 ### Execution Playbook: Audit and Correct Documentation

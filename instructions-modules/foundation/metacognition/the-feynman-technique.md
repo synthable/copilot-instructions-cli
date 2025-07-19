@@ -1,4 +1,5 @@
 ---
+tier: foundation
 name: 'The Feynman Technique'
 description: "A process for testing one's own understanding of a concept by attempting to explain it in simple terms."
 layer: 4

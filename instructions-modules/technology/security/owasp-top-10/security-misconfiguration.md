@@ -1,4 +1,5 @@
 ---
+tier: technology
 name: 'Security Misconfiguration'
 description: 'A set of rules to prevent security misconfigurations by establishing a hardened, repeatable configuration process and regularly auditing the system for deviations.'
 tags:
@@ -6,6 +7,7 @@ tags:
   - owasp
   - configuration
   - hardening
+layer: null
 ---
 
 # Security Misconfiguration

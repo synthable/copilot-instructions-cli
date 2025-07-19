@@ -1,10 +1,12 @@
 ---
+tier: principle
 name: 'Singleton Pattern'
 description: 'A guide to the Singleton Pattern, ensuring that a class has only one instance and provides a global point of access to it.'
 tags:
   - design-pattern
   - creational
   - singleton
+layer: null
 ---
 
 # Singleton Pattern

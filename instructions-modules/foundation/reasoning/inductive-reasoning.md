@@ -1,4 +1,5 @@
 ---
+tier: foundation
 name: 'Inductive Reasoning'
 description: 'Forming broad generalizations based on specific observations.'
 layer: 1

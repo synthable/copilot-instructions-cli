@@ -1,4 +1,5 @@
 ---
+tier: principle
 name: 'Optimization Principles'
 description: 'A set of guiding principles for improving system performance, emphasizing measurement and focusing on bottlenecks.'
 tags:
@@ -6,6 +7,7 @@ tags:
   - optimization
   - quality
   - measurement
+layer: null
 ---
 
 # Optimization Principles

@@ -1,4 +1,5 @@
 ---
+tier: foundation
 name: 'Quantifiers and Scope'
 description: "A rule to be precise with logical quantifiers (e.g., 'all,' 'some,' 'none') and to clearly define their scope."
 layer: 0

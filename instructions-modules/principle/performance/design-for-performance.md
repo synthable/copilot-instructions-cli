@@ -1,10 +1,12 @@
 ---
+tier: principle
 name: 'Design for Performance'
 description: 'The principle of intentionally designing for efficiency in response time, throughput, and resource utilization.'
 tags:
   - performance
   - architecture
   - optimization
+layer: null
 ---
 
 # Design for Performance

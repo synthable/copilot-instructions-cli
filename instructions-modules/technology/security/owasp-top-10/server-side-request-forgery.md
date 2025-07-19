@@ -1,10 +1,12 @@
 ---
+tier: technology
 name: 'Server-Side Request Forgery (SSRF)'
 description: "A set of rules to prevent Server-Side Request Forgery (SSRF) vulnerabilities by validating all user-supplied URLs and restricting the server's ability to make arbitrary network requests."
 tags:
   - security
   - owasp
   - ssrf
+layer: null
 ---
 
 # Server-Side Request Forgery (SSRF)

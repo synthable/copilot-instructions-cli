@@ -1,4 +1,5 @@
 ---
+tier: foundation
 name: 'Weighing Trade-Offs'
 description: 'A process for systematically analyzing the pros and cons of different options.'
 layer: 2

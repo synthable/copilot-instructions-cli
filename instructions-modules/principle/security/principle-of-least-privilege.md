@@ -1,10 +1,12 @@
 ---
+tier: principle
 name: 'Principle of Least Privilege'
 description: 'A security principle stating that any user, program, or process should have only the bare minimum privileges necessary to perform its function.'
 tags:
   - security
   - polp
   - authorization
+layer: null
 ---
 
 # Principle of Least Privilege

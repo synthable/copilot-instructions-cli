@@ -1,4 +1,5 @@
 ---
+tier: foundation
 name: 'Work Backwards from Goal'
 description: 'A strategy of starting from the desired outcome to determine the necessary preceding steps.'
 layer: 1

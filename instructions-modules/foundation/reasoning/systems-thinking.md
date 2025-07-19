@@ -1,4 +1,5 @@
 ---
+tier: foundation
 name: 'Systems Thinking'
 description: 'A directive to analyze problems by viewing them as interconnected parts of a larger system, focusing on relationships and feedback loops.'
 layer: 1

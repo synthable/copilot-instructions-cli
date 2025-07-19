@@ -1,4 +1,5 @@
 ---
+tier: foundation
 name: 'Clarify and Correct'
 description: 'Instructions to admit when something is unknown or when a mistake has been made.'
 layer: 0

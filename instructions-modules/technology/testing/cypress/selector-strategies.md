@@ -1,4 +1,5 @@
 ---
+tier: technology
 name: 'Cypress Selector Strategies'
 description: 'A guide to the best strategies for selecting elements in Cypress tests to create stable and resilient tests.'
 tags:
@@ -6,6 +7,7 @@ tags:
   - cypress
   - e2e
   - selectors
+layer: null
 ---
 
 # Cypress Selector Strategies

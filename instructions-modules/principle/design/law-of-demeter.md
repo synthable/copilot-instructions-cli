@@ -1,4 +1,5 @@
 ---
+tier: principle
 name: 'Law of Demeter (Principle of Least Knowledge)'
 description: 'A design guideline stating that a module should not have knowledge of the internal details of the objects it manipulates. This reduces coupling between components.'
 tags:
@@ -6,6 +7,7 @@ tags:
   - oop
   - coupling
   - lod
+layer: null
 ---
 
 # Law of Demeter (Principle of Least Knowledge)

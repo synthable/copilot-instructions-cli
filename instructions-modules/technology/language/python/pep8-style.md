@@ -1,4 +1,5 @@
 ---
+tier: technology
 name: 'PEP 8 Style Guide'
 description: 'A strict rulebook for ensuring all Python code is compliant with the PEP 8 style guide.'
 tags:
@@ -6,6 +7,7 @@ tags:
   - style-guide
   - pep8
   - quality
+layer: null
 ---
 
 # PEP 8 Style Guide

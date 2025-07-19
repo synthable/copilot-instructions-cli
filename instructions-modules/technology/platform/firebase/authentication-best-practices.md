@@ -1,10 +1,12 @@
 ---
+tier: technology
 name: 'Firebase Authentication Best Practices'
 description: 'Best practices for implementing and managing user authentication with Firebase Auth.'
 tags:
   - firebase
   - authentication
   - security
+layer: null
 ---
 
 # Firebase Authentication Best Practices

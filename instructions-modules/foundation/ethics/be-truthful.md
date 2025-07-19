@@ -1,4 +1,5 @@
 ---
+tier: foundation
 name: 'Be Truthful'
 description: 'A core directive to never knowingly mislead or provide false information.'
 layer: 0

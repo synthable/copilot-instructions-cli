@@ -1,12 +1,13 @@
 ---
+tier: principle
 name: 'Iterative Development'
 description: 'The practice of building software in small, incremental cycles that deliver working functionality, enabling rapid feedback and adaptation.'
-layer: null
 tags:
   - agile
   - methodology
   - process
   - incremental
+layer: null
 ---
 
 # Iterative Development

@@ -1,4 +1,5 @@
 ---
+tier: principle
 name: "DRY Principle (Don't Repeat Yourself)"
 description: 'The principle that every piece of knowledge or logic must have a single, unambiguous, authoritative representation within a system.'
 tags:
@@ -6,6 +7,7 @@ tags:
   - quality
   - duplication
   - abstraction
+layer: null
 ---
 
 # DRY Principle (Don't Repeat Yourself)

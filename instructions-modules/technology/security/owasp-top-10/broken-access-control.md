@@ -1,10 +1,12 @@
 ---
+tier: technology
 name: 'Broken Access Control'
 description: 'A set of strict rules to prevent broken access control vulnerabilities by enforcing a default-deny policy and verifying authorization for every request.'
 tags:
   - security
   - owasp
   - access-control
+layer: null
 ---
 
 # Broken Access Control

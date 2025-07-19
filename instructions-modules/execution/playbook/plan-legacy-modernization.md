@@ -1,4 +1,5 @@
 ---
+tier: execution
 name: 'Plan Legacy Modernization'
 description: 'A playbook for creating a safe, incremental plan to modernize a legacy system.'
 tags:
@@ -7,6 +8,7 @@ tags:
   - refactoring
   - modernization
   - playbook
+layer: null
 ---
 
 # Plan Legacy Modernization

@@ -1,4 +1,5 @@
 ---
+tier: technology
 name: 'React Component Best Practices'
 description: 'Rules for component composition, state management, and props to create maintainable and performant React applications.'
 tags:
@@ -6,6 +7,7 @@ tags:
   - components
   - best-practices
   - state-management
+layer: null
 ---
 
 # React Component Best Practices

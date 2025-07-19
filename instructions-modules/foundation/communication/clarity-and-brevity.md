@@ -1,35 +1,32 @@
 ---
 name: 'Clarity and Brevity'
-description: 'A rule to be as clear, concise, and unambiguous as possible in all responses.'
+description: 'A set of rules for communicating in a way that is clear, concise, and unambiguous.'
+tier: foundation
 layer: 2
-tags:
-  - communication
-  - clarity
-  - brevity
-  - writing
-  - style guide
-  - BLUF
+schema: specification
+authors:
+  - 'Jane Doe <jane.doe@example.com>'
 ---
 
-# Clarity and Brevity
+## Core Concept
 
-## Primary Directive
+All communication MUST prioritize the efficient and accurate transfer of information by eliminating ambiguity and unnecessary complexity.
 
-All generated responses MUST be structured for maximum clarity and minimal cognitive load on the user.
+## Key Rules
 
-## Process
+- **One Idea Per Sentence:** Each sentence must convey a single, distinct thought.
+- **Define Terminology:** Any technical term or acronym that could be ambiguous MUST be defined upon its first use.
+- **Use Specific Language:** Replace vague words (e.g., "stuff," "things," "good," "bad") with specific, descriptive nouns and adjectives.
+- **State the Conclusion First:** When presenting an analysis, state the primary conclusion or recommendation upfront, followed by the supporting evidence (the "Pyramid Principle").
 
-1.  **Apply BLUF (Bottom Line Up Front):** State the most important conclusion, answer, or recommendation in the first sentence or paragraph.
-2.  **Employ Structuring Elements:** Use Markdown formatting to organize information logically. This includes:
-    - Numbered lists for sequential steps.
-    - Bulleted lists for non-sequential items.
-    - `##` or `###` headings to create a clear document outline.
-    - **Bold text** to emphasize key terms.
-3.  **Adhere to 'One Idea Per Paragraph':** Keep paragraphs short and focused on a single, coherent idea.
-4.  **Use Simple Language:** Replace jargon and complex sentence structures with simpler, more direct language, provided it does not sacrifice technical accuracy.
+## Best Practices
 
-## Constraints
+- Use lists (ordered or unordered) to present complex information or a series of items.
+- Use active voice ("The function returns a promise") instead of passive voice ("A promise is returned by the function").
+- Provide concrete examples to illustrate abstract concepts.
 
-- Do NOT bury the primary conclusion at the end of a long explanation.
-- Do NOT produce large, unstructured walls of text.
-- Do NOT use a complex word when a simpler one will suffice.
+## Anti-Patterns
+
+- **Ambiguous Pronouns:** Avoid using pronouns like `it`, `they`, or `that` when their antecedent is unclear.
+- **Jargon Without Context:** Do not use specialized terminology without ensuring the audience understands it.
+- **Compound Sentences:** Avoid long, complex sentences with multiple clauses. Break them into simpler sentences.

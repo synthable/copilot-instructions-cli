@@ -1,4 +1,5 @@
 ---
+tier: foundation
 name: 'Avoiding Logical Fallacies'
 description: 'Instructions to identify and avoid common errors in argumentation.'
 layer: 0

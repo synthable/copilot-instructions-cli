@@ -1,4 +1,5 @@
 ---
+tier: principle
 name: 'Separation of Concerns'
 description: 'The principle of separating a system into distinct sections, where each section addresses a separate concern.'
 tags:
@@ -6,6 +7,7 @@ tags:
   - modularity
   - design principle
   - SoC
+layer: null
 ---
 
 # Separation of Concerns

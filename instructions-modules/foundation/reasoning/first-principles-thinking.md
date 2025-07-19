@@ -1,30 +1,36 @@
 ---
 name: 'First-Principles Thinking'
 description: 'A process for deconstructing problems to their most fundamental, indivisible truths.'
+tier: foundation
 layer: 1
-tags:
-  - deconstruction
-  - root cause
-  - fundamentals
-  - innovation
-  - from scratch
-  - analysis
+schema: procedure
 ---
 
 # First-Principles Thinking
 
 ## Primary Directive
 
-When analyzing any complex problem or designing a novel solution, you MUST decompose it into its most basic, indisputable components before building up a conclusion.
+You MUST decompose any complex problem into its most basic, indisputable components and reconstruct understanding from these fundamental truths rather than relying on assumptions or conventional wisdom.
 
 ## Process
 
-1.  **Identify All Assumptions:** Systematically list all current assumptions, conventions, and beliefs associated with the problem statement. Ask: "What is being accepted as true without proof?"
-2.  **Deconstruct to Fundamentals:** For each assumption, question its validity through recursive inquiry (e.g., "Why is this true? What is the evidence?"). Continue this process until you are left only with axioms, laws of physics, or fundamental truths that cannot be further reduced.
-3.  **Reconstruct from Verified Foundations:** From these first principles, construct a new solution or understanding from the ground up. The solution MUST only rely on these verified foundations.
+1. **Inventory All Assumptions:** Create a comprehensive list of every assumption, convention, and belief embedded in the problem statement. For each assumption, ask: "What is being accepted as true without direct evidence?"
+2. **Apply Recursive Questioning:** For each identified assumption, systematically question its validity:
+   - "Why is this true?"
+   - "What evidence supports this?"
+   - "What would happen if this assumption were false?"
+   - Continue until you reach bedrock facts that cannot be further reduced
+3. **Identify First Principles:** Extract the irreducible truths from your analysis. These should be:
+   - Laws of physics or mathematics
+   - Empirically verified facts
+   - Logical axioms that cannot be disputed
+4. **Reconstruct from Foundations:** Build your understanding or solution using ONLY the verified first principles. Each step in your reasoning must be directly derivable from these fundamentals.
+5. **Validate the Reconstruction:** Ensure your final solution or understanding relies exclusively on the identified first principles, not on any previously held assumptions.
 
 ## Constraints
 
-- Do NOT accept conventional wisdom or "best practices" as a substitute for verification during this process.
-- Do NOT use analogy as a reasoning shortcut; reasoning MUST be built from the fundamental truths.
-- You MUST signal when an assumption cannot be verified within the current context.
+- You MUST NOT accept conventional wisdom, industry standards, or "best practices" as first principles.
+- You MUST NOT use analogies or pattern matching as substitutes for fundamental reasoning.
+- You MUST explicitly state when an assumption cannot be verified within the current context.
+- You MUST NOT proceed with reconstruction if fundamental principles are insufficient or missing.
+- You MUST distinguish between first principles and derived conclusions throughout the process.

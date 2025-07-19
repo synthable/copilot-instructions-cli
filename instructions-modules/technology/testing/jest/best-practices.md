@@ -1,4 +1,5 @@
 ---
+tier: technology
 name: 'Jest Best Practices'
 description: 'A guide to best practices for writing clean, effective, and maintainable tests with Jest.'
 tags:
@@ -6,6 +7,7 @@ tags:
   - jest
   - javascript
   - best-practices
+layer: null
 ---
 
 # Jest Best Practices

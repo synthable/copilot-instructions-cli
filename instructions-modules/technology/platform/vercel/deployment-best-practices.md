@@ -1,4 +1,5 @@
 ---
+tier: technology
 name: 'Vercel Deployment Best Practices'
 description: 'A set of rules and processes for deploying applications to Vercel, focusing on performance, environment variables, and caching.'
 tags:
@@ -6,6 +7,7 @@ tags:
   - deployment
   - hosting
   - platform
+layer: null
 ---
 
 # Vercel Deployment Best Practices

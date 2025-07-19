@@ -1,4 +1,5 @@
 ---
+tier: principle
 name: 'Single Source of Truth (SSoT)'
 description: 'The practice of structuring information models and data schemas so that every data element is stored exactly once. This prevents inconsistencies and improves data integrity.'
 tags:
@@ -6,6 +7,7 @@ tags:
   - data
   - architecture
   - ssot
+layer: null
 ---
 
 # Single Source of Truth (SSoT)

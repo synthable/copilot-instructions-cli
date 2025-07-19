@@ -1,4 +1,5 @@
 ---
+tier: principle
 name: 'Event-Driven Architecture'
 description: 'An architectural style where components communicate through asynchronous events, enabling loose coupling and high scalability.'
 tags:
@@ -6,6 +7,7 @@ tags:
   - events
   - asynchronous
   - pub-sub
+layer: null
 ---
 
 # Event-Driven Architecture

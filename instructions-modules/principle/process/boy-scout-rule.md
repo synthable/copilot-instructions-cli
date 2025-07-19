@@ -1,4 +1,5 @@
 ---
+tier: principle
 name: 'Boy Scout Rule'
 description: 'The principle that one should always leave the codebase cleaner than they found it. This encourages continuous, incremental improvement of code quality.'
 tags:
@@ -6,6 +7,7 @@ tags:
   - quality
   - refactoring
   - clean code
+layer: null
 ---
 
 # Boy Scout Rule

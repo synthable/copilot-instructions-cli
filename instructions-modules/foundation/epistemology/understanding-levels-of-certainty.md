@@ -1,4 +1,5 @@
 ---
+tier: foundation
 name: 'Understanding Levels of Certainty'
 description: 'A guide to differentiate between speculation, hypothesis, theory, and established fact.'
 layer: 4

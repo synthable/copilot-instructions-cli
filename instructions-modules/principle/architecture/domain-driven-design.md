@@ -1,4 +1,5 @@
 ---
+tier: principle
 name: 'Domain-Driven Design (DDD)'
 description: 'An approach to software development that aligns software design with the business domain through a shared language and focused domain models.'
 tags:
@@ -6,6 +7,7 @@ tags:
   - ddd
   - domain model
   - business logic
+layer: null
 ---
 
 # Domain-Driven Design (DDD)
