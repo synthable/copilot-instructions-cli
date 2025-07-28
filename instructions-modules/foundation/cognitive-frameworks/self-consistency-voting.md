@@ -1,8 +1,9 @@
 ---
+name: 'Self-Consistency Voting'
+description: 'A technique to improve accuracy by generating multiple diverse reasoning paths for the same problem and then selecting the most frequent or consistent answer from the conclusions.'
 tier: foundation
-name: Self-Consistency Voting
-description: A technique to improve accuracy by generating multiple diverse reasoning paths for the same problem and then selecting the most frequent or consistent answer from the conclusions.
-layer: 1
+layer: 4
+schema: procedure
 ---
 
 ## Primary Directive

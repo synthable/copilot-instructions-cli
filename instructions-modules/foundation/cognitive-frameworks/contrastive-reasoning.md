@@ -1,8 +1,9 @@
 ---
+name: 'Contrastive Reasoning'
+description: 'A directive to improve reasoning clarity by generating both a correct and an intentionally incorrect example or reasoning path, then explaining why one is correct and the other is flawed.'
 tier: foundation
-name: Contrastive Reasoning
-description: A directive to improve reasoning clarity by generating both a correct and an intentionally incorrect example or reasoning path, then explaining why one is correct and the other is flawed.
-layer: 1
+layer: 4
+schema: procedure
 ---
 
 ## Primary Directive

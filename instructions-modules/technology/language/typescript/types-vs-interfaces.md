@@ -1,36 +1,27 @@
 ---
-tier: technology
-name: 'Types vs. Interfaces'
+name: 'TypeScript: Types vs. Interfaces'
 description: 'A decision-making guide on when to use type aliases versus interface declarations for defining object shapes.'
-tags:
-  - typescript
-  - types
-  - interfaces
-  - best-practices
+tier: technology
+schema: specification
 layer: null
 ---
 
-# Types vs. Interfaces
+## Core Concept
 
-## Primary Directive
+In TypeScript, both `type` aliases and `interface` declarations can be used to define the shape of an object. The choice between them depends on the specific use case and the need for extensibility.
 
-You MUST use the appropriate tool (`type` or `interface`) for defining types in TypeScript based on the specific use case, following a consistent project-wide convention.
+## Key Rules
 
-## Process
+- You MUST use `interface` when defining the shape of an object or a class that is meant to be extended or implemented.
+- You MUST use `type` when defining a type alias for a primitive, union, intersection, or tuple.
 
-1.  **Use `interface` for Object Shapes and Classes:**
-    - When defining the shape of an object or a class, you MUST prefer `interface`.
-    - Interfaces support declaration merging, which allows you or third-party packages to extend them. This makes them ideal for defining extensible public APIs.
-    - Example: `interface User { id: string; name: string; }`
-2.  **Use `type` for Primitives, Unions, and Tuples:**
-    - When creating a type alias for a primitive (`string`, `number`), a union (`string | number`), or a tuple (`[string, number]`), you MUST use `type`.
-    - `type` is more versatile for defining complex types that are not simple object shapes.
-    - Example: `type Status = 'success' | 'error';`
-3.  **Consistency is Key:**
-    - Within a single project or codebase, you MUST establish and follow a consistent convention. If the project primarily uses `type` for object shapes, continue to do so. If it uses `interface`, follow that pattern.
+## Best Practices
 
-## Constraints
+- **Prefer `interface` for public APIs:** Use `interface` for defining object shapes that are part of a public-facing API, as they can be extended via declaration merging by consumers.
+- **Use `type` for complex types:** Use `type` for more complex type definitions that combine existing types, such as `type Result = Success | Failure;`.
+- **Maintain Consistency:** Within a project, adhere to a consistent style. If the existing codebase prefers one over the other for object shapes, follow that convention.
 
-- Do NOT use `type` to define a shape that is meant to be extended or implemented by a class; use `interface`.
-- Do NOT use an `interface` to define a union or tuple type; you MUST use `type`.
-- While `type` can be used for object shapes, `interface` is generally preferred for its better error messages and support for declaration merging.
+## Anti-Patterns
+
+- Using `type` to define an object shape that you know will need to be extended by a third party.
+- Using `interface` to attempt to define a union or tuple type, which is not possible.

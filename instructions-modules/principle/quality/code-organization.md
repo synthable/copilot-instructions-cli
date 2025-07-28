@@ -1,32 +1,31 @@
 ---
+name: 'Code Organization Pattern'
+description: 'The principle of structuring a codebase for clarity, logical cohesion, and maintainability.'
 tier: principle
-name: 'Code Organization'
-description: 'Principles for structuring a codebase to ensure clarity, logical cohesion, and maintainability.'
-tags:
-  - quality
-  - architecture
-  - organization
-  - encapsulation
-  - dependency management
+schema: pattern
 layer: null
 ---
 
-# Code Organization
+## Summary
 
-## Primary Directive
+The Code Organization pattern dictates that a software system's structure MUST prioritize clarity, maintainability, and ease of navigation by grouping related logic, separating concerns, and managing dependencies effectively.
 
-You MUST structure the codebase to be clear, logically organized, and maintainable, with a focus on loose coupling and high cohesion.
+## Core Principles
 
-## Process
+- **High Cohesion:** Code with a common purpose MUST be grouped together (e.g., in the same file, directory, or module). A module should have a single, well-defined responsibility.
+- **Loose Coupling:** Modules MUST be designed to minimize their dependencies on one another. Changes in one module should have minimal impact on others.
+- **Separation of Concerns:** Different functional areas of the application (e.g., UI, business logic, data access) MUST be separated into distinct layers or modules.
+- **Stable Abstractions:** Modules should depend on stable, abstract interfaces rather than volatile, concrete implementations.
 
-1.  **Logical Cohesion:** Group related functionality together. Files and directories MUST have a clear, focused purpose.
-2.  **Encapsulation:** Hide implementation details behind well-defined, minimal interfaces. Minimize the visibility of classes, methods, and variables (e.g., use `private` or `protected` where appropriate).
-3.  **Dependency Management:** Control dependencies between modules. High-level modules should not depend on the implementation details of low-level modules. Use dependency injection to keep components loosely coupled.
-4.  **Consistent Patterns:** Apply consistent, well-known design patterns throughout the codebase to reduce cognitive load and make the system more predictable.
-5.  **Prefer Composition:** Favor composition over inheritance as the primary mechanism for code reuse. Deep inheritance hierarchies often lead to brittle and hard-to-maintain systems.
+## Advantages / Use Cases
 
-## Constraints
+- **Improved Maintainability:** A well-organized codebase is easier to understand, modify, and debug, reducing the cost of maintenance.
+- **Enhanced Reusability:** Loosely coupled, highly cohesive modules can be more easily reused across different parts of the application or in other projects.
+- **Increased Developer Velocity:** Developers can find and work on code more quickly when the structure is logical and predictable.
+- **Facilitates Parallel Development:** Clear boundaries between modules allow multiple developers or teams to work on different parts of the system concurrently with fewer merge conflicts.
 
-- Do NOT create "God Objects" or modules that know too much about other parts of the system.
-- Do NOT expose internal state or implementation details through public interfaces.
-- Avoid circular dependencies between modules.
+## Disadvantages / Trade-offs
+
+- **Initial Overhead:** Establishing a clear organization and architecture at the beginning of a project requires upfront planning and effort.
+- **Risk of Over-Engineering:** For very small or simple projects, a complex organizational structure can be unnecessary and add needless complexity.
+- **Potential for Rigidity:** A poorly designed structure can become rigid, making it difficult to adapt to changing requirements. The chosen structure must be flexible enough to evolve.

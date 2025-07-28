@@ -1,44 +1,36 @@
 ---
 tier: technology
-name: 'Conventional Commits'
-description: 'A strict format for writing commit messages that creates an explicit and machine-readable commit history.'
-tags:
-  - git
-  - version-control
-  - conventional-commits
-  - process
+name: 'Conventional Commits Specification'
+description: 'A specification for writing commit messages that creates an explicit and machine-readable commit history.'
+schema: specification
 layer: null
 ---
 
-# Conventional Commits
+## Core Concept
 
-## Primary Directive
+The Conventional Commits specification is a lightweight convention on top of commit messages. It provides an easy set of rules for creating an explicit commit history, which makes it easier to write automated tools on top of.
 
-All Git commit messages MUST adhere to the Conventional Commits v1.0.0 specification to create an explicit and easily navigable project history.
+## Key Rules
 
-## Process
+- **Structure:** Commits MUST be structured as follows: `<type>[optional scope]: <description>
 
-1.  **Format:** The commit message MUST follow the structure:
-    `<type>[optional scope]: <description>`
-    `[optional body]`
-    `[optional footer(s)]`
-2.  **Types:** You MUST use one of the following types:
-    - `feat`: A new feature for the user.
-    - `fix`: A bug fix for the user.
-    - `build`: Changes that affect the build system or external dependencies.
-    - `chore`: Other changes that don't modify src or test files.
-    - `ci`: Changes to our CI configuration files and scripts.
-    - `docs`: Documentation only changes.
-    - `perf`: A code change that improves performance.
-    - `refactor`: A code change that neither fixes a bug nor adds a feature.
-    - `style`: Changes that do not affect the meaning of the code (white-space, formatting, etc).
-    - `test`: Adding missing tests or correcting existing tests.
-3.  **Description:** The description MUST be a short summary of the code changes, written in the present, imperative mood (e.g., "add," "fix," "change").
-4.  **Footer:** The footer MUST be used for `BREAKING CHANGE:` notifications and for referencing issues (e.g., `Fixes #123`).
+[optional body]
 
-## Constraints
+[optional footer(s)]`
 
-- The subject line (`<type>[scope]: <description>`) MUST NOT exceed 72 characters.
-- The subject line MUST NOT end with a period.
-- A `BREAKING CHANGE:` in the footer is mandatory for any commit that introduces a breaking API change.
-- There MUST be a blank line between the subject and the body.
+- **Types:** The `<type>` MUST be one of the following: `feat`, `fix`, `build`, `chore`, `ci`, `docs`, `perf`, `refactor`, `style`, `test`.
+- **Description:** The `<description>` MUST be a short summary of the code changes, written in the present, imperative mood.
+- **Breaking Changes:** A commit that introduces a breaking API change MUST include a `BREAKING CHANGE:` footer.
+
+## Best Practices
+
+- **Scope:** Use the `scope` to provide additional contextual information (e.g., `feat(api): add user endpoint`).
+- **Body:** Use the `body` to explain the 'what' and 'why' of the change, as opposed to the 'how'.
+- **Footer:** Use the `footer` to reference issue tracker IDs (e.g., `Fixes #123`).
+
+## Anti-Patterns
+
+- **Vague Descriptions:** Writing descriptions that are not specific (e.g., "fix bug", "update code").
+- **Incorrect Type:** Using the `feat` type for a change that does not introduce a new feature for the end user.
+- **Missing Breaking Change Footer:** Introducing a breaking change without the `BREAKING CHANGE:` footer.
+- **Exceeding Line Limits:** Writing a subject line that exceeds 72 characters.

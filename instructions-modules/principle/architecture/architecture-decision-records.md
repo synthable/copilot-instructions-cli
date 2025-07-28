@@ -1,31 +1,42 @@
 ---
 tier: principle
 name: 'Architecture Decision Records (ADRs)'
-description: 'The practice of documenting significant architectural decisions, their context, and their consequences in a lightweight text file.'
-tags:
-  - architecture
-  - documentation
-  - adr
-  - decision making
+description: 'A documentation pattern for capturing significant architectural decisions, their context, and consequences in a structured, lightweight format.'
 layer: null
+schema: pattern
 ---
 
 # Architecture Decision Records (ADRs)
 
-## Primary Directive
+## Summary
 
-For any significant architectural decision, you MUST generate an Architecture Decision Record (ADR) to document the context, decision, and consequences for future reference.
+Architecture Decision Records (ADRs) are a documentation pattern that captures significant architectural decisions in a structured format, including the context that led to the decision, the decision itself, and its expected consequences.
 
-## Process
+## Core Principles
 
-1.  **Define the Context:** State the problem that needs to be solved and the architectural constraints and requirements.
-2.  **List Considered Options:** Enumerate the different viable solutions that were considered. Briefly describe the pros and cons of each option.
-3.  **State the Decision:** Clearly and unambiguously state the chosen option. Provide a detailed justification for why this option was selected over the others.
-4.  **Document the Consequences:** Describe the expected positive and negative consequences of the decision. This includes the impact on performance, security, maintainability, and team workflow. Note any follow-up work required.
-5.  **Format as a Record:** The output MUST be a well-formatted Markdown file with a clear title (e.g., "ADR-001: Choice of Asynchronous Communication Pattern"), status (e.g., "Proposed," "Accepted," "Superseded"), and the sections defined above.
+- **Immutability:** Once accepted, an ADR becomes an immutable historical record that cannot be modified.
+- **Context Preservation:** Each ADR captures the specific circumstances, constraints, and requirements that influenced the decision.
+- **Consequence Documentation:** ADRs explicitly document both positive and negative outcomes expected from the decision.
+- **Lightweight Format:** ADRs use simple Markdown format with standardized sections for consistency and accessibility.
+- **Sequential Numbering:** ADRs are numbered sequentially (ADR-001, ADR-002) to establish chronological order and enable cross-referencing.
 
-## Constraints
+## Advantages / Use Cases
 
-- ADRs are for significant decisions that affect the entire system or cross-cutting concerns, not for minor implementation details.
-- The ADR MUST be immutable once its status is "Accepted." If the decision changes, a new ADR must be created to supersede the old one.
-- The language used MUST be objective and focused on technical trade-offs.
+- **Knowledge Preservation:** Prevents architectural amnesia by documenting the rationale behind decisions for future team members and stakeholders.
+- **Decision Transparency:** Makes architectural reasoning visible to all stakeholders, improving team alignment and reducing decision-making friction.
+- **Audit Trail:** Provides a chronological history of architectural evolution for compliance, governance, and retrospective analysis.
+- **Reduces Repeated Discussions:** Eliminates rehashing of previously considered and rejected alternatives, saving development time.
+- **Onboarding Acceleration:** New team members can quickly understand system design decisions and their reasoning without requiring tribal knowledge transfer.
+- **Risk Mitigation:** Documents potential negative consequences upfront, enabling proactive monitoring and mitigation strategies.
+- **Architectural Evolution Tracking:** Enables teams to understand how system architecture evolved over time and identify patterns in decision-making.
+- **Cross-Team Communication:** Facilitates communication of architectural decisions across distributed teams and organizational boundaries.
+
+## Disadvantages / Trade-offs
+
+- **Documentation Overhead:** Requires time and effort to create and maintain, which may slow down initial development velocity and decision implementation.
+- **Process Discipline:** Teams must consistently follow the ADR process, which requires organizational commitment, training, and enforcement mechanisms.
+- **Storage and Discovery:** ADRs must be stored in accessible locations and properly indexed for effective retrieval, requiring additional infrastructure.
+- **Version Control Complexity:** Managing ADRs alongside code changes can create additional merge conflicts and repository complexity.
+- **Scope Ambiguity:** Determining which decisions warrant an ADR versus simple documentation can be subjective and inconsistent across teams.
+- **Maintenance Burden:** Keeping ADRs current and relevant as system architecture evolves requires ongoing effort and review processes.
+- **Tool Chain Integration:** Requires integration with existing development workflows, documentation systems, and decision-making processes.

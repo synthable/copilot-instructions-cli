@@ -1,26 +1,28 @@
 ---
-name: 'Testing Pyramid'
-description: 'The principle of having a balanced testing strategy with a large base of fast unit tests, fewer integration tests, and a small number of slow end-to-end tests.'
-tags:
-  - quality
-  - testing
-  - test strategy
+name: 'The Testing Pyramid'
+description: 'A strategic model for creating a balanced and effective testing portfolio with a focus on speed and reliability.'
+tier: principle
+schema: pattern
+layer: null
 ---
 
-# Testing Pyramid
+## Summary
 
-## Primary Directive
+The Testing Pyramid is a strategic model that guides the allocation of testing efforts to create a fast, reliable, and maintainable automated test suite. It prescribes having a large base of fast, isolated unit tests, a smaller number of slower integration tests, and a very small number of slow, brittle end-to-end tests.
 
-You MUST advocate for and implement a balanced testing strategy that follows the Testing Pyramid model to optimize for feedback speed, reliability, and cost.
+## Core Principles
 
-## Process
+- **Unit Tests (The Base):** The largest part of the pyramid. These tests are fast, isolated, and verify a single unit of code (e.g., a function or component) in isolation from its dependencies. They provide rapid feedback to developers.
+- **Integration Tests (The Middle):** These tests verify that multiple units work together correctly. They are slower than unit tests because they involve multiple components, services, or network requests.
+- **End-to-End (E2E) Tests (The Peak):** The smallest part of the pyramid. These tests simulate a full user journey through the application. They are the slowest, most expensive, and most brittle type of test.
 
-1.  **Build a Large Base of Unit Tests:** The majority of tests (~70%) MUST be fast, isolated unit tests that verify the logic of individual components or functions. These should run in milliseconds.
-2.  **Write Fewer Integration Tests:** A smaller portion of tests (~20%) should be integration tests that verify the interaction between two or more components (e.g., your application code and a database). These are slower and more brittle.
-3.  **Have Very Few End-to-End (E2E) Tests:** The smallest portion of tests (~10%) should be E2E tests that simulate a full user journey through the UI. These are the slowest, most expensive, and most brittle tests.
+## Advantages / Use Cases
 
-## Constraints
+- **Fast Feedback:** A large base of unit tests provides developers with near-instantaneous feedback, catching bugs early in the development cycle.
+- **High Reliability:** Unit tests are highly reliable and less prone to flakiness because they have no external dependencies.
+- **Improved Maintainability:** A pyramid structure leads to a test suite that is easier to debug and maintain. When a test fails, its small scope makes it easier to identify the root cause.
 
-- Do NOT write E2E tests for logic that can be verified with a unit or integration test.
-- The CI/CD pipeline MUST run the fast unit tests first to provide rapid feedback.
-- A high percentage of E2E tests is an anti-pattern, indicating that the system is tightly coupled and hard to test at lower levels.
+## Disadvantages / Trade-offs
+
+- **The Inverted Pyramid (Ice-Cream Cone Anti-Pattern):** A test suite dominated by slow E2E tests and manual testing leads to slow feedback, high costs, and brittle tests that frequently break for reasons unrelated to the code change.
+- **Lack of Confidence:** Relying only on unit tests does not guarantee that the system works as a whole. A balanced approach is required.

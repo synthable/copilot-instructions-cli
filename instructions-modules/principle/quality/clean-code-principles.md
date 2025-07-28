@@ -1,32 +1,36 @@
 ---
-tier: principle
 name: 'Clean Code Principles'
-description: 'A set of fundamental principles for writing human-readable, understandable, and maintainable code.'
-schema: procedure
-tags:
-  - quality
-  - readability
-  - maintainability
-  - simplicity
-  - clean code
+description: 'A software development philosophy emphasizing code readability, maintainability, and simplicity through consistent naming, minimal complexity, and self-documenting practices.'
+tier: principle
 layer: null
+schema: pattern
 ---
 
-## Primary Directive
+## Summary
 
-You MUST write code that is clean, simple, and easy for a human to read and maintain. The primary audience for code is a human, not the computer.
+Clean Code Principles represent a development philosophy that prioritizes writing software for human comprehension and long-term maintainability. This approach emphasizes clear naming conventions, minimal complexity, single responsibility functions, and self-documenting code structures that reduce cognitive load and accelerate development velocity over time.
 
-## Process
+## Core Principles
 
-1.  **Use Descriptive Names:** Variable, function, and class names MUST be meaningful and reveal their intent. Avoid single-letter names or cryptic abbreviations.
-2.  **Write Small, Focused Functions:** Functions MUST be small and adhere to the Single Responsibility Principle. A function should do one thing and do it well. It should be easily understandable.
-3.  **Keep It Simple (KISS):** Prefer the simplest solution that works. Avoid unnecessary complexity and cleverness. Simple code is easier to understand, debug, and maintain.
-4.  **Don't Repeat Yourself (DRY):** Avoid duplicating code. Encapsulate repeated logic in functions or classes.
-5.  **Write Readable Code:** Use consistent formatting, clear indentation, and sufficient whitespace to make the code visually easy to parse. Add comments only to explain the "why," not the "what."
+- **Meaningful Names:** Variable, function, class, and module names MUST clearly communicate intent and behavior without requiring additional context. Names serve as documentation and MUST use descriptive terminology rather than abbreviations, single letters, or cryptic references.
+- **Small Functions:** Functions MUST adhere to the Single Responsibility Principle with a maximum of 20 lines of code excluding whitespace and comments. Each function MUST perform one logical operation that can be described in a single sentence.
+- **Minimal Complexity:** Code implementations MUST favor simplicity over cleverness. Cyclomatic complexity MUST NOT exceed 10 per function, and nested conditional statements MUST NOT exceed 3 levels of depth to maintain readability.
+- **No Duplication:** Identical or substantially similar code blocks MUST be extracted into reusable abstractions when they appear more than twice. The codebase MUST maintain less than 5% code duplication to prevent maintenance inconsistencies.
+- **Self-Documentation:** Code structure and naming MUST eliminate the need for explanatory comments about functionality. Comments MUST only explain business logic rationale, algorithmic choices, or non-obvious technical decisions.
+- **Consistent Formatting:** All code MUST follow standardized formatting rules including consistent indentation (2 or 4 spaces), bracket placement, and spacing around operators to maintain visual consistency.
 
-## Constraints
+## Advantages / Use Cases
 
-- Do NOT write large, monolithic functions that do many different things.
-- Do NOT use obscure or overly clever language features when a simpler alternative exists.
-- Do NOT leave commented-out code in the codebase.
-- Code MUST be self-explanatory. Add comments only to explain the "why," not the "what."
+- **Reduced Maintenance Costs:** Clean code significantly decreases the time required to understand, debug, and modify existing functionality, reducing long-term development costs and technical debt accumulation.
+- **Improved Developer Onboarding:** New team members can understand and contribute to clean codebases faster, reducing training time and increasing productivity within the first weeks of engagement.
+- **Enhanced Bug Detection:** Clear, simple code structures make logical errors more visible during code reviews and testing, leading to higher quality software with fewer production defects.
+- **Increased Development Velocity:** Well-structured code enables faster feature development and refactoring by reducing the cognitive overhead required to understand existing implementations.
+- **Better Collaboration:** Consistent coding standards and self-documenting practices facilitate effective code reviews and pair programming sessions across development teams.
+
+## Disadvantages / Trade-offs
+
+- **Initial Development Overhead:** Writing clean code requires more upfront effort in naming, structuring, and organizing compared to quick-and-dirty implementations, potentially slowing initial development cycles.
+- **Over-Engineering Risk:** Excessive focus on code cleanliness can lead to unnecessary abstractions, over-modularization, and premature optimization that adds complexity without providing meaningful benefits.
+- **Subjective Standards:** Clean code principles can be interpreted differently across teams and individuals, leading to inconsistent application and potential conflicts during code reviews.
+- **Performance Considerations:** Prioritizing readability over performance optimizations may result in less efficient code that requires additional optimization work for performance-critical applications.
+- **Learning Curve:** Teams transitioning to clean code practices require training and adjustment periods, which can temporarily reduce productivity while new habits are established.
