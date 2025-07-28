@@ -1,30 +1,31 @@
 ---
 tier: principle
 name: "YAGNI (You Ain't Gonna Need It)"
-description: 'The principle of not adding functionality until it is demonstrably necessary. This avoids over-engineering and wasted effort on features that may not be needed.'
-tags:
-  - process
-  - agile
-  - simplicity
-  - yagni
+description: 'The principle of not adding functionality until it is demonstrably necessary to avoid over-engineering.'
+tier: principle
+schema: pattern
 layer: null
+authors: []
 ---
 
-# YAGNI (You Ain't Gonna Need It)
+## Summary
 
-## Primary Directive
+YAGNI (You Ain't Gonna Need It) is a core principle of Extreme Programming (XP) that states a developer should not add functionality until it is demonstrably necessary. It is a strategy for avoiding waste and over-engineering by focusing exclusively on the immediate, concrete requirements.
 
-You MUST NOT add any functionality, code, or configuration until it is required by a concrete, immediate need. Avoid implementing features based on speculation about the future.
+## Core Principles
 
-## Process
+- **Solve the Immediate Problem:** Only write code that is required to solve the current, well-defined problem.
+- **Delay Abstraction:** Do not build abstract frameworks or complex designs to accommodate future problems that are only speculative.
+- **Trust in Refactoring:** Rely on the ability to refactor the code later when a new, concrete requirement emerges. Simple code is easier to change than complex, speculative code.
 
-1.  **Identify the Current Requirement:** Clearly state the problem that needs to be solved right now.
-2.  **Implement the Simplest Solution:** Write the simplest possible code that solves the current requirement (see `Keep It Simple (KISS)`).
-3.  **Resist Speculative Generalization:** Do not add parameters, configuration options, or architectural layers to support a future use case that does not yet exist.
-4.  **Refactor When Necessary:** When a new requirement emerges, refactor the existing simple solution to accommodate it. It is easier to adapt a simple, working system than to predict the future correctly.
+## Advantages / Use Cases
 
-## Constraints
+- **Increased Development Speed:** Avoids time spent on developing, testing, and documenting features that are never used.
+- **Reduced Code Complexity:** Results in a simpler, smaller, and more maintainable codebase.
+- **Focus on Value:** Ensures that all development effort is directed towards delivering immediate, tangible value.
 
-- Do NOT add a feature just because you think it might be useful one day.
-- Do NOT create abstract classes, complex frameworks, or configurable parameters for problems you do not have yet.
-- You MUST be able to justify every piece of code with a current, explicit requirement.
+## Disadvantages / Trade-offs
+
+- **Potential for Rework:** May require significant refactoring if a new requirement is architecturally incompatible with the simple solution.
+- **Risk of Local Optima:** A series of simple solutions might not lead to the best global design in the long run without careful refactoring.
+- **Misinterpretation:** Can be incorrectly used to justify avoiding necessary design foresight or writing low-quality, hard-to-change code.

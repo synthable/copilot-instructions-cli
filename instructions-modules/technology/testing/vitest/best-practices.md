@@ -1,30 +1,31 @@
 ---
-name: 'Vitest Best Practices'
+name: 'Vitest: Best Practices'
 description: 'A guide to best practices for writing clean, effective, and maintainable tests with Vitest.'
-tags:
-  - testing
-  - vitest
-  - javascript
-  - typescript
-  - best-practices
+tier: technology
+schema: specification
+layer: null
 ---
 
-# Vitest Best Practices
+## Core Concept
 
-## Primary Directive
+Vitest is a modern, fast, and feature-rich testing framework. Adhering to its best practices ensures that test suites are reliable, performant, and easy to maintain.
 
-You MUST write tests that are fast, reliable, and easy to maintain. Leverage Vitest's modern features, such as its ESM-first architecture and smart test runner, to create a highly efficient testing workflow.
+## Key Rules
 
-## Process
+- Test files MUST be named with a `.test.ts` (or `.spec.ts`) suffix to be discovered by the test runner.
+- Use `describe()` blocks to group related tests into logical suites, typically one per function or component.
+- Use `it()` or `test()` for individual test cases. The description MUST clearly state the expected outcome for the specific condition being tested.
+- Use `expect()` combined with matcher functions (e.g., `.toBe()`, `.toEqual()`, `.toThrow()`) for all assertions.
 
-1.  **Follow AAA Pattern:** Structure your tests using the Arrange-Act-Assert (AAA) pattern. This makes tests readable and easy to follow.
-2.  **Use `describe`, `test`, and `expect`:** Use `describe` to group related tests. Use `test` (or `it`) to define a specific test case. Use `expect` for assertions, leveraging Vitest's Chai-based assertion library.
-3.  **Leverage In-Source Testing:** For simple functions, consider using Vitest's in-source testing feature to write tests directly alongside your code. This can improve developer experience and code locality.
-4.  **Use Mocks for Isolation:** Use `vi.mock` to mock dependencies and isolate the code under test. Vitest's mocking capabilities are similar to Jest's but are designed for an ESM-first world.
-5.  **Take Advantage of Hot Module Replacement (HMR):** Use Vitest's watch mode to get near-instant feedback as you write your code and tests. The HMR-powered test runner is one of Vitest's key strengths.
+## Best Practices
 
-## Constraints
+- Prefer `.toEqual()` for deep equality checks on objects and arrays, and `.toBe()` for primitive value and reference equality checks.
+- Use `test.each()` or `it.each()` to run the same test with multiple different inputs, reducing code duplication.
+- Leverage Vitest's built-in snapshot testing (`.toMatchSnapshot()`) for large objects or UI components, but review snapshots carefully on each change.
+- Use `describe.concurrent` to run tests within a suite in parallel for a significant performance boost, but only if the tests are properly isolated.
 
-- You MUST NOT write tests that are dependent on each other. Each test must be atomic and runnable in isolation.
-- You MUST NOT test implementation details. Focus on the public API and the observable behavior of your code.
-- You MUST NOT over-mock. Only mock what is necessary to isolate the unit under test. Excessive mocking can lead to brittle tests that are tightly coupled to the implementation.
+## Anti-Patterns
+
+- Placing test logic directly inside a `describe()` block instead of within an `it()` or `test()` block.
+- Writing overly long or complex test descriptions. The code should be clear enough that a simple description suffices.
+- Including multiple, unrelated assertions in a single `it()` block. Each test should have a single, focused objective.

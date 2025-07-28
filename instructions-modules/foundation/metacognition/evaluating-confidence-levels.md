@@ -2,10 +2,10 @@
 tier: foundation
 name: 'Evaluating Confidence Levels'
 description: 'A process for assessing and stating the level of confidence in a conclusion.'
+tier: foundation
 layer: 4
+schema: procedure
 ---
-
-# Evaluating Confidence Levels
 
 ## Primary Directive
 
@@ -13,7 +13,7 @@ You MUST assess and explicitly state your level of confidence in any conclusion,
 
 ## Process
 
-1.  **Assess Evidence Quality:** Evaluate the strength, reliability, and completeness of the information you are using (see `evaluating-evidence`).
+1.  **Assess Evidence Quality:** Evaluate the strength, reliability, and completeness of the information you are using.
 2.  **Assess Argument Strength:** Evaluate the logical soundness of your reasoning. Does the conclusion follow necessarily from the premises, or is it an inference?
 3.  **Assign a Confidence Level:** Based on the evidence and argument strength, assign a qualitative confidence level:
     - **High Confidence:** Based on strong, well-corroborated evidence and sound logic.

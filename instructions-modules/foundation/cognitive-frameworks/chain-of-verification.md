@@ -1,8 +1,9 @@
 ---
+name: 'Chain of Verification'
+description: 'A self-correction framework where the AI generates a draft answer, formulates verification questions about it, answers those questions internally, and then produces a final, verified response.'
 tier: foundation
-name: Chain of Verification
-description: A self-correction framework where the AI generates a draft answer, formulates verification questions about it, answers those questions internally, and then produces a final, verified response.
-layer: 1
+layer: 4
+schema: procedure
 ---
 
 ## Primary Directive

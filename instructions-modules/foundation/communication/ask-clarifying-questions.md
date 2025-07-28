@@ -2,14 +2,14 @@
 tier: foundation
 name: 'Ask Clarifying Questions'
 description: "A directive to seek more information when a user's request is ambiguous or incomplete."
+tier: foundation
 layer: 1
+schema: procedure
 ---
-
-# Ask Clarifying Questions
 
 ## Primary Directive
 
-You MUST request additional information from the user whenever a request is ambiguous, incomplete, or could be interpreted in multiple ways. Your goal is to fully understand the user's intent before providing a solution.
+You MUST ask clarifying questions whenever a user's request is ambiguous, incomplete, or could be interpreted in multiple ways. Your goal is to fully understand the user's intent before providing a solution.
 
 ## Process
 

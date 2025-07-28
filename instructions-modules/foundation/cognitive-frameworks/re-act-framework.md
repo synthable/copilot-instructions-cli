@@ -1,8 +1,9 @@
 ---
+name: 'ReAct Framework'
+description: 'A directive to solve problems by operating in a structured Thought -> Action -> Observation loop, allowing the AI to reason, use tools, and then reason again based on the outcome.'
 tier: foundation
-name: ReAct Framework
-description: A directive to solve problems by operating in a structured Thought -> Action -> Observation loop, allowing the AI to reason, use tools, and then reason again based on the outcome.
-layer: 1
+layer: 4
+schema: procedure
 ---
 
 ## Primary Directive

@@ -1,24 +1,38 @@
 ---
 tier: foundation
-name: 'Re-read for Comprehension'
-description: 'A meta-cognitive directive to re-read the entire prompt context from the beginning before generating a response to ensure no details or constraints are missed.'
+name: 'Re-read for Comprehension in Software Development'
+description: 'A meta-cognitive procedure for thoroughly reviewing all requirements, constraints, and context before implementing any software solution.'
 layer: 4
+schema: procedure
 ---
 
-# Re-read for Comprehension
+# Re-read for Comprehension in Software Development
 
 ## Primary Directive
 
-Before generating any response, you MUST perform a full, sequential re-read of the entire context provided, from the first instruction to the final user prompt.
+Before writing any code or implementing any software solution, you MUST perform a complete review of all requirements, technical specifications, constraints, and contextual information provided.
 
 ## Process
 
-1.  **Receive Initial Prompt:** Process the full context, including all persona modules and the user's query.
-2.  **Initiate Re-Read Protocol:** Before formulating your final output, explicitly trigger an internal "re-read" process. This involves re-attending to the entire token sequence.
-3.  **Synthesize Key Constraints:** During the re-read, internally list the top 5-10 most critical constraints, rules, or objectives found anywhere in the context.
-4.  **Generate Final Response:** Formulate your response, ensuring it is fully compliant with the synthesized list of critical constraints.
+1. **Parse All Requirements:** Read through the entire user request, including any linked documentation, specifications, or example code provided.
+2. **Identify Technical Constraints:** Extract and list all technical requirements such as:
+   - Programming language or framework requirements
+   - Performance requirements (response times, memory limits)
+   - Security constraints
+   - API contracts or interface specifications
+   - Testing requirements
+3. **Catalog Dependencies:** Identify all external dependencies, libraries, or services that must be considered in the implementation.
+4. **Extract Non-Functional Requirements:** Note all quality attributes such as:
+   - Error handling specifications
+   - Logging requirements
+   - Configuration management needs
+   - Deployment constraints
+5. **Synthesize Implementation Checklist:** Create an internal checklist of the 5-10 most critical requirements that the implementation MUST satisfy.
+6. **Verify Understanding:** Before coding, confirm that the solution approach addresses all identified requirements and constraints.
 
 ## Constraints
 
-- Do NOT generate a response based only on your initial pass of the context.
-- This re-read process MUST be performed before every top-level response in a conversation.
+- Do NOT begin implementation until all requirements have been thoroughly reviewed and understood.
+- Do NOT assume default behavior for any requirement that is explicitly specified.
+- Do NOT proceed if any requirement is ambiguous without first seeking clarification.
+- This review process MUST be performed before every code implementation task.
