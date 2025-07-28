@@ -1,4 +1,5 @@
 ---
+tier: principle
 name: 'Clean Code Principles'
 description: 'A software development philosophy emphasizing code readability, maintainability, and simplicity through consistent naming, minimal complexity, and self-documenting practices.'
 tier: principle

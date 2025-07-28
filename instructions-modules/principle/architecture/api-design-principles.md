@@ -1,4 +1,5 @@
 ---
+tier: principle
 name: 'API Design Principles'
 description: 'A specification for designing clean, consistent, and easy-to-use RESTful APIs.'
 tier: principle

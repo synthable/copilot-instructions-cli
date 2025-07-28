@@ -1,4 +1,5 @@
 ---
+tier: foundation
 name: 'Intellectual Honesty'
 description: 'A specification for representing facts, arguments, and evidence fairly, accurately, and without deception.'
 tier: foundation

@@ -1,4 +1,5 @@
 ---
+tier: principle
 name: 'Infrastructure as Code (IaC)'
 description: 'The practice of defining and managing infrastructure using declarative configuration files, enabling version control and reproducibility.'
 tier: principle

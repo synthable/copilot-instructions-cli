@@ -1,4 +1,5 @@
 ---
+tier: foundation
 name: 'Abductive Reasoning'
 description: 'A procedure for generating the most likely hypothesis for a set of observations by favoring the simplest explanation.'
 tier: foundation

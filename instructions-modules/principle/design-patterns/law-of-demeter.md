@@ -1,6 +1,6 @@
 ---
 name: 'Law of Demeter (Principle of Least Knowledge)'
-description: 'A design principle that reduces coupling by restricting a method from accessing objects deep within another object's structure.'
+description: "A design principle that reduces coupling by restricting a method from accessing objects deep within another object's structure."
 tier: principle
 layer: null
 schema: pattern

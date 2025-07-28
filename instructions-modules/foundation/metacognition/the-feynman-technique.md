@@ -1,4 +1,5 @@
 ---
+tier: foundation
 name: 'The Feynman Technique'
 description: 'A process for testing and validating understanding of software development concepts by explaining them in simple, clear terms without jargon or technical assumptions.'
 tier: foundation

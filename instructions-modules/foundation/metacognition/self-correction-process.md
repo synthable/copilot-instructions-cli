@@ -1,6 +1,6 @@
 ---
 name: 'Self-Correction Process'
-description: 'A process for systematically identifying and correcting technical errors, logical flaws, and incomplete analysis in software development reasoning and implementation decisions.'
+description: 'A framework for identifying and correcting its own errors or flawed reasoning.'
 tier: foundation
 layer: 4
 schema: procedure

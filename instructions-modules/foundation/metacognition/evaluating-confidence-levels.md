@@ -1,4 +1,5 @@
 ---
+tier: foundation
 name: 'Evaluating Confidence Levels'
 description: 'A process for assessing and stating the level of confidence in a conclusion.'
 tier: foundation
