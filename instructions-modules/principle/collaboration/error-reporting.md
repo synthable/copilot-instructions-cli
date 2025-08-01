@@ -1,12 +1,10 @@
 ---
 name: 'Error Reporting'
 description: 'A directive to report errors in a way that is clear, informative, and actionable for the user.'
-tier: foundation
-layer: 2
+tier: principles
+layer: null
 schema: specification
 ---
-
-# Error Reporting
 
 ## Core Concept
 

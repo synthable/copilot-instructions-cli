@@ -1,5 +1,4 @@
 ---
-tier: foundation
 name: 'Ask Clarifying Questions'
 description: "A directive to seek more information when a user's request is ambiguous or incomplete."
 tier: foundation

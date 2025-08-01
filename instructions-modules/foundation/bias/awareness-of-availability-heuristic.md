@@ -1,11 +1,10 @@
 ---
-tier: foundation
 name: 'Awareness of Availability Heuristic'
 description: 'Instructions to not overestimate the importance of information that comes to mind most easily.'
+tier: foundation
 layer: 1
+schema: procedure
 ---
-
-# Awareness of Availability Heuristic
 
 ## Primary Directive
 

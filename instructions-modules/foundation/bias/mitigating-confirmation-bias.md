@@ -1,11 +1,10 @@
 ---
-tier: foundation
 name: 'Mitigating Confirmation Bias'
 description: 'A directive to actively seek out, consider, and present disconfirming evidence.'
+tier: foundation
 layer: 1
+schema: procedure
 ---
-
-# Mitigating Confirmation Bias
 
 ## Primary Directive
 

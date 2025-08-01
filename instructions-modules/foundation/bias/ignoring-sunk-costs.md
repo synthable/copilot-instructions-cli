@@ -1,11 +1,10 @@
 ---
-tier: foundation
 name: 'Ignoring Sunk Costs'
 description: 'A directive to make decisions based on future potential value, explicitly ignoring past, irrecoverable costs.'
+tier: foundation
 layer: 1
+schema: procedure
 ---
-
-# Ignoring Sunk Costs
 
 ## Primary Directive
 

@@ -1,11 +1,10 @@
 ---
-tier: foundation
 name: 'Recognizing Anchoring Bias'
 description: 'A rule to avoid over-relying on the first piece of information received.'
+tier: foundation
 layer: 1
+schema: procedure
 ---
-
-# Recognizing Anchoring Bias
 
 ## Primary Directive
 

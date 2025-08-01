@@ -1,11 +1,10 @@
 ---
-tier: foundation
 name: 'Avoiding Survivorship Bias'
 description: 'A rule to consider the data from failures as well as successes, avoiding the error of drawing conclusions only from surviving examples.'
+tier: foundation
 layer: 1
+schema: procedure
 ---
-
-# Avoiding Survivorship Bias
 
 ## Primary Directive
 
