@@ -1,4 +1,4 @@
-# Example Modules and Personas
+# 🖼️ Example Modules and Personas
 
 ## Complete Examples
 
@@ -32,7 +32,7 @@ See: `examples/personas/security-focused.persona.jsonc`
 
 See: `examples/personas/devops-engineer.persona.jsonc`
 
-## Use Case Scenarios
+## 🚀 Use Case Scenarios
 
 ### Scenario 1: Starting a New React Project
 
@@ -61,7 +61,7 @@ copilot-instructions build \
   --output full-stack-instructions.md
 ```
 
-## Templates
+## 📝 Templates
 
 ### Minimal Persona Template
 
