@@ -174,7 +174,7 @@ copilot-instructions create-persona <name> [description] [options]
 - **Templates:** Use `--template` in `create-persona` to base your persona on a template from `./templates/persona`.
 - **Validation:** Use `validate` to check modules and personas for errors before building.
 
-## 下一步
+## Next Steps
 
 - Read the [Module System](./module-system.md) documentation
 - Explore the [Usage Guide](./usage.md) for advanced features
