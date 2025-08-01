@@ -1,5 +1,4 @@
 ---
-tier: execution
 name: 'Refactor a Component'
 description: 'A step-by-step process for safely improving the internal structure of a piece of code without changing its external behavior.'
 tier: execution

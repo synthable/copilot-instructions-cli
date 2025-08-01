@@ -1,5 +1,4 @@
 ---
-tier: principle
 name: 'Single Source of Truth (SSoT)'
 description: 'Software architecture principle requiring that every data element, business rule, and system configuration must be stored in exactly one authoritative location to ensure data integrity, consistency, and eliminate synchronization conflicts.'
 tier: principle

@@ -1,5 +1,4 @@
 ---
-tier: principle
 name: 'Separation of Concerns'
 description: 'An architectural pattern that divides software systems into distinct components where each component addresses a single, well-defined responsibility or concern.'
 tier: principle

@@ -1,5 +1,4 @@
 ---
-tier: principle
 name: 'Iterative Development'
 description: 'The practice of building software in small, incremental cycles that deliver working functionality, enabling rapid feedback and adaptation.'
 tier: principle

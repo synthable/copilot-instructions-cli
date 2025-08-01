@@ -1,5 +1,4 @@
 ---
-tier: principle
 name: "YAGNI (You Ain't Gonna Need It)"
 description: 'The principle of not adding functionality until it is demonstrably necessary to avoid over-engineering.'
 tier: principle

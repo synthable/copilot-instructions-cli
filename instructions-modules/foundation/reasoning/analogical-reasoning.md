@@ -1,5 +1,4 @@
 ---
-tier: foundation
 name: 'Analogical Reasoning'
 description: 'A cognitive process for transferring knowledge and solutions from one domain to solve problems in another domain by mapping structural relationships.'
 tier: foundation

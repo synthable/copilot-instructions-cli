@@ -1,5 +1,4 @@
 ---
-tier: foundation
 name: 'Systems Thinking'
 description: 'A procedure for analyzing problems holistically by mapping system components, their interconnections, and identifying key leverage points like feedback loops and bottlenecks.'
 tier: foundation
