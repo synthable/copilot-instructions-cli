@@ -142,3 +142,5 @@ vite.config.ts.timestamp-*
 docs/archive/
 docs/evaluations/
 docs/todo.md
+CLAUDE.md
+.geminiignore
