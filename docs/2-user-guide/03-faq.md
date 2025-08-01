@@ -1,10 +1,10 @@
-# FAQ: AI Persona Builder
+# ❓ FAQ: AI Persona Builder
 
 This document answers frequently asked questions about the design, philosophy, and best practices for the AI Persona Builder CLI.
 
 ---
 
-### **Table of Contents**
+### **📜 Table of Contents**
 
 - [FAQ: AI Persona Builder](#faq-ai-persona-builder)
   - [**Table of Contents**](#table-of-contents)
@@ -21,7 +21,7 @@ This document answers frequently asked questions about the design, philosophy, a
     - [The Formal Level System](#the-formal-level-system)
     - [How Subjects Map to Levels](#how-subjects-map-to-levels)
     - [The Exception Proves the Rule](#the-exception-proves-the-rule)
-  - [CLI Commands \& Usage](#cli-commands--usage)
+  - [CLI Commands & Usage](#cli-commands--usage)
     - [**`build`**](#build)
     - [**`list`**](#list)
     - [**`search`**](#search)
@@ -31,14 +31,14 @@ This document answers frequently asked questions about the design, philosophy, a
 
 ---
 
-### 1. What is the purpose of the `Foundation` tier?
+### 1. What is the purpose of the `Foundation` tier? 🏛️
 
 The `Foundation` tier contains the absolute, universal truths of logic, reason, and systematic thinking. It is completely abstract and applies to any problem-solving domain. Its purpose is to define the core cognitive architecture of a rational agent.
 
 - **Litmus Test:** "Is this a fundamental rule of how to think?"
 - **Examples:** `reasoning/first-principles-thinking`, `logic/avoiding-logical-fallacies`, `ethics/be-truthful`, `bias/mitigating-confirmation-bias`.
 
-### 2. Should subjects in the `Foundation` tier depend on each other?
+### 2. Should subjects in the `Foundation` tier depend on each other? 🔗
 
 **Yes, conceptually they do, but this dependency is managed through ordering, not a technical system.**
 
@@ -46,7 +46,7 @@ Conceptually, foundational subjects form a hierarchy. For example, `Ethics` and 
 
 This dependency is implemented by the **order of modules in the `persona.jsonc` file**. The `build` command concatenates modules in the exact sequence specified, creating a logical cognitive flow for the AI to follow. A technical dependency system (e.g., a `depends_on` field) is intentionally avoided to maintain simplicity and flexibility.
 
-### 3. How can we ease the learning curve for new users if ordering is so flexible?
+### 3. How can we ease the learning curve for new users if ordering is so flexible? 🧑‍🏫
 
 We can guide users toward best practices without removing power-user flexibility through a multi-layered approach:
 
@@ -55,7 +55,7 @@ We can guide users toward best practices without removing power-user flexibility
 3.  **Scaffolding (`init` command):** A CLI command that creates a new persona file from a pre-made, well-ordered template.
 4.  **Linting (`--lint` flag):** An optional flag for the `build` command that uses `layer` metadata in `Foundation` modules to warn the user about potential ordering issues without failing the build. This is the ideal solution as it educates without restricting.
 
-### 4. Does the `layer` metadata concept apply to every tier?
+### 4. Does the `layer` metadata concept apply to every tier? LAYER
 
 **No. The `layer` concept is most valuable and meaningful for the `Foundation` tier and should generally not be applied to others.**
 
@@ -63,7 +63,7 @@ We can guide users toward best practices without removing power-user flexibility
 - **`Principle`:** Low applicability. These are a "toolbox" of best practices, not a strict hierarchy. Ordering is based on generality, not prerequisites.
 - **`Technology` & `Execution`:** Not applicable. These modules are independent peers. Forcing a `layer` on them would be arbitrary and restrictive. Their order is based on user preference or context.
 
-### 5. Should a `Technology` module for a language (e.g., TypeScript) come before a framework (e.g., React)?
+### 5. Should a `Technology` module for a language (e.g., TypeScript) come before a framework (e.g., React)? 🥞
 
 **Yes, this is a best practice.**
 
@@ -76,27 +76,27 @@ Ordering `Technology` modules from **most general to most specific** creates a m
   2.  `technology/frontend/react/...` (Specific framework context)
   3.  `technology/tool/jest/...` (Specific testing context)
 
-### 6. What is the role of an `Execution` module? Is it like a prompt?
+### 6. What is the role of an `Execution` module? Is it like a prompt? 🎯
 
 **Yes, an `Execution` module is the imperative, task-activating component of the final compiled meta-prompt.**
 
 - **Tiers 1-3 (`Foundation`, `Principle`, `Technology`):** These form the **Declarative Context Block**. They act as a detailed system prompt, establishing the AI's "mindset," rules, and prioritized knowledge. They tell the AI _what to be_.
 - **Tier 4 (`Execution`):** This forms the **Imperative Instruction Block**. It acts as a pre-loaded user prompt, providing a specific, step-by-step task for the AI to perform immediately. It tells the AI _what to do_.
 
-### 7. Is there a use case for having more than one `Execution` module in a persona?
+### 7. Is there a use case for having more than one `Execution` module in a persona? ⛓️
 
 **Yes, this is a powerful technique for creating more versatile agents.**
 
 1.  **Chained Workflows:** Concatenate multiple playbooks to create a seamless, multi-step task. For example, `create-api-endpoint` followed by `write-integration-tests-for-endpoint`. The AI completes the first task and immediately uses that context for the second.
 2.  **"Toolbox" Personas:** Include several independent playbooks in the persona. The user can then "invoke" a specific playbook by name in their live prompt to the AI (e.g., "Using the `debug-iam-policy` playbook, analyze this for me.").
 
-### 8. Is it valid to build a persona without any `Execution` modules?
+### 8. Is it valid to build a persona without any `Execution` modules? ✅
 
 **Yes, this is a primary and powerful use case.** This creates an **"On-Demand Expert"** or **"Primed Consultant."**
 
 When you omit the `Execution` tier, you create a meta-prompt that consists only of the declarative context. The result is an AI that is in a fully configured, "primed" state, but is awaiting its first instruction. The user's live prompt then becomes the first imperative task that the AI processes within that highly-configured state. This is ideal for interactive, conversational, or unpredictable tasks.
 
-### 9. Are there any edge cases where a module should be placed outside its tier in the persona file?
+### 9. Are there any edge cases where a module should be placed outside its tier in the persona file? 🧩
 
 **The 99% rule is to always maintain the strict `Foundation -> Principle -> Technology -> Execution` order.**
 
@@ -108,7 +108,7 @@ However, deliberately breaking this order is an expert-layer prompt engineering 
 
 In this case, the `Execution` module's instruction ("Analyze the following text...") re-contextualizes the subsequent `Technology` module from a rule to be followed into raw text to be analyzed.
 
-### 10. Do all subjects in the `Foundation` tier support different module layers?
+### 10. Do all subjects in the `Foundation` tier support different module layers? 🏛️
 
 **No. The `layer` metadata is a property of a module's _function_, and modules within the same subject almost always share the same layer because they perform the same _type_ of cognitive work.**
 

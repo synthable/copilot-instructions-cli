@@ -1,10 +1,8 @@
-# Architecture Overview
-
-## 1. Introduction
+# 🏗️ Project Architecture
 
 This document details the internal architecture of the `copilot-instructions` CLI tool. It is intended for developers who want to understand how the system is structured, how the different components interact, and the design principles that guide its development.
 
-## 2. Guiding Principles
+## 🧭 Guiding Principles
 
 The architecture is designed around established software engineering principles to ensure the codebase is maintainable, scalable, and easy to reason about:
 
@@ -12,7 +10,7 @@ The architecture is designed around established software engineering principles 
 - **Single Responsibility Principle (SRP):** Functions and modules are kept small and focused on a single task.
 - **Dependency Inversion:** High-level modules (like command handlers) depend on abstractions (like the `Module` interface or function signatures), not on the low-level implementation details of other modules. This decouples the components and makes them easier to test.
 
-## 3. High-Level Architecture
+## 🏢 High-Level Architecture
 
 The application can be broken down into three main layers:
 
@@ -22,7 +20,7 @@ The application can be broken down into three main layers:
 
 3.  **Core Services (`src/core/*.ts`):** This is the heart of the application. It contains the shared business logic that is used by multiple commands. The primary service is the `ModuleService`, which is responsible for all interactions with the `instructions-modules/` directory.
 
-## 4. Key Components & Data Flow
+## ⚙️ Key Components & Data Flow
 
 ### 4.1. `ModuleService` (`src/core/module-service.ts`)
 
