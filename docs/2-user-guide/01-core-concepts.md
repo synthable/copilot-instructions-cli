@@ -40,6 +40,8 @@ These principles are the fundamental laws upon which the entire system is built.
 6.  **Machine-Centric Language:** The content of all modules **MUST** be written for a machine, not a human. The language must be deterministic, precise, and structured.
 7.  **The Hybrid Foundation:** The `Foundation` tier is intentionally split into `software` and `universal` domains to provide both pragmatic and deeply abstract reasoning capabilities.
 
+8.  **The Synergistic Pair Pattern:** The system enables the creation of sophisticated behaviors by composing atomic modules. A Synergistic Pair is a design pattern where a persona architect intentionally sequences modules with complementary roles (e.g., an action-oriented `procedure` followed by a verification-oriented `checklist`) to create an emergent behavior, such as self-correction or automated auditing.
+
 ---
 
 ## See Also

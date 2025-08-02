@@ -136,6 +136,13 @@ function parseModule(filePath: string, fileContent: string): Module {
     module.layer = frontmatter.layer;
   }
 
+  if (
+    frontmatter.implement !== undefined &&
+    typeof frontmatter.implement === 'string'
+  ) {
+    module.implement = frontmatter.implement;
+  }
+
   return module;
 }
 

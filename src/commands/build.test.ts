@@ -262,4 +262,117 @@ Content2`;
       expectedContent
     );
   });
+
+describe('Synergistic Pair Build Validation', () => {
+  const mockModule1: Module = {
+    id: 'proc-implement-valid',
+    tier: 'execution',
+    subject: '',
+    name: 'Valid Implementing Procedure',
+    description: 'A procedure that correctly implement a spec.',
+    content: 'Procedure content',
+    filePath: '/test/proc-implement-valid.md',
+    implement: 'spec-for-implementing',
+  };
+
+  const mockModule2: Module = {
+    id: 'spec-for-implementing',
+    tier: 'principle',
+    subject: '',
+    name: 'Example Specification',
+    description: 'A spec to be implemented.',
+    content: 'Specification content',
+    filePath: '/test/spec-for-implementing.md',
+  };
+
+  const mockModule3: Module = {
+    id: 'other-module',
+    tier: 'foundation',
+    subject: '',
+    name: 'Other Module',
+    description: 'Another module.',
+    content: 'Other content',
+    filePath: '/test/other-module.md',
+  };
+
+  beforeEach(() => {
+    vi.mocked(validatePersona).mockReturnValue({ isValid: true, errors: [] });
+    vi.mocked(validateModuleFile).mockResolvedValue({
+      filePath: '',
+      isValid: true,
+      errors: [],
+    });
+    vi.mocked(fs.mkdir).mockResolvedValue(undefined);
+    vi.mocked(fs.writeFile).mockResolvedValue(undefined);
+  });
+
+  it('should pass build if a synergistic pair is ordered correctly in a persona', async () => {
+    // Arrange
+    const modules = ['proc-implement-valid', 'spec-for-implementing'];
+    const moduleMap = new Map([
+      ['proc-implement-valid', mockModule1],
+      ['spec-for-implementing', mockModule2],
+    ]);
+    vi.mocked(scanModules).mockResolvedValue(moduleMap);
+    const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+    // Act
+    await handleBuild({ modules, output: 'output.md' });
+
+    // Assert
+    expect(consoleSpy).not.toHaveBeenCalled();
+    expect(fs.writeFile).toHaveBeenCalled();
+
+    consoleSpy.mockRestore();
+  });
+
+  it('should warn during build if a synergistic pair is ordered incorrectly', async () => {
+    // Arrange
+    const modules = [
+      'proc-implement-valid',
+      'other-module',
+      'spec-for-implementing',
+    ];
+    const moduleMap = new Map([
+      ['proc-implement-valid', mockModule1],
+      ['other-module', mockModule3],
+      ['spec-for-implementing', mockModule2],
+    ]);
+    vi.mocked(scanModules).mockResolvedValue(moduleMap);
+    const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+    // Act
+    await handleBuild({ modules, output: 'output.md' });
+
+    // Assert
+    expect(consoleSpy).toHaveBeenCalledWith(
+      expect.stringContaining(
+        "Warning: Module 'proc-implement-valid' implement 'spec-for-implementing', but it is followed by 'other-module'"
+      )
+    );
+    expect(fs.writeFile).toHaveBeenCalled();
+
+    consoleSpy.mockRestore();
+  });
+
+  it('should warn during build if the implemented module is missing from the persona', async () => {
+    // Arrange
+    const modules = ['proc-implement-valid'];
+    const moduleMap = new Map([['proc-implement-valid', mockModule1]]);
+    vi.mocked(scanModules).mockResolvedValue(moduleMap);
+    const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+    // Act
+    await handleBuild({ modules, output: 'output.md' });
+
+    // Assert
+    expect(consoleSpy).toHaveBeenCalledWith(
+      expect.stringContaining(
+        "Warning: Module 'proc-implement-valid' implement 'spec-for-implementing', but it is the last module in the list"
+      )
+    );
+    expect(fs.writeFile).toHaveBeenCalled();
+
+    consoleSpy.mockRestore();
+  });
 });

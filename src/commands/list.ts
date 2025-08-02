@@ -52,8 +52,8 @@ export async function handleList(options: ListOptions): Promise<void> {
 
     const maxWidth = process.stdout.columns || 80;
     const table = new Table({
-      head: ['Layer', 'Tier/Subject', 'Name', 'Description'],
-      colWidths: [8, 40, 24, maxWidth - (8 + 40 + 24 + 6)], // 6 for table borders/padding
+      head: ['Layer', 'Tier/Subject', 'Name', 'Description', 'Implement'],
+      colWidths: [8, 32, 20, maxWidth - (8 + 32 + 20 + 16 + 10), 16], // 10 for table borders/padding
       wordWrap: true,
       style: { head: ['cyan'] },
     });
@@ -61,7 +61,8 @@ export async function handleList(options: ListOptions): Promise<void> {
     modules.forEach(m => {
       const subjectPath = m.subject ? `${m.tier}/${m.subject}` : m.tier;
       const layer = m.layer !== undefined ? m.layer.toString() : 'N/A';
-      table.push([layer, subjectPath, m.name, m.description]);
+      const implement = m.implement || 'N/A';
+      table.push([layer, subjectPath, m.name, m.description, implement]);
     });
 
     console.log(table.toString());

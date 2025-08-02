@@ -45,6 +45,9 @@ This document provides definitions for the core concepts and terminology used in
 - **Schema**
   - A formal declaration in a module's frontmatter that defines the purpose and required structure of its Markdown content. The six schemas are `procedure`, `specification`, `pattern`, `checklist`, `data`, and `rule`.
 
+- **Synergistic Pair**
+  - A design pattern where two or more modules with complementary roles (e.g., a `procedure` and a `checklist`) are intentionally sequenced in a `persona.jsonc` file to produce a combined behavior that is more sophisticated than the individual modules alone.
+
 ### T
 
 - **Technology Tier**

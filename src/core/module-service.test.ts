@@ -491,4 +491,134 @@ Content1`;
 
     await expect(scanModules()).rejects.toThrow(/Module validation failed/);
   });
+
+  it('should parse the implement field from frontmatter', async () => {
+    const mockFiles = [path.join(MODULES_ROOT_DIR, 'execution/test.md')];
+    const mockModuleContent = `---
+name: Test Implementing Module
+description: A module that implement another
+schema: procedure
+implement: 'principle/spec/target'
+---
+## Primary Directive
+Test
+
+## Process
+1. Test step
+
+## Constraints
+- Test constraint`;
+
+    vi.mocked(fs.access).mockResolvedValue(undefined);
+    vi.mocked(glob).mockResolvedValue(mockFiles);
+    vi.mocked(fs.readFile).mockResolvedValue(mockModuleContent);
+    vi.mocked(matter).mockReturnValue({
+      data: {
+        name: 'Test Implementing Module',
+        description: 'A module that implement another',
+        schema: 'procedure',
+        implement: 'principle/spec/target',
+      },
+      content: `
+## Primary Directive
+Test
+
+## Process
+1. Test step
+
+## Constraints
+- Test constraint`,
+    } as any);
+
+    const modules = await scanModules();
+    expect(modules.size).toBe(1);
+    const module = modules.get('execution/test');
+    expect(module?.implement).toBe('principle/spec/target');
+  });
+});
+
+describe('Synergistic Pair Validation', () => {
+  afterEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('should validate that implemented modules exist during scan', async () => {
+    const mockFiles = [
+      path.join(MODULES_ROOT_DIR, 'execution/implementing.md'),
+      path.join(MODULES_ROOT_DIR, 'principle/implemented.md'),
+    ];
+
+    const implementingContent = `---
+name: Implementing Module
+description: Implements another module
+schema: procedure
+implement: 'principle/implemented'
+---
+## Primary Directive
+Test
+
+## Process
+1. Test step
+
+## Constraints
+- Test constraint`;
+
+    const implementedContent = `---
+name: Implemented Module
+description: The implemented module
+schema: specification
+---
+## Core Concept
+Test spec
+
+## Key Rules
+- Test rule`;
+
+    vi.mocked(fs.access).mockResolvedValue(undefined);
+    vi.mocked(glob).mockResolvedValue(mockFiles);
+    vi.mocked(fs.readFile)
+      .mockResolvedValueOnce(implementingContent)
+      .mockResolvedValueOnce(implementedContent);
+
+    vi.mocked(matter)
+      .mockReturnValueOnce({
+        data: {
+          name: 'Implementing Module',
+          description: 'Implements another module',
+          schema: 'procedure',
+          implement: 'principle/implemented',
+        },
+        content: `
+## Primary Directive
+Test
+
+## Process
+1. Test step
+
+## Constraints
+- Test constraint`,
+      } as any)
+      .mockReturnValueOnce({
+        data: {
+          name: 'Implemented Module',
+          description: 'The implemented module',
+          schema: 'specification',
+        },
+        content: `
+## Core Concept
+Test spec
+
+## Key Rules
+- Test rule`,
+      } as any);
+
+    const modules = await scanModules();
+    expect(modules.size).toBe(2);
+
+    const implementingModule = modules.get('execution/implementing');
+    expect(implementingModule?.implement).toBe('principle/implemented');
+
+    // Verify the implemented module exists
+    expect(modules.has('principle/implemented')).toBe(true);
+  });
 });

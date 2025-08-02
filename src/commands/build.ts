@@ -95,6 +95,50 @@ export async function handleBuild(options: BuildOptions): Promise<void> {
       })
     );
 
+    // Perform explicit positional validation for synergistic pairs
+    if (verbose === true) {
+      console.log(
+        chalk.gray('[verbose] Performing synergistic pair validation')
+      );
+    }
+    for (let i = 0; i < resolvedModules.length; i++) {
+      const moduleA = resolvedModules[i];
+      if (moduleA.implement) {
+        const moduleB_id = moduleA.implement;
+        if (verbose === true) {
+          console.log(
+            chalk.gray(
+              `[verbose] Module '${moduleA.id}' implement '${moduleB_id}' - checking position`
+            )
+          );
+        }
+
+        // Check if there's a next module
+        if (i + 1 >= resolvedModules.length) {
+          console.warn(
+            chalk.yellow(
+              `Warning: Module '${moduleA.id}' implement '${moduleB_id}', but it is the last module in the list. The implemented module must follow immediately.`
+            )
+          );
+        } else {
+          const moduleB = resolvedModules[i + 1];
+          if (moduleB.id !== moduleB_id) {
+            console.warn(
+              chalk.yellow(
+                `Warning: Module '${moduleA.id}' implement '${moduleB_id}', but it is followed by '${moduleB.id}'. The implemented module must appear immediately after the implementing module.`
+              )
+            );
+          } else if (verbose === true) {
+            console.log(
+              chalk.gray(
+                `[verbose] Synergistic pair validated: '${moduleA.id}' → '${moduleB.id}'`
+              )
+            );
+          }
+        }
+      }
+    }
+
     const outputParts: string[] = [];
     resolvedModules.forEach((module, index) => {
       if (verbose) {

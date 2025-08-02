@@ -87,6 +87,8 @@ The frontmatter is a YAML block at the top of the file, enclosed by `---`. It co
 
 - `authors` (array of strings): A list of contributors to the module. `'Jane Doe <jane.doe@example.com>', 'John Smith <john.smith@example.com>'`
 
+- `implement` (string): The unique ID of another module that this module implement or instantiates. This is used to formally declare a **Synergistic Pair**. For example, a `procedure` module that provides the steps to create a commit message would `implement` the `specification` module that defines the commit message format.
+
 ### Frontmatter Examples
 
 **Foundation Module Example:**
@@ -825,6 +827,12 @@ Write for a machine, not a human. The language must be direct, explicit, and str
 | :------------------------------------------------------------------------------------- | :---------------------------------------------------------------- |
 | `You MUST validate all user-provided input against a strict schema before processing.` | `It's very important to think about validating user input.`       |
 | `- Do NOT attempt to sanitize or correct invalid input.`                               | `Try not to change the user's input, as that could be confusing.` |
+
+### Design for Composition: Synergistic Pairs
+
+While authoring an atomic module, consider how it might be paired with other modules. The most powerful personas are built by creating **Synergistic Pairs**—intentionally sequencing modules with complementary schemas to create advanced behaviors. For example, a `procedure` module can be paired with a `checklist` to create a self-auditing workflow.
+
+For a complete guide on this advanced pattern, see the [Examples and Patterns](../3-authoring/02-examples-and-patterns.md) document.
 
 ### Use Markdown Effectively
 
