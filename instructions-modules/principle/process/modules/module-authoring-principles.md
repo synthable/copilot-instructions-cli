@@ -1,6 +1,6 @@
 ---
 name: 'Module Authoring Principles'
-description: 'A procedure for authoring high-quality, machine-centric instruction modules that conform to the system's standards.'
+description: "A procedure for authoring high-quality, machine-centric instruction modules that conform to the system's standards."
 tier: principle
 schema: procedure
 layer: null
@@ -17,7 +17,7 @@ You MUST author all new instruction modules in strict accordance with the offici
     - Determine its `tier` (`foundation`, `principle`, `technology`, or `execution`) based on the concept's scope.
 
 2.  **Select the Schema:**
-    - Following the Schema Decision Guide, ask the questions in order to determine the correct `schema` (`procedure`, `checklist`, `specification`, `pattern`, or `data`). This is the most critical authoring decision.
+    - Following the Schema Decision Guide, ask the questions in order to determine the correct `schema` (`rule`, `procedure`, `checklist`, `specification`, `pattern`, or `data`). This is the most critical authoring decision.
 
 3.  **Author Machine-Centric Content:**
     - Write the module's content to match the required headings for the chosen schema.

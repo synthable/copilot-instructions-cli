@@ -218,6 +218,99 @@ This should not be here.
     expect(result.isValid).toBe(false);
     expect(result.errors).toContain('Extra section(s) found: Extra Section');
   });
+
+  describe('rule schema validation', () => {
+    it('should pass validation for a valid rule module', () => {
+      const fileContent = `---
+name: 'Valid Rule'
+description: 'A valid rule module for testing.'
+tier: foundation
+layer: 0
+schema: rule
+---
+## Mandate
+You MUST follow this single, atomic rule.`;
+      vi.mocked(matter).mockReturnValue({
+        data: {
+          name: 'Valid Rule',
+          description: 'A valid rule module for testing.',
+          tier: 'foundation',
+          layer: 0,
+          schema: 'rule',
+        },
+        content: `
+## Mandate
+You MUST follow this single, atomic rule.`,
+      } as any);
+      const result = validateModuleContent(fileContent, 'foundation');
+      expect(result.isValid).toBe(true);
+      expect(result.errors).toHaveLength(0);
+    });
+
+    it('should fail validation if a rule module has multiple H2 headings', () => {
+      const fileContent = `---
+name: 'Invalid Rule - Multiple Headings'
+description: 'An invalid rule module for testing.'
+tier: foundation
+layer: 0
+schema: rule
+---
+## Mandate
+This is the first heading.
+
+## Another Heading
+This is the second, forbidden heading.`;
+      vi.mocked(matter).mockReturnValue({
+        data: {
+          name: 'Invalid Rule - Multiple Headings',
+          description: 'An invalid rule module for testing.',
+          tier: 'foundation',
+          layer: 0,
+          schema: 'rule',
+        },
+        content: `
+## Mandate
+This is the first heading.
+
+## Another Heading
+This is the second, forbidden heading.`,
+      } as any);
+      const result = validateModuleContent(fileContent, 'foundation');
+      expect(result.isValid).toBe(false);
+      expect(result.errors).toContain(
+        'Rule schema modules must have exactly one H2 heading.'
+      );
+    });
+
+    it('should fail validation if a rule module has an incorrect H2 heading', () => {
+      const fileContent = `---
+name: 'Invalid Rule - Wrong Heading'
+description: 'An invalid rule module for testing.'
+tier: foundation
+layer: 0
+schema: rule
+---
+## Core Concept
+This heading is not '## Mandate' and should fail validation.`;
+      vi.mocked(matter).mockReturnValue({
+        data: {
+          name: 'Invalid Rule - Wrong Heading',
+          description: 'An invalid rule module for testing.',
+          tier: 'foundation',
+          layer: 0,
+          schema: 'rule',
+        },
+        content: `
+## Core Concept
+This heading is not '## Mandate' and should fail validation.`,
+      } as any);
+      const result = validateModuleContent(fileContent, 'foundation');
+      expect(result.isValid).toBe(false);
+      expect(result.errors).toContain(
+        'The heading in a rule schema module must be ## Mandate.'
+      );
+    });
+  });
 });
 
 describe('validateModuleFile', () => {

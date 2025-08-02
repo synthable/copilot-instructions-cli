@@ -92,6 +92,7 @@ Once there is rough consensus on the direction, the **Author** opens a Pull Requ
 - Content quality and clarity
 - Alignment with tier-specific rules
 - Technical accuracy and completeness
+- Correct usage of the `rule` schema for single, atomic mandates
 
 This is a collaborative loop of feedback and iteration until the contribution meets quality standards.
 

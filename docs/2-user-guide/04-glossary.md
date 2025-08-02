@@ -43,7 +43,7 @@ This document provides definitions for the core concepts and terminology used in
 ### S
 
 - **Schema**
-  - A formal declaration in a module's frontmatter that defines the purpose and required structure of its Markdown content. The five schemas are `procedure`, `specification`, `pattern`, `checklist`, and `data`.
+  - A formal declaration in a module's frontmatter that defines the purpose and required structure of its Markdown content. The six schemas are `procedure`, `specification`, `pattern`, `checklist`, `data`, and `rule`.
 
 ### T
 

@@ -71,12 +71,13 @@ The frontmatter is a YAML block at the top of the file, enclosed by `---`. It co
   - `technology`: For factual knowledge about a specific tool, language, or platform.
   - `execution`: For step-by-step playbooks that perform a concrete task.
 
-- `schema` (string): Dictates the required format of the module content. One of the five official schemas:
-  - `procedure`:
-  - `specification`:
-  - `pattern`:
-  - `checklist`:
-  - `data`:
+- `schema` (string): Dictates the required format of the module content. One of the six official schemas:
+  - `procedure`
+  - `specification`
+  - `pattern`
+  - `checklist`
+  - `data`
+  - `rule`
 
 - `layer` (number): A number from 0-4 that defines the module's position in the cognitive hierarchy. Its purpose is to enable validation of the cognitive flow, ensuring bedrock concepts like `Ethics` (Layer 0) are processed before dependent concepts like `Decision-Making` (Layer 3).
   - For `foundation` modules, a number between 0-4.
@@ -116,24 +117,35 @@ authors:
 ---
 ```
 
-## 4. The Five Module Schemas: A Deep Dive 🗂️
+## 4. The Six Module Schemas: A Deep Dive 🗂️
 
 A module's **schema** is a formal declaration of its purpose and structure. It is the most important piece of metadata an author provides, as it tells the system how the module's content should be interpreted and validated.
 
 The core philosophy is **"structure should follow intent."** By choosing the correct schema, an author makes their module clearer, more effective, and easier for both humans and machines to understand.
 
-This section details the five official schemas. While each schema has a natural affinity for certain tiers, the author's explicit choice in the module's frontmatter is the final authority.
+This section details the six official schemas. While each schema has a natural affinity for certain tiers, the author's explicit choice in the module's frontmatter is the final authority.
 
-### 4.1. Quick Reference: The Five Module Schemas
+### 4.1. Quick Reference: The Six Module Schemas
 
 The fastest way to choose the right schema is to follow this decision process:
 
 ```mermaid
 graph TD
-    Start["`**What is your module's primary purpose?**`"] --> Q1{"`Is it a step-by-step,
+    Start["`**What is your module's primary purpose?**`"] --> Q1{"`Is it a single, atomic,
+    non-procedural mandate?`"}
+
+    Q1 -->|Yes| RULE["`**RULE**
+
+    Keywords: Mandate, Constraint,
+    Axiom, Non-negotiable
+
+    Examples: be-truthful,
+    do-no-harm`"]
+
+    Q1 -->|No| Q2{"`Is it a step-by-step,
     sequential process?`"}
 
-    Q1 -->|Yes| PROC["`**PROCEDURE**
+    Q2 -->|Yes| PROC["`**PROCEDURE**
 
     Keywords: Process, Algorithm,
     Workflow, Playbook, How-to
@@ -141,10 +153,10 @@ graph TD
     Examples: debug-api-endpoint,
     git-commit-workflow`"]
 
-    Q1 -->|No| Q2{"`Is it a list of conditions
+    Q2 -->|No| Q3{"`Is it a list of conditions
     to verify/check?`"}
 
-    Q2 -->|Yes| CHECK["`**CHECKLIST**
+    Q3 -->|Yes| CHECK["`**CHECKLIST**
 
     Keywords: Verify, Assess,
     Audit, Quality Gate
@@ -152,10 +164,10 @@ graph TD
     Examples: code-review-items,
     security-audit-points`"]
 
-    Q2 -->|No| Q3{"`Is it factual rules/standards
+    Q3 -->|No| Q4{"`Is it factual rules/standards
     for a specific tool?`"}
 
-    Q3 -->|Yes| SPEC["`**SPECIFICATION**
+    Q4 -->|Yes| SPEC["`**SPECIFICATION**
 
     Keywords: Rules, Facts,
     Standards, API Contract
@@ -163,10 +175,10 @@ graph TD
     Examples: react-hooks-rules,
     pep8-style-guide`"]
 
-    Q3 -->|No| Q4{"`Is it an abstract concept
+    Q4 -->|No| Q5{"`Is it an abstract concept
     with trade-offs?`"}
 
-    Q4 -->|Yes| PATT["`**PATTERN**
+    Q5 -->|Yes| PATT["`**PATTERN**
 
     Keywords: Concept, Architecture,
     Philosophy, Trade-offs
@@ -174,7 +186,7 @@ graph TD
     Examples: singleton-pattern,
     microservices-architecture`"]
 
-    Q4 -->|No| DATA["`**DATA**
+    Q5 -->|No| DATA["`**DATA**
 
     Keywords: Reference, Input,
     Example, Configuration
@@ -403,6 +415,106 @@ This is the standard `tsconfig.json` configuration for a strict Node.js project.
 
 This schema is particularly useful for providing configuration files, code snippets, or other structured data that the AI can use as a reference or input in its reasoning process.
 
+### 4.7. The `rule` Schema
+
+#### **1. Purpose and Philosophy**
+
+The `rule` schema is designed to define a single, atomic, non-procedural constraint with maximum force and clarity. Its purpose is to establish a non-negotiable mandate that governs an AI's behavior or output.
+
+When authoring a `rule` module, it is useful to consider the "spirit of the law" versus the "letter of the law":
+
+- **The "Letter" (A Heuristic):** "The mandate must be a single, imperative sentence." This is a simple guideline that is correct in most cases and serves as an excellent starting point.
+- **The "Spirit" (The Core Principle):** "The mandate must represent one, and only one, indivisible concept, expressed with maximum force and minimum noise."
+
+The ultimate goal is **conceptual atomicity**. While a single sentence is the ideal, perfect clarity for a single concept may occasionally require two tightly-coupled sentences or a short, focused list.
+
+#### **2. Formal Definition**
+
+A module using the `rule` schema must adhere to the following principles:
+
+1.  **Conceptual Atomicity:** It **MUST** represent a single, indivisible concept. If the content introduces multiple, distinct, and separable rules, it is not atomic and should be broken into multiple `rule` modules or refactored into a `specification`.
+2.  **Declarative Nature:** It **MUST** be declarative, not procedural. It must describe a state, a condition, or a constraint on the final output. It **MUST NOT** describe a sequence of steps or a process.
+3.  **Imperative Language:** The content **MUST** consist only of imperative statements (e.g., using `MUST`, `WILL`, `SHALL`, `MUST NOT`). It **MUST NOT** contain descriptive, explanatory, or conversational text.
+4.  **Brevity and Potency:** It **MUST** be concise. The content should be a single, short paragraph. A short, unordered list is permissible only if every list item directly supports and clarifies the single, overarching mandate.
+
+#### **3. Content Requirements**
+
+The Markdown content of a `rule` module must contain only one section:
+
+```markdown
+## Mandate
+
+The imperative statement(s) that form the rule.
+```
+
+#### **4. Illustrative Examples**
+
+##### ✅ **Good Example (The Ideal - Single Sentence)**
+
+This is the gold standard for a `rule` module.
+
+```markdown
+## Mandate
+
+You MUST NOT knowingly present false, fabricated, or misleading information as fact.
+```
+
+- **Critique:** Perfect. It is one sentence expressing one indivisible concept: truthfulness.
+
+##### ✅ **Good Example (Acceptable - Tightly-Coupled Sentences)**
+
+This is acceptable because two sentences are required to fully express the single, atomic concept of epistemic responsibility.
+
+```markdown
+## Mandate
+
+You MUST explicitly state when you do not have sufficient information to answer a question. You MUST also proactively correct any errors you identify in your own previous statements.
+```
+
+- **Critique:** Acceptable. The two commands—"clarify ignorance" and "correct errors"—are two facets of the same core idea. They are not independent rules that could be used separately.
+
+##### ❌ **Bad Example (Multiple, Unrelated Ideas)**
+
+This violates the principle of conceptual atomicity.
+
+```markdown
+## Mandate
+
+You MUST NOT present false information. You MUST also ensure all TypeScript code is compatible with `strict: true`.
+```
+
+- **Critique:** Incorrect. This contains two completely separate rules. It **MUST** be split into two different modules: one `rule` module for truthfulness and one `specification` or `rule` module for TypeScript standards.
+
+##### ❌ **Bad Example (Becomes a `specification`)**
+
+This example violates multiple principles and should be refactored.
+
+```markdown
+## Mandate
+
+You MUST report errors in a clear and actionable way. This is important for user experience. The error message MUST NOT expose stack traces or other sensitive system details. You MUST also provide a unique correlation ID for tracking purposes.
+```
+
+- **Critique:** Flawed. It contains (1) descriptive filler, and (2) three distinct, separable rules. This module **MUST** be refactored into a `specification` schema, where each rule becomes an item under `## Key Rules`.
+
+#### **5. Schema Decision Guide (The Litmus Test)**
+
+An author should use the `rule` schema if they can answer "yes" to all of the following questions:
+
+1.  **Does my instruction represent a single, indivisible concept?**
+2.  **Is it a non-procedural constraint, rather than a sequence of steps?**
+3.  **Is it expressed purely as imperative commands, with no descriptive filler?**
+
+If the answer to any of these is "no," another schema (`specification` or `procedure`) is more appropriate.
+
+#### **6. Summary: `rule` vs. Other Schemas**
+
+| Schema              | Core Purpose                                                  | Example Use Case                              |
+| :------------------ | :------------------------------------------------------------ | :-------------------------------------------- |
+| **`rule`**          | A single, atomic, non-procedural mandate.                     | `You MUST NOT cause harm.`                    |
+| **`specification`** | A set of declarative rules and facts about a specific entity. | The key rules for using React Hooks.          |
+| **`procedure`**     | A step-by-step, sequential process for performing a task.     | The process for writing a Git commit message. |
+
 [For full examples of a module, refer to Section 6](#6-full-module-examples).
 
 ### 5.1. The Core Philosophy: The AI is a Tool, Not a Colleague 🤖
@@ -419,7 +531,20 @@ To find the perfect schema for your module, ask yourself the following questions
 
 ---
 
-#### **Step 1: The `procedure` Question**
+#### **Step 1: The `rule` Question**
+
+> Is the primary purpose of this module to define a **single, atomic, non-procedural mandate** with no descriptive filler?
+
+- **Think:** Is this a single, non-negotiable constraint? Is it an axiom? Would adding sections like `## Process` or `## Best Practices` be nonsensical?
+- **Keywords:** Mandate, Constraint, Axiom, Non-negotiable.
+
+✅ **If yes,** your schema is **`rule`**. You are done.
+
+❌ **If no,** proceed to Step 2.
+
+---
+
+#### **Step 2: The `procedure` Question**
 
 > Is the primary purpose of this module to describe a **step-by-step, sequential process** for performing a task, executing an algorithm, or achieving a specific outcome?
 
@@ -428,11 +553,11 @@ To find the perfect schema for your module, ask yourself the following questions
 
 ✅ **If yes,** your schema is **`procedure`**. You are done.
 
-❌ **If no,** proceed to Step 2.
+❌ **If no,** proceed to Step 3.
 
 ---
 
-#### **Step 2: The `checklist` Question**
+#### **Step 3: The `checklist` Question**
 
 > Is the primary purpose of this module to provide a list of **conditions to be verified** to ensure quality, completeness, or correctness?
 
@@ -441,11 +566,11 @@ To find the perfect schema for your module, ask yourself the following questions
 
 ✅ **If yes,** your schema is **`checklist`**. You are done.
 
-❌ **If no,** proceed to Step 3.
+❌ **If no,** proceed to Step 4.
 
 ---
 
-#### **Step 3: The `specification` Question**
+#### **Step 4: The `specification` Question**
 
 > Is the primary purpose of this module to provide a set of **declarative, factual rules** or standards for a specific tool, API, or style?
 
@@ -454,11 +579,11 @@ To find the perfect schema for your module, ask yourself the following questions
 
 ✅ **If yes,** your schema is **`specification`**. You are done.
 
-❌ **If no,** proceed to Step 4.
+❌ **If no,** proceed to Step 5.
 
 ---
 
-#### **Step 4: The `pattern` Question**
+#### **Step 5: The `pattern` Question**
 
 > Is the primary purpose of this module to explain a **high-level, abstract concept** by analyzing its principles, advantages, and disadvantages?
 
@@ -467,11 +592,11 @@ To find the perfect schema for your module, ask yourself the following questions
 
 ✅ **If yes,** your schema is **`pattern`**. You are done.
 
-❌ **If no,** proceed to Step 5.
+❌ **If no,** proceed to Step 6.
 
 ---
 
-#### **Step 5: The `data` Question**
+#### **Step 6: The `data` Question**
 
 > Is the primary content of this module a **raw, structured block of information** (like code or configuration) intended for reference or as input for another process?
 
@@ -488,6 +613,7 @@ Use this table as a quick reference once you are familiar with the decision proc
 
 | Schema              | Core Question                                | Keywords                                         |
 | :------------------ | :------------------------------------------- | :----------------------------------------------- |
+| **`rule`**          | Is it a single, atomic "mandate"?            | Constraint, Axiom, Non-negotiable                |
 | **`procedure`**     | Is it a step-by-step "how-to"?               | Process, Algorithm, Workflow, Playbook           |
 | **`checklist`**     | Is it a list of conditions to "verify"?      | Assess, Audit, Quality Gate, Criteria            |
 | **`specification`** | Is it a set of factual "rules"?              | Standards, Contract, Style Guide, Facts          |

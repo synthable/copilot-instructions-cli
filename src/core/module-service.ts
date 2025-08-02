@@ -17,6 +17,7 @@ const MODULES_ROOT_DIR = path.resolve(__dirname, '../../instructions-modules');
  * Supported schema types for instruction modules.
  */
 export type SchemaType =
+  | 'rule'
   | 'procedure'
   | 'specification'
   | 'pattern'
@@ -27,6 +28,7 @@ export type SchemaType =
  * Defines the required section order for each schema type.
  */
 const schemaSectionOrder: Record<SchemaType, string[]> = {
+  rule: ['Mandate'],
   procedure: ['Primary Directive', 'Process', 'Constraints'],
   specification: [
     'Core Concept',
@@ -288,6 +290,32 @@ function validateDataSchema(body: string): string[] {
 }
 
 /**
+ * Validates the rule schema for modules of type 'rule'.
+ * Ensures exactly one H2 heading that must be '## Mandate'.
+ * @param body - The markdown body content.
+ * @returns Array of validation error messages.
+ */
+function validateRuleSchema(body: string): string[] {
+  const errors: string[] = [];
+
+  // Parse the module's Markdown content to identify all H2 headings
+  const h2Headings = body.match(/^## .+$/gm) || [];
+
+  // Check if the count is not equal to 1
+  if (h2Headings.length !== 1) {
+    errors.push('Rule schema modules must have exactly one H2 heading.');
+    return errors;
+  }
+
+  // Check if the single heading's text is not '## Mandate'
+  if (h2Headings[0] !== '## Mandate') {
+    errors.push('The heading in a rule schema module must be ## Mandate.');
+  }
+
+  return errors;
+}
+
+/**
  * Validates a module's content against its schema and structure.
  * @param fileContent - The markdown content of the module.
  * @param tier - The tier of the module, used for tier-specific validation.
@@ -315,6 +343,8 @@ export function validateModuleContent(
       errors.push(...validateSections(schema, trimmedBody));
       if (schema === 'data') {
         errors.push(...validateDataSchema(trimmedBody));
+      } else if (schema === 'rule') {
+        errors.push(...validateRuleSchema(trimmedBody));
       }
     }
 
