@@ -136,11 +136,15 @@ function parseModule(filePath: string, fileContent: string): Module {
     module.layer = frontmatter.layer;
   }
 
-  if (
-    frontmatter.implement !== undefined &&
-    typeof frontmatter.implement === 'string'
-  ) {
-    module.implement = frontmatter.implement;
+  if (frontmatter.implement !== undefined) {
+    if (typeof frontmatter.implement === 'string') {
+      module.implement = [frontmatter.implement];
+    } else if (
+      Array.isArray(frontmatter.implement) &&
+      frontmatter.implement.every(item => typeof item === 'string')
+    ) {
+      module.implement = frontmatter.implement;
+    }
   }
 
   return module;
@@ -395,4 +399,16 @@ export async function validateModuleFile(
     const error = `Failed to read or parse module ${filePath}: ${err.message}`;
     return { filePath, isValid: false, errors: [error] };
   }
+}
+
+/**
+ * Formats the implement field for display purposes.
+ * @param implement - The implement field (array of module IDs or undefined)
+ * @returns A string representation for display
+ */
+export function formatImplementDisplay(implement?: string[]): string {
+  if (!implement || implement.length === 0) {
+    return 'N/A';
+  }
+  return implement.join(', ');
 }

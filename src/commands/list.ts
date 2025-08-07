@@ -7,7 +7,7 @@ import chalk from 'chalk';
 import ora from 'ora';
 import Table from 'cli-table3';
 import { handleError } from '../utils/error-handler.js';
-import { scanModules } from '../core/module-service.js';
+import { scanModules, formatImplementDisplay } from '../core/module-service.js';
 
 interface ListOptions {
   tier?: string;
@@ -61,7 +61,7 @@ export async function handleList(options: ListOptions): Promise<void> {
     modules.forEach(m => {
       const subjectPath = m.subject ? `${m.tier}/${m.subject}` : m.tier;
       const layer = m.layer !== undefined ? m.layer.toString() : 'N/A';
-      const implement = m.implement || 'N/A';
+      const implement = formatImplementDisplay(m.implement);
       table.push([layer, subjectPath, m.name, m.description, implement]);
     });
 

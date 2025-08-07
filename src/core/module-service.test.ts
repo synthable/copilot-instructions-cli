@@ -8,6 +8,7 @@ import {
   validateFrontmatter,
   validateModuleFile,
   validateModuleContent,
+  formatImplementDisplay,
 } from './module-service.js';
 
 // Mock dependencies
@@ -533,7 +534,127 @@ Test
     const modules = await scanModules();
     expect(modules.size).toBe(1);
     const module = modules.get('execution/test');
-    expect(module?.implement).toBe('principle/spec/target');
+    expect(module?.implement).toEqual(['principle/spec/target']);
+  });
+
+  it('should parse array implement field from frontmatter', async () => {
+    const mockFiles = [path.join(MODULES_ROOT_DIR, 'execution/test-array.md')];
+    const mockModuleContent = `---
+name: Test Multi-Implementing Module
+description: A module that implements multiple others
+schema: procedure
+implement: 
+  - 'principle/spec/auth'
+  - 'principle/spec/validation'
+---
+## Primary Directive
+Test multiple implementations
+
+## Process
+1. Test step
+
+## Constraints
+- Test constraint`;
+
+    vi.mocked(fs.access).mockResolvedValue(undefined);
+    vi.mocked(glob).mockResolvedValue(mockFiles);
+    vi.mocked(fs.readFile).mockResolvedValue(mockModuleContent);
+    vi.mocked(matter).mockReturnValue({
+      data: {
+        name: 'Test Multi-Implementing Module',
+        description: 'A module that implements multiple others',
+        schema: 'procedure',
+        implement: ['principle/spec/auth', 'principle/spec/validation'],
+      },
+      content: `
+## Primary Directive
+Test multiple implementations
+
+## Process
+1. Test step
+
+## Constraints
+- Test constraint`,
+    } as any);
+
+    const modules = await scanModules();
+    expect(modules.size).toBe(1);
+    const module = modules.get('execution/test-array');
+    expect(module?.implement).toEqual([
+      'principle/spec/auth',
+      'principle/spec/validation',
+    ]);
+  });
+
+  it('should ignore invalid implement field types', async () => {
+    const mockFiles = [
+      path.join(MODULES_ROOT_DIR, 'execution/test-invalid.md'),
+    ];
+    const mockModuleContent = `---
+name: Test Invalid Implement Module
+description: A module with invalid implement field
+schema: procedure
+implement: 123
+---
+## Primary Directive
+Test invalid implement
+
+## Process
+1. Test step
+
+## Constraints
+- Test constraint`;
+
+    vi.mocked(fs.access).mockResolvedValue(undefined);
+    vi.mocked(glob).mockResolvedValue(mockFiles);
+    vi.mocked(fs.readFile).mockResolvedValue(mockModuleContent);
+    vi.mocked(matter).mockReturnValue({
+      data: {
+        name: 'Test Invalid Implement Module',
+        description: 'A module with invalid implement field',
+        schema: 'procedure',
+        implement: 123, // Invalid type
+      },
+      content: `
+## Primary Directive
+Test invalid implement
+
+## Process
+1. Test step
+
+## Constraints
+- Test constraint`,
+    } as any);
+
+    const modules = await scanModules();
+    expect(modules.size).toBe(1);
+    const module = modules.get('execution/test-invalid');
+    expect(module?.implement).toBeUndefined();
+  });
+});
+
+describe('formatImplementDisplay', () => {
+  it('should return "N/A" for undefined implement field', () => {
+    expect(formatImplementDisplay(undefined)).toBe('N/A');
+  });
+
+  it('should return "N/A" for empty array', () => {
+    expect(formatImplementDisplay([])).toBe('N/A');
+  });
+
+  it('should return single module ID for array with one item', () => {
+    expect(formatImplementDisplay(['principle/spec/auth'])).toBe(
+      'principle/spec/auth'
+    );
+  });
+
+  it('should return comma-separated list for multiple items', () => {
+    expect(
+      formatImplementDisplay([
+        'principle/spec/auth',
+        'principle/spec/validation',
+      ])
+    ).toBe('principle/spec/auth, principle/spec/validation');
   });
 });
 
@@ -616,7 +737,7 @@ Test spec
     expect(modules.size).toBe(2);
 
     const implementingModule = modules.get('execution/implementing');
-    expect(implementingModule?.implement).toBe('principle/implemented');
+    expect(implementingModule?.implement).toEqual(['principle/implemented']);
 
     // Verify the implemented module exists
     expect(modules.has('principle/implemented')).toBe(true);

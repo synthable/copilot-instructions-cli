@@ -39,6 +39,7 @@
   - [7. Authoring Best Practices \& Style Guide 🎨](#7-authoring-best-practices--style-guide-)
     - [Atomicity: One Module, One Concept](#atomicity-one-module-one-concept)
     - [Machine-Centric Language](#machine-centric-language)
+    - [Design for Composition: Synergistic Pairs](#design-for-composition-synergistic-pairs)
     - [Use Markdown Effectively](#use-markdown-effectively)
   - [8. Module Creation Workflow 🔄](#8-module-creation-workflow-)
 
@@ -87,7 +88,20 @@ The frontmatter is a YAML block at the top of the file, enclosed by `---`. It co
 
 - `authors` (array of strings): A list of contributors to the module. `'Jane Doe <jane.doe@example.com>', 'John Smith <john.smith@example.com>'`
 
-- `implement` (string): The unique ID of another module that this module implement or instantiates. This is used to formally declare a **Synergistic Pair**. For example, a `procedure` module that provides the steps to create a commit message would `implement` the `specification` module that defines the commit message format.
+- `implement` (string | array of strings): The unique ID(s) of module(s) that this module implements or instantiates. This is used to formally declare **Synergistic Pairs**. For example, a `procedure` module that provides the steps to create a commit message would `implement` the `specification` module that defines the commit message format. Multiple implementations are supported for complex procedures that implement several specifications.
+
+  Examples:
+
+  ```yaml
+  # Single implementation
+  implement: 'principle/specs/authentication'
+
+  # Multiple implementations (new feature)
+  implement:
+    - 'principle/specs/authentication'
+    - 'principle/specs/authorization'
+    - 'principle/specs/validation'
+  ```
 
 ### Frontmatter Examples
 

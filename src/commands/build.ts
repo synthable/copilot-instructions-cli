@@ -95,48 +95,88 @@ export async function handleBuild(options: BuildOptions): Promise<void> {
       })
     );
 
-    // Perform explicit positional validation for synergistic pairs
+    // Process synergistic pairs - prepend implemented modules before implementing modules
     if (verbose === true) {
       console.log(
-        chalk.gray('[verbose] Performing synergistic pair validation')
+        chalk.gray(
+          '[verbose] Processing synergistic pairs and reordering modules'
+        )
       );
     }
-    for (let i = 0; i < resolvedModules.length; i++) {
-      const moduleA = resolvedModules[i];
-      if (moduleA.implement) {
-        const moduleB_id = moduleA.implement;
+
+    const finalModules: typeof resolvedModules = [];
+    const processedModules = new Set<string>();
+
+    for (const module of resolvedModules) {
+      if (processedModules.has(module.id)) {
+        continue; // Skip if already processed
+      }
+
+      if (module.implement && module.implement.length > 0) {
         if (verbose === true) {
           console.log(
             chalk.gray(
-              `[verbose] Module '${moduleA.id}' implement '${moduleB_id}' - checking position`
+              `[verbose] Module '${module.id}' implements: ${module.implement.join(', ')}`
             )
           );
         }
 
-        // Check if there's a next module
-        if (i + 1 >= resolvedModules.length) {
-          console.warn(
-            chalk.yellow(
-              `Warning: Module '${moduleA.id}' implement '${moduleB_id}', but it is the last module in the list. The implemented module must follow immediately.`
-            )
-          );
-        } else {
-          const moduleB = resolvedModules[i + 1];
-          if (moduleB.id !== moduleB_id) {
+        // Validate all implemented modules exist in the persona
+        const moduleIds = new Set(resolvedModules.map(m => m.id));
+        for (const implementedId of module.implement) {
+          if (!moduleIds.has(implementedId)) {
             console.warn(
               chalk.yellow(
-                `Warning: Module '${moduleA.id}' implement '${moduleB_id}', but it is followed by '${moduleB.id}'. The implemented module must appear immediately after the implementing module.`
-              )
-            );
-          } else if (verbose === true) {
-            console.log(
-              chalk.gray(
-                `[verbose] Synergistic pair validated: '${moduleA.id}' → '${moduleB.id}'`
+                `Warning: Module '${module.id}' implements '${implementedId}', but it is not included in the persona modules list.`
               )
             );
           }
         }
+
+        // Add implemented modules first (prepend)
+        for (const implementedId of module.implement) {
+          const implementedModule = resolvedModules.find(
+            m => m.id === implementedId
+          );
+          if (implementedModule && !processedModules.has(implementedId)) {
+            finalModules.push(implementedModule);
+            processedModules.add(implementedId);
+            if (verbose === true) {
+              console.log(
+                chalk.gray(
+                  `[verbose] Prepended implemented module: ${implementedId}`
+                )
+              );
+            }
+          }
+        }
       }
+
+      // Add the implementing module (or regular module)
+      if (!processedModules.has(module.id)) {
+        finalModules.push(module);
+        processedModules.add(module.id);
+        if (
+          verbose === true &&
+          module.implement &&
+          module.implement.length > 0
+        ) {
+          console.log(
+            chalk.gray(`[verbose] Added implementing module: ${module.id}`)
+          );
+        }
+      }
+    }
+
+    // Update resolvedModules with the reordered array
+    resolvedModules.splice(0, resolvedModules.length, ...finalModules);
+
+    if (verbose === true) {
+      console.log(
+        chalk.gray(
+          `[verbose] Final module order: ${resolvedModules.map(m => m.id).join(', ')}`
+        )
+      );
     }
 
     const outputParts: string[] = [];

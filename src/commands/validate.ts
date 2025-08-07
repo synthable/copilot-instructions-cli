@@ -133,16 +133,20 @@ async function validateAll(
       const moduleIds = new Set(allModules.keys());
 
       for (const [id, module] of allModules) {
-        if (module.implement && !moduleIds.has(module.implement)) {
-          // Find the result for this module and add the error
-          const moduleResult = results.find(
-            r => r.filePath === module.filePath
-          );
-          if (moduleResult) {
-            moduleResult.isValid = false;
-            moduleResult.errors.push(
-              `Error: Module '${id}' implement non-existent module '${module.implement}'.`
-            );
+        if (module.implement && module.implement.length > 0) {
+          for (const implementedId of module.implement) {
+            if (!moduleIds.has(implementedId)) {
+              // Find the result for this module and add the error
+              const moduleResult = results.find(
+                r => r.filePath === module.filePath
+              );
+              if (moduleResult) {
+                moduleResult.isValid = false;
+                moduleResult.errors.push(
+                  `Error: Module '${id}' implements non-existent module '${implementedId}'.`
+                );
+              }
+            }
           }
         }
       }

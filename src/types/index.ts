@@ -18,8 +18,8 @@ export interface Module {
   filePath: string;
   /** The layer of the module (foundation tier only) */
   layer?: number;
-  /** The ID of another module that this module implements (for Synergistic Pairs) */
-  implement?: string;
+  /** The ID(s) of module(s) that this module implements (for Synergistic Pairs) */
+  implement?: string[];
 }
 
 /**
