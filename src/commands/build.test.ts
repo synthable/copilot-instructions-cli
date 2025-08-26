@@ -356,7 +356,7 @@ describe('Synergistic Pair Build Validation', () => {
     vi.mocked(fs.writeFile).mockResolvedValue(undefined);
   });
 
-  it('should automatically reorder modules for synergistic pairs', async () => {
+  it('should warn if modules are out of order for synergistic pairs', async () => {
     // Arrange
     const modules = ['proc-implement-valid', 'spec-for-implementing'];
     const moduleMap = new Map([
@@ -364,14 +364,20 @@ describe('Synergistic Pair Build Validation', () => {
       ['spec-for-implementing', mockModule2],
     ]);
     vi.mocked(scanModules).mockResolvedValue(moduleMap);
-    const writeFileSpy = vi.mocked(fs.writeFile);
+    const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
 
     // Act
     await handleBuild({ modules, output: 'output.md' });
 
-    // Assert - the build succeeded and contains the reordered content
-    expect(writeFileSpy).toHaveBeenCalled();
-    // The actual content ordering is tested by the build logic itself
+    // Assert
+    expect(consoleSpy).toHaveBeenCalledWith(
+      expect.stringContaining(
+        "Warning: Module 'proc-implement-valid' implements 'spec-for-implementing', but it appears after it in the module list. For best results, 'spec-for-implementing' should appear before 'proc-implement-valid'."
+      )
+    );
+    expect(fs.writeFile).toHaveBeenCalled();
+
+    consoleSpy.mockRestore();
   });
 
   it('should handle multiple implementing modules correctly', async () => {
@@ -405,14 +411,25 @@ describe('Synergistic Pair Build Validation', () => {
       ['other-spec', otherSpecModule],
     ]);
     vi.mocked(scanModules).mockResolvedValue(moduleMap);
-    const writeFileSpy = vi.mocked(fs.writeFile);
+    const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
 
     // Act
     await handleBuild({ modules, output: 'output.md' });
 
-    // Assert - the build succeeded and contains all modules
-    expect(writeFileSpy).toHaveBeenCalled();
-    // The actual content ordering is tested by the build logic itself
+    // Assert
+    expect(consoleSpy).toHaveBeenCalledWith(
+      expect.stringContaining(
+        "Warning: Module 'multi-impl-proc' implements 'spec-for-implementing', but it appears after it in the module list. For best results, 'spec-for-implementing' should appear before 'multi-impl-proc'."
+      )
+    );
+    expect(consoleSpy).toHaveBeenCalledWith(
+      expect.stringContaining(
+        "Warning: Module 'multi-impl-proc' implements 'other-spec', but it appears after it in the module list. For best results, 'other-spec' should appear before 'multi-impl-proc'."
+      )
+    );
+    expect(fs.writeFile).toHaveBeenCalled();
+
+    consoleSpy.mockRestore();
   });
 
   it('should warn when implemented module is missing from persona', async () => {
