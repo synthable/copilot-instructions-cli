@@ -55,7 +55,7 @@ copilot-instructions create-module principle code-quality "Clean Code Principles
 
 **Options:**
 
-- `-l, --layer <number>`: Specify layer for foundation modules (0-5).
+- `-o, --order <number>`: Specify order for foundation modules (0-5).
 
 ## 🤖 Creating a Persona
 
@@ -151,7 +151,7 @@ copilot-instructions create-module <tier> <subject> <name> [description]
 
 **Options:**
 
-- `-l, --layer <number>`: Layer for foundation modules (0-5).
+- `-o, --order <number>`: Order for foundation modules (0-5).
 
 ### `create-persona`
 

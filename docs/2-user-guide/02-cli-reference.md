@@ -37,7 +37,7 @@ This document provides a complete reference for the `copilot-instructions` CLI t
       - [Syntax](#syntax-4)
       - [Arguments](#arguments-2)
       - [Options](#options-4)
-      - [Layer Requirements for Foundation Tier](#layer-requirements-for-foundation-tier)
+      - [Order Requirements for Foundation Tier](#order-requirements-for-foundation-tier)
       - [Examples](#examples-4)
     - [`create-persona` - Create a New Persona](#create-persona---create-a-new-persona)
       - [Syntax](#syntax-5)
@@ -121,8 +121,8 @@ graph LR
     E --> F["`**Final Prompt**
     Cohesive AI instructions`"]
 
-    subgraph "Ordering Rules"
-        G["`**Foundation:** Layer-based (0-4)
+    subgraph "Layering Rules"
+        G["`**Foundation:** Order-based (0-4)
         **Principle:** Generality-based
         **Technology:** Language→Framework→Tool
         **Execution:** Sequential playbooks`"]
@@ -200,7 +200,7 @@ copilot-instructions list [options]
 
 The command displays a table with the following columns:
 
-- **Layer**: The cognitive layer (0-5 for foundation modules, N/A for others)
+- **Order**: The cognitive ordering (0-5 for foundation modules, N/A for others)
 - **Tier/Subject**: The module's tier and subject path
 - **Name**: Human-readable module name
 - **Description**: Brief module description
@@ -291,7 +291,7 @@ copilot-instructions validate [path] [options]
 
 - Valid YAML frontmatter with required fields
 - Correct schema structure and section order
-- Proper tier-specific rules (e.g., layer for foundation modules)
+- Proper tier-specific rules (e.g., order for foundation modules)
 - Must be within `instructions-modules/` directory
 
 \*\*Persona Files (`.persona.json`, `.persona.jsonc`):
@@ -358,11 +358,11 @@ copilot-instructions create-module <tier> <subject> <name> [description] [option
 
 | Option                 | Type   | Description                        |
 | ---------------------- | ------ | ---------------------------------- |
-| `-l, --layer <number>` | Number | Layer for foundation modules (0-5) |
+| `-o, --order <number>` | Number | Order for foundation modules (0-5) |
 
-#### Layer Requirements for Foundation Tier
+#### Order Requirements for Foundation Tier
 
-| Subject           | Default Layer | Description                     |
+| Subject           | Default Order | Description                     |
 | ----------------- | ------------- | ------------------------------- |
 | `bias`            | 1             | Cognitive bias mitigation       |
 | `communication`   | 2             | Information exchange principles |
@@ -377,16 +377,16 @@ copilot-instructions create-module <tier> <subject> <name> [description] [option
 
 #### Examples
 
-**Foundation module with auto-detected layer:**
+**Foundation module with auto-detected order:**
 
 ```bash
 copilot-instructions create-module foundation logic "Inductive Reasoning" "Reasoning from specific observations to general conclusions"
 ```
 
-**Foundation module with explicit layer:**
+**Foundation module with explicit order:**
 
 ```bash
-copilot-instructions create-module foundation "new-subject" "Custom Foundation Module" "A custom module" --layer 2
+copilot-instructions create-module foundation "new-subject" "Custom Foundation Module" "A custom module" --order 2
 ```
 
 **Non-foundation modules:**

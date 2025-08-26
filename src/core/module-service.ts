@@ -130,10 +130,10 @@ function parseModule(filePath: string, fileContent: string): Module {
   };
 
   if (
-    frontmatter.layer !== undefined &&
-    typeof frontmatter.layer === 'number'
+    frontmatter.order !== undefined &&
+    typeof frontmatter.order === 'number'
   ) {
-    module.layer = frontmatter.layer;
+    module.order = frontmatter.order;
   }
 
   if (frontmatter.implement !== undefined) {
@@ -223,15 +223,15 @@ export function validateFrontmatter(
   }
 
   if (tier === 'foundation') {
-    const layer = frontmatter.layer;
-    if (layer === undefined || layer === null) {
-      errors.push('Missing required field for foundation tier: "layer"');
+    const order = frontmatter.order;
+    if (order === undefined || order === null) {
+      errors.push('Missing required field for foundation tier: "order"');
     } else if (
-      !Number.isInteger(layer) ||
-      (layer as number) < 0 ||
-      (layer as number) > 5
+      !Number.isInteger(order) ||
+      (order as number) < 0 ||
+      (order as number) > 5
     ) {
-      errors.push('The "layer" field must be an integer between 0 and 5.');
+      errors.push('The "order" field must be an integer between 0 and 5.');
     }
   }
 

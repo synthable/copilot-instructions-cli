@@ -2,7 +2,7 @@
 name: 'Valid Rule'
 description: 'A valid rule module for testing.'
 tier: foundation
-layer: 0
+order: 0
 schema: rule
 ---
 

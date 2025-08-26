@@ -30,15 +30,15 @@ export async function handleList(options: ListOptions): Promise<void> {
     }
 
     modules.sort((a, b) => {
-      const aHasLayer = a.layer !== undefined;
-      const bHasLayer = b.layer !== undefined;
+      const aHasOrder = a.order !== undefined;
+      const bHasOrder = b.order !== undefined;
 
-      if (aHasLayer && bHasLayer) {
-        if (a.layer! < b.layer!) return -1;
-        if (a.layer! > b.layer!) return 1;
-      } else if (aHasLayer) {
+      if (aHasOrder && bHasOrder) {
+        if (a.order! < b.order!) return -1;
+        if (a.order! > b.order!) return 1;
+      } else if (aHasOrder) {
         return -1;
-      } else if (bHasLayer) {
+      } else if (bHasOrder) {
         return 1;
       }
 
@@ -52,7 +52,7 @@ export async function handleList(options: ListOptions): Promise<void> {
 
     const maxWidth = process.stdout.columns || 80;
     const table = new Table({
-      head: ['Layer', 'Tier/Subject', 'Name', 'Description', 'Implement'],
+      head: ['Order', 'Tier/Subject', 'Name', 'Description', 'Implement'],
       colWidths: [
         8,
         32,
@@ -66,9 +66,9 @@ export async function handleList(options: ListOptions): Promise<void> {
 
     modules.forEach(m => {
       const subjectPath = m.subject ? `${m.tier}/${m.subject}` : m.tier;
-      const layer = m.layer !== undefined ? m.layer.toString() : 'N/A';
+      const order = m.order !== undefined ? m.order.toString() : 'N/A';
       const implement = formatImplementDisplay(m.implement);
-      table.push([layer, subjectPath, m.name, m.description, implement]);
+      table.push([order, subjectPath, m.name, m.description, implement]);
     });
 
     console.log(table.toString());

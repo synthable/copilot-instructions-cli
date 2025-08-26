@@ -16,8 +16,8 @@ export interface Module {
   content: string;
   /** The absolute path to the source file */
   filePath: string;
-  /** The layer of the module (foundation tier only) */
-  layer?: number;
+  /** The order of the module (foundation tier only) */
+  order?: number;
   /** The ID(s) of module(s) that this module implements (for Synergistic Pairs) */
   implement?: string[];
 }

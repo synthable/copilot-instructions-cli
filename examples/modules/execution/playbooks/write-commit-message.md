@@ -2,14 +2,17 @@
 name: 'Write Commit Message Playbook'
 description: 'A playbook for writing a commit message that follows the Conventional Commits standard.'
 tier: execution
-layer: null
+order: null
 schema: procedure
 implement: 'principle/specs/conventional-commits'
 ---
+
 ## Primary Directive
+
 Generate a commit message that adheres to the Conventional Commits standard.
 
 ## Process
+
 1. Analyze the code changes to determine the primary type of modification (feat, fix, docs, style, refactor, test, chore).
 2. Identify the scope if the change affects a specific component or area of the codebase.
 3. Determine if this is a breaking change that requires the `!` indicator.
@@ -18,6 +21,7 @@ Generate a commit message that adheres to the Conventional Commits standard.
 6. Add any relevant footers for breaking changes or issue references.
 
 ## Constraints
+
 - Do NOT exceed 50 characters in the subject line.
 - Do NOT use past tense verbs in the subject line.
 - Do NOT use types outside the standard list (feat, fix, docs, style, refactor, test, chore).

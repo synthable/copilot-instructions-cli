@@ -54,7 +54,7 @@ describe('validateFrontmatter', () => {
     expect(result.errors).toContain('Field "name" must be a non-empty string.');
   });
 
-  it('should require layer for foundation tier', () => {
+  it('should require order for foundation tier', () => {
     const frontmatter = {
       name: 'Test Module',
       description: 'A module for testing.',
@@ -63,21 +63,21 @@ describe('validateFrontmatter', () => {
     const result = validateFrontmatter(frontmatter, 'foundation');
     expect(result.isValid).toBe(false);
     expect(result.errors).toContain(
-      'Missing required field for foundation tier: "layer"'
+      'Missing required field for foundation tier: "order"'
     );
   });
 
-  it('should validate layer for foundation tier', () => {
+  it('should validate order for foundation tier', () => {
     const frontmatter = {
       name: 'Test Module',
       description: 'A module for testing.',
       schema: 'procedure',
-      layer: 99,
+      order: 99,
     };
     const result = validateFrontmatter(frontmatter, 'foundation');
     expect(result.isValid).toBe(false);
     expect(result.errors).toContain(
-      'The "layer" field must be an integer between 0 and 5.'
+      'The "order" field must be an integer between 0 and 5.'
     );
   });
 
@@ -226,7 +226,7 @@ This should not be here.
 name: 'Valid Rule'
 description: 'A valid rule module for testing.'
 tier: foundation
-layer: 0
+order: 0
 schema: rule
 ---
 ## Mandate
@@ -236,7 +236,7 @@ You MUST follow this single, atomic rule.`;
           name: 'Valid Rule',
           description: 'A valid rule module for testing.',
           tier: 'foundation',
-          layer: 0,
+          order: 0,
           schema: 'rule',
         },
         content: `
@@ -253,7 +253,7 @@ You MUST follow this single, atomic rule.`,
 name: 'Invalid Rule - Multiple Headings'
 description: 'An invalid rule module for testing.'
 tier: foundation
-layer: 0
+order: 0
 schema: rule
 ---
 ## Mandate
@@ -266,7 +266,7 @@ This is the second, forbidden heading.`;
           name: 'Invalid Rule - Multiple Headings',
           description: 'An invalid rule module for testing.',
           tier: 'foundation',
-          layer: 0,
+          order: 0,
           schema: 'rule',
         },
         content: `
@@ -288,7 +288,7 @@ This is the second, forbidden heading.`,
 name: 'Invalid Rule - Wrong Heading'
 description: 'An invalid rule module for testing.'
 tier: foundation
-layer: 0
+order: 0
 schema: rule
 ---
 ## Core Concept
@@ -298,7 +298,7 @@ This heading is not '## Mandate' and should fail validation.`;
           name: 'Invalid Rule - Wrong Heading',
           description: 'An invalid rule module for testing.',
           tier: 'foundation',
-          layer: 0,
+          order: 0,
           schema: 'rule',
         },
         content: `
@@ -325,7 +325,7 @@ describe('validateModuleFile', () => {
 name: Test
 description: Test desc
 schema: procedure
-layer: 1
+order: 1
 ---
 ## Primary Directive
 Test
@@ -340,7 +340,7 @@ Test
         name: 'Test',
         description: 'Test desc',
         schema: 'procedure',
-        layer: 1,
+        order: 1,
       },
       content: `
 ## Primary Directive
@@ -414,7 +414,7 @@ describe('scanModules', () => {
 name: Test1
 description: Desc1
 schema: procedure
-layer: 1
+order: 1
 ---
 Content1`;
     const mockModule2Content = `---
@@ -436,7 +436,7 @@ Content2`;
           name: 'Test1',
           description: 'Desc1',
           schema: 'procedure',
-          layer: 1,
+          order: 1,
         },
         content: 'Content1',
       } as any)
@@ -451,7 +451,7 @@ Content2`;
     expect(modules.has('principle/quality/test2')).toBe(true);
     const module1 = modules.get('foundation/logic/test1');
     expect(module1?.name).toBe('Test1');
-    expect(module1?.layer).toBe(1);
+    expect(module1?.order).toBe(1);
   });
 
   it('should scan and parse only specified modules when IDs are provided', async () => {
@@ -461,7 +461,7 @@ Content2`;
 name: Test1
 description: Desc1
 schema: procedure
-layer: 1
+order: 1
 ---
 Content1`;
 
@@ -472,7 +472,7 @@ Content1`;
         name: 'Test1',
         description: 'Desc1',
         schema: 'procedure',
-        layer: 1,
+        order: 1,
       },
       content: 'Content1',
     } as any);

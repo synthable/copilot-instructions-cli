@@ -7,21 +7,33 @@
     - [Required Fields](#required-fields)
     - [Optional Fields](#optional-fields)
     - [Frontmatter Examples](#frontmatter-examples)
-  - [4. The Five Module Schemas: A Deep Dive 🗂️](#4-the-five-module-schemas-a-deep-dive-️)
-    - [4.1. Quick Reference: The Five Module Schemas](#41-quick-reference-the-five-module-schemas)
+  - [4. The Six Module Schemas: A Deep Dive 🗂️](#4-the-six-module-schemas-a-deep-dive-️)
+    - [4.1. Quick Reference: The Six Module Schemas](#41-quick-reference-the-six-module-schemas)
     - [4.2. The `procedure` Schema](#42-the-procedure-schema)
     - [4.3. The `specification` Schema](#43-the-specification-schema)
     - [4.4. The `pattern` Schema](#44-the-pattern-schema)
     - [4.5. The `checklist` Schema](#45-the-checklist-schema)
     - [4.6. The `data` Schema](#46-the-data-schema)
     - [`data`](#data)
+    - [4.7. The `rule` Schema](#47-the-rule-schema)
+      - [**1. Purpose and Philosophy**](#1-purpose-and-philosophy)
+      - [**2. Formal Definition**](#2-formal-definition)
+      - [**3. Content Requirements**](#3-content-requirements)
+      - [**4. Illustrative Examples**](#4-illustrative-examples)
+        - [✅ **Good Example (The Ideal - Single Sentence)**](#-good-example-the-ideal---single-sentence)
+        - [✅ **Good Example (Acceptable - Tightly-Coupled Sentences)**](#-good-example-acceptable---tightly-coupled-sentences)
+        - [❌ **Bad Example (Multiple, Unrelated Ideas)**](#-bad-example-multiple-unrelated-ideas)
+        - [❌ **Bad Example (Becomes a `specification`)**](#-bad-example-becomes-a-specification)
+      - [**5. Schema Decision Guide (The Litmus Test)**](#5-schema-decision-guide-the-litmus-test)
+      - [**6. Summary: `rule` vs. Other Schemas**](#6-summary-rule-vs-other-schemas)
     - [5.1. The Core Philosophy: The AI is a Tool, Not a Colleague 🤖](#51-the-core-philosophy-the-ai-is-a-tool-not-a-colleague-)
     - [Schema Decision Guide: A Step-by-Step Process 🗺️](#schema-decision-guide-a-step-by-step-process-️)
-      - [**Step 1: The `procedure` Question**](#step-1-the-procedure-question)
-      - [**Step 2: The `checklist` Question**](#step-2-the-checklist-question)
-      - [**Step 3: The `specification` Question**](#step-3-the-specification-question)
-      - [**Step 4: The `pattern` Question**](#step-4-the-pattern-question)
-      - [**Step 5: The `data` Question**](#step-5-the-data-question)
+      - [**Step 1: The `rule` Question**](#step-1-the-rule-question)
+      - [**Step 2: The `procedure` Question**](#step-2-the-procedure-question)
+      - [**Step 3: The `checklist` Question**](#step-3-the-checklist-question)
+      - [**Step 4: The `specification` Question**](#step-4-the-specification-question)
+      - [**Step 5: The `pattern` Question**](#step-5-the-pattern-question)
+      - [**Step 6: The `data` Question**](#step-6-the-data-question)
     - [Summary Table](#summary-table)
     - [5.2. The Three Pillars of Machine-Centric Writing 🏛️](#52-the-three-pillars-of-machine-centric-writing-️)
       - [A. Determinism: Ensure One Path of Execution](#a-determinism-ensure-one-path-of-execution)
@@ -72,6 +84,8 @@ The frontmatter is a YAML block at the top of the file, enclosed by `---`. It co
   - `technology`: For factual knowledge about a specific tool, language, or platform.
   - `execution`: For step-by-step playbooks that perform a concrete task.
 
+  For a detailed guide on selecting the correct tier, see the [Module Classification Guide](./01a-module-classification-guide.md).
+
 - `schema` (string): Dictates the required format of the module content. One of the six official schemas:
   - `procedure`
   - `specification`
@@ -80,9 +94,9 @@ The frontmatter is a YAML block at the top of the file, enclosed by `---`. It co
   - `data`
   - `rule`
 
-- `layer` (number): A number from 0-4 that defines the module's position in the cognitive hierarchy. Its purpose is to enable validation of the cognitive flow, ensuring bedrock concepts like `Ethics` (Layer 0) are processed before dependent concepts like `Decision-Making` (Layer 3).
-  - For `foundation` modules, a number between 0-4.
-  - For `principle`, `technology`, and `execution` modules, this field **MUST** be set to null.
+- `order` (number | null, required): A number that defines the module's sequential position in the cognitive hierarchy of the `Foundation` tier.
+  - **MUST** be an integer from `0` to `4` if `tier` is `foundation`.
+  - **MUST** be `null` if `tier` is `principle`, `technology`, or `execution`.
 
 ### Optional Fields
 
@@ -112,7 +126,7 @@ The frontmatter is a YAML block at the top of the file, enclosed by `---`. It co
 name: 'First-Principles Thinking'
 description: 'A process for deconstructing problems to their most fundamental, indivisible truths.'
 tier: foundation
-layer: 1
+order: 1
 schema: procedure
 authors:
   - 'Jane Doe <jane.doe@example.com>'
@@ -126,7 +140,7 @@ authors:
 name: 'React: Rules of Hooks'
 description: 'The two fundamental rules for using React Hooks correctly.'
 tier: technology
-layer: null
+order: null
 schema: specification
 authors:
   - 'John Smith <john.smith@example.com>'
@@ -859,7 +873,7 @@ Follow this systematic process to create new, high-quality modules.
 1.  **Conceptualize and Scope:**
     - Identify the single, atomic idea the module will represent.
     - Determine its `tier` based on its scope (is it a universal truth, a professional principle, a specific technology, or a task?).
-    - If it is a `foundation` module, determine its `layer` in the cognitive hierarchy.
+    - If it is a `foundation` module, determine its `order` in the cognitive hierarchy.
 
 2.  **Select the Schema:**
     - Based on the module's core purpose, choose the most appropriate schema from the five official types. This is the most critical authoring decision.
@@ -869,7 +883,7 @@ Follow this systematic process to create new, high-quality modules.
     - Write the content for each section, following the principles of machine-centric language and atomicity.
 
 4.  **Complete the Frontmatter:**
-    - Fill in all required frontmatter fields (`name`, `description`, `tier`, `layer`, `schema`). Double-check that the `layer` value is correct based on the tier.
+    - Fill in all required frontmatter fields (`name`, `description`, `tier`, `order`, `schema`). Double-check that the `order` value is correct based on the tier.
 
 5.  **Test and Iterate:**
     - Create a minimal test persona that includes the new module.
