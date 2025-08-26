@@ -52,7 +52,7 @@ describe('handleCreateModule', () => {
     const subject = 'logic';
     const name = 'Test Module';
     const description = 'A test module.';
-    const options = { order: 1 };
+    const options = { layer: 1 };
     const slugifiedName = 'test-module';
     const expectedDir = path.join(MODULES_ROOT_DIR, tier, subject);
     const expectedPath = path.join(expectedDir, `${slugifiedName}.md`);
@@ -90,10 +90,10 @@ describe('handleCreateModule', () => {
     expect(mockExit).toHaveBeenCalledWith(1);
   });
 
-  it('should use default order for recognized foundation subjects', async () => {
+  it('should use default layer for recognized foundation subjects', async () => {
     // Arrange
     const tier = 'foundation';
-    const subject = 'reasoning'; // Has a default order
+    const subject = 'reasoning'; // Has a default layer
     const name = 'Test Reasoning';
     const description = 'A test.';
     const slugifiedName = 'test-reasoning';
@@ -101,16 +101,16 @@ describe('handleCreateModule', () => {
     const expectedPath = path.join(expectedDir, `${slugifiedName}.md`);
 
     // Act
-    await handleCreateModule(tier, subject, name, description, {}); // No order option
+    await handleCreateModule(tier, subject, name, description, {}); // No layer option
 
     // Assert
     expect(fs.writeFile).toHaveBeenCalledWith(
       expectedPath,
-      expect.stringContaining('order: 1') // Default for reasoning is 1
+      expect.stringContaining('layer: 1') // Default for reasoning is 1
     );
   });
 
-  it('should exit if order is required but not provided for foundation tier', async () => {
+  it('should exit if layer is required but not provided for foundation tier', async () => {
     // Arrange
     const tier = 'foundation';
     const subject = 'unknown-subject';
@@ -118,31 +118,31 @@ describe('handleCreateModule', () => {
     const description = 'A test.';
 
     // Act
-    await handleCreateModule(tier, subject, name, description, {}); // No order, unrecognized subject
+    await handleCreateModule(tier, subject, name, description, {}); // No layer, unrecognized subject
 
     // Assert
     expect(mockSpinner.fail).toHaveBeenCalledWith(
       expect.stringContaining(
-        'Foundation tier modules require a --order option'
+        'Foundation tier modules require a --layer option'
       )
     );
     expect(mockExit).toHaveBeenCalledWith(1);
   });
 
-  it('should exit for invalid order value', async () => {
+  it('should exit for invalid layer value', async () => {
     // Arrange
     const tier = 'foundation';
     const subject = 'logic';
-    const name = 'Test Invalid Order';
+    const name = 'Test Invalid Layer';
     const description = 'A test.';
-    const options = { order: 99 };
+    const options = { layer: 99 };
 
     // Act
     await handleCreateModule(tier, subject, name, description, options);
 
     // Assert
     expect(mockSpinner.fail).toHaveBeenCalledWith(
-      'Order must be an integer between 0 and 5.'
+      'Layer must be an integer between 0 and 5.'
     );
     expect(mockExit).toHaveBeenCalledWith(1);
   });

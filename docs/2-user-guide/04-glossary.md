@@ -17,17 +17,17 @@ This document provides definitions for the core concepts and terminology used in
 ### F
 
 - **Foundation Tier**
-  - The first and most abstract tier in the module hierarchy. Contains the universal, timeless rules of reasoning, logic, and ethics. See also: [Tier](#tier), [Order](#order).
+  - The first and most abstract tier in the module hierarchy. Contains the universal, timeless rules of reasoning, logic, and ethics. See also: [Tier](#tier), [Layer](#layer).
+
+### L
+
+- **Layer**
+  - A numerical property (0-4) specific to `Foundation` modules that defines their position in the cognitive hierarchy. It enables validation of the logical flow, ensuring bedrock concepts are processed before dependent ones.
 
 ### M
 
 - **Module**
   - The atomic unit of instruction in the ecosystem. A single Markdown file (`.md`) that represents one, and only one, self-contained concept. It consists of YAML frontmatter for metadata and Markdown content for the AI instructions.
-
-### O
-
-- **Order**
-  - A numerical property (0-4) specific to `Foundation` modules that defines their required sequential position in the cognitive hierarchy. It enables validation of the logical flow, ensuring bedrock concepts are processed before dependent ones.
 
 ### P
 

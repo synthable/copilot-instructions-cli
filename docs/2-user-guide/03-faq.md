@@ -6,22 +6,22 @@ This document answers frequently asked questions about the design, philosophy, a
 
 ### **📜 Table of Contents**
 
-- [❓ FAQ: AI Persona Builder](#-faq-ai-persona-builder)
-  - [**📜 Table of Contents**](#-table-of-contents)
-  - [1. What is the purpose of the `Foundation` tier? 🏛️](#1-what-is-the-purpose-of-the-foundation-tier-️)
-  - [2. Should subjects in the `Foundation` tier depend on each other? 🔗](#2-should-subjects-in-the-foundation-tier-depend-on-each-other-)
-  - [3. How can we ease the learning curve for new users if layering is so flexible? 🧑‍🏫](#3-how-can-we-ease-the-learning-curve-for-new-users-if-layering-is-so-flexible-)
-  - [4. Does the `order` metadata concept apply to every tier?](#4-does-the-order-metadata-concept-apply-to-every-tier)
-  - [5. Should a `Technology` module for a language (e.g., TypeScript) come before a framework (e.g., React)? 🥞](#5-should-a-technology-module-for-a-language-eg-typescript-come-before-a-framework-eg-react-)
-  - [6. What is the role of an `Execution` module? Is it like a prompt? 🎯](#6-what-is-the-role-of-an-execution-module-is-it-like-a-prompt-)
-  - [7. Is there a use case for having more than one `Execution` module in a persona? ⛓️](#7-is-there-a-use-case-for-having-more-than-one-execution-module-in-a-persona-️)
-  - [8. Is it valid to build a persona without any `Execution` modules? ✅](#8-is-it-valid-to-build-a-persona-without-any-execution-modules-)
-  - [9. Are there any edge cases where a module should be placed outside its tier in the persona file? 🧩](#9-are-there-any-edge-cases-where-a-module-should-be-placed-outside-its-tier-in-the-persona-file-)
-  - [10. Do all subjects in the `Foundation` tier support different module orders? 🏛️](#10-do-all-subjects-in-the-foundation-tier-support-different-module-orders-️)
-    - [The Formal Order System](#the-formal-order-system)
-    - [How Subjects Map to Order](#how-subjects-map-to-order)
+- [FAQ: AI Persona Builder](#faq-ai-persona-builder)
+  - [**Table of Contents**](#table-of-contents)
+  - [1. What is the purpose of the `Foundation` tier?](#1-what-is-the-purpose-of-the-foundation-tier)
+  - [2. Should subjects in the `Foundation` tier depend on each other?](#2-should-subjects-in-the-foundation-tier-depend-on-each-other)
+  - [3. How can we ease the learning curve for new users if ordering is so flexible?](#3-how-can-we-ease-the-learning-curve-for-new-users-if-ordering-is-so-flexible)
+  - [4. Does the `layer` metadata concept apply to every tier?](#4-does-the-layer-metadata-concept-apply-to-every-tier)
+  - [5. Should a `Technology` module for a language (e.g., TypeScript) come before a framework (e.g., React)?](#5-should-a-technology-module-for-a-language-eg-typescript-come-before-a-framework-eg-react)
+  - [6. What is the role of an `Execution` module? Is it like a prompt?](#6-what-is-the-role-of-an-execution-module-is-it-like-a-prompt)
+  - [7. Is there a use case for having more than one `Execution` module in a persona?](#7-is-there-a-use-case-for-having-more-than-one-execution-module-in-a-persona)
+  - [8. Is it valid to build a persona without any `Execution` modules?](#8-is-it-valid-to-build-a-persona-without-any-execution-modules)
+  - [9. Are there any edge cases where a module should be placed outside its tier in the persona file?](#9-are-there-any-edge-cases-where-a-module-should-be-placed-outside-its-tier-in-the-persona-file)
+  - [10. Do all subjects in the `Foundation` tier support different module layers?](#10-do-all-subjects-in-the-foundation-tier-support-different-module-layers)
+    - [The Formal Level System](#the-formal-level-system)
+    - [How Subjects Map to Levels](#how-subjects-map-to-levels)
     - [The Exception Proves the Rule](#the-exception-proves-the-rule)
-  - [CLI Commands \& Usage](#cli-commands--usage)
+  - [CLI Commands & Usage](#cli-commands--usage)
     - [**`build`**](#build)
     - [**`list`**](#list)
     - [**`search`**](#search)
@@ -42,26 +42,26 @@ The `Foundation` tier contains the absolute, universal truths of logic, reason, 
 
 **Yes, conceptually they do, but this dependency is managed through ordering, not a technical system.**
 
-Conceptually, foundational subjects form a hierarchy. For example, `Ethics` and `Logic` are the bedrock (Order 0) upon which `Reasoning` (Order 1) is built. `Decision-Making` (Order 3) is the final action that relies on all prior order.
+Conceptually, foundational subjects form a hierarchy. For example, `Ethics` and `Logic` are the bedrock (Level 0) upon which `Reasoning` (Level 1) is built. `Decision-Making` (Level 3) is the final action that relies on all prior layers.
 
 This dependency is implemented by the **order of modules in the `persona.jsonc` file**. The `build` command concatenates modules in the exact sequence specified, creating a logical cognitive flow for the AI to follow. A technical dependency system (e.g., a `depends_on` field) is intentionally avoided to maintain simplicity and flexibility.
 
-### 3. How can we ease the learning curve for new users if layering is so flexible? 🧑‍🏫
+### 3. How can we ease the learning curve for new users if ordering is so flexible? 🧑‍🏫
 
 We can guide users toward best practices without removing power-user flexibility through a multi-layered approach:
 
-1.  **Documentation:** Provide guides that explain the "cognitive hierarchy" and best practices for layering modules.
-2.  **Starter Kits:** Include well-structured example personas (e.g., `rational-developer.json`) that demonstrate proper layering with explanatory comments.
-3.  **Scaffolding (`init` command):** A CLI command that creates a new persona file from a pre-made, well-layered template.
-4.  **Linting (`--lint` flag):** An optional flag for the `build` command that uses `order` metadata in `Foundation` modules to warn the user about potential layering issues without failing the build. This is the ideal solution as it educates without restricting.
+1.  **Documentation:** Provide guides that explain the "cognitive hierarchy" and best practices for ordering modules.
+2.  **Starter Kits:** Include well-structured example personas (e.g., `rational-developer.json`) that demonstrate proper ordering with explanatory comments.
+3.  **Scaffolding (`init` command):** A CLI command that creates a new persona file from a pre-made, well-ordered template.
+4.  **Linting (`--lint` flag):** An optional flag for the `build` command that uses `layer` metadata in `Foundation` modules to warn the user about potential ordering issues without failing the build. This is the ideal solution as it educates without restricting.
 
-### 4. Does the `order` metadata concept apply to every tier?
+### 4. Does the `layer` metadata concept apply to every tier? LAYER
 
-**No. The `order` concept is most valuable and meaningful for the `Foundation` tier and should generally not be applied to others.**
+**No. The `layer` concept is most valuable and meaningful for the `Foundation` tier and should generally not be applied to others.**
 
-- **`Foundation`:** High applicability. The `order` metadata prevents logical errors in the persona's cognitive flow (e.g., ensuring `Ethics` (Order 0) comes before `Decision-Making` (Order 3)).
+- **`Foundation`:** High applicability. The `layer` metadata prevents logical errors in the persona's cognitive flow (e.g., ensuring `Ethics` (Level 0) comes before `Decision-Making` (Level 3)).
 - **`Principle`:** Low applicability. These are a "toolbox" of best practices, not a strict hierarchy. Ordering is based on generality, not prerequisites.
-- **`Technology` & `Execution`:** Not applicable. These modules are independent peers. Forcing an `order` on them would be arbitrary and restrictive. Their order is based on user preference or context.
+- **`Technology` & `Execution`:** Not applicable. These modules are independent peers. Forcing a `layer` on them would be arbitrary and restrictive. Their order is based on user preference or context.
 
 ### 5. Should a `Technology` module for a language (e.g., TypeScript) come before a framework (e.g., React)? 🥞
 
@@ -100,7 +100,7 @@ When you omit the `Execution` tier, you create a meta-prompt that consists only 
 
 **The 99% rule is to always maintain the strict `Foundation -> Principle -> Technology -> Execution` order.**
 
-However, deliberately breaking this order is an expert-level prompt engineering technique used to change a module's function from a "rule" to "data."
+However, deliberately breaking this order is an expert-layer prompt engineering technique used to change a module's function from a "rule" to "data."
 
 - **Example: Meta-Analysis.** To have a persona critique another module, you would place the `Execution` playbook _before_ the module to be critiqued.
   1.  `execution/playbook/critique-a-module-for-clarity` (The instruction)
@@ -108,17 +108,17 @@ However, deliberately breaking this order is an expert-level prompt engineering 
 
 In this case, the `Execution` module's instruction ("Analyze the following text...") re-contextualizes the subsequent `Technology` module from a rule to be followed into raw text to be analyzed.
 
-### 10. Do all subjects in the `Foundation` tier support different module orders? 🏛️
+### 10. Do all subjects in the `Foundation` tier support different module layers? 🏛️
 
-**No. The `order` metadata is a property of a module's _function_, and modules within the same subject almost always share the same order because they perform the same _type_ of cognitive work.**
+**No. The `layer` metadata is a property of a module's _function_, and modules within the same subject almost always share the same layer because they perform the same _type_ of cognitive work.**
 
-The `order` system is not for arbitrary sorting. Its sole purpose is to enable the optional linting feature (`--lint`) to validate the logical consistency of a persona's cognitive flow. It enforces a "pyramid of thought," ensuring that foundational concepts are loaded before the concepts that depend on them.
+The `layer` system is not for arbitrary sorting. Its sole purpose is to enable the optional linting feature (`--lint`) to validate the logical consistency of a persona's cognitive flow. It enforces a "pyramid of thought," ensuring that foundational concepts are loaded before the concepts that depend on them.
 
-#### The Formal Order System
+#### The Formal Level System
 
-Think of the orders as defined, discrete categories of cognitive function. Each `Foundation` subject has a natural "home" at one of these orders.
+Think of the layers as defined, discrete categories of cognitive function. Each `Foundation` subject has a natural "home" at one of these layers.
 
-| Order | Name                       | Purpose & Description                                                                                  | Example Subjects                                   |
+| Layer | Name                       | Purpose & Description                                                                                  | Example Subjects                                   |
 | :---- | :------------------------- | :----------------------------------------------------------------------------------------------------- | :------------------------------------------------- |
 | **0** | **Bedrock / Axioms**       | The absolute, non-negotiable rules and constraints that govern all subsequent thought.                 | **`Ethics`**, **`Logic`**                          |
 | **1** | **Core Processes**         | The active, primary "thinking" engines used to process information and formulate initial thoughts.     | **`Reasoning`**, **`Problem-Solving`**, **`Bias`** |
@@ -126,22 +126,22 @@ Think of the orders as defined, discrete categories of cognitive function. Each 
 | **3** | **Action / Decision**      | The final step of selecting a concrete course of action based on the evaluated conclusions.            | **`Decision-Making`**                              |
 | **4** | **Meta-Cognition**         | "Thinking about thinking." Processes that observe, evaluate, and regulate the entire cognitive system. | **`Metacognition`**, **`Epistemology`**            |
 
-#### How Subjects Map to Order
+#### How Subjects Map to Levels
 
-Based on this system, all modules within a given subject will almost always have the same order.
+Based on this system, all modules within a given subject will almost always have the same layer.
 
-- All modules in `foundation/reasoning/` (e.g., `first-principles-thinking.md`) are performing a **Core Process** and should be `order: 1`.
-- All modules in `foundation/ethics/` (e.g., `be-truthful.md`) are establishing **Bedrock Axioms** and should be `order: 0`.
+- All modules in `foundation/reasoning/` (e.g., `first-principles-thinking.md`) are performing a **Core Process** and should be `layer: 1`.
+- All modules in `foundation/ethics/` (e.g., `be-truthful.md`) are establishing **Bedrock Axioms** and should be `layer: 0`.
 
-It would be a conceptual error for a module like `deductive-reasoning.md` to have `order: 3`, as the act of reasoning is a core process used to _inform_ a decision, not the decision itself.
+It would be a conceptual error for a module like `deductive-reasoning.md` to have `layer: 3`, as the act of reasoning is a core process used to _inform_ a decision, not the decision itself.
 
 #### The Exception Proves the Rule
 
-The `order` is technically defined in each module's frontmatter. This allows for rare but important exceptions where a module's specific function differs from its subject's general category.
+The `layer` is technically defined in each module's frontmatter. This allows for rare but important exceptions where a module's specific function differs from its subject's general category.
 
-For example, most `Communication` modules are about presenting a final thought (`order: 2`). However, a module like `communication/ask-clarifying-questions.md` is about gathering input _before_ reasoning begins. A strong argument could be made for assigning it `order: 1` to reflect its role in supporting the **Core Processes**.
+For example, most `Communication` modules are about presenting a final thought (`layer: 2`). However, a module like `communication/ask-clarifying-questions.md` is about gathering input _before_ reasoning begins. A strong argument could be made for assigning it `layer: 1` to reflect its role in supporting the **Core Processes**.
 
-This flexibility makes the linting system both powerful and precise, as it checks the module's specific declared order, not a presumed order for its parent directory.
+This flexibility makes the linting system both powerful and precise, as it checks the module's specific declared layer, not a presumed layer for its parent directory.
 
 ---
 
@@ -181,7 +181,7 @@ Lists all available instruction modules.
   copilot-instructions list --tier foundation
   ```
 
-- **Tip:** Use this command to discover available modules before adding them to your persona file. The output table includes the order, tier/subject, name, and description for easy reference.
+- **Tip:** Use this command to discover available modules before adding them to your persona file. The output table includes the layer, tier/subject, name, and description for easy reference.
 
 ---
 
@@ -241,10 +241,10 @@ Creates a new instruction module file from a template.
   - `<name>` (required): The name for the new module (e.g., "My New Module").
   - `[description]` (optional): A short description for the module.
 - **Options:**
-  - `-o, --order <number>`: The order for foundation modules (0-5).
+  - `-l, --layer <number>`: The layer for foundation modules (0-5).
 - **Example:**
   ```bash
-  copilot-instructions create-module foundation "logic" "Inductive Reasoning" "A module for reasoning from specific observations to broad generalizations." --order 1
+  copilot-instructions create-module foundation "logic" "Inductive Reasoning" "A module for reasoning from specific observations to broad generalizations." --layer 1
   ```
 
 ---

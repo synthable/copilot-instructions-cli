@@ -12,7 +12,7 @@ import { handleError } from '../utils/error-handler.js';
 const MODULES_ROOT_DIR = path.resolve(process.cwd(), 'instructions-modules');
 
 interface CreateOptions {
-  order?: number;
+  layer?: number;
 }
 
 /**
@@ -22,9 +22,9 @@ interface CreateOptions {
  * @param description - The description of the module.
  * @param tier - The tier for the module (e.g., 'foundation').
  * @param subject - The subject/category for the module.
- * @param options - Additional options (e.g., order for foundation tier).
+ * @param options - Additional options (e.g., layer for foundation tier).
  * @returns The markdown content for the module as a string.
- * @throws If the order is not provided or invalid for foundation tier modules.
+ * @throws If the layer is not provided or invalid for foundation tier modules.
  */
 function generateModuleContent(
   name: string,
@@ -39,7 +39,7 @@ function generateModuleContent(
   );
 
   if (tier === 'foundation') {
-    const defaultOrders: { [key: string]: number } = {
+    const defaultLayers: { [key: string]: number } = {
       bias: 1,
       communication: 2,
       'decision-making': 3,
@@ -52,20 +52,22 @@ function generateModuleContent(
       reasoning: 1,
     };
 
-    let order = options.order;
-    if (order === undefined) {
-      order = defaultOrders[subject];
-      if (order === undefined) {
+    let layer = options.layer;
+    if (layer === undefined) {
+      layer = defaultLayers[subject];
+      if (layer === undefined) {
         throw new Error(
-          `Foundation tier modules require a --order option or a recognized subject. Valid subjects with default orders are: ${Object.keys(defaultOrders).join(', ')}`
+          `Foundation tier modules require a --layer option or a recognized subject. Valid subjects with default layers are: ${Object.keys(
+            defaultLayers
+          ).join(', ')}`
         );
       }
     }
 
-    if (!Number.isInteger(order) || order < 0 || order > 5) {
-      throw new Error('Order must be an integer between 0 and 5.');
+    if (!Number.isInteger(layer) || layer < 0 || layer > 5) {
+      throw new Error('Layer must be an integer between 0 and 5.');
     }
-    frontmatter.push(`order: ${order}`);
+    frontmatter.push(`layer: ${layer}`);
   }
 
   frontmatter.push('---', '', 'Your content here...', '');
@@ -129,7 +131,7 @@ function handleCreationError(error: unknown, spinner: Ora): void {
  * @param subject - The subject/category for the new module.
  * @param name - The name of the new module (will be slugified for the filename).
  * @param description - The description for the new module.
- * @param options - The command options (e.g., order for foundation tier).
+ * @param options - The command options (e.g., layer for foundation tier).
  */
 export async function handleCreateModule(
   tier: string,

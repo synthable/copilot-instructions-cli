@@ -42,15 +42,15 @@ export async function handleSearch(
           m.description.toLowerCase().includes(lowerCaseQuery)
       )
       .sort((a, b) => {
-        const aHasOrder = a.order !== undefined;
-        const bHasOrder = b.order !== undefined;
+        const aHasLayer = a.layer !== undefined;
+        const bHasLayer = b.layer !== undefined;
 
-        if (aHasOrder && bHasOrder) {
-          if (a.order! < b.order!) return -1;
-          if (a.order! > b.order!) return 1;
-        } else if (aHasOrder) {
+        if (aHasLayer && bHasLayer) {
+          if (a.layer! < b.layer!) return -1;
+          if (a.layer! > b.layer!) return 1;
+        } else if (aHasLayer) {
           return -1;
-        } else if (bHasOrder) {
+        } else if (bHasLayer) {
           return 1;
         }
 
@@ -64,7 +64,7 @@ export async function handleSearch(
 
     const maxWidth = process.stdout.columns || 80;
     const table = new Table({
-      head: ['Order', 'Tier/Subject', 'Name', 'Description', 'Implement'],
+      head: ['Layer', 'Tier/Subject', 'Name', 'Description', 'Implement'],
       colWidths: [8, 32, 20, maxWidth - (8 + 32 + 20 + 16 + 10), 16], // 10 for table borders/padding
       wordWrap: true,
       style: { head: ['cyan'] },
@@ -72,9 +72,9 @@ export async function handleSearch(
 
     results.forEach(m => {
       const subjectPath = m.subject ? `${m.tier}/${m.subject}` : m.tier;
-      const order = m.order !== undefined ? m.order.toString() : 'N/A';
+      const layer = m.layer !== undefined ? m.layer.toString() : 'N/A';
       const implement = formatImplementDisplay(m.implement);
-      table.push([order, subjectPath, m.name, m.description, implement]);
+      table.push([layer, subjectPath, m.name, m.description, implement]);
     });
 
     console.log(table.toString());

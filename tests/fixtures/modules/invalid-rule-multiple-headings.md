@@ -2,7 +2,7 @@
 name: 'Invalid Rule - Multiple Headings'
 description: 'An invalid rule module for testing.'
 tier: foundation
-order: 0
+layer: 0
 schema: rule
 ---
 

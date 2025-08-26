@@ -2,7 +2,7 @@
 name: 'Example Specification'
 description: 'A spec to be implemented.'
 tier: principle
-order: null
+layer: null
 schema: specification
 ---
 

@@ -149,8 +149,8 @@ program
     name => `A module description for ${name}.`
   )
   .option(
-    '-o, --order <number>',
-    'The order for foundation modules (0-5).',
+    '-l, --layer <number>',
+    'The layer for foundation modules (0-5).',
     value => parseInt(value, 10)
   )
   .action(handleCreateModule);
