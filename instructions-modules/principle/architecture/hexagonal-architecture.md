@@ -1,31 +1,28 @@
 ---
-tier: principle
 name: 'Hexagonal Architecture (Ports and Adapters)'
-description: 'An architectural pattern that isolates the application core from external services through well-defined interfaces (ports) and implementations (adapters).'
-tags:
-  - architecture
-  - ports and adapters
-  - hexagonal
-  - decoupling
+description: 'An architectural pattern that isolates the application core from external services.'
+tier: principle
 layer: null
+schema: pattern
 ---
 
-# Hexagonal Architecture (Ports and Adapters)
+## Summary
 
-## Primary Directive
+Hexagonal Architecture, also known as Ports and Adapters, is an architectural pattern that isolates the application core from external services. This is achieved by defining well-defined interfaces (ports) and implementing them with adapters.
 
-You MUST design the application to isolate the core business logic from external concerns (like UI, databases, or third-party APIs) using a system of ports and adapters.
+## Core Principles
 
-## Process
+- **Ports**: Interfaces that define the contract for interacting with the application core.
+- **Adapters**: Implementations of the ports that connect the application core to external services.
+- **Application Core**: The business logic of the application, which is independent of any external technology or framework.
 
-1.  **Define the Application Core:** Isolate the pure business logic and domain models. This core MUST NOT have any dependencies on external technologies.
-2.  **Define Ports:** For every interaction the core needs with the outside world, define an interface (a "port"). Examples: `OrderRepositoryPort`, `NotificationServicePort`. The core depends only on these ports.
-3.  **Implement Adapters:** For each port, create one or more concrete implementations ("adapters").
-    - _Driving Adapters:_ These drive the application (e.g., a `RESTControllerAdapter` that implements a `UserInputPort`).
-    - _Driven Adapters:_ These are driven by the application (e.g., a `PostgreSQLAdapter` that implements the `OrderRepositoryPort`).
-4.  **Connect via Dependency Injection:** The adapters are "plugged into" the ports from the outside using dependency injection, keeping the core pure and isolated.
+## Advantages / Use Cases
 
-## Constraints
+- **Testability**: The application core can be tested in isolation from external services.
+- **Flexibility**: It is easy to swap out external services by simply creating a new adapter.
+- **Maintainability**: The separation of concerns makes the code easier to understand and maintain.
 
-- The application core MUST NOT contain any code related to a specific framework, database, or external service.
-- Communication between the core and the outside world MUST only happen through a defined port.
+## Disadvantages / Trade-offs
+
+- **Increased Complexity**: The use of ports and adapters can add complexity to the codebase.
+- **Boilerplate Code**: It can require writing more boilerplate code to set up the ports and adapters.

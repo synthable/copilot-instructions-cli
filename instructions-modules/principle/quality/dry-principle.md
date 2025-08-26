@@ -1,6 +1,6 @@
 ---
-name: "DRY (Don't Repeat Yourself) Principle"
-description: 'A fundamental principle requiring that every piece of knowledge, logic, or data must have a single, unambiguous, authoritative representation within a system.'
+name: "Don't Repeat Yourself (DRY)"
+description: 'The principle of reducing repetition of software patterns, replacing it with abstractions or using data normalization to avoid redundancy.'
 tier: principle
 layer: null
 schema: pattern
@@ -8,23 +8,20 @@ schema: pattern
 
 ## Summary
 
-The DRY (Don't Repeat Yourself) principle is a fundamental software development philosophy that mandates every piece of knowledge must have a single, unambiguous, authoritative representation within a system. This applies not only to code logic but also to data schemas, configuration, and documentation (where it is often called Single Source of Truth or SSoT).
+The Don't Repeat Yourself (DRY) principle is aimed at reducing repetition of information of all kinds. It states that every piece of knowledge must have a single, unambiguous, authoritative representation within a system.
 
 ## Core Principles
 
-- **Knowledge Singularity:** Every distinct piece of knowledge in a system—be it business logic, a data definition, or a configuration value—MUST exist in exactly one authoritative location.
-- **Code Abstraction:** Repetitive code logic MUST be extracted into reusable abstractions such as functions, classes, or modules.
-- **Data Normalization (SSoT):** Data entities MUST be stored in exactly one location. Other parts of the system MUST reference this data, not duplicate it.
-- **Configuration Centralization:** Constants, configuration values, and "magic strings" MUST be defined in a single place and imported or referenced from all points of use.
+- **Single Source of Truth**: Every piece of knowledge in a system should have one and only one representation.
+- **Abstraction**: Repetitive code should be abstracted into functions, classes, or modules that can be reused.
 
 ## Advantages / Use Cases
 
-- **Improved Maintainability:** Changes only need to be made in one place, significantly reducing the effort and risk of updates.
-- **Enhanced Consistency & Reliability:** Eliminates discrepancies and bugs that arise when multiple, duplicated copies of logic or data drift out of sync.
-- **Increased Development Velocity:** Developers spend less time hunting down and updating all instances of a repeated piece of information.
+- **Improved Maintainability**: When a change is needed, it only needs to be made in one place.
+- **Reduced Errors**: Less code means fewer opportunities for bugs.
+- **Improved Readability**: Code becomes cleaner and easier to understand when repetitive logic is abstracted away.
 
 ## Disadvantages / Trade-offs
 
-- **Premature Abstraction:** Applying DRY too early can lead to incorrect abstractions that are more costly to fix than the original duplicated code.
-- **Increased Coupling:** A poor abstraction can create unnecessary dependencies between previously independent modules.
-- **Performance vs. Readability:** In some performance-critical scenarios, denormalizing data (violating SSoT) or inlining code (violating DRY) may be a necessary and deliberate trade-off.
+- **Over-Abstraction**: Creating abstractions for everything can lead to code that is difficult to understand and trace.
+- **Incorrect Abstraction**: A wrong abstraction can be more costly to fix than duplicated code.

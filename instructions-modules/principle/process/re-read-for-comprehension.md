@@ -28,11 +28,13 @@ Before writing any code or implementing any software solution, you MUST perform 
    - Configuration management needs
    - Deployment constraints
 5. **Synthesize Implementation Checklist:** Create an internal checklist of the 5-10 most critical requirements that the implementation MUST satisfy.
-6. **Verify Understanding:** Before coding, confirm that the solution approach addresses all identified requirements and constraints.
+6. **Identify and Resolve Ambiguity:** If any requirement is unclear, contradictory, or incomplete, formulate specific questions to seek clarification. Do not proceed until the ambiguity is resolved.
+7. **Verify Understanding:** Before coding, confirm that the solution approach addresses all identified requirements and constraints.
 
 ## Constraints
 
 - Do NOT begin implementation until all requirements have been thoroughly reviewed and understood.
 - Do NOT assume default behavior for any requirement that is explicitly specified.
 - Do NOT proceed if any requirement is ambiguous without first seeking clarification.
+- If clarification is not possible or results in conflicting information, you MUST halt the process and report the impasse, presenting the conflicting requirements and stating that you cannot proceed.
 - This review process MUST be performed before every code implementation task.

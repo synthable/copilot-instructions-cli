@@ -11,12 +11,13 @@ The modules are organized into a hierarchical structure. Below is a list of all 
 Playbooks for executing common tasks.
 
 - **Meta**
-  - [Module Integration Protocol](execution/meta/module-integration-protocol.md) - The core procedure for an AI agent to dynamically discover, select, and apply instruction modules to solve a user''s request.
+  - [Classify an Instruction Module](execution/meta/classify-module.md) - A step-by-step procedure for classifying a new or existing instruction module into the correct tier (Foundation, Principle, Technology, or Execution) using the Top-Down Classification Test.
+  - [Module Integration Protocol](execution/meta/module-integration-protocol.md) - The core procedure for an AI agent to dynamically discover, select, and apply instruction modules to solve a user's request.
 - **Persona Builder**
-  - [Foundation Layer Order Checklist](execution/persona-builder/foundation-layer-rules.md) - A checklist to verify that Foundation modules are ordered correctly by their layer metadata.
-  - [Lint Persona File](execution/persona-builder/lint-persona-file.md) - A playbook to analyze a persona's module list and generate a comprehensive quality and consistency report.
-  - [Module Tier Order Checklist](execution/persona-builder/four-tier-philosophy.md) - A checklist to verify that persona modules follow the strict hierarchical order: Foundation -> Principle -> Technology -> Execution.
+  - [Foundation Layer Rules](execution/persona-builder/foundation-layer-rules.md) - The rule that Foundation modules must be ordered by their 'layer' metadata, from lowest to highest.
+  - [Instruction Module Validation Rules](execution/persona-builder/validation-rules.md) - A specification of the strict, declarative rules for ensuring an instruction module conforms to official authoring standards.
 - **Playbook**
+  - [Create Commit Message](execution/playbook/commit-message-procedure.md) - A playbook for analyzing a set of code changes and generating a commit message that conforms to the Conventional Commits standard.
   - [Debug an Issue](execution/playbook/debug-issue.md) - A systematic playbook for debugging, leveraging foundational modules like root-cause-analysis and causal-reasoning.
   - [Design Microservices Architecture](execution/playbook/design-microservices-architecture.md) - A playbook for designing a system based on the microservices architectural style.
   - [Document a Function](execution/playbook/document-a-function.md) - A playbook for writing comprehensive documentation for a given function, including its parameters, return value, and potential errors.
@@ -28,13 +29,13 @@ Playbooks for executing common tasks.
   - [Plan Legacy Modernization](execution/playbook/plan-legacy-modernization.md) - A playbook for creating a safe, incremental plan to modernize a legacy system.
   - [Refactor a Component](execution/playbook/refactor-component.md) - A step-by-step process for safely improving the internal structure of a piece of code without changing its external behavior.
   - [Review a Pull Request](execution/playbook/review-pull-request.md) - A playbook that uses a checklist to provide structured, constructive feedback on a pull request.
-  - [Write a Commit Message](execution/playbook/write-commit-message.md) - A playbook for writing a well-formed Git commit message following the Conventional Commits standard.
   - **Audit Documentation**
     - [Playbook: Verify and Comment Documentation](execution/playbook/audit-documentation/verify-and-comment.md) - A step-by-step process for auditing documentation against a codebase.
   - **Modules**
     - [Generate New Instruction Module](execution/playbook/modules/generate-new-instruction-module.md) - A systematic playbook for creating well-structured instruction modules that follow the official schema requirements and machine-centric writing principles.
     - [Instruction Module Validation](execution/playbook/modules/instruction-module-validation.md) - A comprehensive checklist to validate that instruction modules conform to official schema requirements, frontmatter standards, and machine-centric language principles.
-    - [Machine-Centric Language](execution/playbook/modules/machine-centric-language.md) - The three pillars of deterministic, precise, and structured language for writing effective AI instructions that eliminate ambiguity and ensure consistent execution.
+- **Prompts**
+  - [Prompt Improvement Procedure](execution/prompts/prompt-improvement-procedure.md) - A playbook for analyzing a user-provided prompt and rewriting it to be more effective using modern prompt engineering techniques.
 - **Testing**
   - [Playbook: Debug Failing Unit Test](execution/testing/debug-failing-unit-test.md) - A playbook that uses root-cause-analysis to diagnose a failing test report from Vitest and propose a minimal, correct fix.
   - [Playbook: Refactor for Testability](execution/testing/refactor-to-use-mocks.md) - A playbook for analyzing a hard-to-test function and refactoring it to use dependency injection, then writing a new unit test using vi.mock.
@@ -61,7 +62,6 @@ Core principles and concepts for reasoning, problem-solving, and decision-making
   - [Ask Clarifying Questions](foundation/communication/ask-clarifying-questions.md) - A directive to seek more information when a user's request is ambiguous or incomplete.
   - [Clarity and Brevity](foundation/communication/clarity-and-brevity.md) - A set of rules for communicating in a way that is clear, concise, and unambiguous.
   - [Define Technical Terms in Software Development](foundation/communication/define-your-terms.md) - A specification for identifying and defining technical jargon, acronyms, and ambiguous terms in software development communications.
-  - [Error Reporting](foundation/communication/error-reporting.md) - A directive to report errors in a way that is clear, informative, and actionable for the user.
   - [Structured Technical Arguments in Software Development](foundation/communication/structure-your-arguments.md) - A specification for presenting technical recommendations, architectural decisions, and implementation proposals with logical structure and evidence-based support.
 - **Decision Making**
   - [Assess Risk and Uncertainty](foundation/decision-making/assess-risk-and-uncertainty.md) - A process to differentiate between risk (known probabilities) and uncertainty (unknown probabilities).
@@ -88,8 +88,7 @@ Core principles and concepts for reasoning, problem-solving, and decision-making
   - [Evaluating Confidence Levels](foundation/metacognition/evaluating-confidence-levels.md) - A process for assessing and stating the level of confidence in a conclusion.
   - [Evaluating Technical Evidence in Software Development](foundation/metacognition/evaluating-evidence.md) - A specification for assessing the quality, reliability, and relevance of technical information and data in software development contexts.
   - [Growth Mindset](foundation/metacognition/growth-mindset.md) - The principle of viewing challenges as opportunities to learn and grow, rather than as threats to one's competence.
-  - [Re-read for Comprehension in Software Development](foundation/metacognition/re-read-for-comprehension.md) - A meta-cognitive procedure for thoroughly reviewing all requirements, constraints, and context before implementing any software solution.
-  - [Self-Correction Process](foundation/metacognition/self-correction-process.md) - A process for systematically identifying and correcting technical errors, logical flaws, and incomplete analysis in software development reasoning and implementation decisions.
+  - [Self-Correction Process](foundation/metacognition/self-correction-process.md) - A framework for identifying and correcting its own errors or flawed reasoning.
   - [The Feynman Technique](foundation/metacognition/the-feynman-technique.md) - A process for testing and validating understanding of software development concepts by explaining them in simple, clear terms without jargon or technical assumptions.
   - [Understanding Levels of Certainty](foundation/metacognition/understanding-levels-of-certainty.md) - A specification for classifying and communicating the certainty of technical claims, from speculation to established facts.
   - [Weighing Trade-Offs](foundation/metacognition/weighing-trade-offs.md) - A process for systematically analyzing the technical trade-offs, constraints, and implications of different software development options and architectural decisions.
@@ -109,12 +108,15 @@ Core principles and concepts for reasoning, problem-solving, and decision-making
   - [Constraint Satisfaction](foundation/reasoning/constraint-satisfaction.md) - A process for finding a solution to a problem by identifying its variables, domains, and constraints, and finding an assignment that satisfies all constraints.
   - [Divergent Thinking](foundation/reasoning/divergent-thinking.md) - A cognitive process for generating a wide variety of possible solutions to a problem without initial judgment or criticism.
   - [Edge Case Analysis](foundation/reasoning/edge-case-analysis.md) - A systematic process for identifying and generating test cases for boundary conditions and non-standard inputs.
-  - [Fundamental Technical Reasoning for Software Development](foundation/reasoning/first-principles-thinking.md) - A specification for deconstructing software engineering problems to their fundamental computational, mathematical, and empirical principles rather than relying on frameworks, patterns, or industry conventions.
   - [Inductive Reasoning](foundation/reasoning/inductive-reasoning.md) - Forming broad generalizations based on specific observations.
   - [Systems Thinking](foundation/reasoning/systems-thinking.md) - A procedure for analyzing problems holistically by mapping system components, their interconnections, and identifying key leverage points like feedback loops and bottlenecks.
 - **Software**
   - **Logic**
-    - [Deductive Reasoning for Code](foundation/software/logic/deductive-reasoning.md) - A process for deriving logically certain conclusions about a system''s state from general rules and specific conditions.
+    - [Deductive Reasoning for Code](foundation/software/logic/deductive-reasoning.md) - A process for deriving logically certain conclusions about a system's state from general rules and specific conditions.
+  - **Reasoning**
+    - [First Principles Thinking for Software](foundation/software/reasoning/first-principles-thinking.md) - A specification for deconstructing software problems to their fundamental computational principles, rather than relying on frameworks or conventions.
+- **Universal**
+  - [First Principles Thinking](foundation/universal/first-principles-thinking.md) - A specification for deconstructing complex problems to their fundamental, irreducible components and rebuilding understanding from verified foundational truths rather than relying on assumptions or conventional wisdom.
 
 ## Principle
 
@@ -125,23 +127,28 @@ Guiding principles for software development, architecture, and process.
   - [Architecture Decision Records (ADRs)](principle/architecture/architecture-decision-records.md) - A documentation pattern for capturing significant architectural decisions, their context, and consequences in a structured, lightweight format.
   - [Command-Query Responsibility Segregation (CQRS)](principle/architecture/command-query-responsibility-segregation.md) - The principle that separates methods that change state (Commands) from methods that read state (Queries). This can improve performance, scalability, and security.
   - [Design for Scalability](principle/architecture/design-for-scalability.md) - The principle of designing systems that can handle increased load by adding resources, typically horizontally.
-  - [Domain-Driven Design (DDD)](principle/architecture/domain-driven-design.md) - An architectural approach that aligns software design with business domain complexity through shared language, strategic modeling, and tactical design patterns.
-  - [Event-Driven Architecture](principle/architecture/event-driven-architecture.md) - An architectural pattern where components communicate through asynchronous events, enabling loose coupling, scalability, and reactive system design.
-  - [Hexagonal Architecture (Ports and Adapters)](principle/architecture/hexagonal-architecture.md) - An architectural pattern that isolates the application core from external services through well-defined interfaces (ports) and implementations (adapters).
-  - [Layered Architecture](principle/architecture/layered-architecture.md) - An architectural pattern that organizes software systems into horizontal layers with specific responsibilities, where each layer depends only on the layer immediately below it to enforce separation of concerns and maintainability.
+  - [Domain-Driven Design (DDD)](principle/architecture/domain-driven-design.md) - An approach to software development for complex needs by connecting the implementation to an evolving model.
+  - [Event-Driven Architecture](principle/architecture/event-driven-architecture.md) - A software architecture paradigm promoting the production, detection, consumption of, and reaction to events.
+  - [Hexagonal Architecture (Ports and Adapters)](principle/architecture/hexagonal-architecture.md) - An architectural pattern that isolates the application core from external services.
+  - [Layered Architecture](principle/architecture/layered-architecture.md) - An architectural pattern that organizes software into layers, each with a specific responsibility.
   - [Microservices Architecture](principle/architecture/microservices.md) - An architectural pattern that decomposes applications into a collection of loosely coupled, independently deployable services organized around business capabilities.
   - [Principle of Least Astonishment](principle/architecture/principle-of-least-astonishment.md) - A rule that a system's components should behave in a way that users expect, without surprising them. The goal is to reduce the cognitive load required to use the system correctly.
   - [Robustness Principle (Postel's Law)](principle/architecture/robustness-principle.md) - A design principle for software implementation that states to 'be conservative in what you do, be liberal in what you accept from others.' This helps build resilient systems that can handle imperfect input.
-  - [Separation of Concerns](principle/architecture/separation-of-concerns.md) - An architectural pattern that divides software systems into distinct components where each component addresses a single, well-defined responsibility or concern.
+  - [Separation of Concerns](principle/architecture/separation-of-concerns.md) - The principle of dividing a system into distinct sections, where each section addresses a specific aspect of the functionality.
+  - [Serverless Architecture](principle/architecture/serverless-architecture.md) - A cloud computing execution model in which the cloud provider runs the server, and dynamically manages the allocation of machine resources.
 - **Collaboration**
   - [Effective Communication](principle/collaboration/effective-communication.md) - A set of principles for clear, concise, and effective technical communication with team members and stakeholders.
+  - [Error Reporting](principle/collaboration/error-reporting.md) - A directive to report errors in a way that is clear, informative, and actionable for the user.
   - [Escalation Protocol (Asking for Help)](principle/collaboration/escalation-protocol.md) - A protocol for recognizing when to stop working alone and when to escalate a problem to a human user or another expert.
   - [Knowledge Sharing](principle/collaboration/knowledge-sharing.md) - Principles for actively mentoring, documenting, and sharing technical knowledge to improve a team's collective capability.
   - [Request for Comments (RFC) Process](principle/collaboration/request-for-comments-process.md) - A formal process for proposing and building consensus on significant technical changes by inviting feedback from a wide audience.
 - **Design Patterns**
   - [Composition Over Inheritance Principle](principle/design-patterns/composition-over-inheritance.md) - A design principle stating that systems should achieve polymorphic behavior and code reuse by containing instances of other classes rather than inheriting from a base class.
-  - [KISS (Keep It Simple, Stupid) Principle](principle/design-patterns/kiss-principle.md) - A design principle stating that most systems work best if they are kept simple rather than made unnecessarily complicated, prioritizing clarity and maintainability.
+  - [Dependency Inversion Principle](principle/design-patterns/dependency-inversion-principle.md) - High-level modules should not depend on low-level modules. Both should depend on abstractions.
+  - [KISS (Keep It Simple, Stupid)](principle/design-patterns/kiss-principle.md) - The KISS principle states that most systems work best if they are kept simple rather than made complicated; therefore, simplicity should be a key goal in design, and unnecessary complexity should be avoided.
   - [Law of Demeter (Principle of Least Knowledge)](principle/design-patterns/law-of-demeter.md) - A design principle that reduces coupling by restricting a method from accessing objects deep within another object's structure.
+  - [Open/Closed Principle](principle/design-patterns/open-closed-principle.md) - Software entities (classes, modules, functions, etc.) should be open for extension, but closed for modification.
+  - [Single Responsibility Principle](principle/design-patterns/single-responsibility-principle.md) - A class should have only one reason to change, meaning it should have only one job or responsibility.
   - **Behavioral**
     - [Command Pattern](principle/design-patterns/behavioral/command-pattern.md) - A behavioral design pattern that encapsulates requests as objects, enabling parameterization of clients with different requests, queuing operations, logging requests, and supporting undo functionality.
     - [Template Method Pattern](principle/design-patterns/behavioral/template-method-pattern.md) - A behavioral design pattern that defines the skeleton of an algorithm in a base class, allowing subclasses to override specific steps without changing the overall algorithm structure.
@@ -170,6 +177,7 @@ Guiding principles for software development, architecture, and process.
 - **Process**
   - [Agile (Scrum)](principle/process/agile-scrum.md) - An iterative and incremental framework for project management and software development, focused on delivering value in small increments (Sprints) and adapting to change.
   - [Boy Scout Rule](principle/process/boy-scout-rule.md) - The principle that one should always leave the codebase cleaner than they found it. This encourages continuous, incremental improvement of code quality.
+  - [Re-read for Comprehension in Software Development](principle/process/re-read-for-comprehension.md) - A meta-cognitive procedure for thoroughly reviewing all requirements, constraints, and context before implementing any software solution.
   - [Test-Driven Development (TDD)](principle/process/test-driven-development.md) - A software development process where tests are written before the code that they are intended to validate. The process is a short, repeating cycle of Red-Green-Refactor.
   - [YAGNI (You Ain't Gonna Need It)](principle/process/yagni.md) - The principle of not adding functionality until it is demonstrably necessary to avoid over-engineering.
   - **Modules**
@@ -181,11 +189,22 @@ Guiding principles for software development, architecture, and process.
   - [Code Organization Pattern](principle/quality/code-organization.md) - The principle of structuring a codebase for clarity, logical cohesion, and maintainability.
   - [Code Review Checklist](principle/quality/code-review-checklist.md) - A systematic checklist for reviewing code, focusing on readability, maintainability, and correctness.
   - [Code Review Process](principle/quality/code-review-process.md) - The principle of implementing a thorough peer review process to catch issues before they enter the codebase.
-  - [DRY (Don't Repeat Yourself) Principle](principle/quality/dry-principle.md) - A fundamental principle requiring that every piece of knowledge, logic, or data must have a single, unambiguous, authoritative representation within a system.
+  - [Don''t Repeat Yourself (DRY)](principle/quality/dry-principle.md) - The principle of reducing repetition of software patterns, replacing it with abstractions or using data normalization to avoid redundancy.
   - [Single Source of Truth (SSoT)](principle/quality/single-source-of-truth.md) - Software architecture principle requiring that every data element, business rule, and system configuration must be stored in exactly one authoritative location to ensure data integrity, consistency, and eliminate synchronization conflicts.
   - [SOLID Design Philosophy](principle/quality/solid-principles.md) - A design philosophy comprising five fundamental principles for creating maintainable, scalable, and robust object-oriented software architecture.
   - [Static Analysis Integration](principle/quality/static-analysis-integration.md) - The principle of using automated tools to identify potential issues in code before it is executed.
   - [Technical Debt Management](principle/quality/technical-debt-management.md) - A proactive process for identifying, tracking, and paying down technical debt to maintain long-term codebase health.
+  - **Modules**
+    - [Machine-Centric Language Specification](principle/quality/modules/machine-centric-language-spec.md) - A comprehensive specification for authoring machine-centric instructions, defining the style, structure, and formal meaning of requirement keywords to ensure deterministic AI behavior.
+    - [Module Content Specification](principle/quality/modules/module-content-spec.md) - A comprehensive specification defining both the required Markdown structure (H2 headings) and content formats for each of the six official module schemas.
+    - [Module Metadata Specification](principle/quality/modules/module-metadata-spec.md) - A formal specification defining the required and optional fields for valid module frontmatter, including their data types and constraints.
+- **Quality Attributes**
+  - [Maintainability](principle/quality-attributes/maintainability.md) - The quality attribute that enables a system to be easily modified and extended.
+  - [Performance](principle/quality-attributes/performance.md) - The quality attribute that focuses on the efficiency of a system in terms of response time, throughput, and resource utilization.
+  - [Reliability](principle/quality-attributes/reliability.md) - The quality attribute that ensures a system functions correctly even under adverse conditions.
+  - [Scalability](principle/quality-attributes/scalability.md) - The quality attribute that enables a system to handle increased load by adding resources.
+  - [Security](principle/quality-attributes/security.md) - The quality attribute that protects a system against unauthorized access and potential vulnerabilities.
+  - [Testability](principle/quality-attributes/testability.md) - The quality attribute that enables a system to be easily tested in isolation.
 - **Reliability**
   - [Chaos Engineering](principle/reliability/chaos-engineering.md) - The practice of proactively testing system resilience by introducing controlled, deliberate failures into a production environment.
   - [Design for Reliability](principle/reliability/design-for-reliability.md) - The principle of designing systems that function correctly and consistently, even under adverse conditions.
@@ -206,10 +225,20 @@ Guiding principles for software development, architecture, and process.
 
 Guidance on specific technologies, languages, and platforms.
 
+- **Build Tool**
+  - **Vite**
+    - [Vite: Configuring a Development Server Proxy](technology/build-tool/vite/configure-dev-proxy.md) - A procedure for setting up a proxy in vite.config.ts to solve CORS issues during local development.
+    - [Vite: Vendor Chunking for Caching](technology/build-tool/vite/vendor-chunking.md) - A pattern for optimizing production builds by splitting node_modules dependencies into a separate 'vendor' chunk to improve browser caching.
+- **Css**
+  - **Tailwind**
+    - [TailwindCSS: Config as Design Tokens](technology/css/tailwind/config-as-design-tokens.md) - A specification for using the tailwind.config.js file as a single source of truth for a project's design tokens.
 - **Database**
   - **Postgresql**
     - [PostgreSQL Query Optimization](technology/database/postgresql/query-optimization.md) - Directives for writing efficient and performant queries in PostgreSQL, focusing on indexing, joins, and query analysis.
 - **Framework**
+  - **Preact**
+    - [Preact: React Ecosystem Compatibility](technology/framework/preact/react-compat-alias.md) - A procedure for using preact/compat to leverage the vast React ecosystem within a Preact application.
+    - [Preact: State Management with Signals](technology/framework/preact/state-with-signals.md) - A pattern for managing state in Preact using Signals for fine-grained reactivity, avoiding unnecessary component re-renders.
   - **React**
     - [React Component Best Practices](technology/framework/react/component-best-practices.md) - Rules for component composition, state management, and props to create maintainable and performant React applications.
     - [React State Management Decisions](technology/framework/react/state-management-decisions.md) - A decision-tree module for choosing between useState, useReducer, useContext, and external libraries.
@@ -223,10 +252,12 @@ Guidance on specific technologies, languages, and platforms.
     - [TypeScript: Async/Await with Types](technology/language/typescript/async-await-with-types.md) - A guide to correctly typing asynchronous functions and handling Promises to ensure type safety.
     - [TypeScript: Effective Generics](technology/language/typescript/effective-generics.md) - Best practices for using generics (<T>) to create reusable, type-safe functions, classes, and components.
     - [TypeScript: Enums and Discriminated Unions](technology/language/typescript/enums-and-discriminated-unions.md) - A guide for using enums and discriminated unions to create type-safe state machines and variant types.
-    - [TypeScript: Module Resolution and Paths](technology/language/typescript/module-resolution-and-paths.md) - A guide to configuring tsconfig.json for robust module resolution and path aliasing.
+    - [TypeScript: Module Resolution and Path Aliasing](technology/language/typescript/module-resolution-and-paths.md) - A specification for configuring tsconfig.json to use non-relative path aliases, eliminating fragile, relative import paths.
+    - [TypeScript: Strict Compiler Options](technology/language/typescript/strict-compiler-options.md) - A specification for enforcing a strict, safe coding style by enabling advanced TypeScript compiler flags.
     - [TypeScript: Strict Type-Checking](technology/language/typescript/strict-type-checking.md) - A rule enforcing the use of strict type-checking options in tsconfig.json to catch common errors at compile time.
+    - [TypeScript: Template Literal Types](technology/language/typescript/template-literal-types.md) - A specification for using template literal types to create precise, type-safe string unions for events, routes, or other string-based APIs.
     - [TypeScript: Type Guards and Narrowing](technology/language/typescript/type-guards-and-narrowing.md) - A guide to using type guards to narrow down the type of a variable within a conditional block.
-    - [TypeScript: Types vs. Interfaces](technology/language/typescript/types-vs-interfaces.md) - A decision-making guide on when to use type aliases versus interface declarations for defining object shapes.
+    - [TypeScript: Types vs. Interfaces](technology/language/typescript/types-vs-interfaces.md) - A specification outlining the pragmatic conventions for choosing between `type` aliases and `interface` declarations.
     - [TypeScript: Utility Types Best Practices](technology/language/typescript/utility-types-best-practices.md) - A guide to effectively using TypeScript's built-in utility types (Partial, Pick, Omit, Record, etc.) to manipulate and create new types.
 - **Platform**
   - **Aws**
@@ -278,5 +309,5 @@ Guidance on specific technologies, languages, and platforms.
     - [Vitest: Mocking with vi](technology/testing/vitest/mocking-with-vi.md) - A procedure for using the `vi` utility to create mocks for external dependencies, ensuring unit tests are isolated and deterministic.
 - **Tool**
   - **Git**
-    - [Conventional Commits Specification](technology/tool/git/conventional-commits.md) - A specification for writing commit messages that creates an explicit and machine-readable commit history.
+    - [Conventional Commits Specification](technology/tool/git/conventional-commits-specification.md) - A formal specification defining the rules of the Conventional Commits v1.0.0 standard for creating an explicit and machine-readable commit history.
     - [Interactive Rebase Workflow](technology/tool/git/interactive-rebase-workflow.md) - A process for cleaning up commit history using interactive rebase before merging a feature branch.
