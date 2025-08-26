@@ -9,7 +9,10 @@ import chalk from 'chalk';
 import ora, { type Ora } from 'ora';
 import { glob } from 'glob';
 import { validatePersonaFile as coreValidatePersonaFile } from '../core/persona-service.js';
-import { validateModuleFile as coreValidateModuleFile } from '../core/module-service.js';
+import {
+  validateModuleFile as coreValidateModuleFile,
+  scanModules,
+} from '../core/module-service.js';
 import { handleError } from '../utils/error-handler.js';
 
 /**
@@ -120,6 +123,45 @@ async function validateAll(
         : validatePersonaFile(file, spinner, verbose)
     )
   );
+
+  // Additional validation for synergistic pairs
+  const moduleFiles = files.filter(file => file.endsWith('.md'));
+  if (moduleFiles.length > 0) {
+    spinner.start('Validating synergistic pair relationships...');
+    try {
+      const allModules = await scanModules();
+      const moduleIds = new Set(allModules.keys());
+
+      for (const [id, module] of allModules) {
+        if (module.implement && module.implement.length > 0) {
+          for (const implementedId of module.implement) {
+            if (!moduleIds.has(implementedId)) {
+              // Find the result for this module and add the error
+              const moduleResult = results.find(
+                r => r.filePath === module.filePath
+              );
+              if (moduleResult) {
+                moduleResult.isValid = false;
+                moduleResult.errors.push(
+                  `Error: Module '${id}' implements non-existent module '${implementedId}'.`
+                );
+              }
+            }
+          }
+        }
+      }
+
+      spinner.succeed('Synergistic pair validation complete.');
+    } catch (error) {
+      spinner.warn('Could not validate synergistic pair relationships.');
+      if (verbose) {
+        console.log(
+          chalk.gray(`[verbose] Synergistic pair validation error: ${error}`)
+        );
+      }
+    }
+  }
+
   return results;
 }
 

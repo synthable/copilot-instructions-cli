@@ -8,6 +8,7 @@ import {
   validateFrontmatter,
   validateModuleFile,
   validateModuleContent,
+  formatImplementDisplay,
 } from './module-service.js';
 
 // Mock dependencies
@@ -218,6 +219,99 @@ This should not be here.
     expect(result.isValid).toBe(false);
     expect(result.errors).toContain('Extra section(s) found: Extra Section');
   });
+
+  describe('rule schema validation', () => {
+    it('should pass validation for a valid rule module', () => {
+      const fileContent = `---
+name: 'Valid Rule'
+description: 'A valid rule module for testing.'
+tier: foundation
+layer: 0
+schema: rule
+---
+## Mandate
+You MUST follow this single, atomic rule.`;
+      vi.mocked(matter).mockReturnValue({
+        data: {
+          name: 'Valid Rule',
+          description: 'A valid rule module for testing.',
+          tier: 'foundation',
+          layer: 0,
+          schema: 'rule',
+        },
+        content: `
+## Mandate
+You MUST follow this single, atomic rule.`,
+      } as any);
+      const result = validateModuleContent(fileContent, 'foundation');
+      expect(result.isValid).toBe(true);
+      expect(result.errors).toHaveLength(0);
+    });
+
+    it('should fail validation if a rule module has multiple H2 headings', () => {
+      const fileContent = `---
+name: 'Invalid Rule - Multiple Headings'
+description: 'An invalid rule module for testing.'
+tier: foundation
+layer: 0
+schema: rule
+---
+## Mandate
+This is the first heading.
+
+## Another Heading
+This is the second, forbidden heading.`;
+      vi.mocked(matter).mockReturnValue({
+        data: {
+          name: 'Invalid Rule - Multiple Headings',
+          description: 'An invalid rule module for testing.',
+          tier: 'foundation',
+          layer: 0,
+          schema: 'rule',
+        },
+        content: `
+## Mandate
+This is the first heading.
+
+## Another Heading
+This is the second, forbidden heading.`,
+      } as any);
+      const result = validateModuleContent(fileContent, 'foundation');
+      expect(result.isValid).toBe(false);
+      expect(result.errors).toContain(
+        'Rule schema modules must have exactly one H2 heading.'
+      );
+    });
+
+    it('should fail validation if a rule module has an incorrect H2 heading', () => {
+      const fileContent = `---
+name: 'Invalid Rule - Wrong Heading'
+description: 'An invalid rule module for testing.'
+tier: foundation
+layer: 0
+schema: rule
+---
+## Core Concept
+This heading is not '## Mandate' and should fail validation.`;
+      vi.mocked(matter).mockReturnValue({
+        data: {
+          name: 'Invalid Rule - Wrong Heading',
+          description: 'An invalid rule module for testing.',
+          tier: 'foundation',
+          layer: 0,
+          schema: 'rule',
+        },
+        content: `
+## Core Concept
+This heading is not '## Mandate' and should fail validation.`,
+      } as any);
+      const result = validateModuleContent(fileContent, 'foundation');
+      expect(result.isValid).toBe(false);
+      expect(result.errors).toContain(
+        'The heading in a rule schema module must be ## Mandate.'
+      );
+    });
+  });
 });
 
 describe('validateModuleFile', () => {
@@ -397,5 +491,255 @@ Content1`;
     vi.mocked(matter).mockReturnValue({ data: {}, content: '' } as any); // Missing fields
 
     await expect(scanModules()).rejects.toThrow(/Module validation failed/);
+  });
+
+  it('should parse the implement field from frontmatter', async () => {
+    const mockFiles = [path.join(MODULES_ROOT_DIR, 'execution/test.md')];
+    const mockModuleContent = `---
+name: Test Implementing Module
+description: A module that implement another
+schema: procedure
+implement: 'principle/spec/target'
+---
+## Primary Directive
+Test
+
+## Process
+1. Test step
+
+## Constraints
+- Test constraint`;
+
+    vi.mocked(fs.access).mockResolvedValue(undefined);
+    vi.mocked(glob).mockResolvedValue(mockFiles);
+    vi.mocked(fs.readFile).mockResolvedValue(mockModuleContent);
+    vi.mocked(matter).mockReturnValue({
+      data: {
+        name: 'Test Implementing Module',
+        description: 'A module that implement another',
+        schema: 'procedure',
+        implement: 'principle/spec/target',
+      },
+      content: `
+## Primary Directive
+Test
+
+## Process
+1. Test step
+
+## Constraints
+- Test constraint`,
+    } as any);
+
+    const modules = await scanModules();
+    expect(modules.size).toBe(1);
+    const module = modules.get('execution/test');
+    expect(module?.implement).toEqual(['principle/spec/target']);
+  });
+
+  it('should parse array implement field from frontmatter', async () => {
+    const mockFiles = [path.join(MODULES_ROOT_DIR, 'execution/test-array.md')];
+    const mockModuleContent = `---
+name: Test Multi-Implementing Module
+description: A module that implements multiple others
+schema: procedure
+implement: 
+  - 'principle/spec/auth'
+  - 'principle/spec/validation'
+---
+## Primary Directive
+Test multiple implementations
+
+## Process
+1. Test step
+
+## Constraints
+- Test constraint`;
+
+    vi.mocked(fs.access).mockResolvedValue(undefined);
+    vi.mocked(glob).mockResolvedValue(mockFiles);
+    vi.mocked(fs.readFile).mockResolvedValue(mockModuleContent);
+    vi.mocked(matter).mockReturnValue({
+      data: {
+        name: 'Test Multi-Implementing Module',
+        description: 'A module that implements multiple others',
+        schema: 'procedure',
+        implement: ['principle/spec/auth', 'principle/spec/validation'],
+      },
+      content: `
+## Primary Directive
+Test multiple implementations
+
+## Process
+1. Test step
+
+## Constraints
+- Test constraint`,
+    } as any);
+
+    const modules = await scanModules();
+    expect(modules.size).toBe(1);
+    const module = modules.get('execution/test-array');
+    expect(module?.implement).toEqual([
+      'principle/spec/auth',
+      'principle/spec/validation',
+    ]);
+  });
+
+  it('should ignore invalid implement field types', async () => {
+    const mockFiles = [
+      path.join(MODULES_ROOT_DIR, 'execution/test-invalid.md'),
+    ];
+    const mockModuleContent = `---
+name: Test Invalid Implement Module
+description: A module with invalid implement field
+schema: procedure
+implement: 123
+---
+## Primary Directive
+Test invalid implement
+
+## Process
+1. Test step
+
+## Constraints
+- Test constraint`;
+
+    vi.mocked(fs.access).mockResolvedValue(undefined);
+    vi.mocked(glob).mockResolvedValue(mockFiles);
+    vi.mocked(fs.readFile).mockResolvedValue(mockModuleContent);
+    vi.mocked(matter).mockReturnValue({
+      data: {
+        name: 'Test Invalid Implement Module',
+        description: 'A module with invalid implement field',
+        schema: 'procedure',
+        implement: 123, // Invalid type
+      },
+      content: `
+## Primary Directive
+Test invalid implement
+
+## Process
+1. Test step
+
+## Constraints
+- Test constraint`,
+    } as any);
+
+    const modules = await scanModules();
+    expect(modules.size).toBe(1);
+    const module = modules.get('execution/test-invalid');
+    expect(module?.implement).toBeUndefined();
+  });
+});
+
+describe('formatImplementDisplay', () => {
+  it('should return "N/A" for undefined implement field', () => {
+    expect(formatImplementDisplay(undefined)).toBe('N/A');
+  });
+
+  it('should return "N/A" for empty array', () => {
+    expect(formatImplementDisplay([])).toBe('N/A');
+  });
+
+  it('should return single module ID for array with one item', () => {
+    expect(formatImplementDisplay(['principle/spec/auth'])).toBe(
+      'principle/spec/auth'
+    );
+  });
+
+  it('should return comma-separated list for multiple items', () => {
+    expect(
+      formatImplementDisplay([
+        'principle/spec/auth',
+        'principle/spec/validation',
+      ])
+    ).toBe('principle/spec/auth, principle/spec/validation');
+  });
+});
+
+describe('Synergistic Pair Validation', () => {
+  afterEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('should validate that implemented modules exist during scan', async () => {
+    const mockFiles = [
+      path.join(MODULES_ROOT_DIR, 'execution/implementing.md'),
+      path.join(MODULES_ROOT_DIR, 'principle/implemented.md'),
+    ];
+
+    const implementingContent = `---
+name: Implementing Module
+description: Implements another module
+schema: procedure
+implement: 'principle/implemented'
+---
+## Primary Directive
+Test
+
+## Process
+1. Test step
+
+## Constraints
+- Test constraint`;
+
+    const implementedContent = `---
+name: Implemented Module
+description: The implemented module
+schema: specification
+---
+## Core Concept
+Test spec
+
+## Key Rules
+- Test rule`;
+
+    vi.mocked(fs.access).mockResolvedValue(undefined);
+    vi.mocked(glob).mockResolvedValue(mockFiles);
+    vi.mocked(fs.readFile)
+      .mockResolvedValueOnce(implementingContent)
+      .mockResolvedValueOnce(implementedContent);
+
+    vi.mocked(matter)
+      .mockReturnValueOnce({
+        data: {
+          name: 'Implementing Module',
+          description: 'Implements another module',
+          schema: 'procedure',
+          implement: 'principle/implemented',
+        },
+        content: `
+## Primary Directive
+Test
+
+## Process
+1. Test step
+
+## Constraints
+- Test constraint`,
+      } as any)
+      .mockReturnValueOnce({
+        data: {
+          name: 'Implemented Module',
+          description: 'The implemented module',
+          schema: 'specification',
+        },
+        content: `
+## Core Concept
+Test spec
+
+## Key Rules
+- Test rule`,
+      } as any);
+
+    const modules = await scanModules();
+    expect(modules.size).toBe(2);
+
+    const implementingModule = modules.get('execution/implementing');
+    expect(implementingModule?.implement).toEqual(['principle/implemented']);
+
+    // Verify the implemented module exists
+    expect(modules.has('principle/implemented')).toBe(true);
   });
 });

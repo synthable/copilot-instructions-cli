@@ -23,11 +23,44 @@ program
   .description(
     'Builds a persona instruction file from a .persona.json configuration.'
   )
-  .argument('<personaFile>', 'Path to the persona configuration file.')
+  .option('-p, --persona <file>', 'Path to the persona configuration file.')
+  .option('--name <name>', 'Override the persona name in the output file.')
+  .option(
+    '--description <description>',
+    'Override the persona description in the output file.'
+  )
+  .option('--no-attributions', 'Exclude attributions in the output file.')
+  .option('-o, --output <file>', 'Specify the output file for the build.')
+  .option('-m, --modules <path...>', 'A list of instruction modules.', [])
   .option('-v, --verbose', 'Enable verbose output')
-  .action((personaFile, options) => {
+  .addHelpText(
+    'after',
+    `  Examples:
+    $ copilot-instructions build --persona ./personas/my-persona.persona.jsonc
+    $ copilot-instructions build --output ./dist/my-persona.md --modules foundation/logic/reasoning principle/ethics/ethical-considerations technology/language/python technology/frameworks/django
+    $ copilot-instructions build --modules foundation/ethics/be-truthful principle/testing/test-isolation technology/language/typescript technology/frameworks/react
+    `
+  )
+  .showHelpAfterError()
+  .action((options, cmd) => {
+    if (!options.persona && options.modules.length === 0) {
+      cmd.error(
+        'You must specify either a persona file with --persona <file> or a modules list with --modules <file...>'
+      );
+      return;
+    }
     const verbose = options.verbose || program.opts().verbose;
-    handleBuild({ personaFilePath: personaFile, verbose });
+    const stdout = !options.output && !options.persona;
+    handleBuild({
+      personaFilePath: options.persona,
+      modules: options.modules,
+      name: options.name,
+      description: options.description,
+      output: options.output,
+      stdout,
+      noAttributions: options.attributions === false,
+      verbose,
+    });
   });
 
 program

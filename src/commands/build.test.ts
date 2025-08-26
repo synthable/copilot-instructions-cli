@@ -51,6 +51,9 @@ const mockExit = vi
 const mockConsoleError = vi
   .spyOn(console, 'error')
   .mockImplementation(() => {});
+const mockStdoutWrite = vi
+  .spyOn(process.stdout, 'write')
+  .mockImplementation(() => true);
 
 describe('handleBuild', () => {
   const mockSpinner = ora();
@@ -67,6 +70,7 @@ describe('handleBuild', () => {
   afterEach(() => {
     mockExit.mockClear();
     mockConsoleError.mockClear();
+    mockStdoutWrite.mockClear();
   });
 
   const personaFilePath = 'my-persona.persona.jsonc';
@@ -127,7 +131,7 @@ describe('handleBuild', () => {
 
     // Assert
     expect(mockSpinner.fail).toHaveBeenCalledWith(
-      'Persona file validation failed.'
+      'Persona configuration validation failed.'
     );
     expect(mockConsoleError).toHaveBeenCalledWith(`- ${validationErrors[0]}`);
     expect(mockExit).toHaveBeenCalledWith(1);
@@ -187,10 +191,7 @@ describe('handleBuild', () => {
     await handleBuild({ personaFilePath });
 
     // Assert
-    const expectedContent = `Content1
-
----
-Content2`;
+    const expectedContent = `Content1\n\n---\nContent2`;
     expect(fs.writeFile).toHaveBeenCalledWith(
       expect.any(String),
       expectedContent
@@ -261,5 +262,194 @@ Content2`;
       expect.any(String),
       expectedContent
     );
+  });
+
+  it('should build from modules, overriding name and description', async () => {
+    // Arrange
+    const modules = ['mod1'];
+    const name = 'Custom Name';
+    const description = 'Custom Description';
+    const moduleMap = new Map<string, Module>([
+      ['mod1', { ...mockModule, id: 'mod1' }],
+    ]);
+    vi.mocked(scanModules).mockResolvedValue(moduleMap);
+    vi.mocked(validatePersona).mockReturnValue({ isValid: true, errors: [] });
+
+    // Act
+    await handleBuild({ modules, name, description, output: 'output.md' });
+
+    // Assert
+    expect(validatePersona).toHaveBeenCalledWith(
+      expect.objectContaining({ name, description })
+    );
+    expect(fs.writeFile).toHaveBeenCalled();
+  });
+
+  it('should write to stdout when specified', async () => {
+    // Arrange
+    const modules = ['mod1'];
+    const moduleMap = new Map<string, Module>([
+      ['mod1', { ...mockModule, id: 'mod1' }],
+    ]);
+    vi.mocked(scanModules).mockResolvedValue(moduleMap);
+    vi.mocked(validatePersona).mockReturnValue({ isValid: true, errors: [] });
+
+    // Act
+    await handleBuild({ modules, stdout: true });
+
+    // Assert
+    expect(mockStdoutWrite).toHaveBeenCalledWith(
+      'Module content\n[Attribution: mod1]'
+    );
+  });
+
+  it('should handle --no-attributions flag', async () => {
+    // Arrange
+    const modules = ['mod1'];
+    const moduleMap = new Map<string, Module>([
+      ['mod1', { ...mockModule, id: 'mod1' }],
+    ]);
+    vi.mocked(scanModules).mockResolvedValue(moduleMap);
+    vi.mocked(validatePersona).mockReturnValue({ isValid: true, errors: [] });
+
+    // Act
+    await handleBuild({ modules, noAttributions: true, output: 'output.md' });
+
+    // Assert
+    expect(fs.writeFile).toHaveBeenCalledWith(
+      expect.any(String),
+      'Module content'
+    );
+  });
+});
+
+describe('Synergistic Pair Build Validation', () => {
+  const mockModule1: Module = {
+    id: 'proc-implement-valid',
+    tier: 'execution',
+    subject: '',
+    name: 'Valid Implementing Procedure',
+    description: 'A procedure that correctly implement a spec.',
+    content: 'Procedure content',
+    filePath: '/test/proc-implement-valid.md',
+    implement: ['spec-for-implementing'],
+  };
+
+  const mockModule2: Module = {
+    id: 'spec-for-implementing',
+    tier: 'principle',
+    subject: '',
+    name: 'Example Specification',
+    description: 'A spec to be implemented.',
+    content: 'Specification content',
+    filePath: '/test/spec-for-implementing.md',
+  };
+
+  beforeEach(() => {
+    vi.mocked(validatePersona).mockReturnValue({ isValid: true, errors: [] });
+    vi.mocked(validateModuleFile).mockResolvedValue({
+      filePath: '',
+      isValid: true,
+      errors: [],
+    });
+    vi.mocked(fs.mkdir).mockResolvedValue(undefined);
+    vi.mocked(fs.writeFile).mockResolvedValue(undefined);
+  });
+
+  it('should warn if modules are out of order for synergistic pairs', async () => {
+    // Arrange
+    const modules = ['proc-implement-valid', 'spec-for-implementing'];
+    const moduleMap = new Map([
+      ['proc-implement-valid', mockModule1],
+      ['spec-for-implementing', mockModule2],
+    ]);
+    vi.mocked(scanModules).mockResolvedValue(moduleMap);
+    const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+    // Act
+    await handleBuild({ modules, output: 'output.md' });
+
+    // Assert
+    expect(consoleSpy).toHaveBeenCalledWith(
+      expect.stringContaining(
+        "Warning: Module 'proc-implement-valid' implements 'spec-for-implementing', but it appears after it in the module list. For best results, 'spec-for-implementing' should appear before 'proc-implement-valid'."
+      )
+    );
+    expect(fs.writeFile).toHaveBeenCalled();
+
+    consoleSpy.mockRestore();
+  });
+
+  it('should handle multiple implementing modules correctly', async () => {
+    // Create a module that implements multiple specs
+    const multiImplModule: Module = {
+      id: 'multi-impl-proc',
+      tier: 'execution',
+      subject: '',
+      name: 'Multi Implementation Procedure',
+      description: 'A procedure that implements multiple specs.',
+      content: 'Multi implementation content',
+      filePath: '/test/multi-impl-proc.md',
+      implement: ['spec-for-implementing', 'other-spec'],
+    };
+
+    const otherSpecModule: Module = {
+      id: 'other-spec',
+      tier: 'principle',
+      subject: '',
+      name: 'Other Specification',
+      description: 'Another spec to be implemented.',
+      content: 'Other specification content',
+      filePath: '/test/other-spec.md',
+    };
+
+    // Arrange
+    const modules = ['multi-impl-proc', 'spec-for-implementing', 'other-spec'];
+    const moduleMap = new Map([
+      ['multi-impl-proc', multiImplModule],
+      ['spec-for-implementing', mockModule2],
+      ['other-spec', otherSpecModule],
+    ]);
+    vi.mocked(scanModules).mockResolvedValue(moduleMap);
+    const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+    // Act
+    await handleBuild({ modules, output: 'output.md' });
+
+    // Assert
+    expect(consoleSpy).toHaveBeenCalledWith(
+      expect.stringContaining(
+        "Warning: Module 'multi-impl-proc' implements 'spec-for-implementing', but it appears after it in the module list. For best results, 'spec-for-implementing' should appear before 'multi-impl-proc'."
+      )
+    );
+    expect(consoleSpy).toHaveBeenCalledWith(
+      expect.stringContaining(
+        "Warning: Module 'multi-impl-proc' implements 'other-spec', but it appears after it in the module list. For best results, 'other-spec' should appear before 'multi-impl-proc'."
+      )
+    );
+    expect(fs.writeFile).toHaveBeenCalled();
+
+    consoleSpy.mockRestore();
+  });
+
+  it('should warn when implemented module is missing from persona', async () => {
+    // Arrange
+    const modules = ['proc-implement-valid']; // Missing 'spec-for-implementing'
+    const moduleMap = new Map([['proc-implement-valid', mockModule1]]);
+    vi.mocked(scanModules).mockResolvedValue(moduleMap);
+    const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+    // Act
+    await handleBuild({ modules, output: 'output.md' });
+
+    // Assert
+    expect(consoleSpy).toHaveBeenCalledWith(
+      expect.stringContaining(
+        "Warning: Module 'proc-implement-valid' implements 'spec-for-implementing', but it is not included in the persona modules list."
+      )
+    );
+    expect(fs.writeFile).toHaveBeenCalled();
+
+    consoleSpy.mockRestore();
   });
 });

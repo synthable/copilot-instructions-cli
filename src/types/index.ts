@@ -18,6 +18,8 @@ export interface Module {
   filePath: string;
   /** The layer of the module (foundation tier only) */
   layer?: number;
+  /** The ID(s) of module(s) that this module implements (for Synergistic Pairs) */
+  implement?: string[];
 }
 
 /**
@@ -26,7 +28,7 @@ export interface Module {
 export interface PersonaConfig {
   name: string;
   description?: string;
-  output?: string;
+  output?: string | undefined;
   attributions?: boolean;
   modules: string[];
 }
