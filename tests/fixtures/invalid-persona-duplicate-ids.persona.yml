@@ -1,0 +1,8 @@
+name: "Invalid Duplicates"
+description: "Demonstrates invalid duplication of module IDs within a single group."
+semantic: "example"
+moduleGroups:
+  - groupName: "Bad Group"
+    modules:
+      - "principle/architecture/separation-of-concerns"
+      - "principle/architecture/separation-of-concerns"

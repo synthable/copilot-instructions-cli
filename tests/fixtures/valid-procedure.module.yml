@@ -1,0 +1,22 @@
+id: "execution/release/cut-minor-release"
+version: "1.0.0"
+schemaVersion: "1.0"
+shape: procedure
+declaredDirectives:
+  required: [goal, process]
+  optional: [constraints, examples]
+meta:
+  name: "Cut Minor Release"
+  description: "A procedure to cut a minor release using conventional commits and semantic versioning."
+  semantic: |
+    Step-by-step process to prepare, version, tag, and publish a minor release. Conventional commits, changelog generation,
+    CI validation, git tagging, package publishing, and post-release verification.
+body:
+  goal: |
+    Produce a clean, tagged minor release with an accurate changelog and validated artifacts.
+  process:
+    - Ensure main branch is green and synchronized with remote.
+    - Generate the changelog from conventional commits since the last tag.
+    - Bump the minor version and commit the changes.
+    - Tag the release and push tags.
+    - Publish artifacts and verify installability.

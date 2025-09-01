@@ -1,0 +1,15 @@
+id: "execution/build/invalid-undeclared-key"
+version: "1.0.0"
+schemaVersion: "1.0"
+shape: procedure
+declaredDirectives:
+  required: [goal, process]
+  optional: []
+meta:
+  name: "Invalid Undeclared Key"
+  description: "Contains a body key not listed in declaredDirectives."
+  semantic: "example"
+body:
+  goal: "Build something."
+  process: ["Do stuff."]
+  steps: ["this key is not declared and MUST cause validation to fail"]

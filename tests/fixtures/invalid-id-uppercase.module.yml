@@ -1,0 +1,14 @@
+id: "Principle/testing/tdd"
+version: "1.0.0"
+schemaVersion: "1.0"
+shape: specification
+declaredDirectives:
+  required: [goal, constraints]
+  optional: []
+meta:
+  name: "TDD"
+  description: "Invalid ID due to uppercase."
+  semantic: "example"
+body:
+  goal: "Test driven development specification."
+  constraints: ["Write tests first."]

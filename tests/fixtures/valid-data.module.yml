@@ -1,0 +1,22 @@
+id: "technology/config/build-target-matrix"
+version: "1.0.0"
+schemaVersion: "1.0"
+shape: data
+declaredDirectives:
+  required: [goal, data]
+  optional: [examples]
+meta:
+  name: "Build Target Matrix"
+  description: "Provides a small JSON matrix of supported build targets and Node versions."
+  semantic: |
+    Data block listing supported build targets, platforms, and versions. Used by tooling and documentation.
+body:
+  goal: |
+    Make supported build targets machine-readable for CI and documentation automation.
+  data:
+    mediaType: application/json
+    value: |
+      { "targets": [
+        { "name": "linux-x64", "node": "20.x" },
+        { "name": "darwin-arm64", "node": "20.x" }
+      ] }
