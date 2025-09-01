@@ -27,13 +27,29 @@ import type {
 /**
  * Loads and validates a UMS v1.0 module from file
  */
+// Raw parsed YAML structure before validation
+interface RawModuleData {
+  id?: unknown;
+  version?: unknown;
+  schemaVersion?: unknown;
+  shape?: unknown;
+  declaredDirectives?: unknown;
+  meta?: unknown;
+  body?: unknown;
+  [key: string]: unknown;
+}
+
+function isValidRawModuleData(data: unknown): data is RawModuleData {
+  return data !== null && typeof data === 'object' && !Array.isArray(data);
+}
+
 export async function loadModule(filePath: string): Promise<UMSModule> {
   try {
     // Read and parse YAML file
     const content = await readFile(filePath, 'utf-8');
-    const parsed = parse(content);
+    const parsed: unknown = parse(content);
 
-    if (!parsed || typeof parsed !== 'object') {
+    if (!isValidRawModuleData(parsed)) {
       throw new Error('Invalid YAML: expected object at root');
     }
 

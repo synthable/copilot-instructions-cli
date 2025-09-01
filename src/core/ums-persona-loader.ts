@@ -1,3 +1,4 @@
+/* eslint-disable max-lines-per-function */
 /**
  * UMS v1.0 Persona loader and validator (M2)
  * Implements persona parsing and validation per UMS v1.0 specification
@@ -17,6 +18,21 @@ import type {
   ValidationWarning,
 } from '../types/ums-v1.js';
 
+// Raw parsed YAML structure before validation
+interface RawPersonaData {
+  name?: unknown;
+  description?: unknown;
+  semantic?: unknown;
+  role?: unknown;
+  attribution?: unknown;
+  moduleGroups?: unknown;
+  [key: string]: unknown;
+}
+
+function isValidRawPersonaData(data: unknown): data is RawPersonaData {
+  return data !== null && typeof data === 'object' && !Array.isArray(data);
+}
+
 /**
  * Loads and validates a UMS v1.0 persona from file
  */
@@ -24,9 +40,9 @@ export async function loadPersona(filePath: string): Promise<UMSPersona> {
   try {
     // Read and parse YAML file
     const content = await readFile(filePath, 'utf-8');
-    const parsed = parse(content);
+    const parsed: unknown = parse(content);
 
-    if (!parsed || typeof parsed !== 'object') {
+    if (!isValidRawPersonaData(parsed)) {
       throw new Error('Invalid YAML: expected object at root');
     }
 

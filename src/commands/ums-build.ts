@@ -62,12 +62,23 @@ export async function handleUMSBuild(options: UMSBuildOptions): Promise<void> {
         process.exit(1);
       }
 
-      // Read from stdin
-      const chunks: Buffer[] = [];
-      for await (const chunk of process.stdin) {
-        chunks.push(Buffer.from(chunk));
-      }
-      personaContent = Buffer.concat(chunks).toString('utf8');
+      // Read from stdin using proper async stream handling
+      personaContent = await new Promise<string>((resolve, reject) => {
+        const chunks: Buffer[] = [];
+
+        process.stdin.on('data', (chunk: Buffer) => {
+          chunks.push(chunk);
+        });
+
+        process.stdin.on('end', () => {
+          resolve(Buffer.concat(chunks).toString('utf8'));
+        });
+
+        process.stdin.on('error', reject);
+
+        // Start reading
+        process.stdin.resume();
+      });
 
       if (!personaContent.trim()) {
         spinner.fail('No persona content provided via stdin');
