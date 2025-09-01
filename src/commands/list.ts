@@ -1,78 +1,154 @@
 /**
  * @module commands/list
- * @description Command to list available modules.
+ * @description Command to list available UMS v1.0 modules (M5).
  */
 
 import chalk from 'chalk';
 import ora from 'ora';
 import Table from 'cli-table3';
 import { handleError } from '../utils/error-handler.js';
-import { scanModules, formatImplementDisplay } from '../core/module-service.js';
+import { ModuleRegistry } from '../core/ums-build-engine.js';
+import { loadModule } from '../core/ums-module-loader.js';
+import type { UMSModule } from '../types/ums-v1.js';
 
 interface ListOptions {
   tier?: string;
 }
 
 /**
- * Handles the 'list' command.
- * @param options - The command options.
- * @param options.tier - The tier to filter by.
+ * Loads all modules from the registry
  */
-export async function handleList(options: ListOptions): Promise<void> {
-  const spinner = ora('Scanning for modules...').start();
-  try {
-    const allModules = await scanModules();
-    spinner.succeed('Module scan complete.');
-    let modules = Array.from(allModules.values());
+async function loadModulesFromRegistry(
+  registry: ModuleRegistry,
+  skipErrors: boolean
+): Promise<UMSModule[]> {
+  const moduleIds = registry.getAllModuleIds();
+  const modules: UMSModule[] = [];
 
-    if (options.tier) {
-      modules = modules.filter(m => m.tier === options.tier);
+  for (const moduleId of moduleIds) {
+    const filePath = registry.resolve(moduleId);
+    if (filePath) {
+      try {
+        const module = await loadModule(filePath);
+        modules.push(module);
+      } catch (error) {
+        if (skipErrors) {
+          continue;
+        }
+        console.warn(
+          chalk.yellow(
+            `Warning: Failed to load module ${moduleId}: ${error instanceof Error ? error.message : String(error)}`
+          )
+        );
+      }
+    }
+  }
+
+  return modules;
+}
+
+/**
+ * Filters and sorts modules according to M5 requirements
+ */
+function filterAndSortModules(
+  modules: UMSModule[],
+  tierFilter?: string
+): UMSModule[] {
+  let filteredModules = modules;
+
+  if (tierFilter) {
+    const validTiers = ['foundation', 'principle', 'technology', 'execution'];
+    if (!validTiers.includes(tierFilter)) {
+      throw new Error(
+        `Invalid tier '${tierFilter}'. Must be one of: ${validTiers.join(', ')}`
+      );
     }
 
-    modules.sort((a, b) => {
-      const aHasLayer = a.layer !== undefined;
-      const bHasLayer = b.layer !== undefined;
-
-      if (aHasLayer && bHasLayer) {
-        if (a.layer! < b.layer!) return -1;
-        if (a.layer! > b.layer!) return 1;
-      } else if (aHasLayer) {
-        return -1;
-      } else if (bHasLayer) {
-        return 1;
-      }
-
-      return a.name.localeCompare(b.name);
+    filteredModules = modules.filter(m => {
+      const tier = m.id.split('/')[0];
+      return tier === tierFilter;
     });
+  }
 
-    if (modules.length === 0) {
-      console.log(chalk.yellow('No modules found.'));
+  // M5 sorting: meta.name (Title Case) then id
+  filteredModules.sort((a, b) => {
+    const nameCompare = a.meta.name.localeCompare(b.meta.name);
+    if (nameCompare !== 0) return nameCompare;
+    return a.id.localeCompare(b.id);
+  });
+
+  return filteredModules;
+}
+
+/**
+ * Renders the modules table
+ */
+function renderModulesTable(modules: UMSModule[]): void {
+  const table = new Table({
+    head: ['ID', 'Tier/Subject', 'Name', 'Description'],
+    style: {
+      head: ['cyan'],
+      border: ['gray'],
+    },
+    wordWrap: true,
+  });
+
+  modules.forEach(module => {
+    const idParts = module.id.split('/');
+    const tier = idParts[0];
+    const subject = idParts.slice(1).join('/');
+    const tierSubject = subject ? `${tier}/${subject}` : tier;
+
+    table.push([
+      module.id,
+      tierSubject,
+      module.meta.name,
+      module.meta.description,
+    ]);
+  });
+
+  console.log('\nAvailable UMS v1.0 modules:\n');
+  console.log(table.toString());
+  console.log(`\nTotal modules: ${modules.length}`);
+}
+
+/**
+ * Handles the 'list' command for UMS v1.0 modules (M5).
+ * @param options - The command options.
+ * @param options.tier - The tier to filter by (foundation|principle|technology|execution).
+ */
+export async function handleList(options: ListOptions): Promise<void> {
+  const spinner = ora('Discovering UMS v1.0 modules...').start();
+  try {
+    // Use UMS v1.0 module discovery
+    const registry = new ModuleRegistry();
+    await registry.discover();
+
+    const moduleIds = registry.getAllModuleIds();
+    if (moduleIds.length === 0) {
+      spinner.succeed('Module discovery complete.');
+      console.log(chalk.yellow('No UMS v1.0 modules found.'));
       return;
     }
 
-    const maxWidth = process.stdout.columns || 80;
-    const table = new Table({
-      head: ['Layer', 'Tier/Subject', 'Name', 'Description', 'Implement'],
-      colWidths: [
-        8,
-        32,
-        20,
-        Math.max(20, maxWidth - (8 + 32 + 20 + 16 + 10)),
-        16,
-      ], // 10 for table borders/padding
-      wordWrap: true,
-      style: { head: ['cyan'] },
-    });
+    // Load all modules
+    const modules = await loadModulesFromRegistry(registry, !!options.tier);
+    spinner.succeed('Module discovery complete.');
 
-    modules.forEach(m => {
-      const subjectPath = m.subject ? `${m.tier}/${m.subject}` : m.tier;
-      const layer = m.layer !== undefined ? m.layer.toString() : 'N/A';
-      const implement = formatImplementDisplay(m.implement);
-      table.push([layer, subjectPath, m.name, m.description, implement]);
-    });
+    // Filter and sort modules
+    const filteredModules = filterAndSortModules(modules, options.tier);
 
-    console.log(table.toString());
+    // M5 empty state
+    if (filteredModules.length === 0) {
+      const filterMsg = options.tier ? ` in tier '${options.tier}'` : '';
+      console.log(chalk.yellow(`No UMS v1.0 modules found${filterMsg}.`));
+      return;
+    }
+
+    // Render results
+    renderModulesTable(filteredModules);
   } catch (error) {
-    handleError(error, spinner);
+    spinner.fail('Failed to discover modules.');
+    handleError(error);
   }
 }
