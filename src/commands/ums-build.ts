@@ -122,11 +122,20 @@ export async function handleUMSBuild(options: UMSBuildOptions): Promise<void> {
 
     // Output the result
     if (outputPath) {
-      // Write to file
+      // Write markdown file
       await writeFile(outputPath, result.markdown, 'utf8');
       console.log(
         chalk.green(`✓ Persona instructions written to: ${outputPath}`)
       );
+
+      // Write build report JSON file (M4 requirement)
+      const buildReportPath = outputPath.replace(/\.md$/, '.build.json');
+      await writeFile(
+        buildReportPath,
+        JSON.stringify(result.buildReport, null, 2),
+        'utf8'
+      );
+      console.log(chalk.green(`✓ Build report written to: ${buildReportPath}`));
 
       if (verbose) {
         console.log(

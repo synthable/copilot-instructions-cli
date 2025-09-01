@@ -18,6 +18,9 @@ import type {
   UMSPersona,
   DataDirective,
   ExampleDirective,
+  BuildReport,
+  ResolvedModuleGroup,
+  ResolvedModule,
 } from '../types/ums-v1.js';
 
 export interface BuildOptions {
@@ -40,6 +43,8 @@ export interface BuildResult {
   persona: UMSPersona;
   /** Build warnings */
   warnings: string[];
+  /** Build report for JSON output */
+  buildReport: BuildReport;
 }
 
 /**
@@ -168,12 +173,82 @@ export class BuildEngine {
     // Generate Markdown
     const markdown = this.renderMarkdown(persona, modules);
 
+    // Generate Build Report
+    const buildReport = this.generateBuildReport(persona, modules, options);
+
     return {
       markdown,
       modules,
       persona,
       warnings,
+      buildReport,
     };
+  }
+
+  /**
+   * Generates Build Report according to M4 requirements
+   */
+  private generateBuildReport(
+    persona: UMSPersona,
+    modules: UMSModule[],
+    options: BuildOptions
+  ): BuildReport {
+    // Get package version (placeholder for now)
+    const toolVersion = '1.0.0';
+
+    // Create resolved module groups
+    const resolvedModuleGroups: ResolvedModuleGroup[] = [];
+
+    for (const group of persona.moduleGroups) {
+      const resolvedModules: ResolvedModule[] = [];
+
+      for (const moduleId of group.modules) {
+        const module = modules.find(m => m.id === moduleId);
+        if (module) {
+          resolvedModules.push({
+            id: module.id,
+            version: module.version,
+            source: 'local',
+            digest: this.generateDigest(module.filePath),
+            shape: module.shape,
+            declaredDirectives: module.declaredDirectives,
+          });
+        }
+      }
+
+      resolvedModuleGroups.push({
+        groupName: group.groupName,
+        modules: resolvedModules,
+      });
+    }
+
+    return {
+      personaName: persona.name,
+      schemaVersion: '1.0',
+      toolVersion,
+      personaDigest: this.generatePersonaDigest(options),
+      buildTimestamp: new Date().toISOString(),
+      moduleGroups: resolvedModuleGroups,
+    };
+  }
+
+  /**
+   * Generates a simple digest for content (placeholder implementation)
+   */
+  private generateDigest(filePath: string): string {
+    // Simple hash based on file path for now
+    // In a real implementation, this would be a content hash
+    return `sha256:${Buffer.from(filePath).toString('base64').slice(0, 16)}`;
+  }
+
+  /**
+   * Generates a digest for persona content
+   */
+  private generatePersonaDigest(options: BuildOptions): string {
+    if (options.personaContent) {
+      return `sha256:${Buffer.from(options.personaContent).toString('base64').slice(0, 16)}`;
+    }
+    return `sha256:${Buffer.from(options.personaSource).toString('base64').slice(0, 16)}`;
   }
 
   /**
