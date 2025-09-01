@@ -206,7 +206,7 @@ export class BuildEngine {
 
       return parsed as UMSPersona;
     } else {
-      return await loadPersona(options.personaSource);
+      return loadPersona(options.personaSource);
     }
   }
 

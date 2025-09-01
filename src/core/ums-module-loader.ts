@@ -11,6 +11,7 @@ import {
   UMS_SCHEMA_VERSION,
   STANDARD_SHAPES,
   type StandardShape,
+  type ValidTier,
 } from '../constants.js';
 import {
   ID_VALIDATION_ERRORS,
@@ -72,24 +73,12 @@ export async function loadModule(filePath: string): Promise<UMSModule> {
 }
 
 /**
- * Validates a parsed UMS v1.0 module object
+ * Validates required top-level keys
  */
-export function validateModule(obj: unknown): ValidationResult {
+function validateRequiredKeys(
+  module: Record<string, unknown>
+): ValidationError[] {
   const errors: ValidationError[] = [];
-  const warnings: ValidationWarning[] = [];
-
-  if (!obj || typeof obj !== 'object') {
-    errors.push({
-      path: '',
-      message: 'Module must be an object',
-      section: 'Section 2.1',
-    });
-    return { valid: false, errors, warnings };
-  }
-
-  const module = obj as Record<string, unknown>;
-
-  // Validate top-level required keys (Section 2.1)
   const requiredKeys = [
     'id',
     'version',
@@ -110,13 +99,16 @@ export function validateModule(obj: unknown): ValidationResult {
     }
   }
 
-  // Validate id field (Section 3)
-  if ('id' in module) {
-    const idValidation = validateId(module.id as string);
-    if (!idValidation.valid) {
-      errors.push(...idValidation.errors);
-    }
-  }
+  return errors;
+}
+
+/**
+ * Validates version and schemaVersion fields
+ */
+function validateVersionFields(
+  module: Record<string, unknown>
+): ValidationError[] {
+  const errors: ValidationError[] = [];
 
   // Validate version field
   if ('version' in module) {
@@ -147,23 +139,18 @@ export function validateModule(obj: unknown): ValidationResult {
     }
   }
 
-  // Validate shape and declaredDirectives (Section 2.5)
-  if ('shape' in module && 'declaredDirectives' in module) {
-    const shapeValidation = validateShapeAndDirectives(
-      module.shape as string,
-      module.declaredDirectives as any
-    );
-    errors.push(...shapeValidation.errors);
-    warnings.push(...shapeValidation.warnings);
-  }
+  return errors;
+}
 
-  // Validate meta block (Section 2.2)
+/**
+ * Validates deprecation warnings
+ */
+function validateDeprecation(
+  module: Record<string, unknown>
+): ValidationWarning[] {
+  const warnings: ValidationWarning[] = [];
+
   if ('meta' in module) {
-    const metaValidation = validateMeta(module.meta as any);
-    errors.push(...metaValidation.errors);
-    warnings.push(...metaValidation.warnings);
-
-    // Check for deprecation warnings
     const meta = module.meta as ModuleMeta;
     if (meta?.deprecated) {
       const replacedBy = meta.replacedBy;
@@ -177,12 +164,64 @@ export function validateModule(obj: unknown): ValidationResult {
     }
   }
 
+  return warnings;
+}
+
+/**
+ * Validates a parsed UMS v1.0 module object
+ */
+export function validateModule(obj: unknown): ValidationResult {
+  const errors: ValidationError[] = [];
+  const warnings: ValidationWarning[] = [];
+
+  if (!obj || typeof obj !== 'object') {
+    errors.push({
+      path: '',
+      message: 'Module must be an object',
+      section: 'Section 2.1',
+    });
+    return { valid: false, errors, warnings };
+  }
+
+  const module = obj as Record<string, unknown>;
+
+  // Validate top-level required keys (Section 2.1)
+  errors.push(...validateRequiredKeys(module));
+
+  // Validate id field (Section 3)
+  if ('id' in module) {
+    const idValidation = validateId(module.id as string);
+    if (!idValidation.valid) {
+      errors.push(...idValidation.errors);
+    }
+  }
+
+  // Validate version and schema version fields
+  errors.push(...validateVersionFields(module));
+
+  // Validate shape and declaredDirectives (Section 2.5)
+  if ('shape' in module && 'declaredDirectives' in module) {
+    const shapeValidation = validateShapeAndDirectives(
+      module.shape,
+      module.declaredDirectives
+    );
+    errors.push(...shapeValidation.errors);
+    warnings.push(...shapeValidation.warnings);
+  }
+
+  // Validate meta block (Section 2.2)
+  if ('meta' in module) {
+    const metaValidation = validateMeta(module.meta);
+    errors.push(...metaValidation.errors);
+    warnings.push(...metaValidation.warnings);
+  }
+
+  // Check for deprecation warnings
+  warnings.push(...validateDeprecation(module));
+
   // Validate body against declared directives (Section 4)
   if ('body' in module && 'declaredDirectives' in module) {
-    const bodyValidation = validateBody(
-      module.body as any,
-      module.declaredDirectives as any
-    );
+    const bodyValidation = validateBody(module.body, module.declaredDirectives);
     errors.push(...bodyValidation.errors);
     warnings.push(...bodyValidation.warnings);
   }
@@ -218,7 +257,7 @@ function validateId(id: unknown): ValidationResult {
           message: ID_VALIDATION_ERRORS.uppercaseCharacters(id),
           section: 'Section 3.3',
         });
-      } else if (!VALID_TIERS.includes(tier as any)) {
+      } else if (!VALID_TIERS.includes(tier as ValidTier)) {
         errors.push({
           path: 'id',
           message: ID_VALIDATION_ERRORS.invalidTier(tier, [...VALID_TIERS]),
@@ -337,29 +376,14 @@ function validateShapeAndDirectives(
 }
 
 /**
- * Validates module metadata block (Section 2.2)
+ * Validates required meta fields
  */
-function validateMeta(meta: unknown): ValidationResult {
+function validateRequiredMetaFields(
+  metaObj: Record<string, unknown>
+): ValidationError[] {
   const errors: ValidationError[] = [];
-  const warnings: ValidationWarning[] = [];
-
-  if (!meta || typeof meta !== 'object') {
-    errors.push({
-      path: 'meta',
-      message: SCHEMA_VALIDATION_ERRORS.wrongType(
-        'meta',
-        'object',
-        typeof meta
-      ),
-      section: 'Section 2.2',
-    });
-    return { valid: false, errors, warnings };
-  }
-
-  const metaObj = meta as Record<string, unknown>;
-
-  // Validate required meta fields
   const requiredMetaFields = ['name', 'description', 'semantic'];
+
   for (const field of requiredMetaFields) {
     if (!(field in metaObj)) {
       errors.push({
@@ -380,7 +404,15 @@ function validateMeta(meta: unknown): ValidationResult {
     }
   }
 
-  // Validate optional meta fields when present
+  return errors;
+}
+
+/**
+ * Validates optional tags field
+ */
+function validateMetaTags(metaObj: Record<string, unknown>): ValidationError[] {
+  const errors: ValidationError[] = [];
+
   if ('tags' in metaObj && metaObj.tags !== undefined) {
     if (!Array.isArray(metaObj.tags)) {
       errors.push({
@@ -412,7 +444,17 @@ function validateMeta(meta: unknown): ValidationResult {
     }
   }
 
-  // Validate deprecated/replacedBy constraint
+  return errors;
+}
+
+/**
+ * Validates deprecated/replacedBy constraint
+ */
+function validateDeprecatedReplacedBy(
+  metaObj: Record<string, unknown>
+): ValidationError[] {
+  const errors: ValidationError[] = [];
+
   if ('deprecated' in metaObj && metaObj.deprecated === true) {
     if ('replacedBy' in metaObj) {
       if (typeof metaObj.replacedBy !== 'string') {
@@ -444,6 +486,40 @@ function validateMeta(meta: unknown): ValidationResult {
       section: 'Section 2.2',
     });
   }
+
+  return errors;
+}
+
+/**
+ * Validates module metadata block (Section 2.2)
+ */
+function validateMeta(meta: unknown): ValidationResult {
+  const errors: ValidationError[] = [];
+  const warnings: ValidationWarning[] = [];
+
+  if (!meta || typeof meta !== 'object') {
+    errors.push({
+      path: 'meta',
+      message: SCHEMA_VALIDATION_ERRORS.wrongType(
+        'meta',
+        'object',
+        typeof meta
+      ),
+      section: 'Section 2.2',
+    });
+    return { valid: false, errors, warnings };
+  }
+
+  const metaObj = meta as Record<string, unknown>;
+
+  // Validate required meta fields
+  errors.push(...validateRequiredMetaFields(metaObj));
+
+  // Validate optional tags field
+  errors.push(...validateMetaTags(metaObj));
+
+  // Validate deprecated/replacedBy constraint
+  errors.push(...validateDeprecatedReplacedBy(metaObj));
 
   return { valid: errors.length === 0, errors, warnings };
 }
