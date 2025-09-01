@@ -1,6 +1,14 @@
 #!/usr/bin/env node
+/* eslint-disable max-lines-per-function */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
+/* eslint-disable @typescript-eslint/no-floating-promises */
+
 import { Argument, Command, Option } from 'commander';
 import { handleBuild } from './commands/build.js';
+import { handleUMSBuild, validatePersonaFile } from './commands/ums-build.js';
 import { handleList } from './commands/list.js';
 import { handleSearch } from './commands/search.js';
 import { handleValidate } from './commands/validate.js';
@@ -21,46 +29,125 @@ program
 program
   .command('build')
   .description(
-    'Builds a persona instruction file from a .persona.json configuration.'
+    'Builds a persona instruction file from a .persona.yml configuration (UMS v1.0) or legacy .persona.jsonc'
   )
-  .option('-p, --persona <file>', 'Path to the persona configuration file.')
-  .option('--name <name>', 'Override the persona name in the output file.')
+  .option(
+    '-p, --persona <file>',
+    'Path to the persona configuration file (.persona.yml for UMS v1.0, or .persona.jsonc for legacy)'
+  )
+  .option(
+    '--name <name>',
+    '[Legacy only] Override the persona name in the output file.'
+  )
   .option(
     '--description <description>',
-    'Override the persona description in the output file.'
+    '[Legacy only] Override the persona description in the output file.'
   )
-  .option('--no-attributions', 'Exclude attributions in the output file.')
+  .option(
+    '--no-attributions',
+    '[Legacy only] Exclude attributions in the output file.'
+  )
   .option('-o, --output <file>', 'Specify the output file for the build.')
-  .option('-m, --modules <path...>', 'A list of instruction modules.', [])
+  .option(
+    '-m, --modules <path...>',
+    '[Legacy only] A list of instruction modules.',
+    []
+  )
   .option('-v, --verbose', 'Enable verbose output')
   .addHelpText(
     'after',
     `  Examples:
+    UMS v1.0 (recommended):
+    $ copilot-instructions build --persona ./personas/my-persona.persona.yml
+    $ copilot-instructions build --persona ./personas/my-persona.persona.yml --output ./dist/my-persona.md
+    $ cat persona.yml | copilot-instructions build --output ./dist/my-persona.md
+
+    Legacy format:
     $ copilot-instructions build --persona ./personas/my-persona.persona.jsonc
-    $ copilot-instructions build --output ./dist/my-persona.md --modules foundation/logic/reasoning principle/ethics/ethical-considerations technology/language/python technology/frameworks/django
-    $ copilot-instructions build --modules foundation/ethics/be-truthful principle/testing/test-isolation technology/language/typescript technology/frameworks/react
+    $ copilot-instructions build --output ./dist/my-persona.md --modules foundation/logic/reasoning principle/ethics/ethical-considerations
     `
   )
   .showHelpAfterError()
   .action((options, cmd) => {
-    if (!options.persona && options.modules.length === 0) {
-      cmd.error(
-        'You must specify either a persona file with --persona <file> or a modules list with --modules <file...>'
-      );
+    const verbose = options.verbose ?? program.opts().verbose;
+
+    // Determine if this is a UMS v1.0 build or legacy build
+    if (options.persona) {
+      if (options.persona.endsWith('.persona.yml')) {
+        // UMS v1.0 build
+        try {
+          validatePersonaFile(options.persona);
+        } catch (error) {
+          const message =
+            error instanceof Error ? error.message : String(error);
+          cmd.error(message);
+          return;
+        }
+
+        handleUMSBuild({
+          persona: options.persona,
+          output: options.output,
+          verbose,
+        });
+        return;
+      } else if (
+        options.persona.endsWith('.persona.jsonc') ||
+        options.persona.endsWith('.persona.json')
+      ) {
+        // Legacy build
+        const stdout = !options.output && !options.persona;
+        handleBuild({
+          personaFilePath: options.persona,
+          modules: options.modules,
+          name: options.name,
+          description: options.description,
+          output: options.output,
+          stdout,
+          noAttributions: options.attributions === false,
+          verbose,
+        });
+        return;
+      } else {
+        cmd.error(
+          'Persona file must have either .persona.yml extension (UMS v1.0) or .persona.jsonc/.persona.json extension (legacy)'
+        );
+        return;
+      }
+    }
+
+    // Check for stdin input (UMS v1.0 only)
+    if (!process.stdin.isTTY) {
+      // Reading from stdin - assume UMS v1.0 format
+      handleUMSBuild({
+        output: options.output,
+        verbose,
+      });
       return;
     }
-    const verbose = options.verbose || program.opts().verbose;
-    const stdout = !options.output && !options.persona;
-    handleBuild({
-      personaFilePath: options.persona,
-      modules: options.modules,
-      name: options.name,
-      description: options.description,
-      output: options.output,
-      stdout,
-      noAttributions: options.attributions === false,
-      verbose,
-    });
+
+    // Legacy fallback for modules-only build
+    if (options.modules.length > 0) {
+      const stdout = !options.output && !options.persona;
+      handleBuild({
+        personaFilePath: options.persona,
+        modules: options.modules,
+        name: options.name,
+        description: options.description,
+        output: options.output,
+        stdout,
+        noAttributions: options.attributions === false,
+        verbose,
+      });
+      return;
+    }
+
+    cmd.error(
+      'You must specify either:\n' +
+        '  - A UMS v1.0 persona file with --persona <file.persona.yml>\n' +
+        '  - A legacy persona file with --persona <file.persona.jsonc>\n' +
+        '  - A legacy modules list with --modules <module-ids...>\n' +
+        '  - UMS v1.0 persona YAML content via stdin (pipe or redirect)'
+    );
   });
 
 program
@@ -84,8 +171,8 @@ program
   `
   )
   .action(options => {
-    const verbose = options.verbose || program.opts().verbose;
-    handleList({ ...options, verbose });
+    const verbose = options.verbose ?? program.opts().verbose;
+    void handleList({ ...options, verbose });
   });
 
 program
@@ -125,8 +212,8 @@ program
   `
   )
   .action((path, options) => {
-    const verbose = options.verbose || program.opts().verbose;
-    handleValidate({ targetPath: path, verbose });
+    const verbose = options.verbose ?? program.opts().verbose;
+    void handleValidate({ targetPath: path, verbose });
   });
 
 program
@@ -196,8 +283,8 @@ program
   .action(handleCreatePersona);
 
 // Asynchronous execution wrapper
-async function main() {
+async function main(): Promise<void> {
   await program.parseAsync(process.argv);
 }
 
-main();
+void main();
