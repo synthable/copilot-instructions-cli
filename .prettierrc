@@ -16,17 +16,19 @@
   "requirePragma": false,
   "overrides": [
     {
-      "files": "*.md",
+      "files": "docs/**/*.md",
       "options": {
         "tabWidth": 2,
         "proseWrap": "preserve",
-        "parser": "markdown"
+        "parser": "markdown",
+        "singleQuote": false
       }
     },
     {
-      "files": "*.yml",
+      "files": ["*.yml", "*.yaml"],
       "options": {
-        "parser": "yaml"
+        "parser": "yaml",
+        "singleQuote": false
       }
     }
   ]
