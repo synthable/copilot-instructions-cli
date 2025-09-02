@@ -70,7 +70,8 @@
     "glob": "^11.0.3",
     "gray-matter": "^4.0.3",
     "jsonc-parser": "^3.3.1",
-    "ora": "^8.2.0"
+    "ora": "^8.2.0",
+    "yaml": "^2.6.0"
   },
   "devDependencies": {
     "@types/node": "^24.1.0",

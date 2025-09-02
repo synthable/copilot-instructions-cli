@@ -13,6 +13,7 @@ import type { UMSModule } from '../types/ums-v1.js';
 
 interface SearchOptions {
   tier?: string;
+  verbose?: boolean;
 }
 
 /**
