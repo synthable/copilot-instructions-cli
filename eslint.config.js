@@ -4,6 +4,7 @@ import { fileURLToPath } from 'node:url';
 import tseslint from 'typescript-eslint';
 import vitest from '@vitest/eslint-plugin';
 import prettierConfig from 'eslint-config-prettier';
+import prettierPlugin from 'eslint-plugin-prettier';
 import globals from 'globals';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -25,9 +26,11 @@ export default tseslint.config(
       ...tseslint.configs.recommendedTypeChecked,
       ...tseslint.configs.stylisticTypeChecked,
     ],
+    plugins: {
+      prettier: prettierPlugin,
+    },
     rules: {
-      // ...tseslint.configs.recommended.rules,
-      //'prettier/prettier': 'error',
+      'prettier/prettier': 'warn',
 
       '@typescript-eslint/no-floating-promises': 'error', // Critical for async code
       '@typescript-eslint/await-thenable': 'error',
@@ -63,8 +66,7 @@ export default tseslint.config(
       parserOptions: {
         ecmaVersion: '2022',
         sourceType: 'module',
-        project: true,
-        tsconfig: path.join(__dirname, 'tsconfig.json')
+        project: [path.join(__dirname, 'tsconfig.json')]
       },
       globals: {
         ...globals.node,
@@ -75,8 +77,7 @@ export default tseslint.config(
     files: ['**/*.{test,spec}.{ts,tsx}', '**/__tests__/**/*.{ts,tsx}'],
     ...vitest.configs.recommended,
     rules: {
-      //...vitest.configs.recommended.rules,
-      //'prettier/prettier': 'error',
+      ...vitest.configs.recommended.rules,
       '@typescript-eslint/no-explicit-any': 'off',
       '@typescript-eslint/no-non-null-assertion': 'off',
       'max-lines-per-function': 'off',
