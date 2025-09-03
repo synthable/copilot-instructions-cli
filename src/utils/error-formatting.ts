@@ -47,6 +47,45 @@ export function formatError(ctx: ErrorContext): string {
 }
 
 /**
+ * Format a command-specific error with consistent styling
+ */
+export function formatCommandError(
+  command: string,
+  message: string,
+  filePath?: string
+): string {
+  let formatted = `[ERROR] ${command}: ${message}`;
+
+  if (filePath) {
+    formatted += `\n  File: ${filePath}`;
+  }
+
+  return formatted;
+}
+
+/**
+ * Format validation error with enhanced context
+ */
+export function formatValidationError(
+  command: string,
+  filePath: string,
+  issue: string,
+  suggestion: string,
+  keyPath?: string,
+  sectionRef?: string
+): string {
+  return formatError({
+    command,
+    context: `validation failed`,
+    issue,
+    suggestion,
+    filePath,
+    ...(keyPath && { keyPath }),
+    ...(sectionRef && { sectionReference: sectionRef }),
+  });
+}
+
+/**
  * Format a standardized warning message
  */
 export function formatWarning(ctx: WarningContext): string {

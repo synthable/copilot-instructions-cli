@@ -67,17 +67,21 @@ describe('build command', () => {
 
   it('should build persona from file with output to file', async () => {
     // Arrange
-    const mockPersona = { name: 'Test Persona' };
+    const mockPersona = { name: 'Test Persona', moduleGroups: [] };
     const mockMarkdown = '# Test Persona Instructions';
-    const mockBuildReport = { persona: mockPersona };
+    const mockBuildReport = {
+      persona: mockPersona,
+      modules: [],
+      moduleGroups: [],
+    };
 
     vi.mocked(mockBuildEngine.build).mockResolvedValue({
       persona: mockPersona,
       markdown: mockMarkdown,
+      modules: [],
+      buildReport: mockBuildReport,
+      warnings: [],
     });
-    vi.mocked(mockBuildEngine.generateBuildReport).mockReturnValue(
-      mockBuildReport
-    );
 
     const options = {
       persona: 'test.persona.yml',
@@ -89,10 +93,10 @@ describe('build command', () => {
 
     // Assert
     expect(BuildEngine).toHaveBeenCalled();
-    expect(mockBuildEngine.build).toHaveBeenCalledWith(
-      'test.persona.yml',
-      undefined
-    );
+    expect(mockBuildEngine.build).toHaveBeenCalledWith({
+      personaSource: 'test.persona.yml',
+      outputTarget: 'output.md',
+    });
     expect(writeFile).toHaveBeenCalledWith('output.md', mockMarkdown, 'utf8');
     expect(writeFile).toHaveBeenCalledWith(
       'output.build.json',
@@ -103,12 +107,40 @@ describe('build command', () => {
 
   it('should build persona from stdin with output to stdout', async () => {
     // Arrange
-    const mockPersona = { name: 'Test Persona' };
+    const mockPersona = { name: 'Test Persona', moduleGroups: [] };
     const mockMarkdown = '# Test Persona Instructions';
+    const mockBuildReport = {
+      persona: mockPersona,
+      modules: [],
+      moduleGroups: [],
+    };
 
     vi.mocked(mockBuildEngine.build).mockResolvedValue({
       persona: mockPersona,
       markdown: mockMarkdown,
+      modules: [],
+      buildReport: mockBuildReport,
+      warnings: [],
+    });
+
+    // Mock process.stdin for this test
+    const mockStdin = {
+      isTTY: false,
+      on: vi.fn((event: string, handler: (data?: Buffer) => void) => {
+        if (event === 'data') {
+          setTimeout(
+            () => handler(Buffer.from('name: Test Persona\nmodules: []')),
+            0
+          );
+        } else if (event === 'end') {
+          setTimeout(() => handler(), 0);
+        }
+      }),
+      resume: vi.fn(),
+    };
+    Object.defineProperty(process, 'stdin', {
+      value: mockStdin,
+      writable: true,
     });
 
     const options = {};
@@ -117,19 +149,31 @@ describe('build command', () => {
     await handleBuild(options);
 
     // Assert
-    expect(mockBuildEngine.build).toHaveBeenCalledWith(undefined, undefined);
+    expect(mockBuildEngine.build).toHaveBeenCalledWith({
+      personaSource: 'stdin',
+      outputTarget: 'stdout',
+      personaContent: 'name: Test Persona\nmodules: []',
+    });
     expect(mockConsoleLog).toHaveBeenCalledWith(mockMarkdown);
     expect(writeFile).not.toHaveBeenCalled();
   });
 
   it('should handle verbose mode', async () => {
     // Arrange
-    const mockPersona = { name: 'Test Persona' };
+    const mockPersona = { name: 'Test Persona', moduleGroups: [] };
     const mockMarkdown = '# Test Persona Instructions';
+    const mockBuildReport = {
+      persona: mockPersona,
+      modules: [],
+      moduleGroups: [],
+    };
 
     vi.mocked(mockBuildEngine.build).mockResolvedValue({
       persona: mockPersona,
       markdown: mockMarkdown,
+      modules: [],
+      buildReport: mockBuildReport,
+      warnings: [],
     });
 
     const options = {
@@ -141,6 +185,11 @@ describe('build command', () => {
     await handleBuild(options);
 
     // Assert
+    expect(mockBuildEngine.build).toHaveBeenCalledWith({
+      personaSource: 'test.persona.yml',
+      outputTarget: 'stdout',
+      verbose: true,
+    });
     expect(mockConsoleLog).toHaveBeenCalledWith(
       expect.stringContaining(
         '[INFO] build: Reading persona from test.persona.yml'
@@ -150,12 +199,20 @@ describe('build command', () => {
 
   it('should build persona from file with output to stdout', async () => {
     // Arrange
-    const mockPersona = { name: 'Test Persona' };
+    const mockPersona = { name: 'Test Persona', moduleGroups: [] };
     const mockMarkdown = '# Test Persona Instructions';
+    const mockBuildReport = {
+      persona: mockPersona,
+      modules: [],
+      moduleGroups: [],
+    };
 
     vi.mocked(mockBuildEngine.build).mockResolvedValue({
       persona: mockPersona,
       markdown: mockMarkdown,
+      modules: [],
+      buildReport: mockBuildReport,
+      warnings: [],
     });
 
     const options = {
@@ -166,27 +223,51 @@ describe('build command', () => {
     await handleBuild(options);
 
     // Assert
-    expect(mockBuildEngine.build).toHaveBeenCalledWith(
-      'test.persona.yml',
-      undefined
-    );
+    expect(mockBuildEngine.build).toHaveBeenCalledWith({
+      personaSource: 'test.persona.yml',
+      outputTarget: 'stdout',
+    });
     expect(mockConsoleLog).toHaveBeenCalledWith(mockMarkdown);
     expect(writeFile).not.toHaveBeenCalled();
   });
 
   it('should handle persona from stdin with file output', async () => {
     // Arrange
-    const mockPersona = { name: 'Test Persona' };
+    const mockPersona = { name: 'Test Persona', moduleGroups: [] };
     const mockMarkdown = '# Test Persona Instructions';
-    const mockBuildReport = { persona: mockPersona };
+    const mockBuildReport = {
+      persona: mockPersona,
+      modules: [],
+      moduleGroups: [],
+    };
 
     vi.mocked(mockBuildEngine.build).mockResolvedValue({
       persona: mockPersona,
       markdown: mockMarkdown,
+      modules: [],
+      buildReport: mockBuildReport,
+      warnings: [],
     });
-    vi.mocked(mockBuildEngine.generateBuildReport).mockReturnValue(
-      mockBuildReport
-    );
+
+    // Mock process.stdin for this test
+    const mockStdin = {
+      isTTY: false,
+      on: vi.fn((event: string, handler: (data?: Buffer) => void) => {
+        if (event === 'data') {
+          setTimeout(
+            () => handler(Buffer.from('name: Test Persona\nmodules: []')),
+            0
+          );
+        } else if (event === 'end') {
+          setTimeout(() => handler(), 0);
+        }
+      }),
+      resume: vi.fn(),
+    };
+    Object.defineProperty(process, 'stdin', {
+      value: mockStdin,
+      writable: true,
+    });
 
     const options = {
       output: 'output.md',
@@ -196,7 +277,11 @@ describe('build command', () => {
     await handleBuild(options);
 
     // Assert
-    expect(mockBuildEngine.build).toHaveBeenCalledWith(undefined, undefined);
+    expect(mockBuildEngine.build).toHaveBeenCalledWith({
+      personaSource: 'stdin',
+      outputTarget: 'output.md',
+      personaContent: 'name: Test Persona\nmodules: []',
+    });
     expect(writeFile).toHaveBeenCalledWith('output.md', mockMarkdown, 'utf8');
     expect(writeFile).toHaveBeenCalledWith(
       'output.build.json',
@@ -216,21 +301,42 @@ describe('build command', () => {
       persona: 'test.persona.yml',
     };
 
-    // Act
-    await handleBuild(options);
+    // Act & Assert - expect process.exit to be called
+    const mockExit = vi
+      .spyOn(process, 'exit')
+      .mockImplementation((code?: string | number | null) => {
+        throw new Error(`process.exit called with code ${code}`);
+      });
 
-    // Assert
-    expect(handleError).toHaveBeenCalledWith(error);
+    await expect(handleBuild(options)).rejects.toThrow(
+      'process.exit called with code 1'
+    );
+
+    expect(handleError).toHaveBeenCalledWith(error, {
+      command: 'build',
+      operation: 'build',
+    });
+    expect(mockExit).toHaveBeenCalledWith(1);
+
+    mockExit.mockRestore();
   });
 
   it('should skip build report for stdout output', async () => {
     // Arrange
-    const mockPersona = { name: 'Test Persona' };
+    const mockPersona = { name: 'Test Persona', moduleGroups: [] };
     const mockMarkdown = '# Test Persona Instructions';
+    const mockBuildReport = {
+      persona: mockPersona,
+      modules: [],
+      moduleGroups: [],
+    };
 
     vi.mocked(mockBuildEngine.build).mockResolvedValue({
       persona: mockPersona,
       markdown: mockMarkdown,
+      modules: [],
+      buildReport: mockBuildReport,
+      warnings: [],
     });
 
     const options = {
@@ -242,7 +348,10 @@ describe('build command', () => {
     await handleBuild(options);
 
     // Assert
-    expect(mockBuildEngine.generateBuildReport).not.toHaveBeenCalled();
+    expect(mockBuildEngine.build).toHaveBeenCalledWith({
+      personaSource: 'test.persona.yml',
+      outputTarget: 'stdout',
+    });
     expect(writeFile).not.toHaveBeenCalled();
     expect(mockConsoleLog).toHaveBeenCalledWith(mockMarkdown);
   });

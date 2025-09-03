@@ -6,12 +6,12 @@
 import { promises as fs } from 'fs';
 import path from 'path';
 import chalk from 'chalk';
-import ora from 'ora';
 import { glob } from 'glob';
 import { loadModule } from '../core/ums-module-loader.js';
 import { loadPersona } from '../core/ums-persona-loader.js';
 import type { ValidationError, ValidationWarning } from '../types/ums-v1.js';
 import { handleError } from '../utils/error-handler.js';
+import { createValidationProgress, BatchProgress } from '../utils/progress.js';
 
 interface ValidateOptions {
   targetPath?: string;
@@ -118,7 +118,10 @@ async function validateFile(filePath: string): Promise<ValidationResult> {
 /**
  * Validates all files in a directory recursively
  */
-async function validateDirectory(dirPath: string): Promise<ValidationResult[]> {
+async function validateDirectory(
+  dirPath: string,
+  verbose: boolean
+): Promise<ValidationResult[]> {
   // M7 matchers: {instructions-modules/**/*.module.yml, personas/**/*.persona.yml}
   const patterns = [
     path.join(dirPath, 'instructions-modules/**/*.module.yml'),
@@ -126,6 +129,7 @@ async function validateDirectory(dirPath: string): Promise<ValidationResult[]> {
   ];
 
   const results: ValidationResult[] = [];
+  const allFiles: string[] = [];
 
   for (const pattern of patterns) {
     try {
@@ -133,11 +137,7 @@ async function validateDirectory(dirPath: string): Promise<ValidationResult[]> {
         nodir: true,
         ignore: ['**/node_modules/**'],
       });
-
-      for (const file of files) {
-        const result = await validateFile(file);
-        results.push(result);
-      }
+      allFiles.push(...files);
     } catch (error) {
       console.warn(
         chalk.yellow(
@@ -147,13 +147,31 @@ async function validateDirectory(dirPath: string): Promise<ValidationResult[]> {
     }
   }
 
+  if (allFiles.length > 0) {
+    const progress = new BatchProgress(
+      allFiles.length,
+      { command: 'validate', operation: 'directory validation' },
+      verbose
+    );
+
+    progress.start('Validating files');
+
+    for (const file of allFiles) {
+      const result = await validateFile(file);
+      results.push(result);
+      progress.increment(path.basename(file));
+    }
+
+    progress.complete();
+  }
+
   return results;
 }
 
 /**
  * Validates all files in standard locations (M7)
  */
-async function validateAll(): Promise<ValidationResult[]> {
+async function validateAll(verbose: boolean): Promise<ValidationResult[]> {
   // M7: none → standard locations
   const patterns = [
     'instructions-modules/**/*.module.yml',
@@ -161,6 +179,7 @@ async function validateAll(): Promise<ValidationResult[]> {
   ];
 
   const results: ValidationResult[] = [];
+  const allFiles: string[] = [];
 
   for (const pattern of patterns) {
     try {
@@ -168,11 +187,7 @@ async function validateAll(): Promise<ValidationResult[]> {
         nodir: true,
         ignore: ['**/node_modules/**'],
       });
-
-      for (const file of files) {
-        const result = await validateFile(file);
-        results.push(result);
-      }
+      allFiles.push(...files);
     } catch (error) {
       console.warn(
         chalk.yellow(
@@ -180,6 +195,24 @@ async function validateAll(): Promise<ValidationResult[]> {
         )
       );
     }
+  }
+
+  if (allFiles.length > 0) {
+    const progress = new BatchProgress(
+      allFiles.length,
+      { command: 'validate', operation: 'standard location validation' },
+      verbose
+    );
+
+    progress.start('Validating files in standard locations');
+
+    for (const file of allFiles) {
+      const result = await validateFile(file);
+      results.push(result);
+      progress.increment(path.basename(file));
+    }
+
+    progress.complete();
   }
 
   return results;
@@ -258,32 +291,28 @@ export async function handleValidate(
   options: ValidateOptions = {}
 ): Promise<void> {
   const { targetPath, verbose } = options;
-  const spinner = ora('Starting UMS v1.0 validation...').start();
+  const progress = createValidationProgress('validate', verbose);
 
   try {
+    progress.start('Starting UMS v1.0 validation...');
+
     let results: ValidationResult[] = [];
 
     if (!targetPath) {
       // M7: none → standard locations
-      if (verbose) {
-        spinner.text = 'Validating files in standard locations...';
-      }
-      results = await validateAll();
+      progress.update('Discovering files in standard locations...');
+      results = await validateAll(verbose ?? false);
     } else {
       const stats = await fs.stat(targetPath);
       if (stats.isFile()) {
         // M7: file → validate file
-        if (verbose) {
-          spinner.text = `Validating file: ${targetPath}...`;
-        }
+        progress.update(`Validating file: ${targetPath}...`);
         const result = await validateFile(targetPath);
         results.push(result);
       } else if (stats.isDirectory()) {
         // M7: dir → recurse
-        if (verbose) {
-          spinner.text = `Validating directory: ${targetPath}...`;
-        }
-        results = await validateDirectory(targetPath);
+        progress.update(`Discovering files in directory: ${targetPath}...`);
+        results = await validateDirectory(targetPath, verbose ?? false);
       } else {
         throw new Error(
           `Path is neither a file nor a directory: ${targetPath}`
@@ -291,7 +320,7 @@ export async function handleValidate(
       }
     }
 
-    spinner.succeed(`Validation complete. Processed ${results.length} files.`);
+    progress.succeed(`Validation complete. Processed ${results.length} files.`);
 
     // Print results
     printResults(results, verbose ?? false);
@@ -304,7 +333,11 @@ export async function handleValidate(
       );
     }
   } catch (error) {
-    spinner.fail('Validation failed.');
-    handleError(error);
+    progress.fail('Validation failed.');
+    handleError(error, {
+      command: 'validate',
+      operation: 'validation',
+      ...(verbose && { verbose, timestamp: verbose }),
+    });
   }
 }

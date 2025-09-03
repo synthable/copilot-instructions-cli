@@ -7,7 +7,21 @@ import { handleSearch } from './search.js';
 vi.mock('chalk', () => ({
   default: {
     yellow: vi.fn((text: string) => text),
-    cyan: vi.fn((text: string) => text),
+    cyan: Object.assign(
+      vi.fn((text: string) => text),
+      {
+        bold: vi.fn((text: string) => text),
+      }
+    ),
+    green: vi.fn((text: string) => text),
+    white: Object.assign(
+      vi.fn((text: string) => text),
+      {
+        bold: vi.fn((text: string) => text),
+      }
+    ),
+    gray: vi.fn((text: string) => text),
+    bold: vi.fn((text: string) => text),
   },
 }));
 
@@ -43,6 +57,15 @@ vi.mock('../core/ums-module-loader.js', () => ({
 
 vi.mock('../utils/error-handler.js', () => ({
   handleError: vi.fn(),
+}));
+
+vi.mock('../utils/progress.js', () => ({
+  createDiscoveryProgress: vi.fn(() => ({
+    start: vi.fn(),
+    update: vi.fn(),
+    succeed: vi.fn(),
+    fail: vi.fn(),
+  })),
 }));
 
 // Mock console

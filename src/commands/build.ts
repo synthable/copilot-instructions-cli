@@ -5,12 +5,12 @@
 
 import { writeFile } from 'fs/promises';
 import chalk from 'chalk';
-import ora from 'ora';
 import { handleError } from '../utils/error-handler.js';
 import {
   BuildEngine,
   type BuildOptions as EngineBuildOptions,
 } from '../core/ums-build-engine.js';
+import { createBuildProgress } from '../utils/progress.js';
 
 /**
  * Options for the build command
@@ -27,12 +27,13 @@ export interface BuildOptions {
 /**
  * Handles the 'build' command
  */
-/* eslint-disable max-lines-per-function */
 export async function handleBuild(options: BuildOptions): Promise<void> {
   const { persona: personaPath, output: outputPath, verbose } = options;
-  const spinner = ora('Starting UMS v1.0 build process...').start();
+  const progress = createBuildProgress('build', verbose);
 
   try {
+    progress.start('Starting UMS v1.0 build process...');
+
     const buildEngine = new BuildEngine();
     let personaContent: string | undefined;
 
@@ -40,7 +41,7 @@ export async function handleBuild(options: BuildOptions): Promise<void> {
     let personaSource: string;
     if (personaPath) {
       personaSource = personaPath;
-      spinner.text = `Reading persona file: ${personaPath}`;
+      progress.update(`Reading persona file: ${personaPath}`);
 
       if (verbose) {
         console.log(
@@ -50,10 +51,10 @@ export async function handleBuild(options: BuildOptions): Promise<void> {
     } else {
       // Read from stdin
       personaSource = 'stdin';
-      spinner.text = 'Reading persona from stdin...';
+      progress.update('Reading persona from stdin...');
 
       if (process.stdin.isTTY) {
-        spinner.fail('No persona file specified and stdin is not available');
+        progress.fail('No persona file specified and stdin is not available');
         console.error(
           chalk.red(
             'Error: You must specify a persona file with --persona <file> or provide YAML content via stdin'
@@ -62,26 +63,10 @@ export async function handleBuild(options: BuildOptions): Promise<void> {
         process.exit(1);
       }
 
-      // Read from stdin using proper async stream handling
-      personaContent = await new Promise<string>((resolve, reject) => {
-        const chunks: Buffer[] = [];
-
-        process.stdin.on('data', (chunk: Buffer) => {
-          chunks.push(chunk);
-        });
-
-        process.stdin.on('end', () => {
-          resolve(Buffer.concat(chunks).toString('utf8'));
-        });
-
-        process.stdin.on('error', reject);
-
-        // Start reading
-        process.stdin.resume();
-      });
+      personaContent = await readFromStdin();
 
       if (!personaContent.trim()) {
-        spinner.fail('No persona content provided via stdin');
+        progress.fail('No persona content provided via stdin');
         console.error(
           chalk.red('Error: No persona content received from stdin')
         );
@@ -106,10 +91,10 @@ export async function handleBuild(options: BuildOptions): Promise<void> {
       buildOptions.verbose = verbose;
     }
 
-    spinner.text = 'Building persona...';
+    progress.update('Building persona...');
     const result = await buildEngine.build(buildOptions);
 
-    spinner.succeed('Build completed successfully');
+    progress.succeed('Build completed successfully');
 
     // Show warnings if any
     if (result.warnings.length > 0) {
@@ -170,10 +155,36 @@ export async function handleBuild(options: BuildOptions): Promise<void> {
       }
     }
   } catch (error) {
-    spinner.fail('Build failed');
-    handleError(error);
+    progress.fail('Build failed');
+    handleError(error, {
+      command: 'build',
+      operation: 'build',
+      ...(verbose && { verbose, timestamp: verbose }),
+    });
     process.exit(1);
   }
+}
+
+/**
+ * Reads content from stdin
+ */
+async function readFromStdin(): Promise<string> {
+  return new Promise<string>((resolve, reject) => {
+    const chunks: Buffer[] = [];
+
+    process.stdin.on('data', (chunk: Buffer) => {
+      chunks.push(chunk);
+    });
+
+    process.stdin.on('end', () => {
+      resolve(Buffer.concat(chunks).toString('utf8'));
+    });
+
+    process.stdin.on('error', reject);
+
+    // Start reading
+    process.stdin.resume();
+  });
 }
 
 /**

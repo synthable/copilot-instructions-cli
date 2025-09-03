@@ -4,11 +4,11 @@
  */
 
 import chalk from 'chalk';
-import ora from 'ora';
 import Table from 'cli-table3';
 import { handleError } from '../utils/error-handler.js';
 import { ModuleRegistry } from '../core/ums-build-engine.js';
 import { loadModule } from '../core/ums-module-loader.js';
+import { createDiscoveryProgress } from '../utils/progress.js';
 import type { UMSModule } from '../types/ums-v1.js';
 
 interface ListOptions {
@@ -82,15 +82,17 @@ function filterAndSortModules(
 }
 
 /**
- * Renders the modules table
+ * Renders the modules table with consistent styling
  */
 function renderModulesTable(modules: UMSModule[]): void {
   const table = new Table({
     head: ['ID', 'Tier/Subject', 'Name', 'Description'],
     style: {
-      head: ['cyan'],
+      head: ['cyan', 'bold'],
       border: ['gray'],
+      compact: false,
     },
+    colWidths: [30, 25, 30],
     wordWrap: true,
   });
 
@@ -101,16 +103,18 @@ function renderModulesTable(modules: UMSModule[]): void {
     const tierSubject = subject ? `${tier}/${subject}` : tier;
 
     table.push([
-      module.id,
-      tierSubject,
-      module.meta.name,
-      module.meta.description,
+      chalk.green(module.id),
+      chalk.yellow(tierSubject),
+      chalk.white.bold(module.meta.name),
+      chalk.gray(module.meta.description),
     ]);
   });
 
-  console.log('\nAvailable UMS v1.0 modules:\n');
+  console.log(chalk.cyan.bold('\nAvailable UMS v1.0 modules:\n'));
   console.log(table.toString());
-  console.log(`\nTotal modules: ${modules.length}`);
+  console.log(
+    chalk.cyan(`\nTotal modules: ${chalk.bold(modules.length.toString())}`)
+  );
 }
 
 /**
@@ -119,25 +123,33 @@ function renderModulesTable(modules: UMSModule[]): void {
  * @param options.tier - The tier to filter by (foundation|principle|technology|execution).
  */
 export async function handleList(options: ListOptions): Promise<void> {
-  const spinner = ora('Discovering UMS v1.0 modules...').start();
+  const progress = createDiscoveryProgress('list', options.verbose);
+
   try {
+    progress.start('Discovering UMS v1.0 modules...');
+
     // Use UMS v1.0 module discovery
     const registry = new ModuleRegistry();
     await registry.discover();
 
     const moduleIds = registry.getAllModuleIds();
     if (moduleIds.length === 0) {
-      spinner.succeed('Module discovery complete.');
+      progress.succeed('Module discovery complete.');
       console.log(chalk.yellow('No UMS v1.0 modules found.'));
       return;
     }
 
+    progress.update(`Loading ${moduleIds.length} modules...`);
+
     // Load all modules
     const modules = await loadModulesFromRegistry(registry, !!options.tier);
-    spinner.succeed('Module discovery complete.');
+
+    progress.update('Filtering and sorting modules...');
 
     // Filter and sort modules
     const filteredModules = filterAndSortModules(modules, options.tier);
+
+    progress.succeed('Module listing complete.');
 
     // M5 empty state
     if (filteredModules.length === 0) {
@@ -149,7 +161,14 @@ export async function handleList(options: ListOptions): Promise<void> {
     // Render results
     renderModulesTable(filteredModules);
   } catch (error) {
-    spinner.fail('Failed to discover modules.');
-    handleError(error);
+    progress.fail('Failed to discover modules.');
+    handleError(error, {
+      command: 'list',
+      operation: 'discovery',
+      ...(options.verbose && {
+        verbose: options.verbose,
+        timestamp: options.verbose,
+      }),
+    });
   }
 }

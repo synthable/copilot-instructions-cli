@@ -4,11 +4,11 @@
  */
 
 import chalk from 'chalk';
-import ora from 'ora';
 import Table from 'cli-table3';
 import { handleError } from '../utils/error-handler.js';
 import { ModuleRegistry } from '../core/ums-build-engine.js';
 import { loadModule } from '../core/ums-module-loader.js';
+import { createDiscoveryProgress } from '../utils/progress.js';
 import type { UMSModule } from '../types/ums-v1.js';
 
 interface SearchOptions {
@@ -110,15 +110,17 @@ function filterAndSortModules(
 }
 
 /**
- * Renders the search results table
+ * Renders the search results table with consistent styling
  */
 function renderSearchResults(modules: UMSModule[], query: string): void {
   const table = new Table({
     head: ['ID', 'Tier/Subject', 'Name', 'Description'],
     style: {
-      head: ['cyan'],
+      head: ['cyan', 'bold'],
       border: ['gray'],
+      compact: false,
     },
+    colWidths: [30, 25, 30],
     wordWrap: true,
   });
 
@@ -129,16 +131,20 @@ function renderSearchResults(modules: UMSModule[], query: string): void {
     const tierSubject = subject ? `${tier}/${subject}` : tier;
 
     table.push([
-      module.id,
-      tierSubject,
-      module.meta.name,
-      module.meta.description,
+      chalk.green(module.id),
+      chalk.yellow(tierSubject),
+      chalk.white.bold(module.meta.name),
+      chalk.gray(module.meta.description),
     ]);
   });
 
-  console.log(`\nSearch results for "${query}":\n`);
+  console.log(chalk.cyan.bold(`\nSearch results for "${query}":\n`));
   console.log(table.toString());
-  console.log(`\nFound ${modules.length} matching modules`);
+  console.log(
+    chalk.cyan(
+      `\nFound ${chalk.bold(modules.length.toString())} matching modules`
+    )
+  );
 }
 
 /**
@@ -151,28 +157,38 @@ export async function handleSearch(
   query: string,
   options: SearchOptions
 ): Promise<void> {
-  const spinner = ora('Discovering UMS v1.0 modules...').start();
+  const progress = createDiscoveryProgress('search', options.verbose);
+
   try {
+    progress.start('Discovering UMS v1.0 modules...');
+
     // Use UMS v1.0 module discovery
     const registry = new ModuleRegistry();
     await registry.discover();
 
     const moduleIds = registry.getAllModuleIds();
     if (moduleIds.length === 0) {
-      spinner.succeed('Module discovery complete.');
+      progress.succeed('Module discovery complete.');
       console.log(chalk.yellow('No UMS v1.0 modules found.'));
       return;
     }
 
+    progress.update(`Loading ${moduleIds.length} modules...`);
+
     // Load all modules
     const modules = await loadModulesFromRegistry(registry, !!options.tier);
-    spinner.succeed('Module discovery complete.');
+
+    progress.update(`Searching for "${query}"...`);
 
     // M6: Query substring case-insensitive across meta.name, meta.description, meta.tags
     const searchResults = searchModules(modules, query);
 
+    progress.update('Filtering and sorting results...');
+
     // Filter by tier and sort (same as M5)
     const filteredResults = filterAndSortModules(searchResults, options.tier);
+
+    progress.succeed('Module search complete.');
 
     // M6: no-match case
     if (filteredResults.length === 0) {
@@ -186,7 +202,14 @@ export async function handleSearch(
     // Render results
     renderSearchResults(filteredResults, query);
   } catch (error) {
-    spinner.fail('Failed to search modules.');
-    handleError(error);
+    progress.fail('Failed to search modules.');
+    handleError(error, {
+      command: 'search',
+      operation: 'search',
+      ...(options.verbose && {
+        verbose: options.verbose,
+        timestamp: options.verbose,
+      }),
+    });
   }
 }
