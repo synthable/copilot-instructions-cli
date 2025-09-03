@@ -25,50 +25,56 @@ describe('handleError', () => {
     consoleErrorSpy.mockClear();
   });
 
-  it('should handle error with structured logging options', () => {
+  it('should handle error with M0.5 structured format', () => {
     // Arrange
     const error = new Error('Test error');
 
     // Act
     handleError(error, {
       command: 'build',
-      operation: 'validation',
+      context: 'validation process',
+      suggestion: 'check your input files',
       verbose: true,
       timestamp: true,
     });
 
     // Assert
-    expect(console.error).toHaveBeenCalledWith('build:validation failed');
     expect(console.error).toHaveBeenCalledWith(
-      expect.stringMatching(
-        /\[\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z\] \[ERROR\]/
-      ),
-      'Test error'
+      expect.stringMatching(/\[\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z\]/),
+      '[ERROR] build: validation process - Test error (check your input files)'
     );
   });
 
-  it('should handle error with minimal options', () => {
+  it('should handle error with minimal M0.5 options', () => {
     // Arrange
     const error = new Error('Simple error');
 
     // Act
-    handleError(error, { command: 'test' });
+    handleError(error, {
+      command: 'test',
+      context: 'operation',
+      suggestion: 'retry the operation',
+    });
 
     // Assert
-    expect(console.error).toHaveBeenCalledWith('test failed');
-    expect(console.error).toHaveBeenCalledWith('Simple error');
+    expect(console.error).toHaveBeenCalledWith(
+      '[ERROR] test: operation - Simple error (retry the operation)'
+    );
   });
 
-  it('should handle error with no options', () => {
+  it('should handle error with required command parameter', () => {
     // Arrange
     const error = new Error('Default error');
 
     // Act
-    handleError(error);
+    handleError(error, {
+      command: 'validate',
+    });
 
     // Assert
-    expect(console.error).toHaveBeenCalledWith('Operation failed.');
-    expect(console.error).toHaveBeenCalledWith('Default error');
+    expect(console.error).toHaveBeenCalledWith(
+      '[ERROR] validate: operation failed - Default error (check the error details and try again)'
+    );
   });
 
   it('should handle non-Error objects', () => {
@@ -76,10 +82,16 @@ describe('handleError', () => {
     const error = 'String error';
 
     // Act
-    handleError(error, { command: 'test' });
+    handleError(error, {
+      command: 'test',
+      context: 'processing',
+      suggestion: 'check input format',
+    });
 
     // Assert
-    expect(console.error).toHaveBeenCalledWith('test failed');
+    expect(console.error).toHaveBeenCalledWith(
+      '[ERROR] test: processing - String error (check input format)'
+    );
     expect(console.error).toHaveBeenCalledTimes(1);
   });
 });

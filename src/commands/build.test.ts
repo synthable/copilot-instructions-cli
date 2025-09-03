@@ -314,7 +314,8 @@ describe('build command', () => {
 
     expect(handleError).toHaveBeenCalledWith(error, {
       command: 'build',
-      operation: 'build',
+      context: 'build process',
+      suggestion: 'check persona file syntax and module references',
     });
     expect(mockExit).toHaveBeenCalledWith(1);
 

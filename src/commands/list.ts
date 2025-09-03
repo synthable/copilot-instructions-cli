@@ -164,7 +164,9 @@ export async function handleList(options: ListOptions): Promise<void> {
     progress.fail('Failed to discover modules.');
     handleError(error, {
       command: 'list',
-      operation: 'discovery',
+      context: 'module discovery',
+      suggestion:
+        'check that instructions-modules directory exists and is readable',
       ...(options.verbose && {
         verbose: options.verbose,
         timestamp: options.verbose,

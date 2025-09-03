@@ -205,7 +205,8 @@ export async function handleSearch(
     progress.fail('Failed to search modules.');
     handleError(error, {
       command: 'search',
-      operation: 'search',
+      context: 'search operation',
+      suggestion: 'check module directory and permissions',
       ...(options.verbose && {
         verbose: options.verbose,
         timestamp: options.verbose,

@@ -6,6 +6,7 @@
 import { writeFile } from 'fs/promises';
 import chalk from 'chalk';
 import { handleError } from '../utils/error-handler.js';
+import { formatError } from '../utils/error-formatting.js';
 import {
   BuildEngine,
   type BuildOptions as EngineBuildOptions,
@@ -56,9 +57,13 @@ export async function handleBuild(options: BuildOptions): Promise<void> {
       if (process.stdin.isTTY) {
         progress.fail('No persona file specified and stdin is not available');
         console.error(
-          chalk.red(
-            'Error: You must specify a persona file with --persona <file> or provide YAML content via stdin'
-          )
+          formatError({
+            command: 'build',
+            context: 'input validation',
+            issue: 'no persona file specified and stdin is not available',
+            suggestion:
+              'use --persona <file> to specify a persona file or pipe YAML content to stdin',
+          })
         );
         process.exit(1);
       }
@@ -68,7 +73,13 @@ export async function handleBuild(options: BuildOptions): Promise<void> {
       if (!personaContent.trim()) {
         progress.fail('No persona content provided via stdin');
         console.error(
-          chalk.red('Error: No persona content received from stdin')
+          formatError({
+            command: 'build',
+            context: 'input validation',
+            issue: 'no persona content received from stdin',
+            suggestion:
+              'ensure YAML content is piped to stdin or use --persona <file>',
+          })
         );
         process.exit(1);
       }
@@ -158,7 +169,8 @@ export async function handleBuild(options: BuildOptions): Promise<void> {
     progress.fail('Build failed');
     handleError(error, {
       command: 'build',
-      operation: 'build',
+      context: 'build process',
+      suggestion: 'check persona file syntax and module references',
       ...(verbose && { verbose, timestamp: verbose }),
     });
     process.exit(1);

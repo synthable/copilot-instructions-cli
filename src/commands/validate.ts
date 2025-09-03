@@ -336,7 +336,8 @@ export async function handleValidate(
     progress.fail('Validation failed.');
     handleError(error, {
       command: 'validate',
-      operation: 'validation',
+      context: 'validation process',
+      suggestion: 'check file paths and permissions',
       ...(verbose && { verbose, timestamp: verbose }),
     });
   }
