@@ -140,55 +140,68 @@ export interface ValidationWarning {
   message: string;
 }
 
-// Build Report structure (Section 9)
+// Build Report structure (M4 - CLI v1.0 requirement)
 export interface BuildReport {
-  /** Name from source persona.yml */
-  personaName: string;
-  /** Version of Build Report schema */
-  schemaVersion: string;
-  /** CLI/build tool version */
-  toolVersion: string;
-  /** Content digest of source persona.yml */
-  personaDigest: string;
-  /** UTC timestamp in ISO 8601 format */
-  buildTimestamp: string;
-  /** Ordered list of module groups and resolved modules */
-  moduleGroups: ResolvedModuleGroup[];
+  /** Tool information */
+  tool: {
+    /** CLI tool name */
+    name: string;
+    /** CLI tool version */
+    version: string;
+  };
+  /** Build timestamp in ISO 8601 format */
+  timestamp: string;
+  /** Persona information */
+  persona: {
+    /** Persona name */
+    name: string;
+    /** Persona description */
+    description: string;
+    /** Persona semantic field */
+    semantic: string;
+    /** Optional role field */
+    role?: string;
+    /** Attribution setting */
+    attribution?: boolean;
+    /** Number of module groups */
+    groupCount: number;
+  };
+  /** Module groups with resolved modules */
+  groups: BuildReportGroup[];
+  /** Rendering configuration */
+  rendering: {
+    /** Directive rendering order */
+    directiveOrder: string[];
+    /** Module separators used */
+    separators: string;
+    /** Whether attribution is enabled */
+    attributionEnabled: boolean;
+  };
+  /** Discovery information */
+  discovery: {
+    /** Root directory for modules */
+    modulesRoot: string;
+    /** Total number of modules resolved */
+    totalModulesResolved: number;
+  };
 }
 
-export interface ResolvedModuleGroup {
-  /** Name of the group */
+export interface BuildReportGroup {
+  /** Group name */
   groupName: string;
-  /** Fully resolved module objects in this group */
-  modules: ResolvedModule[];
+  /** Modules in this group */
+  modules: BuildReportModule[];
 }
 
-export interface ResolvedModule {
-  /** Unique, version-agnostic ID */
-  id: string;
-  /** Module's declared version */
-  version: string;
-  /** Primary source label */
-  source: string;
-  /** Cryptographic hash of module file content */
-  digest: string;
-  /** Module's declared shape */
-  shape: string;
-  /** Contract as declared in module */
-  declaredDirectives: DeclaredDirectives;
-  /** Present if module was composed from multiple sources */
-  composedFrom?: CompositionEvent[];
-}
-
-export interface CompositionEvent {
+export interface BuildReportModule {
   /** Module ID */
   id: string;
-  /** Source module version */
-  version: string;
-  /** Source label */
-  source: string;
-  /** Content digest */
-  digest: string;
-  /** Composition strategy */
-  strategy: 'base' | 'replace';
+  /** Module name from meta */
+  name: string;
+  /** Absolute file path */
+  filePath: string;
+  /** Whether module is deprecated */
+  deprecated: boolean;
+  /** Replacement module ID if deprecated */
+  replacedBy?: string;
 }

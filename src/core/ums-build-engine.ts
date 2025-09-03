@@ -7,6 +7,7 @@ import { join } from 'path';
 import { glob } from 'glob';
 import { loadModule } from './ums-module-loader.js';
 import { loadPersona } from './ums-persona-loader.js';
+import pkg from '../../package.json' with { type: 'json' };
 import {
   MODULES_ROOT,
   MODULE_FILE_EXTENSION,
@@ -19,8 +20,8 @@ import type {
   DataDirective,
   ExampleDirective,
   BuildReport,
-  ResolvedModuleGroup,
-  ResolvedModule,
+  BuildReportGroup,
+  BuildReportModule,
 } from '../types/ums-v1.js';
 
 export interface BuildOptions {
@@ -191,64 +192,71 @@ export class BuildEngine {
   private generateBuildReport(
     persona: UMSPersona,
     modules: UMSModule[],
-    options: BuildOptions
+    _options: BuildOptions
   ): BuildReport {
-    // Get package version (placeholder for now)
-    const toolVersion = '1.0.0';
-
-    // Create resolved module groups
-    const resolvedModuleGroups: ResolvedModuleGroup[] = [];
+    // Create build report groups following M4 structure
+    const groups: BuildReportGroup[] = [];
 
     for (const group of persona.moduleGroups) {
-      const resolvedModules: ResolvedModule[] = [];
+      const reportModules: BuildReportModule[] = [];
 
       for (const moduleId of group.modules) {
         const module = modules.find(m => m.id === moduleId);
         if (module) {
-          resolvedModules.push({
+          const reportModule: BuildReportModule = {
             id: module.id,
-            version: module.version,
-            source: 'local',
-            digest: this.generateDigest(module.filePath),
-            shape: module.shape,
-            declaredDirectives: module.declaredDirectives,
-          });
+            name: module.meta.name,
+            filePath: module.filePath,
+            deprecated: module.meta.deprecated ?? false,
+          };
+
+          if (module.meta.replacedBy) {
+            reportModule.replacedBy = module.meta.replacedBy;
+          }
+
+          reportModules.push(reportModule);
         }
       }
 
-      resolvedModuleGroups.push({
+      groups.push({
         groupName: group.groupName,
-        modules: resolvedModules,
+        modules: reportModules,
       });
     }
 
-    return {
-      personaName: persona.name,
-      schemaVersion: '1.0',
-      toolVersion,
-      personaDigest: this.generatePersonaDigest(options),
-      buildTimestamp: new Date().toISOString(),
-      moduleGroups: resolvedModuleGroups,
+    const personaInfo: BuildReport['persona'] = {
+      name: persona.name,
+      description: persona.description,
+      semantic: persona.semantic,
+      groupCount: persona.moduleGroups.length,
     };
-  }
 
-  /**
-   * Generates a simple digest for content (placeholder implementation)
-   */
-  private generateDigest(filePath: string): string {
-    // Simple hash based on file path for now
-    // In a real implementation, this would be a content hash
-    return `sha256:${Buffer.from(filePath).toString('base64').slice(0, 16)}`;
-  }
-
-  /**
-   * Generates a digest for persona content
-   */
-  private generatePersonaDigest(options: BuildOptions): string {
-    if (options.personaContent) {
-      return `sha256:${Buffer.from(options.personaContent).toString('base64').slice(0, 16)}`;
+    if (persona.role) {
+      personaInfo.role = persona.role;
     }
-    return `sha256:${Buffer.from(options.personaSource).toString('base64').slice(0, 16)}`;
+
+    if (persona.attribution !== undefined) {
+      personaInfo.attribution = persona.attribution;
+    }
+
+    return {
+      tool: {
+        name: pkg.name,
+        version: pkg.version,
+      },
+      timestamp: new Date().toISOString(),
+      persona: personaInfo,
+      groups,
+      rendering: {
+        directiveOrder: RENDER_ORDER,
+        separators: '---',
+        attributionEnabled: persona.attribution ?? false,
+      },
+      discovery: {
+        modulesRoot: MODULES_ROOT,
+        totalModulesResolved: modules.length,
+      },
+    };
   }
 
   /**
