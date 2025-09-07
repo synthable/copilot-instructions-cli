@@ -1,55 +1,14 @@
 {
-  "compilerOptions": {
-    "target": "ES2022",
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
-    "lib": ["ESNext"],
-
-    // Output
-    "outDir": "./dist",
-    "rootDir": "./src",
-    "declaration": true,
-    "declarationMap": true,
-    "sourceMap": true,
-    "removeComments": false,
-
-    // Type Checking
-    "strict": true,
-    "noImplicitAny": true,
-    "strictNullChecks": true,
-    "strictFunctionTypes": true,
-    "strictBindCallApply": true,
-    "strictPropertyInitialization": true,
-    "noImplicitReturns": true,
-    "noImplicitOverride": true,
-    "exactOptionalPropertyTypes": true,
-    "typeRoots": ["./node_modules/@types", "./src/types"],
-
-    // Error Checking
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "noImplicitThis": true,
-    "useUnknownInCatchVariables": true,
-    "noFallthroughCasesInSwitch": true,
-
-    // Interop and Compatibility
-    "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true,
-    "forceConsistentCasingInFileNames": true,
-    "isolatedModules": true,
-    "verbatimModuleSyntax": true,
-
-    // Node.js specific
-    "allowImportingTsExtensions": false,
-    "moduleDetection": "force",
-    "resolveJsonModule": true,
-
-    // Advanced
-    "skipLibCheck": true,
-    "incremental": true,
-    "tsBuildInfoFile": "./dist/.tsbuildinfo"
-  },
-  "include": ["src/**/*"],
+  "files": [],
+  "references": [
+    {
+      "path": "packages/ums-lib"
+    },
+    {
+      "path": "packages/copilot-instructions-cli"
+    }
+  ],
+  "include": ["packages/*/src/**/*"],
   "exclude": [
     "node_modules",
     "dist",

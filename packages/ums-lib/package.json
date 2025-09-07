@@ -1,0 +1,57 @@
+{
+  "name": "ums-lib",
+  "version": "1.0.0",
+  "type": "module",
+  "private": false,
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "author": "synthable",
+  "license": "GPL-3.0-or-later",
+  "description": "A reusable library for UMS (Unified Module System) v1.0 operations - parsing, validating, and building modular AI instructions.",
+  "homepage": "https://github.com/synthable/copilot-instructions-cli/tree/main/packages/ums-lib",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/synthable/copilot-instructions-cli.git",
+    "directory": "packages/ums-lib"
+  },
+  "keywords": [
+    "ums",
+    "unified-module-system",
+    "ai",
+    "instructions",
+    "modular",
+    "library"
+  ],
+  "scripts": {
+    "build": "tsc --build --pretty",
+    "test": "vitest run --run",
+    "coverage": "vitest run --coverage",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist",
+    "prepublishOnly": "npm run clean && npm run build",
+    "pretest": "npm run typecheck",
+    "prebuild": "npm run clean",
+    "quality-check": "npm run typecheck && npm run lint && npm run format:check && npm run test"
+  },
+  "dependencies": {
+    "glob": "^11.0.3",
+    "gray-matter": "^4.0.3",
+    "yaml": "^2.6.0"
+  },
+  "devDependencies": {
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ]
+}

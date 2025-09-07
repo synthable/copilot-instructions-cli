@@ -5,6 +5,9 @@ node_modules/
 package-lock.json
 yarn.lock
 
+# Ignore npm package manager files
+package.json
+
 # Build outputs
 dist/
 build/
@@ -50,7 +53,15 @@ Thumbs.db
 .eslintrc.js
 *.config.js
 *.config.ts
+.prettierrc
 
 # Documentation that may have specific formatting
 CHANGELOG.md
 LICENSE
+
+# Ignore specific directories
+.claude/
+.gemini/
+.github/
+archive/
+docs/

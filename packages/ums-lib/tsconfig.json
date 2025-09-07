@@ -1,0 +1,18 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    // --- Monorepo Linking ---
+    "composite": true,
+    "tsBuildInfoFile": "dist/.tsbuildinfo",
+    // --- Package-Specific Output ---
+    "outDir": "dist",
+    "rootDir": "src",
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    // --- Stricter Library Rules ---
+    "noUnusedLocals": true,
+    "noUnusedParameters": true
+  },
+  "include": ["src/**/*"]
+}
