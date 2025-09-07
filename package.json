@@ -1,12 +1,11 @@
 {
-  "name": "copilot-instructions-cli",
+  "name": "instructions-composer-workspace",
   "version": "2.0.0",
   "type": "module",
-  "private": false,
-  "main": "dist/index.js",
-  "bin": {
-    "copilot-instructions": "dist/index.js"
-  },
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
   "author": "synthable",
   "license": "GPL-3.0-or-later",
   "description": "A CLI tool for composing, managing, and building modular AI assistant instructions.",
@@ -29,49 +28,38 @@
     "node": ">=22.0.0"
   },
   "scripts": {
-    "build": "tsc --pretty",
-    "start": "node dist/index.js",
-    "test": "vitest run --run",
-    "dev": "tsc -w",
-    "coverage": "vitest run --coverage",
-    "lint": "eslint src/**/*.ts",
-    "lint:src": "eslint src/**/*.ts",
-    "lint:fix": "eslint src/**/*.ts --fix",
-    "lint:fix:src": "eslint src/**/*.ts --fix",
-    "lint:md": "markdownlint \"docs/**/*.md\"",
-    "format": "prettier --write 'src/**/*.{ts,js,json,md,test.ts}'",
-    "format:docs": "prettier --write 'docs/**/*.md'",
-    "format:check": "prettier --check 'src/**/*.{ts,js,json,md,test.ts}' && npm run format:check:docs",
-    "format:check:src": "prettier --check 'src/**/*.{ts,js,json,md,test.ts}'",
-    "format:check:docs": "prettier --check 'docs/**/*.md'",
-    "typecheck": "tsc --noEmit",
-    "clean": "rm -rf dist",
-    "prepublishOnly": "npm run clean && npm run build",
-    "pretest": "npm run typecheck",
-    "prebuild": "npm run clean",
-    "prepare": "husky",
+    "build:tsc": "tsc --build --pretty",
+    "build:tsc:clean": "tsc --build --clean",
+    "build:tsc:force": "tsc --build --force --pretty",
+    "build": "npm run build --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
+    "cli:test": "npm run test -w packages/copilot-instructions-cli",
+    "ums:test": "npm run test -w packages/ums-lib",
+    "lint": "eslint 'packages/*/src/**/*.ts'",
+    "lint:fix": "eslint 'packages/*/src/**/*.ts' --fix",
+    "cli:lint": "npm run lint -w packages/copilot-instructions-cli",
+    "cli:lint:fix": "npm run lint:fix -w packages/copilot-instructions-cli",
+    "ums:lint": "npm run lint -w packages/ums-lib",
+    "ums:lint:fix": "npm run lint:fix -w packages/ums-lib",
+    "format": "prettier --write 'packages/*/src/**/*.ts'",
+    "format:check": "prettier --check 'packages/*/src/**/*.ts'",
+    "cli:format": "npm run format -w packages/copilot-instructions-cli",
+    "cli:format:check": "npm run format:check -w packages/copilot-instructions-cli",
+    "ums:format": "npm run format -w packages/ums-lib",
+    "ums:format:check": "npm run format:check -w packages/ums-lib",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "quality-check": "npm run quality-check --workspaces --if-present",
     "pre-commit": "npm run typecheck && npx lint-staged",
-    "pre-push": "npm run typecheck && npm test && npm run lint && npm run build",
-    "quality-check": "npm run typecheck && npm run lint && npm run format:check && npm test"
+    "pre-push": "npm run typecheck && npm test && npm run lint && npm run build"
   },
   "lint-staged": {
-    "*.{ts,js}": [
-      "eslint --fix",
-      "prettier --write"
+    "packages/*/src/**/*.ts": [
+      "eslint 'packages/*/src/**/*.ts' --fix",
+      "prettier 'packages/*/src/**/*.ts' --write"
     ],
     "*.{json,md,yml,yaml}": [
-      "prettier --write"
+      "prettier --write ."
     ]
-  },
-  "dependencies": {
-    "chalk": "^5.5.0",
-    "cli-table3": "^0.6.5",
-    "commander": "^14.0.0",
-    "glob": "^11.0.3",
-    "gray-matter": "^4.0.3",
-    "jsonc-parser": "^3.3.1",
-    "ora": "^8.2.0",
-    "yaml": "^2.6.0"
   },
   "devDependencies": {
     "@types/node": "^24.1.0",

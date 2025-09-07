@@ -1,0 +1,57 @@
+{
+  "name": "copilot-instructions-cli",
+  "version": "1.0.0",
+  "type": "module",
+  "private": false,
+  "main": "dist/index.js",
+  "bin": {
+    "copilot-instructions": "dist/index.js"
+  },
+  "author": "synthable",
+  "license": "GPL-3.0-or-later",
+  "description": "A CLI tool for composing, managing, and building modular AI assistant instructions using UMS v1.0.",
+  "homepage": "https://github.com/synthable/copilot-instructions-cli/tree/main/packages/copilot-instructions-cli",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/synthable/copilot-instructions-cli.git",
+    "directory": "packages/copilot-instructions-cli"
+  },
+  "keywords": [
+    "ai",
+    "copilot",
+    "instructions",
+    "cli",
+    "persona",
+    "ums",
+    "unified-module-system"
+  ],
+  "scripts": {
+    "build": "tsc --build --pretty",
+    "test": "vitest run --run",
+    "coverage": "vitest run --coverage",
+    "lint": "eslint ",
+    "lint:fix": "eslint --fix",
+    "format": "prettier --write'",
+    "format:check": "prettier --check",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist",
+    "prepublishOnly": "npm run clean && npm run build",
+    "pretest": "npm run typecheck",
+    "prebuild": "npm run clean",
+    "quality-check": "npm run typecheck && npm run lint && npm run format:check && npm test"
+  },
+  "dependencies": {
+    "ums-lib": "^1.0.0",
+    "chalk": "^5.5.0",
+    "cli-table3": "^0.6.5",
+    "commander": "^14.0.0",
+    "jsonc-parser": "^3.3.1",
+    "ora": "^8.2.0"
+  },
+  "devDependencies": {
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ]
+}
