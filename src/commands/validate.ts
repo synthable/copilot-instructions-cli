@@ -1,301 +1,344 @@
 /**
  * @module commands/validate
- * @description Command to validate modules and persona files.
+ * @description Command to validate UMS v1.0 modules and persona files (M7).
  */
 
 import { promises as fs } from 'fs';
 import path from 'path';
 import chalk from 'chalk';
-import ora, { type Ora } from 'ora';
 import { glob } from 'glob';
-import { validatePersonaFile as coreValidatePersonaFile } from '../core/persona-service.js';
-import {
-  validateModuleFile as coreValidateModuleFile,
-  scanModules,
-} from '../core/module-service.js';
+import { loadModule } from '../core/ums-module-loader.js';
+import { loadPersona } from '../core/ums-persona-loader.js';
+import type { ValidationError, ValidationWarning } from '../types/ums-v1.js';
 import { handleError } from '../utils/error-handler.js';
+import { createValidationProgress, BatchProgress } from '../utils/progress.js';
+
+interface ValidateOptions {
+  targetPath?: string;
+  verbose?: boolean;
+}
 
 /**
- * Represents the result of a single file validation.
+ * Represents the result of a single file validation
  */
 interface ValidationResult {
   filePath: string;
+  fileType: 'module' | 'persona';
   isValid: boolean;
-  errors: string[];
+  errors: ValidationError[];
+  warnings: ValidationWarning[];
 }
 
-async function validateModuleFile(
-  filePath: string,
-  spinner: Ora,
-  verbose?: boolean
-): Promise<ValidationResult> {
-  spinner.start(`Validating module ${filePath}`);
+/**
+ * Validates a single module file
+ */
+async function validateModuleFile(filePath: string): Promise<ValidationResult> {
   try {
-    const result = await coreValidateModuleFile(filePath);
-    if (!result.isValid) {
-      if (verbose) {
-        spinner.fail(chalk.red(`Validation failed for module: ${filePath}`));
-      }
-    } else {
-      if (verbose) {
-        spinner.succeed(
-          chalk.green(`Validation passed for module: ${filePath}`)
-        );
-      }
-    }
-    return result;
-  } catch (err) {
-    spinner.fail(chalk.red(`Error validating module: ${filePath}`));
+    await loadModule(filePath);
     return {
       filePath,
+      fileType: 'module',
+      isValid: true,
+      errors: [],
+      warnings: [],
+    };
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    return {
+      filePath,
+      fileType: 'module',
       isValid: false,
-      errors: [err instanceof Error ? err.message : String(err)],
+      errors: [
+        {
+          path: '',
+          message: errorMessage,
+        },
+      ],
+      warnings: [],
     };
   }
 }
 
+/**
+ * Validates a single persona file
+ */
 async function validatePersonaFile(
-  filePath: string,
-  spinner: Ora,
-  verbose?: boolean
+  filePath: string
 ): Promise<ValidationResult> {
-  spinner.start(`Validating persona ${filePath}`);
   try {
-    const result = await coreValidatePersonaFile(filePath);
-    if (!result.isValid) {
-      if (verbose) {
-        spinner.fail(chalk.red(`Validation failed for persona: ${filePath}`));
-      }
-    } else {
-      if (verbose) {
-        spinner.succeed(
-          chalk.green(`Validation passed for persona: ${filePath}`)
-        );
-      }
-    }
-    return result;
-  } catch (err) {
-    spinner.fail(chalk.red(`Error validating persona: ${filePath}`));
+    await loadPersona(filePath);
     return {
       filePath,
+      fileType: 'persona',
+      isValid: true,
+      errors: [],
+      warnings: [],
+    };
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    return {
+      filePath,
+      fileType: 'persona',
       isValid: false,
-      errors: [err instanceof Error ? err.message : String(err)],
+      errors: [
+        {
+          path: '',
+          message: errorMessage,
+        },
+      ],
+      warnings: [],
     };
   }
 }
 
-async function validateAll(
-  spinner: Ora,
-  verbose?: boolean
+/**
+ * Validates a single file based on its type
+ */
+async function validateFile(filePath: string): Promise<ValidationResult> {
+  if (filePath.endsWith('.module.yml')) {
+    return validateModuleFile(filePath);
+  } else if (filePath.endsWith('.persona.yml')) {
+    return validatePersonaFile(filePath);
+  } else {
+    return {
+      filePath,
+      fileType: 'module', // default
+      isValid: false,
+      errors: [
+        {
+          path: '',
+          message: `Unsupported file type: ${path.extname(filePath)}`,
+        },
+      ],
+      warnings: [],
+    };
+  }
+}
+
+/**
+ * Validates all files in a directory recursively
+ */
+async function validateDirectory(
+  dirPath: string,
+  verbose: boolean
 ): Promise<ValidationResult[]> {
-  spinner.start('Finding files to validate...');
-  let files: string[] = [];
-  try {
-    files = await glob(
-      `{instructions-modules/**/*.md,**/*.persona.json,**/*.persona.jsonc}`,
-      {
-        nodir: true,
-        ignore: 'node_modules/**',
-      }
-    );
-  } catch {
-    spinner.fail('Error finding files to validate.');
-    return [];
-  }
+  // M7 matchers: {instructions-modules/**/*.module.yml, personas/**/*.persona.yml}
+  const patterns = [
+    path.join(dirPath, 'instructions-modules/**/*.module.yml'),
+    path.join(dirPath, 'personas/**/*.persona.yml'),
+  ];
 
-  // Exclude instructions-modules/README.md from validation
-  files = files.filter(
-    file =>
-      path.resolve(file) !== path.resolve('instructions-modules/README.md')
-  );
+  const results: ValidationResult[] = [];
+  const allFiles: string[] = [];
 
-  if (files.length === 0) {
-    spinner.warn('No files found to validate.');
-    return [];
-  }
-  spinner.succeed(`Found ${files.length} files to validate.`);
-
-  // Parallelize validation for performance
-  const results = await Promise.all(
-    files.map(file =>
-      file.endsWith('.md')
-        ? validateModuleFile(file, spinner, verbose)
-        : validatePersonaFile(file, spinner, verbose)
-    )
-  );
-
-  // Additional validation for synergistic pairs
-  const moduleFiles = files.filter(file => file.endsWith('.md'));
-  if (moduleFiles.length > 0) {
-    spinner.start('Validating synergistic pair relationships...');
+  for (const pattern of patterns) {
     try {
-      const allModules = await scanModules();
-      const moduleIds = new Set(allModules.keys());
-
-      for (const [id, module] of allModules) {
-        if (module.implement && module.implement.length > 0) {
-          for (const implementedId of module.implement) {
-            if (!moduleIds.has(implementedId)) {
-              // Find the result for this module and add the error
-              const moduleResult = results.find(
-                r => r.filePath === module.filePath
-              );
-              if (moduleResult) {
-                moduleResult.isValid = false;
-                moduleResult.errors.push(
-                  `Error: Module '${id}' implements non-existent module '${implementedId}'.`
-                );
-              }
-            }
-          }
-        }
-      }
-
-      spinner.succeed('Synergistic pair validation complete.');
+      const files = await glob(pattern, {
+        nodir: true,
+        ignore: ['**/node_modules/**'],
+      });
+      allFiles.push(...files);
     } catch (error) {
-      spinner.warn('Could not validate synergistic pair relationships.');
-      if (verbose) {
-        console.log(
-          chalk.gray(`[verbose] Synergistic pair validation error: ${error}`)
-        );
-      }
+      console.warn(
+        chalk.yellow(
+          `Warning: Failed to glob pattern ${pattern}: ${error instanceof Error ? error.message : String(error)}`
+        )
+      );
     }
+  }
+
+  if (allFiles.length > 0) {
+    const progress = new BatchProgress(
+      allFiles.length,
+      { command: 'validate', operation: 'directory validation' },
+      verbose
+    );
+
+    progress.start('Validating files');
+
+    for (const file of allFiles) {
+      const result = await validateFile(file);
+      results.push(result);
+      progress.increment(path.basename(file));
+    }
+
+    progress.complete();
   }
 
   return results;
 }
 
-function printValidationResults(results: ValidationResult[]): void {
-  const totalFiles = results.length;
-  const passedFiles = results.filter(r => r.isValid).length;
-  const failedFiles = totalFiles - passedFiles;
+/**
+ * Validates all files in standard locations (M7)
+ */
+async function validateAll(verbose: boolean): Promise<ValidationResult[]> {
+  // M7: none → standard locations
+  const patterns = [
+    'instructions-modules/**/*.module.yml',
+    'personas/**/*.persona.yml',
+  ];
 
-  console.log(chalk.bold('\nValidation Results:'));
-  console.log('-------------------');
-  console.log(chalk.green(`Passed: ${passedFiles}`));
-  console.log(chalk.red(`Failed: ${failedFiles}`));
-  console.log(`Total:  ${totalFiles}`);
-  console.log('-------------------');
+  const results: ValidationResult[] = [];
+  const allFiles: string[] = [];
 
-  if (failedFiles > 0) {
-    console.log(chalk.bold.red('\nErrors:'));
-    for (const result of results) {
-      if (!result.isValid) {
-        console.log(chalk.yellow(`  File: ${result.filePath}`));
-        for (const error of result.errors) {
-          console.log(chalk.red(`    - ${error}`));
+  for (const pattern of patterns) {
+    try {
+      const files = await glob(pattern, {
+        nodir: true,
+        ignore: ['**/node_modules/**'],
+      });
+      allFiles.push(...files);
+    } catch (error) {
+      console.warn(
+        chalk.yellow(
+          `Warning: Failed to glob pattern ${pattern}: ${error instanceof Error ? error.message : String(error)}`
+        )
+      );
+    }
+  }
+
+  if (allFiles.length > 0) {
+    const progress = new BatchProgress(
+      allFiles.length,
+      { command: 'validate', operation: 'standard location validation' },
+      verbose
+    );
+
+    progress.start('Validating files in standard locations');
+
+    for (const file of allFiles) {
+      const result = await validateFile(file);
+      results.push(result);
+      progress.increment(path.basename(file));
+    }
+
+    progress.complete();
+  }
+
+  return results;
+}
+
+/**
+ * Prints validation results with optional verbose output
+ */
+function printResults(results: ValidationResult[], verbose: boolean): void {
+  const validCount = results.filter(r => r.isValid).length;
+  const invalidCount = results.length - validCount;
+
+  if (results.length === 0) {
+    console.log(chalk.yellow('No UMS v1.0 files found to validate.'));
+    return;
+  }
+
+  // Print per-file results
+  for (const result of results) {
+    if (result.isValid) {
+      if (verbose) {
+        console.log(chalk.green(`✓ ${result.filePath} (${result.fileType})`));
+        if (result.warnings.length > 0) {
+          for (const warning of result.warnings) {
+            const pathContext = warning.path ? ` at ${warning.path}` : '';
+            console.log(
+              chalk.yellow(`  ⚠ Warning${pathContext}: ${warning.message}`)
+            );
+          }
+        }
+      }
+    } else {
+      console.log(chalk.red(`✗ ${result.filePath} (${result.fileType})`));
+      for (const error of result.errors) {
+        if (verbose) {
+          // M7: verbose flag includes key-path context and rule description
+          const pathContext = error.path ? ` at ${error.path}` : '';
+          const sectionContext = error.section ? ` (${error.section})` : '';
+          console.log(
+            chalk.red(
+              `  ✗ Error${pathContext}: ${error.message}${sectionContext}`
+            )
+          );
+        } else {
+          console.log(chalk.red(`  ✗ ${error.message}`));
+        }
+      }
+
+      if (verbose && result.warnings.length > 0) {
+        for (const warning of result.warnings) {
+          const pathContext = warning.path ? ` at ${warning.path}` : '';
+          console.log(
+            chalk.yellow(`  ⚠ Warning${pathContext}: ${warning.message}`)
+          );
         }
       }
     }
   }
-}
 
-async function validateFile(
-  filePath: string,
-  spinner: Ora,
-  verbose?: boolean
-): Promise<ValidationResult> {
-  if (filePath.endsWith('.md')) {
-    return validateModuleFile(filePath, spinner, verbose);
-  }
-  if (
-    filePath.endsWith('.persona.json') ||
-    filePath.endsWith('.persona.jsonc')
-  ) {
-    return validatePersonaFile(filePath, spinner, verbose);
-  }
-
-  const error = `Unsupported file type: ${filePath}. Please provide a .md, .persona.json, or .persona.jsonc file.`;
-  spinner.fail(error);
-  return {
-    filePath,
-    isValid: false,
-    errors: [error],
-  };
-}
-
-async function validateDirectory(
-  dirPath: string,
-  spinner: Ora,
-  verbose?: boolean
-): Promise<ValidationResult[]> {
-  spinner.text = `Scanning directory: ${dirPath}`;
-  let files: string[] = [];
-  try {
-    files = await glob(`${dirPath}/**/*.{md,persona.json,persona.jsonc}`, {
-      nodir: true,
-    });
-  } catch {
-    spinner.fail(`Error scanning directory: ${dirPath}`);
-    return [];
-  }
-
-  // Exclude instructions-modules/README.md from validation
-  files = files.filter(
-    file =>
-      path.resolve(file) !== path.resolve('instructions-modules/README.md')
-  );
-
-  if (files.length === 0) {
-    spinner.warn(
-      `No .md, .persona.json, or .persona.jsonc files found in ${dirPath}`
+  // Print summary
+  console.log();
+  if (invalidCount === 0) {
+    console.log(chalk.green(`✓ All ${validCount} files are valid`));
+  } else {
+    console.log(
+      chalk.red(`✗ ${invalidCount} of ${results.length} files have errors`)
     );
-    return [];
+    console.log(chalk.green(`✓ ${validCount} files are valid`));
   }
-
-  // Parallelize validation for performance
-  return Promise.all(files.map(file => validateFile(file, spinner, verbose)));
 }
 
 /**
- * Handles the 'validate' command.
- * @param options - The command options.
- * @param options.targetPath - Optional path to a specific file or directory.
- * @param options.verbose - If true, enables verbose output.
+ * Handles the validate command for UMS v1.0 files (M7)
  */
-export interface ValidateOptions {
-  targetPath?: string;
-  verbose?: boolean;
-}
 export async function handleValidate(
   options: ValidateOptions = {}
 ): Promise<void> {
   const { targetPath, verbose } = options;
-  const spinner = ora('Starting validation...').start();
-  let results: ValidationResult[] = [];
+  const progress = createValidationProgress('validate', verbose);
 
   try {
-    if (verbose) {
-      console.log(chalk.gray('[verbose] Starting validation process...'));
-      if (targetPath) {
-        console.log(chalk.gray(`[verbose] Target path: ${targetPath}`));
-      }
-    }
+    progress.start('Starting UMS v1.0 validation...');
+
+    let results: ValidationResult[] = [];
+
     if (!targetPath) {
-      results = await validateAll(spinner, verbose);
+      // M7: none → standard locations
+      progress.update('Discovering files in standard locations...');
+      results = await validateAll(verbose ?? false);
     } else {
       const stats = await fs.stat(targetPath);
       if (stats.isFile()) {
-        results.push(await validateFile(targetPath, spinner, verbose));
+        // M7: file → validate file
+        progress.update(`Validating file: ${targetPath}...`);
+        const result = await validateFile(targetPath);
+        results.push(result);
       } else if (stats.isDirectory()) {
-        results = await validateDirectory(targetPath, spinner, verbose);
+        // M7: dir → recurse
+        progress.update(`Discovering files in directory: ${targetPath}...`);
+        results = await validateDirectory(targetPath, verbose ?? false);
+      } else {
+        throw new Error(
+          `Path is neither a file nor a directory: ${targetPath}`
+        );
       }
     }
 
-    spinner.stop();
-    if (verbose) {
+    progress.succeed(`Validation complete. Processed ${results.length} files.`);
+
+    // Print results
+    printResults(results, verbose ?? false);
+
+    // M7: Exit generally zero unless fatal (I/O) error
+    const hasErrors = results.some(r => !r.isValid);
+    if (hasErrors && !verbose) {
       console.log(
-        chalk.gray('[verbose] Validation complete. Printing results...')
+        chalk.gray('\nTip: Use --verbose for detailed error information')
       );
     }
-    printValidationResults(results);
   } catch (error) {
-    if (
-      error instanceof Error &&
-      (error as NodeJS.ErrnoException).code === 'ENOENT'
-    ) {
-      spinner.fail(`Path not found: ${targetPath}`);
-    }
-    handleError(error, spinner);
+    progress.fail('Validation failed.');
+    handleError(error, {
+      command: 'validate',
+      context: 'validation process',
+      suggestion: 'check file paths and permissions',
+      ...(verbose && { verbose, timestamp: verbose }),
+    });
   }
 }

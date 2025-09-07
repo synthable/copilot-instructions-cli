@@ -1,0 +1,22 @@
+id: "execution/refactoring/refactor-for-dependency-injection"
+version: "1.0.0"
+schemaVersion: "1.0"
+shape: procedure
+declaredDirectives:
+  required: [goal, process]
+  optional: [constraints, examples]
+meta:
+  name: "Dependency Injection Refactoring"
+  description: "A technology-agnostic procedure for refactoring a function to use dependency injection (DI), making it easier to unit test."
+  semantic: |
+    This module provides a detailed, technology-agnostic procedure for refactoring a function to improve its testability by removing hard-coded dependencies and implementing the dependency injection (DI) pattern.
+  deprecated: true
+  replacedBy: "execution/refactoring/dependency-injection-refactoring"
+body:
+  goal: |
+    This procedure outlines the steps for refactoring a function to use dependency injection (DI), enhancing its testability.
+  process:
+    - "Identify the dependencies of the function."
+    - "Modify the function signature to accept dependencies as parameters."
+    - "Update the function implementation to use the injected dependencies."
+    - "Create unit tests for the refactored function, using test doubles for the dependencies."

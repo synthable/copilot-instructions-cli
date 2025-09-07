@@ -13,5 +13,23 @@
   "embeddedLanguageFormatting": "auto",
   "insertPragma": false,
   "proseWrap": "preserve",
-  "requirePragma": false
+  "requirePragma": false,
+  "overrides": [
+    {
+      "files": "docs/**/*.md",
+      "options": {
+        "tabWidth": 2,
+        "proseWrap": "preserve",
+        "parser": "markdown",
+        "singleQuote": false
+      }
+    },
+    {
+      "files": ["*.yml", "*.yaml"],
+      "options": {
+        "parser": "yaml",
+        "singleQuote": false
+      }
+    }
+  ]
 }

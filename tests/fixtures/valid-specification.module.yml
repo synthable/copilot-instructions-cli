@@ -1,0 +1,32 @@
+id: "principle/architecture/separation-of-concerns"
+version: "1.0.0"
+schemaVersion: "1.0"
+shape: specification
+declaredDirectives:
+  required: [goal, constraints]
+  optional: [principles, examples]
+meta:
+  name: "Separation of Concerns"
+  description: "A specification that mandates decomposing systems so each part addresses a single concern."
+  semantic: |
+    Separation of Concerns (SoC) specification describing decomposition strategies, boundaries, cohesion, coupling,
+    module interfaces, testability, maintainability, refactoring, layering, and ownership. Applies to services, modules,
+    and UI components. Emphasizes single-purpose units, stable interfaces, and clear dependency direction.
+  tags:
+    - architecture
+    - design-principles
+    - modularity
+  license: "MIT"
+  authors:
+    - "Jane Doe <jane.doe@example.com>"
+  homepage: "https://github.com/example/modules"
+body:
+  goal: |
+    Define mandatory rules to ensure each component addresses a single well-bounded responsibility to reduce coupling and improve maintainability.
+  constraints:
+    - Components MUST encapsulate a single responsibility and expose a minimal interface.
+    - Cross-cutting concerns MUST be factored into dedicated modules (e.g., logging, auth).
+    - Dependencies MUST flow in one direction within a layer; cycles are forbidden.
+  principles:
+    - Prefer composition over inheritance to maintain explicit boundaries.
+    - Favor pure functions and immutability at boundaries for easier testing.

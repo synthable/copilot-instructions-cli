@@ -1,6 +1,6 @@
 {
   "name": "copilot-instructions-cli",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "type": "module",
   "private": false,
   "main": "dist/index.js",
@@ -35,9 +35,15 @@
     "dev": "tsc -w",
     "coverage": "vitest run --coverage",
     "lint": "eslint src/**/*.ts",
+    "lint:src": "eslint src/**/*.ts",
     "lint:fix": "eslint src/**/*.ts --fix",
+    "lint:fix:src": "eslint src/**/*.ts --fix",
+    "lint:md": "markdownlint \"docs/**/*.md\"",
     "format": "prettier --write 'src/**/*.{ts,js,json,md,test.ts}'",
-    "format:check": "prettier --check 'src/**/*.{ts,js,json,md,test.ts}'",
+    "format:docs": "prettier --write 'docs/**/*.md'",
+    "format:check": "prettier --check 'src/**/*.{ts,js,json,md,test.ts}' && npm run format:check:docs",
+    "format:check:src": "prettier --check 'src/**/*.{ts,js,json,md,test.ts}'",
+    "format:check:docs": "prettier --check 'docs/**/*.md'",
     "typecheck": "tsc --noEmit",
     "clean": "rm -rf dist",
     "prepublishOnly": "npm run clean && npm run build",
@@ -64,7 +70,8 @@
     "glob": "^11.0.3",
     "gray-matter": "^4.0.3",
     "jsonc-parser": "^3.3.1",
-    "ora": "^8.2.0"
+    "ora": "^8.2.0",
+    "yaml": "^2.6.0"
   },
   "devDependencies": {
     "@types/node": "^24.1.0",
@@ -77,8 +84,11 @@
     "eslint-plugin-prettier": "^5.5.4",
     "globals": "^16.3.0",
     "husky": "^9.1.7",
+    "markdownlint": "^0.38.0",
+    "markdownlint-cli": "^0.45.0",
     "prettier": "^3.6.2",
     "typescript": "^5.9.2",
+    "typescript-eslint": "^8.41.0",
     "vitest": "^3.2.4"
   }
 }

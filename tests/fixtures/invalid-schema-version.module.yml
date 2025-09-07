@@ -1,0 +1,14 @@
+id: "execution/build/invalid-schema"
+version: "1.0.0"
+schemaVersion: "2.0"
+shape: procedure
+declaredDirectives:
+  required: [goal, process]
+  optional: []
+meta:
+  name: "Invalid Schema Version"
+  description: "Has wrong schema version."
+  semantic: "example"
+body:
+  goal: "Build something."
+  process: ["Do stuff."]

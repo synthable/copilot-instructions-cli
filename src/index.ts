@@ -1,11 +1,10 @@
 #!/usr/bin/env node
+
 import { Argument, Command, Option } from 'commander';
 import { handleBuild } from './commands/build.js';
 import { handleList } from './commands/list.js';
 import { handleSearch } from './commands/search.js';
 import { handleValidate } from './commands/validate.js';
-import { handleCreateModule } from './commands/create-module.js';
-import { handleCreatePersona } from './commands/create-persona.js';
 import pkg from '../package.json' with { type: 'json' };
 
 const program = new Command();
@@ -13,59 +12,50 @@ const program = new Command();
 program
   .name('copilot-instructions')
   .description(
-    'A CLI for building and managing AI persona instructions from modular files.'
+    'A CLI for building and managing AI persona instructions from UMS v1.0 modules.'
   )
-  .version(pkg.version) // Dynamically derived version, fixed for TypeScript/ESLint
+  .version(pkg.version)
   .option('-v, --verbose', 'Enable verbose output');
 
 program
   .command('build')
   .description(
-    'Builds a persona instruction file from a .persona.json configuration.'
+    'Builds a persona instruction file from a .persona.yml configuration (UMS v1.0)'
   )
-  .option('-p, --persona <file>', 'Path to the persona configuration file.')
-  .option('--name <name>', 'Override the persona name in the output file.')
   .option(
-    '--description <description>',
-    'Override the persona description in the output file.'
+    '-p, --persona <file>',
+    'Path to the persona configuration file (.persona.yml)'
   )
-  .option('--no-attributions', 'Exclude attributions in the output file.')
-  .option('-o, --output <file>', 'Specify the output file for the build.')
-  .option('-m, --modules <path...>', 'A list of instruction modules.', [])
+  .option('-o, --output <file>', 'Specify the output file for the build')
   .option('-v, --verbose', 'Enable verbose output')
   .addHelpText(
     'after',
     `  Examples:
-    $ copilot-instructions build --persona ./personas/my-persona.persona.jsonc
-    $ copilot-instructions build --output ./dist/my-persona.md --modules foundation/logic/reasoning principle/ethics/ethical-considerations technology/language/python technology/frameworks/django
-    $ copilot-instructions build --modules foundation/ethics/be-truthful principle/testing/test-isolation technology/language/typescript technology/frameworks/react
+    $ copilot-instructions build --persona ./personas/my-persona.persona.yml
+    $ copilot-instructions build --persona ./personas/my-persona.persona.yml --output ./dist/my-persona.md
+    $ cat persona.yml | copilot-instructions build --output ./dist/my-persona.md
     `
   )
   .showHelpAfterError()
-  .action((options, cmd) => {
-    if (!options.persona && options.modules.length === 0) {
-      cmd.error(
-        'You must specify either a persona file with --persona <file> or a modules list with --modules <file...>'
-      );
-      return;
+  .action(
+    async (options: {
+      persona?: string;
+      output?: string;
+      verbose?: boolean;
+    }) => {
+      const verbose = Boolean(options.verbose ?? false);
+
+      await handleBuild({
+        ...(options.persona && { persona: options.persona }),
+        ...(options.output && { output: options.output }),
+        verbose,
+      });
     }
-    const verbose = options.verbose || program.opts().verbose;
-    const stdout = !options.output && !options.persona;
-    handleBuild({
-      personaFilePath: options.persona,
-      modules: options.modules,
-      name: options.name,
-      description: options.description,
-      output: options.output,
-      stdout,
-      noAttributions: options.attributions === false,
-      verbose,
-    });
-  });
+  );
 
 program
   .command('list')
-  .description('Lists all available instruction modules.')
+  .description('Lists all available UMS v1.0 modules.')
   .addOption(
     new Option('-t, --tier <name>', 'Filter by tier').choices([
       'foundation',
@@ -77,127 +67,79 @@ program
   .option('-v, --verbose', 'Enable verbose output')
   .addHelpText(
     'after',
-    `
-  Examples:
+    `  Examples:
     $ copilot-instructions list
     $ copilot-instructions list --tier foundation
-  `
+    $ copilot-instructions list --tier technology
+    `
   )
-  .action(options => {
-    const verbose = options.verbose || program.opts().verbose;
-    handleList({ ...options, verbose });
+  .showHelpAfterError()
+  .action(async (options: { tier?: string; verbose?: boolean }) => {
+    const verbose = Boolean(options.verbose ?? false);
+    await handleList({
+      ...(options.tier && { tier: options.tier }),
+      verbose,
+    });
   });
 
 program
   .command('search')
-  .description('Searches for modules by name or description.')
-  .argument('<query>', 'The text to search for.')
+  .description('Searches for UMS v1.0 modules by name, description, or tags.')
+  .addArgument(new Argument('<query>', 'Search query'))
   .addOption(
-    new Option(
-      '-t, --tier <name>',
-      'Restrict the search to a specific tier.'
-    ).choices(['foundation', 'principle', 'technology', 'execution'])
+    new Option('-t, --tier <name>', 'Filter by tier').choices([
+      'foundation',
+      'principle',
+      'technology',
+      'execution',
+    ])
   )
-  .addHelpText(
-    'after',
-    `
-  Examples:
-    $ copilot-instructions search "logic"
-    $ copilot-instructions search "reasoning" --tier foundation
-  `
-  )
-  .action(handleSearch);
-
-program
-  .command('validate')
-  .description(
-    'Validates all modules and persona files, or a specific file/directory.'
-  )
-  .argument('[path]', 'Optional path to a specific file or directory.')
   .option('-v, --verbose', 'Enable verbose output')
   .addHelpText(
     'after',
+    `  Examples:
+    $ copilot-instructions search "logic"
+    $ copilot-instructions search "reasoning" --tier foundation
+    $ copilot-instructions search "react" --tier technology
     `
-  Examples:
-    $ copilot-instructions validate
-    $ copilot-instructions validate ./modules/my-module.md
-    $ copilot-instructions validate ./personas/my-persona.persona.jsonc
-  `
   )
-  .action((path, options) => {
-    const verbose = options.verbose || program.opts().verbose;
-    handleValidate({ targetPath: path, verbose });
-  });
+  .showHelpAfterError()
+  .action(
+    async (query: string, options: { tier?: string; verbose?: boolean }) => {
+      const verbose = Boolean(options.verbose ?? false);
+      await handleSearch(query, {
+        ...(options.tier && { tier: options.tier }),
+        verbose,
+      });
+    }
+  );
 
 program
-  .command('create-module')
-  .description('Creates a new instruction module file.')
+  .command('validate')
+  .description('Validates UMS v1.0 modules and persona files.')
   .addArgument(
     new Argument(
-      '<tier>',
-      'The tier for the new module (e.g., foundation).'
-    ).choices(['foundation', 'principle', 'technology', 'execution'])
-  )
-  .argument(
-    '<subject>',
-    'The subject path within the tier (e.g., logic/reasoning).'
-  )
-  .argument('<name>', 'The name for the new module (e.g., "My New Module").')
-  .argument(
-    '[description]',
-    'A short description for the module.',
-    name => `A module description for ${name}.`
+      '[path]',
+      'Path to validate (file or directory, defaults to current directory)'
+    ).default('.')
   )
   .option(
-    '-l, --layer <number>',
-    'The layer for foundation modules (0-5).',
-    value => parseInt(value, 10)
-  )
-  .action(handleCreateModule);
-
-program
-  .command('create-persona')
-  .description('Creates a new persona configuration file.')
-  .argument('<name>', 'The name for the new persona.')
-  .argument(
-    '[description]',
-    'A short description for the persona.',
-    name => `A persona description for ${name}.`
-  )
-  .option(
-    '--no-attributions',
-    'Do not include attributions in the persona file.'
-  )
-  .option(
-    '-p, --persona-output <path>',
-    'The path where the persona file will be saved.',
-    name => `./${name}.persona.jsonc`
-  )
-  .option(
-    '-b, --build-output <file>',
-    'The file name for the generated persona markdown (sets the "output" property).',
-    name => `./dist/${name}.md`
-  )
-  .option(
-    '-t, --template <name>',
-    'The name of a template file (e.g., "code-critic") from ./templates/persona to use as a base.'
+    '-v, --verbose',
+    'Enable verbose output with detailed validation steps'
   )
   .addHelpText(
     'after',
+    `  Examples:
+    $ copilot-instructions validate
+    $ copilot-instructions validate ./instructions-modules
+    $ copilot-instructions validate ./personas/my-persona.persona.yml
+    $ copilot-instructions validate --verbose
     `
-  Examples:
-    $ copilot-instructions create-persona "My New Persona"
-    $ copilot-instructions create-persona "My New Persona" "A description of my persona."
-    $ copilot-instructions create-persona "My New Persona" --persona-output ./personas/my-new-persona.persona.jsonc --build-output ./dist/my-new-persona.md
-    $ copilot-instructions create-persona "My New Persona" --no-attributions
-    $ copilot-instructions create-persona "My New Persona" --template code-critic
-  `
   )
-  .action(handleCreatePersona);
+  .showHelpAfterError()
+  .action(async (path: string, options: { verbose?: boolean }) => {
+    const verbose = Boolean(options.verbose ?? false);
+    await handleValidate({ targetPath: path, verbose });
+  });
 
-// Asynchronous execution wrapper
-async function main() {
-  await program.parseAsync(process.argv);
-}
-
-main();
+void program.parseAsync();

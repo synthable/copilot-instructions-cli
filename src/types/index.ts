@@ -1,34 +1,8 @@
 /**
- * Represents a single, parsed instruction module from a markdown file.
+ * This file previously contained legacy type definitions.
+ * All types have been moved to UMS v1.0 specification in ./ums-v1.ts
+ *
+ * Re-export UMS v1.0 types for backward compatibility where needed.
  */
-export interface Module {
-  /** Unique identifier, e.g., 'tier/subject/filename' */
-  id: string;
-  /** The top-level category, e.g., 'foundation' */
-  tier: string;
-  /** The sub-category path, e.g., 'logic' or 'framework/react' */
-  subject: string;
-  /** Human-readable name from frontmatter */
-  name: string;
-  /** Description from frontmatter */
-  description: string;
-  /** The raw markdown content of the module */
-  content: string;
-  /** The absolute path to the source file */
-  filePath: string;
-  /** The layer of the module (foundation tier only) */
-  layer?: number;
-  /** The ID(s) of module(s) that this module implements (for Synergistic Pairs) */
-  implement?: string[];
-}
 
-/**
- * Represents the structure of a *.persona.json configuration file.
- */
-export interface PersonaConfig {
-  name: string;
-  description?: string;
-  output?: string | undefined;
-  attributions?: boolean;
-  modules: string[];
-}
+export * from './ums-v1.js';
