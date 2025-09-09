@@ -140,8 +140,10 @@ vite.config.ts.timestamp-*
 
 .DS_Store
 docs/archive/
-docs/evaluations/
 docs/todo.md
 CLAUDE.md
 .geminiignore
 docs/old/
+GEMINI.md
+untracked/
+.gemini/
