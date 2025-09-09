@@ -17,7 +17,6 @@ export const baseConfig = tseslint.config(
   // 2. Base configuration for ALL TypeScript files in the monorepo
   {
     files: ['packages/**/*.ts'],
-    ignores: ['src/**/*.test.ts', 'src/**/*.spec.ts'],
     languageOptions: {
       parserOptions: {
         ecmaVersion: '2022',

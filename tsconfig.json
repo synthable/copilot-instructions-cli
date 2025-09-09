@@ -8,10 +8,10 @@
       "path": "packages/copilot-instructions-cli"
     }
   ],
-  "include": ["packages/*/src/**/*"],
   "exclude": [
     "node_modules",
     "dist",
+    "packages/*/dist",
     "test/**/*",
     "coverage/**/*",
     "docs/**/*",
