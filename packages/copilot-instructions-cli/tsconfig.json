@@ -9,8 +9,8 @@
     "rootDir": "src",
     "declaration": true,
     // --- More Lenient App Rules ---
-    "noUnusedLocals": false,
-    "noUnusedParameters": false
+    "noUnusedLocals": true,
+    "noUnusedParameters": true
   },
   "include": ["src/**/*"],
   "references": [
