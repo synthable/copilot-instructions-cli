@@ -1,0 +1,10 @@
+name: "Test Persona"
+version: "1.0.0"
+schemaVersion: "1.0"
+description: "Test description"
+semantic: "Test semantic"
+identity: "You are a test assistant"
+moduleGroups:
+  - groupName: "Test Group"
+    modules:
+      - "foundation/ethics/do-no-harm"
