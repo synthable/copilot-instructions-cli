@@ -35,7 +35,6 @@ interface RawModuleData {
   version?: unknown;
   schemaVersion?: unknown;
   shape?: unknown;
-  declaredDirectives?: unknown;
   meta?: unknown;
   body?: unknown;
   [key: string]: unknown;
@@ -85,7 +84,6 @@ function validateRequiredKeys(
     'version',
     'schemaVersion',
     'shape',
-    'declaredDirectives',
     'meta',
     'body',
   ];
@@ -200,12 +198,9 @@ export function validateModule(obj: unknown): ValidationResult {
   // Validate version and schema version fields
   errors.push(...validateVersionFields(module));
 
-  // Validate shape and declaredDirectives (Section 2.5)
-  if ('shape' in module && 'declaredDirectives' in module) {
-    const shapeValidation = validateShapeAndDirectives(
-      module.shape,
-      module.declaredDirectives
-    );
+  // Validate shape (Section 2.5)
+  if ('shape' in module) {
+    const shapeValidation = validateShape(module.shape);
     errors.push(...shapeValidation.errors);
     warnings.push(...shapeValidation.warnings);
   }
@@ -221,9 +216,9 @@ export function validateModule(obj: unknown): ValidationResult {
   // Check for deprecation warnings
   warnings.push(...validateDeprecation(module));
 
-  // Validate body against declared directives (Section 4)
-  if ('body' in module && 'declaredDirectives' in module) {
-    const bodyValidation = validateBody(module.body, module.declaredDirectives);
+  // Validate body against shape requirements (Section 4)
+  if ('body' in module && 'shape' in module) {
+    const bodyValidation = validateBodyForShape(module.body, module.shape);
     errors.push(...bodyValidation.errors);
     warnings.push(...bodyValidation.warnings);
   }
@@ -291,12 +286,9 @@ function validateId(id: unknown): ValidationResult {
 }
 
 /**
- * Validates shape and declaredDirectives consistency
+ * Validates shape field (Section 2.5)
  */
-function validateShapeAndDirectives(
-  shape: unknown,
-  declaredDirectives: unknown
-): ValidationResult {
+function validateShape(shape: unknown): ValidationResult {
   const errors: ValidationError[] = [];
   const warnings: ValidationWarning[] = [];
 
@@ -313,62 +305,15 @@ function validateShapeAndDirectives(
     return { valid: false, errors, warnings };
   }
 
-  if (!declaredDirectives || typeof declaredDirectives !== 'object') {
+  // Check if shape is a valid standard shape
+  if (!STANDARD_SHAPES.includes(shape as StandardShape)) {
     errors.push({
-      path: 'declaredDirectives',
-      message: SCHEMA_VALIDATION_ERRORS.wrongType(
-        'declaredDirectives',
-        'object',
-        typeof declaredDirectives
-      ),
+      path: 'shape',
+      message: SCHEMA_VALIDATION_ERRORS.invalidShape(shape, [
+        ...STANDARD_SHAPES,
+      ]),
       section: 'Section 2.5',
     });
-    return { valid: false, errors, warnings };
-  }
-
-  const directives = declaredDirectives as Record<string, unknown>;
-
-  // Validate required/optional structure
-  if (!('required' in directives) || !Array.isArray(directives.required)) {
-    errors.push({
-      path: 'declaredDirectives.required',
-      message: 'declaredDirectives.required must be an array',
-      section: 'Section 2.5',
-    });
-  }
-
-  if (!('optional' in directives) || !Array.isArray(directives.optional)) {
-    errors.push({
-      path: 'declaredDirectives.optional',
-      message: 'declaredDirectives.optional must be an array',
-      section: 'Section 2.5',
-    });
-  }
-
-  // Check if shape matches standard shapes
-  if (STANDARD_SHAPES.includes(shape as StandardShape)) {
-    const standardShape = shape as StandardShape;
-    const required = directives.required as string[];
-
-    // Compare with standard directive sets (informational warning only)
-    const shapeSpec = STANDARD_SHAPE_SPECS[standardShape];
-    const expectedRequiredSet = new Set(shapeSpec.required);
-    const expectedOptionalSet = new Set(shapeSpec.optional);
-    const actualRequiredSet = new Set(required);
-
-    const missingRequired = shapeSpec.required.filter(
-      d => !actualRequiredSet.has(d)
-    );
-    const unexpectedRequired = required.filter(
-      d => !expectedRequiredSet.has(d) && !expectedOptionalSet.has(d)
-    );
-
-    if (missingRequired.length > 0 || unexpectedRequired.length > 0) {
-      warnings.push({
-        path: 'shape',
-        message: `Standard shape '${shape}' typically requires [${shapeSpec.required.join(', ')}] and allows [${shapeSpec.optional.join(', ')}], but found different directive set`,
-      });
-    }
   }
 
   return { valid: errors.length === 0, errors, warnings };
@@ -577,12 +522,9 @@ function validateFoundationLayer(
 }
 
 /**
- * Validates module body against declared directives (Section 4)
+ * Validates module body against shape requirements (Section 4)
  */
-function validateBody(
-  body: unknown,
-  declaredDirectives: unknown
-): ValidationResult {
+function validateBodyForShape(body: unknown, shape: unknown): ValidationResult {
   const errors: ValidationError[] = [];
   const warnings: ValidationWarning[] = [];
 
@@ -599,26 +541,18 @@ function validateBody(
     return { valid: false, errors, warnings };
   }
 
-  if (!declaredDirectives || typeof declaredDirectives !== 'object') {
+  if (typeof shape !== 'string') {
     return { valid: false, errors, warnings };
   }
+
+  // Get the shape specification (shape is already validated to be a standard shape)
+  const shapeSpec =
+    STANDARD_SHAPE_SPECS[shape as keyof typeof STANDARD_SHAPE_SPECS];
 
   const bodyObj = body as Record<string, unknown>;
-  const directives = declaredDirectives as {
-    required: string[];
-    optional: string[];
-  };
-
-  if (
-    !Array.isArray(directives.required) ||
-    !Array.isArray(directives.optional)
-  ) {
-    return { valid: false, errors, warnings };
-  }
-
   const allowedDirectives = new Set([
-    ...directives.required,
-    ...directives.optional,
+    ...shapeSpec.required,
+    ...shapeSpec.optional,
   ]);
   const presentDirectives = new Set(Object.keys(bodyObj));
 
@@ -636,7 +570,7 @@ function validateBody(
   }
 
   // Check for missing required directives
-  for (const required of directives.required) {
+  for (const required of shapeSpec.required) {
     if (!presentDirectives.has(required)) {
       errors.push({
         path: `body.${required}`,
