@@ -310,8 +310,8 @@ function validateGroupStructure(
   }
 
   // Validate groupName and check for duplicates
-  const duplicateResult = checkForDuplicates(groupObj, index, groupNames);
-  errors.push(...duplicateResult.errors);
+  const groupNameResult = validateGroupName(groupObj, index, groupNames);
+  errors.push(...groupNameResult.errors);
 
   // Validate modules array
   const moduleResult = validateModuleIds(groupObj, index);
@@ -397,9 +397,9 @@ function validateModuleIds(
 }
 
 /**
- * Checks for duplicate group names
+ * Validates group name type and checks for duplicates
  */
-function checkForDuplicates(
+function validateGroupName(
   groupObj: Record<string, unknown>,
   index: number,
   groupNames: Set<string>
