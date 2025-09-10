@@ -6,7 +6,6 @@
 import { writeFile } from 'fs/promises';
 import chalk from 'chalk';
 import { handleError } from '../utils/error-handler.js';
-import { formatError } from '../utils/error-formatting.js';
 import { BuildEngine, type BuildOptions as EngineBuildOptions } from 'ums-lib';
 import { createBuildProgress } from '../utils/progress.js';
 
@@ -109,32 +108,20 @@ async function setupBuildEnvironment(
 
     if (process.stdin.isTTY) {
       progress.fail('No persona file specified and stdin is not available');
-      console.error(
-        formatError({
-          command: 'build',
-          context: 'input validation',
-          issue: 'no persona file specified and stdin is not available',
-          suggestion:
-            'use --persona <file> to specify a persona file or pipe YAML content to stdin',
-        })
+      throw new Error(
+        'No persona file specified and stdin is not available. ' +
+          'Use --persona <file> to specify a persona file or pipe YAML content to stdin.'
       );
-      process.exit(1);
     }
 
     personaContent = await readFromStdin();
 
     if (!personaContent.trim()) {
       progress.fail('No persona content provided via stdin');
-      console.error(
-        formatError({
-          command: 'build',
-          context: 'input validation',
-          issue: 'no persona content received from stdin',
-          suggestion:
-            'ensure YAML content is piped to stdin or use --persona <file>',
-        })
+      throw new Error(
+        'No persona content received from stdin. ' +
+          'Ensure YAML content is piped to stdin or use --persona <file>.'
       );
-      process.exit(1);
     }
   }
 
