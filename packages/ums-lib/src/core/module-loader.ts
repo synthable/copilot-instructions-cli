@@ -7,7 +7,7 @@ import { readFile } from 'fs/promises';
 import { parse } from 'yaml';
 import {
   VALID_TIERS,
-  ID_REGEX,
+  MODULE_ID_REGEX,
   UMS_SCHEMA_VERSION,
   STANDARD_SHAPES,
   STANDARD_SHAPE_SPECS,
@@ -212,7 +212,8 @@ export function validateModule(obj: unknown): ValidationResult {
 
   // Validate meta block (Section 2.2)
   if ('meta' in module) {
-    const metaValidation = validateMeta(module.meta);
+    const moduleId = 'id' in module ? (module.id as string) : undefined;
+    const metaValidation = validateMeta(module.meta, moduleId);
     errors.push(...metaValidation.errors);
     warnings.push(...metaValidation.warnings);
   }
@@ -245,7 +246,7 @@ function validateId(id: unknown): ValidationResult {
     return { valid: false, errors, warnings: [] };
   }
 
-  if (!ID_REGEX.test(id)) {
+  if (!MODULE_ID_REGEX.test(id)) {
     // Provide specific error based on what's wrong
     if (id.includes('/')) {
       const parts = id.split('/');
@@ -491,7 +492,7 @@ function validateDeprecatedReplacedBy(
 /**
  * Validates module metadata block (Section 2.2)
  */
-function validateMeta(meta: unknown): ValidationResult {
+function validateMeta(meta: unknown, moduleId?: string): ValidationResult {
   const errors: ValidationError[] = [];
   const warnings: ValidationWarning[] = [];
 
@@ -519,7 +520,60 @@ function validateMeta(meta: unknown): ValidationResult {
   // Validate deprecated/replacedBy constraint
   errors.push(...validateDeprecatedReplacedBy(metaObj));
 
+  // Validate foundation layer field if moduleId is provided
+  if (moduleId) {
+    errors.push(...validateFoundationLayer(moduleId, metaObj));
+  }
+
   return { valid: errors.length === 0, errors, warnings };
+}
+
+/**
+ * Validates foundation layer field for foundation tier modules
+ */
+function validateFoundationLayer(
+  moduleId: string,
+  metaObj: Record<string, unknown>
+): ValidationError[] {
+  const errors: ValidationError[] = [];
+  const isFoundationTier = moduleId.startsWith('foundation/');
+
+  if (isFoundationTier) {
+    // Foundation tier modules MUST have layer field
+    if (!('layer' in metaObj)) {
+      errors.push({
+        path: 'meta.layer',
+        message: 'Foundation tier modules must have a layer field',
+        section: 'Section 2.2',
+      });
+    } else {
+      const layer = metaObj.layer;
+      if (typeof layer !== 'number') {
+        errors.push({
+          path: 'meta.layer',
+          message: 'meta.layer must be a number',
+          section: 'Section 2.2',
+        });
+      } else if (!Number.isInteger(layer) || layer < 0 || layer > 4) {
+        errors.push({
+          path: 'meta.layer',
+          message: 'meta.layer must be an integer between 0 and 4',
+          section: 'Section 2.2',
+        });
+      }
+    }
+  } else {
+    // Non-foundation tiers MUST NOT have layer field
+    if ('layer' in metaObj) {
+      errors.push({
+        path: 'meta.layer',
+        message: 'Only foundation tier modules may have a layer field',
+        section: 'Section 2.2',
+      });
+    }
+  }
+
+  return errors;
 }
 
 /**
