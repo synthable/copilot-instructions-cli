@@ -325,7 +325,11 @@ export class BuildEngine {
     const markdown = this.renderMarkdown(persona, modules);
 
     // Generate Build Report
-    const buildReport = this.generateBuildReport(persona, modules, options);
+    const buildReport = await this.generateBuildReport(
+      persona,
+      modules,
+      options
+    );
 
     return {
       markdown,
@@ -339,11 +343,11 @@ export class BuildEngine {
   /**
    * Generates build report with UMS v1.0 spec compliance (Section 9.3)
    */
-  private generateBuildReport(
+  private async generateBuildReport(
     persona: UMSPersona,
     modules: UMSModule[],
     _options: BuildOptions
-  ): BuildReport {
+  ): Promise<BuildReport> {
     // Create build report groups following UMS v1.0 spec
     const moduleGroups: BuildReportGroup[] = [];
 
@@ -353,9 +357,19 @@ export class BuildEngine {
       for (const moduleId of group.modules) {
         const module = modules.find(m => m.id === moduleId);
         if (module) {
+          // Generate module file digest
+          const moduleFileContent = await readFile(module.filePath, 'utf-8');
+          const moduleDigest = createHash('sha256')
+            .update(moduleFileContent)
+            .digest('hex');
+
           const reportModule: BuildReportModule = {
             id: module.id,
             name: module.meta.name,
+            version: module.version,
+            source: 'Local', // TODO: Distinguish between Standard Library and Local
+            digest: `sha256:${moduleDigest}`,
+            shape: module.shape,
             filePath: module.filePath,
             deprecated: module.meta.deprecated ?? false,
           };
