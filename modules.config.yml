@@ -1,0 +1,3 @@
+localModulePaths:
+  - path: "./instructions-modules"
+    onConflict: "warn"

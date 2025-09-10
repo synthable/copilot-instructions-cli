@@ -2,21 +2,17 @@
  * Type definitions for UMS v1.0 specification
  */
 
-// Module configuration types
+// Module configuration types (UMS v1.0 spec Section 6.1)
 export interface ModuleConfig {
-  /** Conflict resolution strategy */
-  conflictResolution: 'error' | 'replace' | 'warn';
-  /** Module registry entries */
-  modules: ModuleRegistryEntry[];
+  /** Local module paths with conflict resolution */
+  localModulePaths: LocalModulePath[];
 }
 
-export interface ModuleRegistryEntry {
-  /** Module identifier */
-  id: string;
-  /** Path to module file */
+export interface LocalModulePath {
+  /** Relative path from project root to directory containing .module.yml files */
   path: string;
-  /** Optional version constraint */
-  version?: string;
+  /** Conflict resolution strategy when module IDs collide */
+  onConflict?: 'error' | 'replace' | 'warn';
 }
 
 // Top-level UMS v1.0 Module structure (Section 2.1)
@@ -29,22 +25,12 @@ export interface UMSModule {
   schemaVersion: string;
   /** Module structural type (Section 2.5) */
   shape: string;
-  /** Directive contract definition */
-  declaredDirectives: DeclaredDirectives;
   /** Human-readable and AI-discoverable metadata */
   meta: ModuleMeta;
   /** The instructional content */
   body: ModuleBody;
   /** Absolute path to the source file */
   filePath: string;
-}
-
-// Declared directives contract (Section 2.1)
-export interface DeclaredDirectives {
-  /** Directives that MUST be present in body */
-  required: string[];
-  /** Directives that MAY be present in body */
-  optional: string[];
 }
 
 // Module metadata block (Section 2.2)

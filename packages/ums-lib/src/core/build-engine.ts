@@ -27,6 +27,7 @@ import type {
   BuildReportGroup,
   BuildReportModule,
   ModuleConfig,
+  LocalModulePath,
 } from '../types/index.js';
 
 export interface BuildOptions {
@@ -95,21 +96,35 @@ export class ModuleRegistry {
       const content = await readFile(configPath, 'utf-8');
       const parsed = parse(content) as unknown;
 
-      // Validate config structure
+      // Validate config structure per UMS v1.0 spec Section 6.1
       if (
         !parsed ||
         typeof parsed !== 'object' ||
-        !('conflictResolution' in parsed) ||
-        !('modules' in parsed)
+        !('localModulePaths' in parsed)
       ) {
-        throw new Error('Invalid modules.config.yml format');
+        throw new Error(
+          'Invalid modules.config.yml format - missing localModulePaths'
+        );
       }
 
       const config = parsed as ModuleConfig;
-      if (!['error', 'replace', 'warn'].includes(config.conflictResolution)) {
-        throw new Error(
-          `Invalid conflict resolution strategy: ${config.conflictResolution}`
-        );
+      if (!Array.isArray(config.localModulePaths)) {
+        throw new Error('localModulePaths must be an array');
+      }
+
+      // Validate each local module path entry
+      for (const entry of config.localModulePaths) {
+        if (!entry.path) {
+          throw new Error('Each localModulePaths entry must have a path');
+        }
+        if (
+          entry.onConflict &&
+          !['error', 'replace', 'warn'].includes(entry.onConflict)
+        ) {
+          throw new Error(
+            `Invalid conflict resolution strategy: ${entry.onConflict}`
+          );
+        }
       }
 
       this.config = config;
@@ -120,48 +135,70 @@ export class ModuleRegistry {
   }
 
   /**
-   * Loads modules from configuration
+   * Loads modules from configuration paths (UMS v1.0 spec Section 6.1)
    */
   private async loadConfiguredModules(): Promise<void> {
     if (!this.config) return;
 
-    const moduleIds = new Map<string, string>();
+    // Process each localModulePath in order
+    for (const localPath of this.config.localModulePaths) {
+      await this.processLocalModulePath(localPath);
+    }
+  }
 
-    for (const entry of this.config.modules) {
-      // Check for conflicts
-      if (moduleIds.has(entry.id)) {
-        const conflictMessage = `Duplicate module ID '${entry.id}' in modules.config.yml`;
+  /**
+   * Processes a single local module path entry
+   */
+  private async processLocalModulePath(entry: LocalModulePath): Promise<void> {
+    const { path: modulePath, onConflict = 'error' } = entry;
 
-        switch (this.config.conflictResolution) {
-          case 'error':
-            throw new Error(conflictMessage);
-          case 'replace':
-            this.warnings.push(`${conflictMessage} - replacing previous entry`);
-            break;
-          case 'warn':
-            this.warnings.push(`${conflictMessage} - using first entry`);
-            continue;
-        }
-      }
+    try {
+      // Discover all .module.yml files in the specified path
+      const pattern = join(modulePath, '**', `*${MODULE_FILE_EXTENSION}`);
+      const files = await glob(pattern, { nodir: true });
 
-      try {
-        // Validate module exists and is loadable
-        const module = await loadModule(entry.path);
-        if (module.id !== entry.id) {
-          throw new Error(
-            `Module ID mismatch: config specifies '${entry.id}' but module contains '${module.id}'`
+      for (const file of files) {
+        try {
+          // Load module to get its ID
+          const module = await loadModule(file);
+
+          // Check for conflicts with existing modules
+          if (this.moduleMap.has(module.id)) {
+            const conflictMessage = `Duplicate module ID '${module.id}' in path '${modulePath}'`;
+
+            switch (onConflict) {
+              case 'error':
+                throw new Error(conflictMessage);
+              case 'replace':
+                this.warnings.push(
+                  `${conflictMessage} - replacing previous entry`
+                );
+                this.moduleMap.set(module.id, file);
+                break;
+              case 'warn':
+                this.warnings.push(`${conflictMessage} - using first entry`);
+                // Keep the original entry, skip this one
+                break;
+            }
+          } else {
+            // No conflict, add the module
+            this.moduleMap.set(module.id, file);
+          }
+        } catch (error) {
+          // Skip invalid modules during discovery
+          const message =
+            error instanceof Error ? error.message : String(error);
+          this.warnings.push(
+            `Warning: Skipping invalid module ${file}: ${message}`
           );
         }
-        moduleIds.set(entry.id, entry.path);
-      } catch (error) {
-        const message = error instanceof Error ? error.message : String(error);
-        this.warnings.push(
-          `Warning: Skipping configured module ${entry.id}: ${message}`
-        );
       }
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      this.warnings.push(
+        `Warning: Failed to process module path '${modulePath}': ${message}`
+      );
     }
-
-    this.moduleMap = moduleIds;
   }
 
   /**
