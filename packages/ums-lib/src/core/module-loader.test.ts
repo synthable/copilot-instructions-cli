@@ -9,10 +9,6 @@ describe('UMS Module Loader', () => {
         version: '1.0.0',
         schemaVersion: '1.0',
         shape: 'specification',
-        declaredDirectives: {
-          required: ['goal', 'constraints'],
-          optional: ['principles', 'examples'],
-        },
         meta: {
           name: 'Separation of Concerns',
           description: 'A specification that mandates decomposing systems.',
@@ -29,10 +25,6 @@ describe('UMS Module Loader', () => {
             'Components MUST encapsulate a single responsibility.',
             'Dependencies MUST flow in one direction.',
           ],
-          principles: [
-            'Prefer composition over inheritance.',
-            'Favor pure functions at boundaries.',
-          ],
         },
       };
 
@@ -47,10 +39,6 @@ describe('UMS Module Loader', () => {
         version: '1.0.0',
         schemaVersion: '1.0',
         shape: 'procedure',
-        declaredDirectives: {
-          required: ['goal', 'process'],
-          optional: ['constraints', 'examples'],
-        },
         meta: {
           name: 'Cut Minor Release',
           description: 'A procedure to cut a minor release.',
@@ -77,10 +65,6 @@ describe('UMS Module Loader', () => {
         version: '1.0.0',
         schemaVersion: '1.0',
         shape: 'data',
-        declaredDirectives: {
-          required: ['goal', 'data'],
-          optional: ['examples'],
-        },
         meta: {
           name: 'Build Target Matrix',
           description: 'Provides a JSON matrix of supported build targets.',
@@ -106,10 +90,6 @@ describe('UMS Module Loader', () => {
         version: '1.0.0',
         schemaVersion: '1.0',
         shape: 'specification',
-        declaredDirectives: {
-          required: ['goal', 'constraints'],
-          optional: ['examples'],
-        },
         meta: {
           name: 'Unit Testing Examples',
           description: 'Examples of unit testing patterns.',
@@ -147,13 +127,15 @@ describe('UMS Module Loader', () => {
         version: '1.0.0',
         schemaVersion: '1.0',
         shape: 'specification',
-        declaredDirectives: { required: ['goal'], optional: [] },
         meta: {
           name: 'Test',
-          description: 'Test module.',
-          semantic: 'Test semantic content.',
+          description: 'Test',
+          semantic: 'Test',
         },
-        body: { goal: 'Test goal.' },
+        body: {
+          goal: 'Test goal.',
+          constraints: ['Test constraint'],
+        },
       };
 
       const result = validateModule(invalidModule);
@@ -169,13 +151,15 @@ describe('UMS Module Loader', () => {
         version: '1.0.0',
         schemaVersion: '1.0',
         shape: 'specification',
-        declaredDirectives: { required: ['goal'], optional: [] },
         meta: {
           name: 'Test',
-          description: 'Test module.',
-          semantic: 'Test semantic content.',
+          description: 'Test',
+          semantic: 'Test',
         },
-        body: { goal: 'Test goal.' },
+        body: {
+          goal: 'Test goal.',
+          constraints: ['Test constraint'],
+        },
       };
 
       const result = validateModule(invalidModule);
@@ -191,13 +175,15 @@ describe('UMS Module Loader', () => {
         version: '1.0.0',
         schemaVersion: '2.0',
         shape: 'specification',
-        declaredDirectives: { required: ['goal'], optional: [] },
         meta: {
           name: 'Test',
-          description: 'Test module.',
-          semantic: 'Test semantic content.',
+          description: 'Test',
+          semantic: 'Test',
         },
-        body: { goal: 'Test goal.' },
+        body: {
+          goal: 'Test goal.',
+          constraints: ['Test constraint'],
+        },
       };
 
       const result = validateModule(invalidModule);
@@ -211,7 +197,7 @@ describe('UMS Module Loader', () => {
       const invalidModule = {
         id: 'principle/testing/tdd',
         version: '1.0.0',
-        // missing schemaVersion, shape, declaredDirectives, meta, body
+        // missing schemaVersion, shape, meta, body
       };
 
       const result = validateModule(invalidModule);
@@ -221,7 +207,7 @@ describe('UMS Module Loader', () => {
       const missingFields = result.errors.filter(e =>
         e.message.includes('Missing required field')
       );
-      expect(missingFields.length).toBe(5); // schemaVersion, shape, declaredDirectives, meta, body
+      expect(missingFields.length).toBe(4); // schemaVersion, shape, meta, body
     });
 
     it('should reject module with undeclared directive in body', () => {
@@ -230,10 +216,6 @@ describe('UMS Module Loader', () => {
         version: '1.0.0',
         schemaVersion: '1.0',
         shape: 'procedure',
-        declaredDirectives: {
-          required: ['goal', 'process'],
-          optional: [],
-        },
         meta: {
           name: 'Invalid Module',
           description: 'Contains undeclared directive.',
@@ -242,7 +224,7 @@ describe('UMS Module Loader', () => {
         body: {
           goal: 'Build something.',
           process: ['Do stuff.'],
-          steps: ['This is undeclared'], // Not in declaredDirectives
+          steps: ['This is undeclared'], // Not allowed for the shape
         },
       };
 
@@ -259,10 +241,6 @@ describe('UMS Module Loader', () => {
         version: '1.0.0',
         schemaVersion: '1.0',
         shape: 'procedure',
-        declaredDirectives: {
-          required: ['goal', 'process'],
-          optional: [],
-        },
         meta: {
           name: 'Invalid Module',
           description: 'Missing required directive.',
@@ -287,10 +265,6 @@ describe('UMS Module Loader', () => {
         version: '1.0.0',
         schemaVersion: '1.0',
         shape: 'procedure',
-        declaredDirectives: {
-          required: ['goal', 'process'],
-          optional: [],
-        },
         meta: {
           name: 'Invalid Module',
           description: 'Wrong directive types.',
@@ -315,10 +289,6 @@ describe('UMS Module Loader', () => {
         version: '1.0.0',
         schemaVersion: '1.0',
         shape: 'data',
-        declaredDirectives: {
-          required: ['goal', 'data'],
-          optional: [],
-        },
         meta: {
           name: 'Invalid Data Module',
           description: 'Invalid data directive.',
@@ -345,10 +315,6 @@ describe('UMS Module Loader', () => {
         version: '1.0.0',
         schemaVersion: '1.0',
         shape: 'specification',
-        declaredDirectives: {
-          required: ['goal', 'constraints'],
-          optional: ['examples'],
-        },
         meta: {
           name: 'Duplicate Titles',
           description: 'Examples with duplicate titles.',
@@ -384,10 +350,6 @@ describe('UMS Module Loader', () => {
         version: '1.0.0',
         schemaVersion: '1.0',
         shape: 'procedure',
-        declaredDirectives: {
-          required: ['goal', 'process'],
-          optional: [],
-        },
         meta: {
           name: 'Old Refactoring Procedure',
           description: 'Deprecated refactoring procedure.',
@@ -421,10 +383,6 @@ describe('UMS Module Loader', () => {
         version: '1.0.0',
         schemaVersion: '1.0',
         shape: 'procedure',
-        declaredDirectives: {
-          required: ['goal', 'process'],
-          optional: [],
-        },
         meta: {
           name: 'Bad Replacement',
           description: 'Invalid replacement reference.',
@@ -449,10 +407,6 @@ describe('UMS Module Loader', () => {
         version: '1.0.0',
         schemaVersion: '1.0',
         shape: 'procedure',
-        declaredDirectives: {
-          required: ['goal', 'process'],
-          optional: [],
-        },
         meta: {
           name: 'Non-deprecated with replacement',
           description: 'Should not have replacedBy.',
@@ -477,10 +431,6 @@ describe('UMS Module Loader', () => {
         version: '1.0.0',
         schemaVersion: '1.0',
         shape: 'specification',
-        declaredDirectives: {
-          required: ['goal', 'constraints'],
-          optional: [],
-        },
         meta: {
           name: 'Uppercase Tags',
           description: 'Module with uppercase tags.',
