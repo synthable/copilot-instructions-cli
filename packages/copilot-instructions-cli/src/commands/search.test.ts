@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-empty-function */
 import { describe, it, expect, vi, beforeEach, afterAll } from 'vitest';
 import chalk from 'chalk';
 import { handleSearch } from './search.js';
@@ -89,10 +88,6 @@ describe('search command', () => {
     version: '1.0.0',
     schemaVersion: '1.0',
     shape: 'specification',
-    declaredDirectives: {
-      required: ['goal', 'principles'],
-      optional: ['constraints'],
-    },
     meta: {
       name: 'Deductive Reasoning',
       description: 'Apply logical deduction principles',
@@ -112,12 +107,11 @@ describe('search command', () => {
     version: '1.0.0',
     schemaVersion: '1.0',
     shape: 'pattern',
-    declaredDirectives: { required: ['goal', 'principles'], optional: [] },
     meta: {
       name: 'React Hooks',
-      description: 'Modern React patterns with hooks',
-      semantic: 'react-patterns',
-      tags: ['react', 'frontend'],
+      description: 'React hook patterns',
+      semantic: 'React hooks usage patterns',
+      tags: ['frontend', 'react'],
     },
     body: {
       goal: 'Hook usage patterns',
@@ -131,12 +125,10 @@ describe('search command', () => {
     version: '1.0.0',
     schemaVersion: '1.0',
     shape: 'specification',
-    declaredDirectives: { required: ['goal', 'principles'], optional: [] },
     meta: {
-      name: 'Testing Standards',
-      description: 'Software testing best practices',
-      semantic: 'testing-quality',
-      tags: ['testing', 'quality'],
+      name: 'Quality Testing',
+      description: 'Testing principles',
+      semantic: 'Quality testing principles',
     },
     body: {
       goal: 'Ensure quality',
