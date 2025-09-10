@@ -65,8 +65,12 @@ vi.mock('../utils/progress.js', () => ({
 }));
 
 // Mock console
-const mockConsoleLog = vi.spyOn(console, 'log').mockImplementation(() => {});
-const mockConsoleWarn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+const mockConsoleLog = vi.spyOn(console, 'log').mockImplementation(() => {
+  /* noop */
+});
+const mockConsoleWarn = vi.spyOn(console, 'warn').mockImplementation(() => {
+  /* noop */
+});
 
 import { loadModule } from 'ums-lib';
 import { handleError } from '../utils/error-handler.js';
