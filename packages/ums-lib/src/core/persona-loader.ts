@@ -5,13 +5,14 @@
 
 import { readFile } from 'fs/promises';
 import { parse } from 'yaml';
-import { ID_REGEX } from '../constants.js';
+import { MODULE_ID_REGEX, UMS_SCHEMA_VERSION } from '../constants.js';
 import {
   ID_VALIDATION_ERRORS,
   SCHEMA_VALIDATION_ERRORS,
 } from '../utils/errors.js';
 import type {
   UMSPersona,
+  ModuleGroup,
   ValidationResult,
   ValidationWarning,
   ValidationError,
@@ -52,8 +53,23 @@ export async function loadPersona(filePath: string): Promise<UMSPersona> {
       throw new Error(`Persona validation failed:\n${errorMessages}`);
     }
 
-    // Return the validated persona
-    return parsed as UMSPersona;
+    // Return the validated persona with proper typing
+    const validatedPersona: UMSPersona = {
+      name: parsed.name as string,
+      version: parsed.version as string,
+      schemaVersion: parsed.schemaVersion as string,
+      description: parsed.description as string,
+      semantic: parsed.semantic as string,
+      identity: parsed.identity as string,
+      ...(parsed.attribution !== undefined && {
+        attribution: parsed.attribution as boolean,
+      }),
+      moduleGroups: parsed.moduleGroups as ModuleGroup[],
+    };
+
+    // Add filePath as a dynamic property
+    (validatedPersona as UMSPersona & { filePath: string }).filePath = filePath;
+    return validatedPersona as UMSPersona & { filePath: string };
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     throw new Error(`Failed to load persona from ${filePath}: ${message}`);
@@ -78,8 +94,16 @@ export function validatePersona(obj: unknown): ValidationResult {
 
   const persona = obj as Record<string, unknown>;
 
-  // Validate required fields (Section 5.1)
-  const requiredFields = ['name', 'description', 'semantic', 'moduleGroups'];
+  // Validate required fields (Section 5.1 - UMS v1.0 compliant)
+  const requiredFields = [
+    'name',
+    'version',
+    'schemaVersion',
+    'description',
+    'semantic',
+    'identity',
+    'moduleGroups',
+  ];
   for (const field of requiredFields) {
     if (!(field in persona)) {
       errors.push({
@@ -122,6 +146,45 @@ export function validatePersona(obj: unknown): ValidationResult {
         'semantic',
         'string',
         typeof persona.semantic
+      ),
+      section: 'Section 5.1',
+    });
+  }
+
+  // Validate version field
+  if ('version' in persona && typeof persona.version !== 'string') {
+    errors.push({
+      path: 'version',
+      message: SCHEMA_VALIDATION_ERRORS.wrongType(
+        'version',
+        'string',
+        typeof persona.version
+      ),
+      section: 'Section 5.1',
+    });
+  }
+
+  // Validate schemaVersion field
+  if ('schemaVersion' in persona) {
+    if (persona.schemaVersion !== UMS_SCHEMA_VERSION) {
+      errors.push({
+        path: 'schemaVersion',
+        message: SCHEMA_VALIDATION_ERRORS.wrongSchemaVersion(
+          String(persona.schemaVersion)
+        ),
+        section: 'Section 5.1',
+      });
+    }
+  }
+
+  // Validate identity field (renamed from role)
+  if ('identity' in persona && typeof persona.identity !== 'string') {
+    errors.push({
+      path: 'identity',
+      message: SCHEMA_VALIDATION_ERRORS.wrongType(
+        'identity',
+        'string',
+        typeof persona.identity
       ),
       section: 'Section 5.1',
     });
@@ -296,7 +359,7 @@ function validateModuleGroups(moduleGroups: unknown[]): ValidationResult {
           }
 
           // Validate module ID format
-          if (!ID_REGEX.test(moduleId)) {
+          if (!MODULE_ID_REGEX.test(moduleId)) {
             errors.push({
               path: `moduleGroups[${index}].modules[${moduleIndex}]`,
               message: ID_VALIDATION_ERRORS.invalidFormat(moduleId),
