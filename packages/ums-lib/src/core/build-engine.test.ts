@@ -44,10 +44,6 @@ describe('UMS Build Engine', () => {
           version: '1.0.0',
           schemaVersion: '1.0',
           shape: 'specification',
-          declaredDirectives: {
-            required: ['goal', 'constraints'],
-            optional: ['principles', 'process', 'criteria', 'data', 'examples'],
-          },
           meta: {
             name: 'Complete Test Module',
             description: 'A test module with all directives',
@@ -161,10 +157,6 @@ describe('UMS Build Engine', () => {
           version: '1.0.0',
           schemaVersion: '1.0',
           shape: 'specification',
-          declaredDirectives: {
-            required: ['goal'],
-            optional: [],
-          },
           meta: {
             name: 'Simple Module',
             description: 'Simple test module',
@@ -207,10 +199,6 @@ describe('UMS Build Engine', () => {
           version: '1.0.0',
           schemaVersion: '1.0',
           shape: 'specification',
-          declaredDirectives: {
-            required: ['goal'],
-            optional: [],
-          },
           meta: {
             name: 'Simple Module',
             description: 'Simple test module',
@@ -255,11 +243,10 @@ describe('UMS Build Engine', () => {
           version: '1.0.0',
           schemaVersion: '1.0',
           shape: 'specification',
-          declaredDirectives: { required: ['goal'], optional: [] },
           meta: {
-            name: 'Module 1',
-            description: 'First module',
-            semantic: 'Test',
+            name: 'Test Module 1',
+            description: 'Test module 1',
+            semantic: 'Test semantic 1',
           },
           body: { goal: 'Goal one.' },
           filePath: '/test/path1',
@@ -269,11 +256,10 @@ describe('UMS Build Engine', () => {
           version: '1.0.0',
           schemaVersion: '1.0',
           shape: 'specification',
-          declaredDirectives: { required: ['goal'], optional: [] },
           meta: {
-            name: 'Module 2',
-            description: 'Second module',
-            semantic: 'Test',
+            name: 'Test Module 2',
+            description: 'Test module 2',
+            semantic: 'Test semantic 2',
           },
           body: { goal: 'Goal two.' },
           filePath: '/test/path2',
@@ -283,11 +269,10 @@ describe('UMS Build Engine', () => {
           version: '1.0.0',
           schemaVersion: '1.0',
           shape: 'specification',
-          declaredDirectives: { required: ['goal'], optional: [] },
           meta: {
-            name: 'Module 3',
-            description: 'Third module',
-            semantic: 'Test',
+            name: 'Test Module 3',
+            description: 'Test module 3',
+            semantic: 'Test semantic 3',
           },
           body: { goal: 'Goal three.' },
           filePath: '/test/path3',
@@ -328,10 +313,6 @@ describe('UMS Build Engine', () => {
           version: '1.0.0',
           schemaVersion: '1.0',
           shape: 'data',
-          declaredDirectives: {
-            required: ['goal', 'data'],
-            optional: [],
-          },
           meta: {
             name: 'Data Module',
             description: 'Module with data',
@@ -373,10 +354,6 @@ describe('UMS Build Engine', () => {
           version: '1.0.0',
           schemaVersion: '1.0',
           shape: 'specification',
-          declaredDirectives: {
-            required: ['goal'],
-            optional: ['examples'],
-          },
           meta: {
             name: 'Examples Module',
             description: 'Module with examples',
@@ -434,10 +411,6 @@ describe('UMS Build Engine', () => {
           version: '1.0.0',
           schemaVersion: '1.0',
           shape: 'checklist',
-          declaredDirectives: {
-            required: ['goal', 'criteria'],
-            optional: [],
-          },
           meta: {
             name: 'Criteria Module',
             description: 'Module with criteria',
@@ -482,10 +455,6 @@ describe('UMS Build Engine', () => {
           version: '1.0.0',
           schemaVersion: '1.0',
           shape: 'procedure',
-          declaredDirectives: {
-            required: ['goal', 'process'],
-            optional: [],
-          },
           meta: {
             name: 'Process Module',
             description: 'Module with process',
