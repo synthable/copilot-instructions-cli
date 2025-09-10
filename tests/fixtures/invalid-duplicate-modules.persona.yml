@@ -1,0 +1,11 @@
+name: "Duplicate Modules Persona"
+version: "1.0.0"
+schemaVersion: "1.0"
+description: "Persona with duplicate module IDs in same group."
+semantic: "Test semantic"
+identity: "You are a test assistant"
+moduleGroups:
+  - groupName: "Duplicate Modules"
+    modules:
+      - "foundation/ethics/do-no-harm"
+      - "foundation/ethics/do-no-harm"

@@ -1,0 +1,9 @@
+name: "Wrong Modules Type"
+version: "1.0.0"
+schemaVersion: "1.0"
+description: "Persona with wrong modules field type."
+semantic: "Test semantic"
+identity: "You are a test assistant"
+moduleGroups:
+  - groupName: "Bad Modules Type"
+    modules: "not-an-array"

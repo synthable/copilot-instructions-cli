@@ -1,0 +1,10 @@
+name: "Basic Persona"
+version: "1.0.0"
+schemaVersion: "1.0"
+description: "Basic persona without role or attribution."
+semantic: "Basic persona semantic description."
+identity: "You are a basic assistant."
+moduleGroups:
+  - groupName: "Basic Group"
+    modules:
+      - "foundation/ethics/do-no-harm"

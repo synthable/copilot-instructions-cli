@@ -1,0 +1,7 @@
+name: "Empty Groups Persona"
+version: "1.0.0"
+schemaVersion: "1.0"
+description: "Persona with empty moduleGroups."
+semantic: "Test semantic"
+identity: "You are a test assistant"
+moduleGroups: []

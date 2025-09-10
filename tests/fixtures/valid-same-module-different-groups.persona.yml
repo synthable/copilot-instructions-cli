@@ -1,0 +1,13 @@
+name: "Same Module Different Groups"
+version: "1.0.0"
+schemaVersion: "1.0"
+description: "Persona with same module in different groups."
+semantic: "Test semantic"
+identity: "You are a test assistant"
+moduleGroups:
+  - groupName: "Group 1"
+    modules:
+      - "foundation/ethics/do-no-harm"
+  - groupName: "Group 2"
+    modules:
+      - "foundation/ethics/do-no-harm"
