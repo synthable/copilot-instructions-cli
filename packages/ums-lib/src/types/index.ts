@@ -177,6 +177,14 @@ export interface BuildReportModule {
   id: string;
   /** Module name from meta */
   name: string;
+  /** Module version */
+  version: string;
+  /** Module source (e.g., "Standard Library", "Local") */
+  source: string;
+  /** SHA-256 digest of module file content */
+  digest: string;
+  /** Module shape */
+  shape: string;
   /** Absolute file path */
   filePath: string;
   /** Whether module is deprecated */
