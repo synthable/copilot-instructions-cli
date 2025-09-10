@@ -2,6 +2,23 @@
  * Type definitions for UMS v1.0 specification
  */
 
+// Module configuration types
+export interface ModuleConfig {
+  /** Conflict resolution strategy */
+  conflictResolution: 'error' | 'replace' | 'warn';
+  /** Module registry entries */
+  modules: ModuleRegistryEntry[];
+}
+
+export interface ModuleRegistryEntry {
+  /** Module identifier */
+  id: string;
+  /** Path to module file */
+  path: string;
+  /** Optional version constraint */
+  version?: string;
+}
+
 // Top-level UMS v1.0 Module structure (Section 2.1)
 export interface UMSModule {
   /** The Module Identifier (Section 3) */
@@ -38,6 +55,8 @@ export interface ModuleMeta {
   description: string;
   /** Dense, keyword-rich paragraph for AI semantic search */
   semantic: string;
+  /** Foundation layer number (0-4, foundation tier only) */
+  layer?: number;
   /** Optional lowercase keywords for filtering and search boosting */
   tags?: string[];
   /** SPDX license identifier */
@@ -94,12 +113,16 @@ export interface ExampleDirective {
 export interface UMSPersona {
   /** Human-readable, Title Case name */
   name: string;
+  /** Semantic version (required but ignored in v1.0) */
+  version: string;
+  /** UMS specification version ("1.0") */
+  schemaVersion: string;
   /** Concise, single-sentence summary */
   description: string;
   /** Dense, keyword-rich paragraph for semantic search */
   semantic: string;
-  /** Optional prologue describing role, voice, traits */
-  role?: string;
+  /** Prologue describing role, voice, traits (renamed from role) */
+  identity: string;
   /** Whether to append attribution after each module */
   attribution?: boolean;
   /** Composition groups for modules */
@@ -140,50 +163,20 @@ export interface ValidationWarning {
   message: string;
 }
 
-// Build Report structure (M4 - CLI v1.0 requirement)
+// Build Report structure (UMS v1.0 spec section 9.3 compliant)
 export interface BuildReport {
-  /** Tool information */
-  tool: {
-    /** CLI tool name */
-    name: string;
-    /** CLI tool version */
-    version: string;
-  };
-  /** Build timestamp in ISO 8601 format */
-  timestamp: string;
-  /** Persona information */
-  persona: {
-    /** Persona name */
-    name: string;
-    /** Persona description */
-    description: string;
-    /** Persona semantic field */
-    semantic: string;
-    /** Optional role field */
-    role?: string;
-    /** Attribution setting */
-    attribution?: boolean;
-    /** Number of module groups */
-    groupCount: number;
-  };
-  /** Module groups with resolved modules */
-  groups: BuildReportGroup[];
-  /** Rendering configuration */
-  rendering: {
-    /** Directive rendering order */
-    directiveOrder: string[];
-    /** Module separators used */
-    separators: string;
-    /** Whether attribution is enabled */
-    attributionEnabled: boolean;
-  };
-  /** Discovery information */
-  discovery: {
-    /** Root directory for modules */
-    modulesRoot: string;
-    /** Total number of modules resolved */
-    totalModulesResolved: number;
-  };
+  /** Persona name */
+  personaName: string;
+  /** UMS schema version ("1.0") */
+  schemaVersion: string;
+  /** Tool version */
+  toolVersion: string;
+  /** SHA-256 digest of persona content */
+  personaDigest: string;
+  /** Build timestamp in ISO 8601 UTC format */
+  buildTimestamp: string;
+  /** Module groups */
+  moduleGroups: BuildReportGroup[];
 }
 
 export interface BuildReportGroup {
@@ -204,4 +197,6 @@ export interface BuildReportModule {
   deprecated: boolean;
   /** Replacement module ID if deprecated */
   replacedBy?: string;
+  /** Modules this module was composed from (for replace operations) */
+  composedFrom?: string[];
 }

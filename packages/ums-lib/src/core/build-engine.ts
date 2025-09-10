@@ -4,7 +4,11 @@
  */
 
 import { join } from 'path';
+import { existsSync } from 'fs';
+import { readFile } from 'fs/promises';
+import { createHash } from 'node:crypto';
 import { glob } from 'glob';
+import { parse } from 'yaml';
 import { loadModule } from './module-loader.js';
 import { loadPersona } from './persona-loader.js';
 import pkg from '../../package.json' with { type: 'json' };
@@ -22,6 +26,7 @@ import type {
   BuildReport,
   BuildReportGroup,
   BuildReportModule,
+  ModuleConfig,
 } from '../types/index.js';
 
 export interface BuildOptions {
@@ -49,35 +54,136 @@ export interface BuildResult {
 }
 
 /**
- * Module registry for resolving module IDs to file paths
+ * Module registry for resolving module IDs to file paths with modules.config.yml support
  */
 export class ModuleRegistry {
   private moduleMap = new Map<string, string>();
+  private config: ModuleConfig | null = null;
+  private warnings: string[] = [];
 
   /**
-   * Discovers and indexes all modules in the instructions-modules directory
+   * Discovers and indexes modules with modules.config.yml support
    */
   async discover(): Promise<void> {
     try {
-      // Find all .module.yml files in instructions-modules
-      const pattern = join(MODULES_ROOT, '**', `*${MODULE_FILE_EXTENSION}`);
-      const files = await glob(pattern, { nodir: true });
+      // Load modules.config.yml if it exists
+      await this.loadModuleConfig();
 
-      for (const file of files) {
-        try {
-          // Load module to get its ID
-          const module = await loadModule(file);
-          this.moduleMap.set(module.id, file);
-        } catch (error) {
-          // Skip invalid modules during discovery
-          const message =
-            error instanceof Error ? error.message : String(error);
-          console.warn(`Warning: Skipping invalid module ${file}: ${message}`);
-        }
+      if (this.config) {
+        // Use configured modules
+        await this.loadConfiguredModules();
+      } else {
+        // Fall back to directory discovery
+        await this.discoverFromDirectory();
       }
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       throw new Error(`Failed to discover modules: ${message}`);
+    }
+  }
+
+  /**
+   * Loads modules.config.yml configuration
+   */
+  private async loadModuleConfig(): Promise<void> {
+    const configPath = 'modules.config.yml';
+    if (!existsSync(configPath)) {
+      return;
+    }
+
+    try {
+      const content = await readFile(configPath, 'utf-8');
+      const parsed = parse(content) as unknown;
+
+      // Validate config structure
+      if (
+        !parsed ||
+        typeof parsed !== 'object' ||
+        !('conflictResolution' in parsed) ||
+        !('modules' in parsed)
+      ) {
+        throw new Error('Invalid modules.config.yml format');
+      }
+
+      const config = parsed as ModuleConfig;
+      if (!['error', 'replace', 'warn'].includes(config.conflictResolution)) {
+        throw new Error(
+          `Invalid conflict resolution strategy: ${config.conflictResolution}`
+        );
+      }
+
+      this.config = config;
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      throw new Error(`Failed to load modules.config.yml: ${message}`);
+    }
+  }
+
+  /**
+   * Loads modules from configuration
+   */
+  private async loadConfiguredModules(): Promise<void> {
+    if (!this.config) return;
+
+    const moduleIds = new Map<string, string>();
+
+    for (const entry of this.config.modules) {
+      // Check for conflicts
+      if (moduleIds.has(entry.id)) {
+        const conflictMessage = `Duplicate module ID '${entry.id}' in modules.config.yml`;
+
+        switch (this.config.conflictResolution) {
+          case 'error':
+            throw new Error(conflictMessage);
+          case 'replace':
+            this.warnings.push(`${conflictMessage} - replacing previous entry`);
+            break;
+          case 'warn':
+            this.warnings.push(`${conflictMessage} - using first entry`);
+            continue;
+        }
+      }
+
+      try {
+        // Validate module exists and is loadable
+        const module = await loadModule(entry.path);
+        if (module.id !== entry.id) {
+          throw new Error(
+            `Module ID mismatch: config specifies '${entry.id}' but module contains '${module.id}'`
+          );
+        }
+        moduleIds.set(entry.id, entry.path);
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        this.warnings.push(
+          `Warning: Skipping configured module ${entry.id}: ${message}`
+        );
+      }
+    }
+
+    this.moduleMap = moduleIds;
+  }
+
+  /**
+   * Discovers modules from directory structure (fallback)
+   */
+  private async discoverFromDirectory(): Promise<void> {
+    // Find all .module.yml files in instructions-modules
+    const pattern = join(MODULES_ROOT, '**', `*${MODULE_FILE_EXTENSION}`);
+    const files = await glob(pattern, { nodir: true });
+
+    for (const file of files) {
+      try {
+        // Load module to get its ID
+        const module = await loadModule(file);
+        this.moduleMap.set(module.id, file);
+      } catch (error) {
+        // Skip invalid modules during discovery
+        const message = error instanceof Error ? error.message : String(error);
+        this.warnings.push(
+          `Warning: Skipping invalid module ${file}: ${message}`
+        );
+      }
     }
   }
 
@@ -93,6 +199,13 @@ export class ModuleRegistry {
    */
   getAllModuleIds(): string[] {
     return Array.from(this.moduleMap.keys());
+  }
+
+  /**
+   * Gets discovery warnings
+   */
+  getWarnings(): string[] {
+    return [...this.warnings];
   }
 
   /**
@@ -187,15 +300,15 @@ export class BuildEngine {
   }
 
   /**
-   * Generates Build Report according to M4 requirements
+   * Generates build report with UMS v1.0 spec compliance (Section 9.3)
    */
   private generateBuildReport(
     persona: UMSPersona,
     modules: UMSModule[],
     _options: BuildOptions
   ): BuildReport {
-    // Create build report groups following M4 structure
-    const groups: BuildReportGroup[] = [];
+    // Create build report groups following UMS v1.0 spec
+    const moduleGroups: BuildReportGroup[] = [];
 
     for (const group of persona.moduleGroups) {
       const reportModules: BuildReportModule[] = [];
@@ -218,44 +331,31 @@ export class BuildEngine {
         }
       }
 
-      groups.push({
+      moduleGroups.push({
         groupName: group.groupName,
         modules: reportModules,
       });
     }
 
-    const personaInfo: BuildReport['persona'] = {
+    // Generate SHA-256 digest of persona content
+    const personaContent = JSON.stringify({
       name: persona.name,
       description: persona.description,
       semantic: persona.semantic,
-      groupCount: persona.moduleGroups.length,
-    };
-
-    if (persona.role) {
-      personaInfo.role = persona.role;
-    }
-
-    if (persona.attribution !== undefined) {
-      personaInfo.attribution = persona.attribution;
-    }
+      identity: persona.identity,
+      moduleGroups: persona.moduleGroups,
+    });
+    const personaDigest = createHash('sha256')
+      .update(personaContent)
+      .digest('hex');
 
     return {
-      tool: {
-        name: pkg.name,
-        version: pkg.version,
-      },
-      timestamp: new Date().toISOString(),
-      persona: personaInfo,
-      groups,
-      rendering: {
-        directiveOrder: [...RENDER_ORDER],
-        separators: '---',
-        attributionEnabled: persona.attribution ?? false,
-      },
-      discovery: {
-        modulesRoot: MODULES_ROOT,
-        totalModulesResolved: modules.length,
-      },
+      personaName: persona.name,
+      schemaVersion: '1.0',
+      toolVersion: pkg.version,
+      personaDigest,
+      buildTimestamp: new Date().toISOString(),
+      moduleGroups,
     };
   }
 
@@ -299,10 +399,10 @@ export class BuildEngine {
   public renderMarkdown(persona: UMSPersona, modules: UMSModule[]): string {
     const sections: string[] = [];
 
-    // Render persona role if present (Section 7.1)
-    if (persona.role) {
-      sections.push('## Role\n');
-      sections.push(`${persona.role}\n`);
+    // Render persona identity if present and not empty (Section 7.1)
+    if (persona.identity.trim()) {
+      sections.push('## Identity\n');
+      sections.push(`${persona.identity}\n`);
     }
 
     // Group modules by their moduleGroups for proper ordering
