@@ -1,0 +1,10 @@
+name: "Wrong GroupName Type"
+version: "1.0.0"
+schemaVersion: "1.0"
+description: "Persona with wrong groupName type."
+semantic: "Test semantic"
+identity: "You are a test assistant"
+moduleGroups:
+  - groupName: 123
+    modules:
+      - "foundation/ethics/do-no-harm"

@@ -1,6 +1,20 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { BuildEngine } from './build-engine.js';
-import type { UMSModule, UMSPersona } from '../types/index.js';
+import type { UMSModule, UMSPersona, ModuleGroup } from '../types/index.js';
+
+// Helper function to create compliant personas
+function createTestPersona(overrides: Partial<UMSPersona> = {}): UMSPersona {
+  return {
+    name: 'Test Persona',
+    version: '1.0.0',
+    schemaVersion: '1.0',
+    description: 'Test persona for rendering',
+    semantic: 'Test semantic description',
+    identity: 'You are a test assistant.',
+    moduleGroups: [] as ModuleGroup[],
+    ...overrides,
+  };
+}
 
 describe('UMS Build Engine', () => {
   let buildEngine: BuildEngine;
@@ -11,11 +25,10 @@ describe('UMS Build Engine', () => {
 
   describe('renderMarkdown', () => {
     it('should render a complete persona with all directive types', () => {
-      const persona: UMSPersona = {
-        name: 'Test Persona',
-        description: 'Test persona for rendering',
-        semantic: 'Test semantic description',
-        role: 'You are a test assistant with clear communication.',
+      const persona = createTestPersona({
+        version: '1.0.0',
+        schemaVersion: '1.0',
+        identity: 'You are a test assistant with clear communication.',
         attribution: true,
         moduleGroups: [
           {
@@ -23,7 +36,7 @@ describe('UMS Build Engine', () => {
             modules: ['foundation/test/complete-module'],
           },
         ],
-      };
+      });
 
       const modules: UMSModule[] = [
         {
@@ -86,8 +99,8 @@ describe('UMS Build Engine', () => {
       // Use public method for testing
       const markdown = buildEngine.renderMarkdown(persona, modules);
 
-      // Should include role
-      expect(markdown).toContain('## Role');
+      // Should include identity
+      expect(markdown).toContain('## Identity');
       expect(markdown).toContain(
         'You are a test assistant with clear communication.'
       );
@@ -128,18 +141,19 @@ describe('UMS Build Engine', () => {
       );
     });
 
-    it('should render persona without role', () => {
-      const persona: UMSPersona = {
-        name: 'No Role Persona',
-        description: 'Persona without role field',
+    it('should render persona without identity', () => {
+      const persona = createTestPersona({
+        name: 'No Identity Persona',
+        description: 'Persona without identity field',
         semantic: 'Test semantic',
+        identity: '', // Empty identity
         moduleGroups: [
           {
             groupName: 'Test Group',
             modules: ['foundation/test/simple-module'],
           },
         ],
-      };
+      });
 
       const modules: UMSModule[] = [
         {
@@ -165,8 +179,8 @@ describe('UMS Build Engine', () => {
 
       const markdown = buildEngine.renderMarkdown(persona, modules);
 
-      // Should not include role section
-      expect(markdown).not.toContain('## Role');
+      // Should not include identity section
+      expect(markdown).not.toContain('## Identity');
 
       // Should include goal
       expect(markdown).toContain('## Goal');
@@ -174,7 +188,7 @@ describe('UMS Build Engine', () => {
     });
 
     it('should render persona without attribution', () => {
-      const persona: UMSPersona = {
+      const persona = createTestPersona({
         name: 'No Attribution Persona',
         description: 'Persona without attribution',
         semantic: 'Test semantic',
@@ -185,7 +199,7 @@ describe('UMS Build Engine', () => {
             modules: ['foundation/test/simple-module'],
           },
         ],
-      };
+      });
 
       const modules: UMSModule[] = [
         {
@@ -219,7 +233,7 @@ describe('UMS Build Engine', () => {
     });
 
     it('should handle multiple groups with multiple modules', () => {
-      const persona: UMSPersona = {
+      const persona = createTestPersona({
         name: 'Multi-Group Persona',
         description: 'Persona with multiple groups',
         semantic: 'Test semantic',
@@ -233,7 +247,7 @@ describe('UMS Build Engine', () => {
             modules: ['principle/test/module3'],
           },
         ],
-      };
+      });
 
       const modules: UMSModule[] = [
         {
@@ -297,8 +311,7 @@ describe('UMS Build Engine', () => {
     });
 
     it('should render data directive with inferred language', () => {
-      const persona: UMSPersona = {
-        name: 'Data Test Persona',
+      const persona = createTestPersona({
         description: 'Tests data rendering',
         semantic: 'Test semantic',
         moduleGroups: [
@@ -307,7 +320,7 @@ describe('UMS Build Engine', () => {
             modules: ['foundation/test/data-module'],
           },
         ],
-      };
+      });
 
       const modules: UMSModule[] = [
         {
@@ -343,8 +356,7 @@ describe('UMS Build Engine', () => {
     });
 
     it('should render examples with language hints', () => {
-      const persona: UMSPersona = {
-        name: 'Examples Test Persona',
+      const persona = createTestPersona({
         description: 'Tests examples rendering',
         semantic: 'Test semantic',
         moduleGroups: [
@@ -353,7 +365,7 @@ describe('UMS Build Engine', () => {
             modules: ['foundation/test/examples-module'],
           },
         ],
-      };
+      });
 
       const modules: UMSModule[] = [
         {
@@ -405,8 +417,7 @@ describe('UMS Build Engine', () => {
     });
 
     it('should render criteria as task list', () => {
-      const persona: UMSPersona = {
-        name: 'Criteria Test Persona',
+      const persona = createTestPersona({
         description: 'Tests criteria rendering',
         semantic: 'Test semantic',
         moduleGroups: [
@@ -415,7 +426,7 @@ describe('UMS Build Engine', () => {
             modules: ['execution/test/criteria-module'],
           },
         ],
-      };
+      });
 
       const modules: UMSModule[] = [
         {
@@ -454,8 +465,7 @@ describe('UMS Build Engine', () => {
     });
 
     it('should render process as ordered list', () => {
-      const persona: UMSPersona = {
-        name: 'Process Test Persona',
+      const persona = createTestPersona({
         description: 'Tests process rendering',
         semantic: 'Test semantic',
         moduleGroups: [
@@ -464,7 +474,7 @@ describe('UMS Build Engine', () => {
             modules: ['execution/test/process-module'],
           },
         ],
-      };
+      });
 
       const modules: UMSModule[] = [
         {

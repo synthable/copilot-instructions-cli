@@ -1,0 +1,10 @@
+name: "Bad Groups Persona"
+version: "1.0.0"
+schemaVersion: "1.0"
+description: "Persona with invalid group entries."
+semantic: "Test semantic"
+identity: "You are a test assistant"
+moduleGroups:
+  - "not an object"
+  - groupName: "Valid Group"
+    modules: []

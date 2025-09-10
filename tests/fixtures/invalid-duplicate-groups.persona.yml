@@ -1,0 +1,13 @@
+name: "Duplicate Groups Persona"
+version: "1.0.0"
+schemaVersion: "1.0"
+description: "Persona with duplicate group names."
+semantic: "Test semantic"
+identity: "You are a test assistant"
+moduleGroups:
+  - groupName: "Same Name"
+    modules:
+      - "foundation/ethics/do-no-harm"
+  - groupName: "Same Name"
+    modules:
+      - "principle/testing/test-driven-development"
