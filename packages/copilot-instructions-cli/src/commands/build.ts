@@ -26,126 +26,22 @@ export interface BuildOptions {
  * Handles the 'build' command
  */
 export async function handleBuild(options: BuildOptions): Promise<void> {
-  const { persona: personaPath, output: outputPath, verbose } = options;
+  const { verbose } = options;
   const progress = createBuildProgress('build', verbose);
 
   try {
     progress.start('Starting UMS v1.0 build process...');
 
-    const buildEngine = new BuildEngine();
-    let personaContent: string | undefined;
+    // Setup build environment
+    const buildEnvironment = await setupBuildEnvironment(options, progress);
 
-    // Determine persona source
-    let personaSource: string;
-    if (personaPath) {
-      personaSource = personaPath;
-      progress.update(`Reading persona file: ${personaPath}`);
+    // Process persona and modules
+    const result = await processPersonaAndModules(buildEnvironment, progress);
 
-      if (verbose) {
-        console.log(
-          chalk.gray(`[INFO] build: Reading persona from ${personaPath}`)
-        );
-      }
-    } else {
-      // Read from stdin
-      personaSource = 'stdin';
-      progress.update('Reading persona from stdin...');
-
-      if (process.stdin.isTTY) {
-        progress.fail('No persona file specified and stdin is not available');
-        console.error(
-          formatError({
-            command: 'build',
-            context: 'input validation',
-            issue: 'no persona file specified and stdin is not available',
-            suggestion:
-              'use --persona <file> to specify a persona file or pipe YAML content to stdin',
-          })
-        );
-        process.exit(1);
-      }
-
-      personaContent = await readFromStdin();
-
-      if (!personaContent.trim()) {
-        progress.fail('No persona content provided via stdin');
-        console.error(
-          formatError({
-            command: 'build',
-            context: 'input validation',
-            issue: 'no persona content received from stdin',
-            suggestion:
-              'ensure YAML content is piped to stdin or use --persona <file>',
-          })
-        );
-        process.exit(1);
-      }
-    }
-
-    // Determine output target
-    const outputTarget = outputPath ?? 'stdout';
-
-    // Prepare build options
-    const buildOptions: EngineBuildOptions = {
-      personaSource,
-      outputTarget,
-    };
-
-    if (personaContent) {
-      buildOptions.personaContent = personaContent;
-    }
-
-    if (verbose) {
-      buildOptions.verbose = verbose;
-    }
-
-    progress.update('Building persona...');
-    const result = await buildEngine.build(buildOptions);
+    // Generate output files
+    await generateOutputFiles(result, buildEnvironment, verbose);
 
     progress.succeed('Build completed successfully');
-
-    // Show warnings if any
-    if (result.warnings.length > 0) {
-      console.log(chalk.yellow('\nWarnings:'));
-      for (const warning of result.warnings) {
-        console.log(chalk.yellow(`  • ${warning}`));
-      }
-      console.log();
-    }
-
-    // Output the result
-    if (outputPath) {
-      // Write markdown file
-      await writeFile(outputPath, result.markdown, 'utf8');
-      console.log(
-        chalk.green(`✓ Persona instructions written to: ${outputPath}`)
-      );
-
-      // Write build report JSON file (M4 requirement)
-      const buildReportPath = outputPath.replace(/\.md$/, '.build.json');
-      await writeFile(
-        buildReportPath,
-        JSON.stringify(result.buildReport, null, 2),
-        'utf8'
-      );
-      console.log(chalk.green(`✓ Build report written to: ${buildReportPath}`));
-
-      if (verbose) {
-        console.log(
-          chalk.gray(
-            `[INFO] build: Generated ${result.markdown.length} characters of Markdown`
-          )
-        );
-        console.log(
-          chalk.gray(
-            `[INFO] build: Used ${result.modules.length} modules from persona '${result.persona.name}'`
-          )
-        );
-      }
-    } else {
-      // Write to stdout
-      console.log(result.markdown);
-    }
 
     // Log success summary in verbose mode
     if (verbose) {
@@ -171,6 +67,167 @@ export async function handleBuild(options: BuildOptions): Promise<void> {
       ...(verbose && { verbose, timestamp: verbose }),
     });
     process.exit(1);
+  }
+}
+
+/**
+ * Build environment configuration
+ */
+interface BuildEnvironment {
+  buildEngine: BuildEngine;
+  buildOptions: EngineBuildOptions;
+  outputPath?: string | undefined;
+}
+
+/**
+ * Sets up the build environment and validates inputs
+ */
+async function setupBuildEnvironment(
+  options: BuildOptions,
+  progress: ReturnType<typeof createBuildProgress>
+): Promise<BuildEnvironment> {
+  const { persona: personaPath, output: outputPath, verbose } = options;
+
+  const buildEngine = new BuildEngine();
+  let personaContent: string | undefined;
+
+  // Determine persona source
+  let personaSource: string;
+  if (personaPath) {
+    personaSource = personaPath;
+    progress.update(`Reading persona file: ${personaPath}`);
+
+    if (verbose) {
+      console.log(
+        chalk.gray(`[INFO] build: Reading persona from ${personaPath}`)
+      );
+    }
+  } else {
+    // Read from stdin
+    personaSource = 'stdin';
+    progress.update('Reading persona from stdin...');
+
+    if (process.stdin.isTTY) {
+      progress.fail('No persona file specified and stdin is not available');
+      console.error(
+        formatError({
+          command: 'build',
+          context: 'input validation',
+          issue: 'no persona file specified and stdin is not available',
+          suggestion:
+            'use --persona <file> to specify a persona file or pipe YAML content to stdin',
+        })
+      );
+      process.exit(1);
+    }
+
+    personaContent = await readFromStdin();
+
+    if (!personaContent.trim()) {
+      progress.fail('No persona content provided via stdin');
+      console.error(
+        formatError({
+          command: 'build',
+          context: 'input validation',
+          issue: 'no persona content received from stdin',
+          suggestion:
+            'ensure YAML content is piped to stdin or use --persona <file>',
+        })
+      );
+      process.exit(1);
+    }
+  }
+
+  // Determine output target
+  const outputTarget = outputPath ?? 'stdout';
+
+  // Prepare build options
+  const buildOptions: EngineBuildOptions = {
+    personaSource,
+    outputTarget,
+  };
+
+  if (personaContent) {
+    buildOptions.personaContent = personaContent;
+  }
+
+  if (verbose) {
+    buildOptions.verbose = verbose;
+  }
+
+  return {
+    buildEngine,
+    buildOptions,
+    outputPath,
+  };
+}
+
+/**
+ * Processes persona and modules to generate build result
+ */
+async function processPersonaAndModules(
+  environment: BuildEnvironment,
+  progress: ReturnType<typeof createBuildProgress>
+): Promise<Awaited<ReturnType<BuildEngine['build']>>> {
+  progress.update('Building persona...');
+  const result = await environment.buildEngine.build(environment.buildOptions);
+
+  // Show warnings if any
+  if (result.warnings.length > 0) {
+    console.log(chalk.yellow('\nWarnings:'));
+    for (const warning of result.warnings) {
+      console.log(chalk.yellow(`  • ${warning}`));
+    }
+    console.log();
+  }
+
+  return result;
+}
+
+/**
+ * Generates output files (Markdown and build report)
+ */
+async function generateOutputFiles(
+  result: Awaited<ReturnType<BuildEngine['build']>>,
+  environment: BuildEnvironment,
+  verbose?: boolean
+): Promise<void> {
+  if (environment.outputPath) {
+    // Write markdown file
+    await writeFile(environment.outputPath, result.markdown, 'utf8');
+    console.log(
+      chalk.green(
+        `✓ Persona instructions written to: ${environment.outputPath}`
+      )
+    );
+
+    // Write build report JSON file (M4 requirement)
+    const buildReportPath = environment.outputPath.replace(
+      /\.md$/,
+      '.build.json'
+    );
+    await writeFile(
+      buildReportPath,
+      JSON.stringify(result.buildReport, null, 2),
+      'utf8'
+    );
+    console.log(chalk.green(`✓ Build report written to: ${buildReportPath}`));
+
+    if (verbose) {
+      console.log(
+        chalk.gray(
+          `[INFO] build: Generated ${result.markdown.length} characters of Markdown`
+        )
+      );
+      console.log(
+        chalk.gray(
+          `[INFO] build: Used ${result.modules.length} modules from persona '${result.persona.name}'`
+        )
+      );
+    }
+  } else {
+    // Write to stdout
+    console.log(result.markdown);
   }
 }
 
