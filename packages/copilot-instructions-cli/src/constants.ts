@@ -40,39 +40,6 @@ export const RENDER_ORDER: DirectiveKey[] = [
   'examples',
 ];
 
-// Standard shapes as defined in UMS v1.0 Section 2.5
-export const STANDARD_SHAPES = {
-  specification: {
-    required: ['goal', 'constraints'],
-    optional: ['principles', 'examples'],
-  },
-  procedure: {
-    required: ['goal', 'process'],
-    optional: ['constraints', 'examples'],
-  },
-  pattern: {
-    required: ['goal', 'principles'],
-    optional: ['constraints', 'examples'],
-  },
-  checklist: {
-    required: ['goal', 'criteria'],
-    optional: ['examples'],
-  },
-  data: {
-    required: ['goal', 'data'],
-    optional: ['examples'],
-  },
-  'procedural-specification': {
-    required: ['goal', 'process', 'constraints'],
-    optional: ['criteria', 'examples'],
-  },
-  playbook: {
-    required: ['goal', 'process', 'constraints', 'criteria'],
-    optional: ['principles', 'examples', 'data'],
-  },
-} as const;
-
-export type StandardShape = keyof typeof STANDARD_SHAPES;
 
 // Schema version for UMS v1.0
 export const UMS_SCHEMA_VERSION = '1.0';

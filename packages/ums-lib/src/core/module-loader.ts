@@ -550,7 +550,7 @@ function validateBodyForShape(body: unknown, shape: unknown): ValidationResult {
     STANDARD_SHAPE_SPECS[shape as keyof typeof STANDARD_SHAPE_SPECS];
 
   const bodyObj = body as Record<string, unknown>;
-  const allowedDirectives = new Set([
+  const allowedDirectives = new Set<string>([
     ...shapeSpec.required,
     ...shapeSpec.optional,
   ]);
