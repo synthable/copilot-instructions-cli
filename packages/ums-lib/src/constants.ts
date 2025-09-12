@@ -50,35 +50,35 @@ export const MODULE_ID_REGEX =
 // Standard shape directive specifications (UMS v1.0 compliant)
 export const STANDARD_SHAPE_SPECS = {
   procedure: {
-    required: ['goal', 'process'] as string[],
-    optional: ['examples', 'data'] as string[],
+    required: ['goal', 'process'],
+    optional: ['examples', 'data'],
   },
   specification: {
-    required: ['goal', 'constraints'] as string[],
-    optional: ['examples', 'data'] as string[],
+    required: ['goal', 'constraints'],
+    optional: ['examples', 'data'],
   },
   pattern: {
-    required: ['goal', 'principles'] as string[],
-    optional: ['constraints', 'examples', 'data'] as string[],
+    required: ['goal', 'principles'],
+    optional: ['constraints', 'examples', 'data'],
   },
   checklist: {
-    required: ['goal', 'criteria'] as string[],
-    optional: ['examples', 'data'] as string[],
+    required: ['goal', 'criteria'],
+    optional: ['examples', 'data'],
   },
   data: {
-    required: ['goal', 'data'] as string[],
-    optional: ['examples'] as string[],
+    required: ['goal', 'data'],
+    optional: ['examples'],
   },
   'procedural-specification': {
-    required: ['goal', 'process', 'constraints'] as string[],
-    optional: ['examples', 'data'] as string[],
+    required: ['goal', 'process', 'constraints'],
+    optional: ['examples', 'data'],
   },
   'pattern-specification': {
-    required: ['goal', 'principles', 'constraints'] as string[],
-    optional: ['examples', 'data'] as string[],
+    required: ['goal', 'principles', 'constraints'],
+    optional: ['examples', 'data'],
   },
   playbook: {
-    required: ['goal', 'process', 'constraints', 'criteria'] as string[],
-    optional: ['principles', 'examples', 'data'] as string[],
+    required: ['goal', 'process', 'constraints', 'criteria'],
+    optional: ['principles', 'examples', 'data'],
   },
-};
+} as const;
