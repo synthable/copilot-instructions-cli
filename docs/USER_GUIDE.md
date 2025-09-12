@@ -25,7 +25,7 @@ The project is built around a few core concepts that enable a modular and struct
 
 ### Modules
 
-Modules are the building blocks of your AI's knowledge and skills. They are individual YAML files (`.module.yml`) containing specific instructions, principles, or data. Each module is a self-contained unit of knowledge that can be mixed and matched to create different AI personas.
+Modules are the building blocks of your AI's knowledge and skills. They are individual Markdown files (`.module.yml`) containing specific instructions, principles, or data. Each module is a self-contained unit of knowledge that can be mixed and matched to create different AI personas.
 
 ### The Four-Tier Hierarchy
 
@@ -83,6 +83,7 @@ localModulePaths:
     onConflict: "warn"
 ```
 
+
 ## CLI Commands
 
 The `copilot-instructions` CLI provides a set of commands for managing your modules and personas.
@@ -97,11 +98,9 @@ copilot-instructions build [options]
 
 **Options:**
 
-| Option      | Description                                           |
-| :---------- | :---------------------------------------------------- |
-| `-p, --persona <file>` | Path to the persona configuration file.    |
-| `-o, --output <file>`  | Specify the output file for the build.        |
-| `-v, --verbose` | Enable verbose output.                                |
+*   `-p, --persona <file>`: Path to the persona configuration file.
+*   `-o, --output <file>`: Specify the output file for the build.
+*   `-v, --verbose`: Enable verbose output.
 
 **Examples:**
 
@@ -126,10 +125,8 @@ copilot-instructions list [options]
 
 **Options:**
 
-| Option | Description |
-| :--- | :--- |
-| `-t, --tier <name>` | Filter by tier (`foundation`, `principle`, `technology`, `execution`). |
-| `-v, --verbose` | Enable verbose output. |
+*   `-t, --tier <name>`: Filter by tier (`foundation`, `principle`, `technology`, `execution`).
+*   `-v, --verbose`: Enable verbose output.
 
 **Examples:**
 
@@ -151,16 +148,12 @@ copilot-instructions search <query> [options]
 
 **Arguments:**
 
-| Argument | Description |
-| :--- | :--- |
-| `<query>` | The search query. |
+*   `<query>`: The search query.
 
 **Options:**
 
-| Option | Description |
-| :--- | :--- |
-| `-t, --tier <name>` | Filter by tier (`foundation`, `principle`, `technology`, `execution`). |
-| `-v, --verbose` | Enable verbose output. |
+*   `-t, --tier <name>`: Filter by tier (`foundation`, `principle`, `technology`, `execution`).
+*   `-v, --verbose`: Enable verbose output.
 
 **Examples:**
 
@@ -182,15 +175,11 @@ copilot-instructions validate [path] [options]
 
 **Arguments:**
 
-| Argument | Description |
-| :--- | :--- |
-| `[path]` | Path to validate (file or directory, defaults to current directory). |
+*   `[path]`: Path to validate (file or directory, defaults to current directory).
 
 **Options:**
 
-| Option | Description |
-| :--- | :--- |
-| `-v, --verbose` | Enable verbose output with detailed validation steps. |
+*   `-v, --verbose`: Enable verbose output with detailed validation steps.
 
 **Examples:**
 
@@ -221,7 +210,7 @@ version: "1.0.0"
 schemaVersion: "1.0"
 description: "A JavaScript Frontend React Developer persona that specializes in building user-facing web applications with React."
 semantic: |
-  This JavaScript Frontend React Developer persona focuses on building accessible, performant, and maintainable user interfaces.
+  This JavaScript Frontend React Developer persona focused on building accessible, performant, and maintainable user interfaces.
 identity: |
   You are an expert frontend engineer with a calm, collaborative tone.
 attribution: true
