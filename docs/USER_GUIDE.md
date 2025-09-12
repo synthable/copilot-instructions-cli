@@ -25,7 +25,7 @@ The project is built around a few core concepts that enable a modular and struct
 
 ### Modules
 
-Modules are the building blocks of your AI's knowledge and skills. They are individual Markdown files (`.module.yml`) containing specific instructions, principles, or data. Each module is a self-contained unit of knowledge that can be mixed and matched to create different AI personas.
+Modules are the building blocks of your AI's knowledge and skills. They are individual YAML files (`.module.yml`) containing specific instructions, principles, or data. Each module is a self-contained unit of knowledge that can be mixed and matched to create different AI personas.
 
 ### The Four-Tier Hierarchy
 
