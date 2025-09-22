@@ -5,9 +5,14 @@
 
 import chalk from 'chalk';
 import { handleError } from '../utils/error-handler.js';
-import { BuildEngine, type BuildOptions as EngineBuildOptions } from 'ums-lib';
+import {
+  BuildEngine,
+  ModuleRegistry,
+  type BuildOptions as EngineBuildOptions,
+} from 'ums-lib';
 import { createBuildProgress } from '../utils/progress.js';
 import { writeOutputFile, readFromStdin } from '../utils/file-operations.js';
+import { discoverAllModules } from '../utils/module-discovery.js';
 
 /**
  * Options for the build command
@@ -87,7 +92,27 @@ async function setupBuildEnvironment(
 ): Promise<BuildEnvironment> {
   const { persona: personaPath, output: outputPath, verbose } = options;
 
-  const buildEngine = new BuildEngine();
+  // Discover modules and create registry
+  progress.update('Discovering modules...');
+  const moduleDiscoveryResult = await discoverAllModules();
+  const registry = new ModuleRegistry(
+    moduleDiscoveryResult.modules,
+    moduleDiscoveryResult.warnings
+  );
+  const buildEngine = new BuildEngine(registry);
+
+  if (verbose) {
+    console.log(
+      chalk.gray(`[INFO] build: Discovered ${registry.size()} modules`)
+    );
+    if (moduleDiscoveryResult.warnings.length > 0) {
+      console.log(chalk.yellow('\nModule Discovery Warnings:'));
+      for (const warning of moduleDiscoveryResult.warnings) {
+        console.log(chalk.yellow(`  - ${warning}`));
+      }
+    }
+  }
+
   let personaContent: string | undefined;
 
   // Determine persona source

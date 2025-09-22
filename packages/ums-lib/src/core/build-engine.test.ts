@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { BuildEngine } from './build-engine.js';
+import { BuildEngine, ModuleRegistry } from './build-engine.js';
 import type { UMSModule, UMSPersona, ModuleGroup } from '../types/index.js';
 
 // Helper function to create compliant personas
@@ -19,8 +19,14 @@ function createTestPersona(overrides: Partial<UMSPersona> = {}): UMSPersona {
 describe('UMS Build Engine', () => {
   let buildEngine: BuildEngine;
 
+  const createTestRegistry = () => {
+    // Create a test registry with empty modules and no warnings
+    return new ModuleRegistry([], []);
+  };
+
   beforeEach(() => {
-    buildEngine = new BuildEngine();
+    const registry = createTestRegistry();
+    buildEngine = new BuildEngine(registry);
   });
 
   describe('renderMarkdown', () => {
@@ -484,7 +490,8 @@ describe('UMS Build Engine', () => {
 
   describe('inferLanguageFromMediaType', () => {
     it('should correctly infer languages from media types', () => {
-      const engine = new BuildEngine();
+      const registry = createTestRegistry();
+      const engine = new BuildEngine(registry);
 
       // Test common media type mappings
       expect(engine.inferLanguageFromMediaType('application/json')).toBe(

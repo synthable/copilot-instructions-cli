@@ -1,7 +1,9 @@
 import { describe, it, expect, vi, beforeEach, afterAll } from 'vitest';
 import { writeFile } from 'fs/promises';
+import { writeOutputFile, readFromStdin } from '../utils/file-operations.js';
 import { handleBuild } from './build.js';
 import { BuildEngine } from 'ums-lib';
+import { discoverAllModules } from '../utils/module-discovery.js';
 
 // Mock dependencies
 vi.mock('fs/promises', () => ({
@@ -33,8 +35,25 @@ const mockBuildEngine = {
   generateBuildReport: vi.fn(),
 };
 
+const mockModuleRegistry = {
+  resolve: vi.fn(),
+  getAllModuleIds: vi.fn(),
+  getWarnings: vi.fn(),
+  size: vi.fn(),
+};
+
 vi.mock('ums-lib', () => ({
   BuildEngine: vi.fn().mockImplementation(() => mockBuildEngine),
+  ModuleRegistry: vi.fn().mockImplementation(() => mockModuleRegistry),
+}));
+
+vi.mock('../utils/module-discovery.js', () => ({
+  discoverAllModules: vi.fn(),
+}));
+
+vi.mock('../utils/file-operations.js', () => ({
+  writeOutputFile: vi.fn(),
+  readFromStdin: vi.fn(),
 }));
 
 vi.mock('../utils/error-handler.js', () => ({
@@ -60,6 +79,29 @@ Object.defineProperty(process, 'stdin', {
 describe('build command', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+
+    // Set up mock module discovery
+    vi.mocked(discoverAllModules).mockResolvedValue({
+      modules: [],
+      warnings: [],
+    });
+
+    // Set up mock registry behavior
+    mockModuleRegistry.size.mockReturnValue(0);
+    mockModuleRegistry.getWarnings.mockReturnValue([]);
+
+    // Set up default build engine behavior
+    mockBuildEngine.build.mockResolvedValue({
+      persona: { name: 'Test Persona', moduleGroups: [] },
+      markdown: '# Test Persona Instructions',
+      modules: [],
+      buildReport: {
+        persona: { name: 'Test Persona', moduleGroups: [] },
+        modules: [],
+        moduleGroups: [],
+      },
+      warnings: [],
+    });
   });
 
   afterAll(() => {
@@ -98,11 +140,10 @@ describe('build command', () => {
       personaSource: 'test.persona.yml',
       outputTarget: 'output.md',
     });
-    expect(writeFile).toHaveBeenCalledWith('output.md', mockMarkdown, 'utf-8');
-    expect(writeFile).toHaveBeenCalledWith(
+    expect(writeOutputFile).toHaveBeenCalledWith('output.md', mockMarkdown);
+    expect(writeOutputFile).toHaveBeenCalledWith(
       'output.build.json',
-      JSON.stringify(mockBuildReport, null, 2),
-      'utf-8'
+      JSON.stringify(mockBuildReport, null, 2)
     );
   });
 
@@ -124,26 +165,10 @@ describe('build command', () => {
       warnings: [],
     });
 
-    // Mock process.stdin for this test
-    const mockStdin = {
-      isTTY: false,
-      on: vi.fn((event: string, handler: (data?: Buffer) => void) => {
-        if (event === 'data') {
-          setTimeout(() => {
-            handler(Buffer.from('name: Test Persona\nmodules: []'));
-          }, 0);
-        } else if (event === 'end') {
-          setTimeout(() => {
-            handler();
-          }, 0);
-        }
-      }),
-      resume: vi.fn(),
-    };
-    Object.defineProperty(process, 'stdin', {
-      value: mockStdin,
-      writable: true,
-    });
+    // Mock readFromStdin for this test
+    vi.mocked(readFromStdin).mockResolvedValue(
+      'name: Test Persona\nmoduleGroups: []'
+    );
 
     const options = {};
 
@@ -154,7 +179,7 @@ describe('build command', () => {
     expect(mockBuildEngine.build).toHaveBeenCalledWith({
       personaSource: 'stdin',
       outputTarget: 'stdout',
-      personaContent: 'name: Test Persona\nmodules: []',
+      personaContent: 'name: Test Persona\nmoduleGroups: []',
     });
     expect(mockConsoleLog).toHaveBeenCalledWith(mockMarkdown);
     expect(writeFile).not.toHaveBeenCalled();
@@ -251,26 +276,10 @@ describe('build command', () => {
       warnings: [],
     });
 
-    // Mock process.stdin for this test
-    const mockStdin = {
-      isTTY: false,
-      on: vi.fn((event: string, handler: (data?: Buffer) => void) => {
-        if (event === 'data') {
-          setTimeout(() => {
-            handler(Buffer.from('name: Test Persona\nmodules: []'));
-          }, 0);
-        } else if (event === 'end') {
-          setTimeout(() => {
-            handler();
-          }, 0);
-        }
-      }),
-      resume: vi.fn(),
-    };
-    Object.defineProperty(process, 'stdin', {
-      value: mockStdin,
-      writable: true,
-    });
+    // Mock readFromStdin for this test
+    vi.mocked(readFromStdin).mockResolvedValue(
+      'name: Test Persona\nmoduleGroups: []'
+    );
 
     const options = {
       output: 'output.md',
@@ -283,13 +292,12 @@ describe('build command', () => {
     expect(mockBuildEngine.build).toHaveBeenCalledWith({
       personaSource: 'stdin',
       outputTarget: 'output.md',
-      personaContent: 'name: Test Persona\nmodules: []',
+      personaContent: 'name: Test Persona\nmoduleGroups: []',
     });
-    expect(writeFile).toHaveBeenCalledWith('output.md', mockMarkdown, 'utf-8');
-    expect(writeFile).toHaveBeenCalledWith(
+    expect(writeOutputFile).toHaveBeenCalledWith('output.md', mockMarkdown);
+    expect(writeOutputFile).toHaveBeenCalledWith(
       'output.build.json',
-      JSON.stringify(mockBuildReport, null, 2),
-      'utf-8'
+      JSON.stringify(mockBuildReport, null, 2)
     );
   });
 

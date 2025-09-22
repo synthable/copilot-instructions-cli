@@ -6,8 +6,9 @@
 import chalk from 'chalk';
 import Table from 'cli-table3';
 import { handleError } from '../utils/error-handler.js';
-import { ModuleRegistry, loadModule, type UMSModule } from 'ums-lib';
+import { ModuleRegistry, type UMSModule } from 'ums-lib';
 import { createDiscoveryProgress } from '../utils/progress.js';
+import { discoverAllModules } from '../utils/module-discovery.js';
 
 interface ListOptions {
   tier?: string;
@@ -17,29 +18,21 @@ interface ListOptions {
 /**
  * Loads all modules from the registry
  */
-async function loadModulesFromRegistry(
+function loadModulesFromRegistry(
   registry: ModuleRegistry,
   skipErrors: boolean
-): Promise<UMSModule[]> {
+): UMSModule[] {
   const moduleIds = registry.getAllModuleIds();
   const modules: UMSModule[] = [];
 
   for (const moduleId of moduleIds) {
-    const filePath = registry.resolve(moduleId);
-    if (filePath) {
-      try {
-        const module = await loadModule(filePath);
-        modules.push(module);
-      } catch (error) {
-        if (skipErrors) {
-          continue;
-        }
-        console.warn(
-          chalk.yellow(
-            `Warning: Failed to load module ${moduleId}: ${error instanceof Error ? error.message : String(error)}`
-          )
-        );
-      }
+    const module = registry.resolve(moduleId);
+    if (module) {
+      modules.push(module);
+    } else if (!skipErrors) {
+      console.warn(
+        chalk.yellow(`Warning: Module ${moduleId} not found in registry`)
+      );
     }
   }
 
@@ -127,8 +120,11 @@ export async function handleList(options: ListOptions): Promise<void> {
     progress.start('Discovering UMS v1.0 modules...');
 
     // Use UMS v1.0 module discovery
-    const registry = new ModuleRegistry();
-    await registry.discover();
+    const moduleDiscoveryResult = await discoverAllModules();
+    const registry = new ModuleRegistry(
+      moduleDiscoveryResult.modules,
+      moduleDiscoveryResult.warnings
+    );
 
     const moduleIds = registry.getAllModuleIds();
     if (moduleIds.length === 0) {
@@ -140,7 +136,7 @@ export async function handleList(options: ListOptions): Promise<void> {
     progress.update(`Loading ${moduleIds.length} modules...`);
 
     // Load all modules
-    const modules = await loadModulesFromRegistry(registry, !!options.tier);
+    const modules = loadModulesFromRegistry(registry, !!options.tier);
 
     progress.update('Filtering and sorting modules...');
 

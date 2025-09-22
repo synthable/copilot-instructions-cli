@@ -3,21 +3,11 @@
  * Implements Markdown rendering according to UMS v1.0 specification Section 7.1
  */
 
-import { join } from 'path';
-import { existsSync } from 'fs';
-import { readFile } from 'fs/promises';
 import { createHash } from 'node:crypto';
-import { glob } from 'glob';
-import { parse } from 'yaml';
-import { loadModule } from './module-loader.js';
+import { readFile } from 'fs/promises';
 import { loadPersona } from './persona-loader.js';
 import pkg from '../../package.json' with { type: 'json' };
-import {
-  MODULES_ROOT,
-  MODULE_FILE_EXTENSION,
-  RENDER_ORDER,
-  type DirectiveKey,
-} from '../constants.js';
+import { RENDER_ORDER, type DirectiveKey } from '../constants.js';
 import type {
   UMSModule,
   UMSPersona,
@@ -26,8 +16,6 @@ import type {
   BuildReport,
   BuildReportGroup,
   BuildReportModule,
-  ModuleConfig,
-  LocalModulePath,
 } from '../types/index.js';
 
 export interface BuildOptions {
@@ -58,176 +46,23 @@ export interface BuildResult {
  * Module registry for resolving module IDs to file paths with modules.config.yml support
  */
 export class ModuleRegistry {
-  private moduleMap = new Map<string, string>();
-  private config: ModuleConfig | null = null;
+  private moduleMap = new Map<string, UMSModule>();
   private warnings: string[] = [];
 
   /**
-   * Discovers and indexes modules with modules.config.yml support
+   * Creates a module registry from pre-loaded modules
    */
-  async discover(): Promise<void> {
-    try {
-      // Load modules.config.yml if it exists
-      await this.loadModuleConfig();
-
-      if (this.config) {
-        // Use configured modules
-        await this.loadConfiguredModules();
-      } else {
-        // Fall back to directory discovery
-        await this.discoverFromDirectory();
-      }
-    } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
-      throw new Error(`Failed to discover modules: ${message}`);
+  constructor(modules: UMSModule[], warnings: string[] = []) {
+    for (const module of modules) {
+      this.moduleMap.set(module.id, module);
     }
+    this.warnings = [...warnings];
   }
 
   /**
-   * Loads modules.config.yml configuration
+   * Resolves a module ID to its module
    */
-  private async loadModuleConfig(): Promise<void> {
-    const configPath = 'modules.config.yml';
-    if (!existsSync(configPath)) {
-      return;
-    }
-
-    try {
-      const content = await readFile(configPath, 'utf-8');
-      const parsed = parse(content) as unknown;
-
-      // Validate config structure per UMS v1.0 spec Section 6.1
-      if (
-        !parsed ||
-        typeof parsed !== 'object' ||
-        !('localModulePaths' in parsed)
-      ) {
-        throw new Error(
-          'Invalid modules.config.yml format - missing localModulePaths'
-        );
-      }
-
-      const config = parsed as ModuleConfig;
-      if (!Array.isArray(config.localModulePaths)) {
-        throw new Error('localModulePaths must be an array');
-      }
-
-      // Validate each local module path entry
-      for (const entry of config.localModulePaths) {
-        if (!entry.path) {
-          throw new Error('Each localModulePaths entry must have a path');
-        }
-        if (
-          entry.onConflict &&
-          !['error', 'replace', 'warn'].includes(entry.onConflict)
-        ) {
-          throw new Error(
-            `Invalid conflict resolution strategy: ${entry.onConflict}`
-          );
-        }
-      }
-
-      this.config = config;
-    } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
-      throw new Error(`Failed to load modules.config.yml: ${message}`);
-    }
-  }
-
-  /**
-   * Loads modules from configuration paths (UMS v1.0 spec Section 6.1)
-   */
-  private async loadConfiguredModules(): Promise<void> {
-    if (!this.config) return;
-
-    // Process each localModulePath in order
-    for (const localPath of this.config.localModulePaths) {
-      await this.processLocalModulePath(localPath);
-    }
-  }
-
-  /**
-   * Processes a single local module path entry
-   */
-  private async processLocalModulePath(entry: LocalModulePath): Promise<void> {
-    const { path: modulePath, onConflict = 'error' } = entry;
-
-    try {
-      // Discover all .module.yml files in the specified path
-      const pattern = join(modulePath, '**', `*${MODULE_FILE_EXTENSION}`);
-      const files = await glob(pattern, { nodir: true });
-
-      for (const file of files) {
-        try {
-          // Load module to get its ID
-          const module = await loadModule(file);
-
-          // Check for conflicts with existing modules
-          if (this.moduleMap.has(module.id)) {
-            const conflictMessage = `Duplicate module ID '${module.id}' in path '${modulePath}'`;
-
-            switch (onConflict) {
-              case 'error':
-                throw new Error(conflictMessage);
-              case 'replace':
-                this.warnings.push(
-                  `${conflictMessage} - replacing previous entry`
-                );
-                this.moduleMap.set(module.id, file);
-                break;
-              case 'warn':
-                this.warnings.push(`${conflictMessage} - using first entry`);
-                // Keep the original entry, skip this one
-                break;
-            }
-          } else {
-            // No conflict, add the module
-            this.moduleMap.set(module.id, file);
-          }
-        } catch (error) {
-          // Skip invalid modules during discovery
-          const message =
-            error instanceof Error ? error.message : String(error);
-          this.warnings.push(
-            `Warning: Skipping invalid module ${file}: ${message}`
-          );
-        }
-      }
-    } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
-      this.warnings.push(
-        `Warning: Failed to process module path '${modulePath}': ${message}`
-      );
-    }
-  }
-
-  /**
-   * Discovers modules from directory structure (fallback)
-   */
-  private async discoverFromDirectory(): Promise<void> {
-    // Find all .module.yml files in instructions-modules
-    const pattern = join(MODULES_ROOT, '**', `*${MODULE_FILE_EXTENSION}`);
-    const files = await glob(pattern, { nodir: true });
-
-    for (const file of files) {
-      try {
-        // Load module to get its ID
-        const module = await loadModule(file);
-        this.moduleMap.set(module.id, file);
-      } catch (error) {
-        // Skip invalid modules during discovery
-        const message = error instanceof Error ? error.message : String(error);
-        this.warnings.push(
-          `Warning: Skipping invalid module ${file}: ${message}`
-        );
-      }
-    }
-  }
-
-  /**
-   * Resolves a module ID to its file path
-   */
-  resolve(moduleId: string): string | undefined {
+  resolve(moduleId: string): UMSModule | undefined {
     return this.moduleMap.get(moduleId);
   }
 
@@ -257,7 +92,14 @@ export class ModuleRegistry {
  * Main build engine that orchestrates the build process
  */
 export class BuildEngine {
-  private registry = new ModuleRegistry();
+  private registry: ModuleRegistry;
+
+  /**
+   * Creates a build engine with a pre-loaded module registry
+   */
+  constructor(registry: ModuleRegistry) {
+    this.registry = registry;
+  }
 
   /**
    * Builds a persona into Markdown output
@@ -265,11 +107,10 @@ export class BuildEngine {
   async build(options: BuildOptions): Promise<BuildResult> {
     const warnings: string[] = [];
 
-    // Discover modules
-    await this.registry.discover();
-
     if (options.verbose) {
-      console.log(`[INFO] build: Discovered ${this.registry.size()} modules`);
+      console.log(
+        `[INFO] build: Using ${this.registry.size()} pre-loaded modules`
+      );
     }
 
     // Load persona
@@ -285,29 +126,20 @@ export class BuildEngine {
 
     for (const group of persona.moduleGroups) {
       for (const moduleId of group.modules) {
-        const filePath = this.registry.resolve(moduleId);
-        if (!filePath) {
+        const module = this.registry.resolve(moduleId);
+        if (!module) {
           missingModules.push(moduleId);
           continue;
         }
 
-        try {
-          const module = await loadModule(filePath);
-          modules.push(module);
+        modules.push(module);
 
-          // Check for deprecation warnings
-          if (module.meta.deprecated) {
-            const warning = module.meta.replacedBy
-              ? `Module '${moduleId}' is deprecated and has been replaced by '${module.meta.replacedBy}'. Please update your persona file.`
-              : `Module '${moduleId}' is deprecated. This module may be removed in a future version.`;
-            warnings.push(warning);
-          }
-        } catch (error) {
-          const message =
-            error instanceof Error ? error.message : String(error);
-          throw new Error(
-            `Failed to load module '${moduleId}' from ${filePath}: ${message}`
-          );
+        // Check for deprecation warnings
+        if (module.meta.deprecated) {
+          const warning = module.meta.replacedBy
+            ? `Module '${moduleId}' is deprecated and has been replaced by '${module.meta.replacedBy}'. Please update your persona file.`
+            : `Module '${moduleId}' is deprecated. This module may be removed in a future version.`;
+          warnings.push(warning);
         }
       }
     }

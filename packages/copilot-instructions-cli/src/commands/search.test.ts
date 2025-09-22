@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterAll } from 'vitest';
 import chalk from 'chalk';
 import { handleSearch } from './search.js';
+import { discoverAllModules } from '../utils/module-discovery.js';
 
 // Mock dependencies
 vi.mock('chalk', () => ({
@@ -41,14 +42,18 @@ vi.mock('cli-table3', () => ({
 
 // Mock UMS components
 const mockModuleRegistry = {
-  discover: vi.fn(),
   getAllModuleIds: vi.fn(),
   resolve: vi.fn(),
+  size: vi.fn(),
+  getWarnings: vi.fn(),
 };
 
 vi.mock('ums-lib', () => ({
   ModuleRegistry: vi.fn().mockImplementation(() => mockModuleRegistry),
-  loadModule: vi.fn(),
+}));
+
+vi.mock('../utils/module-discovery.js', () => ({
+  discoverAllModules: vi.fn(),
 }));
 
 vi.mock('../utils/error-handler.js', () => ({
@@ -72,15 +77,33 @@ const mockConsoleWarn = vi.spyOn(console, 'warn').mockImplementation(() => {
   /* noop */
 });
 
-import { loadModule } from 'ums-lib';
 import { handleError } from '../utils/error-handler.js';
 import type { UMSModule } from 'ums-lib';
-
-const mockLoadModule = vi.mocked(loadModule);
 
 describe('search command', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+
+    // Set up mock module discovery
+    vi.mocked(discoverAllModules).mockResolvedValue({
+      modules: [mockModule1, mockModule2, mockModule3],
+      warnings: [],
+    });
+
+    // Set up mock registry behavior
+    mockModuleRegistry.getAllModuleIds.mockReturnValue([
+      'foundation/logic/deductive-reasoning',
+      'technology/react/hooks',
+      'principle/quality/testing',
+    ]);
+    mockModuleRegistry.resolve.mockImplementation((id: string) => {
+      if (id === 'foundation/logic/deductive-reasoning') return mockModule1;
+      if (id === 'technology/react/hooks') return mockModule2;
+      if (id === 'principle/quality/testing') return mockModule3;
+      return undefined;
+    });
+    mockModuleRegistry.size.mockReturnValue(3);
+    mockModuleRegistry.getWarnings.mockReturnValue([]);
   });
 
   afterAll(() => {
@@ -149,23 +172,15 @@ describe('search command', () => {
       'principle/quality/testing',
     ]);
     mockModuleRegistry.resolve
-      .mockReturnValueOnce(
-        '/test/foundation/logic/deductive-reasoning.module.yml'
-      )
-      .mockReturnValueOnce('/test/technology/react/hooks.module.yml')
-      .mockReturnValueOnce('/test/principle/quality/testing.module.yml');
-
-    mockLoadModule
-      .mockResolvedValueOnce(mockModule1)
-      .mockResolvedValueOnce(mockModule2)
-      .mockResolvedValueOnce(mockModule3);
+      .mockReturnValueOnce(mockModule1)
+      .mockReturnValueOnce(mockModule2)
+      .mockReturnValueOnce(mockModule3);
 
     // Act
     await handleSearch('React', {});
 
     // Assert
-    expect(mockModuleRegistry.discover).toHaveBeenCalled();
-    expect(loadModule).toHaveBeenCalledTimes(3);
+    expect(discoverAllModules).toHaveBeenCalled();
     expect(mockConsoleLog).toHaveBeenCalledWith(
       expect.stringContaining('Search results for "React"')
     );
@@ -182,16 +197,9 @@ describe('search command', () => {
       'principle/quality/testing',
     ]);
     mockModuleRegistry.resolve
-      .mockReturnValueOnce(
-        '/test/foundation/logic/deductive-reasoning.module.yml'
-      )
-      .mockReturnValueOnce('/test/technology/react/hooks.module.yml')
-      .mockReturnValueOnce('/test/principle/quality/testing.module.yml');
-
-    mockLoadModule
-      .mockResolvedValueOnce(mockModule1)
-      .mockResolvedValueOnce(mockModule2)
-      .mockResolvedValueOnce(mockModule3);
+      .mockReturnValueOnce(mockModule1)
+      .mockReturnValueOnce(mockModule2)
+      .mockReturnValueOnce(mockModule3);
 
     // Act
     await handleSearch('logical', {});
@@ -213,16 +221,9 @@ describe('search command', () => {
       'principle/quality/testing',
     ]);
     mockModuleRegistry.resolve
-      .mockReturnValueOnce(
-        '/test/foundation/logic/deductive-reasoning.module.yml'
-      )
-      .mockReturnValueOnce('/test/technology/react/hooks.module.yml')
-      .mockReturnValueOnce('/test/principle/quality/testing.module.yml');
-
-    mockLoadModule
-      .mockResolvedValueOnce(mockModule1)
-      .mockResolvedValueOnce(mockModule2)
-      .mockResolvedValueOnce(mockModule3);
+      .mockReturnValueOnce(mockModule1)
+      .mockReturnValueOnce(mockModule2)
+      .mockReturnValueOnce(mockModule3);
 
     // Act
     await handleSearch('frontend', {});
@@ -244,16 +245,9 @@ describe('search command', () => {
       'principle/quality/testing',
     ]);
     mockModuleRegistry.resolve
-      .mockReturnValueOnce(
-        '/test/foundation/logic/deductive-reasoning.module.yml'
-      )
-      .mockReturnValueOnce('/test/technology/react/hooks.module.yml')
-      .mockReturnValueOnce('/test/principle/quality/testing.module.yml');
-
-    mockLoadModule
-      .mockResolvedValueOnce(mockModule1)
-      .mockResolvedValueOnce(mockModule2)
-      .mockResolvedValueOnce(mockModule3);
+      .mockReturnValueOnce(mockModule1)
+      .mockReturnValueOnce(mockModule2)
+      .mockReturnValueOnce(mockModule3);
 
     // Act
     await handleSearch('reasoning', { tier: 'foundation' });
@@ -283,10 +277,7 @@ describe('search command', () => {
     mockModuleRegistry.getAllModuleIds.mockReturnValue([
       'foundation/logic/deductive-reasoning',
     ]);
-    mockModuleRegistry.resolve.mockReturnValue(
-      '/test/foundation/logic/deductive-reasoning.module.yml'
-    );
-    mockLoadModule.mockResolvedValue(mockModule1);
+    mockModuleRegistry.resolve.mockReturnValue(mockModule1);
 
     // Act
     await handleSearch('nonexistent', {});
@@ -302,10 +293,7 @@ describe('search command', () => {
     mockModuleRegistry.getAllModuleIds.mockReturnValue([
       'foundation/logic/deductive-reasoning',
     ]);
-    mockModuleRegistry.resolve.mockReturnValue(
-      '/test/foundation/logic/deductive-reasoning.module.yml'
-    );
-    mockLoadModule.mockResolvedValue(mockModule1);
+    mockModuleRegistry.resolve.mockReturnValue(mockModule1);
 
     // Act
     await handleSearch('react', { tier: 'foundation' });
@@ -330,8 +318,7 @@ describe('search command', () => {
   it('should handle module loading errors gracefully', async () => {
     // Arrange
     mockModuleRegistry.getAllModuleIds.mockReturnValue(['test-module']);
-    mockModuleRegistry.resolve.mockReturnValue('/test/module.yml');
-    mockLoadModule.mockRejectedValue(new Error('Load failed'));
+    mockModuleRegistry.resolve.mockReturnValue(null); // Simulate module not found
 
     // Act
     await handleSearch('test', {});
@@ -339,7 +326,7 @@ describe('search command', () => {
     // Assert
     expect(mockConsoleWarn).toHaveBeenCalledWith(
       expect.stringContaining(
-        'Warning: Failed to load module test-module: Load failed'
+        'Warning: Module test-module not found in registry'
       )
     );
   });
@@ -368,14 +355,9 @@ describe('search command', () => {
       'foundation/logic/a-module',
     ]);
     mockModuleRegistry.resolve
-      .mockReturnValueOnce('/test/c-module.yml')
-      .mockReturnValueOnce('/test/b-module.yml')
-      .mockReturnValueOnce('/test/a-module.yml');
-
-    mockLoadModule
-      .mockResolvedValueOnce(moduleC)
-      .mockResolvedValueOnce(moduleB)
-      .mockResolvedValueOnce(moduleA);
+      .mockReturnValueOnce(moduleC)
+      .mockReturnValueOnce(moduleB)
+      .mockReturnValueOnce(moduleA);
 
     // Act - search for something that matches all modules
     await handleSearch('Module', {});
@@ -391,10 +373,7 @@ describe('search command', () => {
     mockModuleRegistry.getAllModuleIds.mockReturnValue([
       'foundation/logic/deductive-reasoning',
     ]);
-    mockModuleRegistry.resolve.mockReturnValue(
-      '/test/foundation/logic/deductive-reasoning.module.yml'
-    );
-    mockLoadModule.mockResolvedValue(mockModule1);
+    mockModuleRegistry.resolve.mockReturnValue(mockModule1);
 
     // Act - search with different cases
     await handleSearch('DEDUCTIVE', {});
@@ -421,8 +400,7 @@ describe('search command', () => {
     };
 
     mockModuleRegistry.getAllModuleIds.mockReturnValue(['test-module']);
-    mockModuleRegistry.resolve.mockReturnValue('/test/module.yml');
-    mockLoadModule.mockResolvedValue(moduleWithoutTags);
+    mockModuleRegistry.resolve.mockReturnValue(moduleWithoutTags);
 
     // Act
     await handleSearch('reasoning', {});
