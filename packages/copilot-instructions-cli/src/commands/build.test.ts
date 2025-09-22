@@ -98,11 +98,11 @@ describe('build command', () => {
       personaSource: 'test.persona.yml',
       outputTarget: 'output.md',
     });
-    expect(writeFile).toHaveBeenCalledWith('output.md', mockMarkdown, 'utf8');
+    expect(writeFile).toHaveBeenCalledWith('output.md', mockMarkdown, 'utf-8');
     expect(writeFile).toHaveBeenCalledWith(
       'output.build.json',
       JSON.stringify(mockBuildReport, null, 2),
-      'utf8'
+      'utf-8'
     );
   });
 
@@ -285,11 +285,11 @@ describe('build command', () => {
       outputTarget: 'output.md',
       personaContent: 'name: Test Persona\nmodules: []',
     });
-    expect(writeFile).toHaveBeenCalledWith('output.md', mockMarkdown, 'utf8');
+    expect(writeFile).toHaveBeenCalledWith('output.md', mockMarkdown, 'utf-8');
     expect(writeFile).toHaveBeenCalledWith(
       'output.build.json',
       JSON.stringify(mockBuildReport, null, 2),
-      'utf8'
+      'utf-8'
     );
   });
 

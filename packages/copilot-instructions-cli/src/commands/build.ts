@@ -3,11 +3,11 @@
  * @description UMS v1.0 build command implementation
  */
 
-import { writeFile } from 'fs/promises';
 import chalk from 'chalk';
 import { handleError } from '../utils/error-handler.js';
 import { BuildEngine, type BuildOptions as EngineBuildOptions } from 'ums-lib';
 import { createBuildProgress } from '../utils/progress.js';
+import { writeOutputFile, readFromStdin } from '../utils/file-operations.js';
 
 /**
  * Options for the build command
@@ -181,7 +181,7 @@ async function generateOutputFiles(
 ): Promise<void> {
   if (environment.outputPath) {
     // Write markdown file
-    await writeFile(environment.outputPath, result.markdown, 'utf8');
+    await writeOutputFile(environment.outputPath, result.markdown);
     console.log(
       chalk.green(
         `✓ Persona instructions written to: ${environment.outputPath}`
@@ -193,10 +193,9 @@ async function generateOutputFiles(
       /\.md$/,
       '.build.json'
     );
-    await writeFile(
+    await writeOutputFile(
       buildReportPath,
-      JSON.stringify(result.buildReport, null, 2),
-      'utf8'
+      JSON.stringify(result.buildReport, null, 2)
     );
     console.log(chalk.green(`✓ Build report written to: ${buildReportPath}`));
 
@@ -215,46 +214,5 @@ async function generateOutputFiles(
   } else {
     // Write to stdout
     console.log(result.markdown);
-  }
-}
-
-/**
- * Reads content from stdin
- */
-async function readFromStdin(): Promise<string> {
-  return new Promise<string>((resolve, reject) => {
-    const chunks: Buffer[] = [];
-
-    process.stdin.on('data', (chunk: Buffer) => {
-      chunks.push(chunk);
-    });
-
-    process.stdin.on('end', () => {
-      resolve(Buffer.concat(chunks).toString('utf8'));
-    });
-
-    process.stdin.on('error', reject);
-
-    // Start reading
-    process.stdin.resume();
-  });
-}
-
-/**
- * Checks if a file path has a .persona.yml extension
- */
-export function isPersonaFile(filePath: string): boolean {
-  return filePath.endsWith('.persona.yml');
-}
-
-/**
- * Validates that the persona file has the correct extension
- */
-export function validatePersonaFile(filePath: string): void {
-  if (!isPersonaFile(filePath)) {
-    throw new Error(
-      `Persona file must have .persona.yml extension, got: ${filePath}\n` +
-        'UMS v1.0 requires persona files to use YAML format with .persona.yml extension.'
-    );
   }
 }

@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unsafe-return, @typescript-eslint/no-empty-function, @typescript-eslint/no-unsafe-argument */
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
 import { describe, it, expect, vi, beforeEach, afterAll } from 'vitest';
 import { promises as fs } from 'fs';
 import { glob } from 'glob';

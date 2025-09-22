@@ -29,8 +29,8 @@ export interface UMSModule {
   meta: ModuleMeta;
   /** The instructional content */
   body: ModuleBody;
-  /** Absolute path to the source file */
-  filePath: string;
+  /** Absolute path to the source file (optional for parsed content) */
+  filePath?: string;
 }
 
 // Module metadata block (Section 2.2)

@@ -77,6 +77,45 @@ export async function loadPersona(filePath: string): Promise<UMSPersona> {
 }
 
 /**
+ * Parses and validates a UMS v1.0 persona from content string
+ */
+export function parsePersona(content: string): UMSPersona {
+  try {
+    const parsed: unknown = parse(content);
+
+    if (!isValidRawPersonaData(parsed)) {
+      throw new Error('Invalid YAML: expected object at root');
+    }
+
+    // Validate the persona structure
+    const validation = validatePersona(parsed);
+    if (!validation.valid) {
+      const errorMessages = validation.errors.map(e => e.message).join('\n');
+      throw new Error(`Persona validation failed:\n${errorMessages}`);
+    }
+
+    // Return the validated persona with proper typing
+    const validatedPersona: UMSPersona = {
+      name: parsed.name as string,
+      version: parsed.version as string,
+      schemaVersion: parsed.schemaVersion as string,
+      description: parsed.description as string,
+      semantic: parsed.semantic as string,
+      identity: parsed.identity as string,
+      ...(parsed.attribution !== undefined && {
+        attribution: parsed.attribution as boolean,
+      }),
+      moduleGroups: parsed.moduleGroups as ModuleGroup[],
+    };
+
+    return validatedPersona;
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    throw new Error(`Failed to parse persona: ${message}`);
+  }
+}
+
+/**
  * Validates a parsed UMS v1.0 persona object
  */
 export function validatePersona(obj: unknown): ValidationResult {

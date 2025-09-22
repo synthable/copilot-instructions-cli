@@ -12,8 +12,8 @@ export * from './types/index.js';
 export { BuildEngine, ModuleRegistry } from './core/build-engine.js';
 export type { BuildOptions, BuildResult } from './core/build-engine.js';
 
-export { loadModule } from './core/module-loader.js';
-export { loadPersona } from './core/persona-loader.js';
+export { loadModule, parseModule } from './core/module-loader.js';
+export { loadPersona, parsePersona } from './core/persona-loader.js';
 
 // Export error types
 export {

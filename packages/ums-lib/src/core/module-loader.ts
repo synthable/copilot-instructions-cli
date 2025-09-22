@@ -73,6 +73,33 @@ export async function loadModule(filePath: string): Promise<UMSModule> {
 }
 
 /**
+ * Parses and validates a UMS v1.0 module from content string
+ */
+export function parseModule(content: string): UMSModule {
+  try {
+    const parsed: unknown = parse(content);
+
+    if (!isValidRawModuleData(parsed)) {
+      throw new Error('Invalid YAML: expected object at root');
+    }
+
+    // Validate the module structure
+    const validation = validateModule(parsed);
+    if (!validation.valid) {
+      const errorMessages = validation.errors.map(e => e.message).join('\n');
+      throw new Error(`Module validation failed:\n${errorMessages}`);
+    }
+
+    // After validation, we know this is a valid UMSModule structure
+    // The only difference is the optional filePath which parseModule doesn't include
+    return parsed as UMSModule;
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    throw new Error(`Failed to parse module: ${message}`);
+  }
+}
+
+/**
  * Validates required top-level keys
  */
 function validateRequiredKeys(

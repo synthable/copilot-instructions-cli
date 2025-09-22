@@ -357,20 +357,23 @@ export class BuildEngine {
       for (const moduleId of group.modules) {
         const module = modules.find(m => m.id === moduleId);
         if (module) {
-          // Generate module file digest
-          const moduleFileContent = await readFile(module.filePath, 'utf-8');
-          const moduleDigest = createHash('sha256')
-            .update(moduleFileContent)
-            .digest('hex');
+          // Generate module file digest (only if filePath exists)
+          let moduleDigest = '';
+          if (module.filePath) {
+            const moduleFileContent = await readFile(module.filePath, 'utf-8');
+            moduleDigest = createHash('sha256')
+              .update(moduleFileContent)
+              .digest('hex');
+          }
 
           const reportModule: BuildReportModule = {
             id: module.id,
             name: module.meta.name,
             version: module.version,
             source: 'Local', // TODO: Distinguish between Standard Library and Local
-            digest: `sha256:${moduleDigest}`,
+            digest: moduleDigest ? `sha256:${moduleDigest}` : '',
             shape: module.shape,
-            filePath: module.filePath,
+            filePath: module.filePath ?? '',
             deprecated: module.meta.deprecated ?? false,
           };
 
