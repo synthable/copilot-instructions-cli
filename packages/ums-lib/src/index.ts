@@ -8,13 +8,11 @@
 // Export all UMS v1.0 types
 export * from './types/index.js';
 
-// Export core functionality
-export { BuildEngine, ModuleRegistry } from './core/build-engine.js';
-export type { BuildOptions, BuildResult } from './core/build-engine.js';
+// Deprecated classes removed in Phase 4 - use pure functions instead
 
-// Export legacy loading functions
-export { loadModule, parseModule } from './core/module-loader.js';
-export { loadPersona, parsePersona } from './core/persona-loader.js';
+// Export pure parsing functions (file-based loading removed in Phase 4)
+export { parseModule } from './core/module-loader.js';
+export { parsePersona } from './core/persona-loader.js';
 
 // Export pure functions for Phase 3 architecture
 export {
@@ -23,7 +21,7 @@ export {
   validateModuleReferences,
   createModuleRegistry,
   resolvePersonaModules,
-  type ModuleResolutionResult
+  type ModuleResolutionResult,
 } from './core/resolver.js';
 
 export {
@@ -37,13 +35,13 @@ export {
   renderCriteria,
   renderData,
   renderExamples,
-  inferLanguageFromMediaType
+  inferLanguageFromMediaType,
 } from './core/renderer.js';
 
 export {
   generateBuildReport,
   generatePersonaDigest,
-  generateModuleDigest
+  generateModuleDigest,
 } from './core/report-generator.js';
 
 // Export error types

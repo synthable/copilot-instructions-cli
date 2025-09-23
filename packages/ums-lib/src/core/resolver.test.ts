@@ -56,7 +56,11 @@ const mockModule3: UMSModule = {
     semantic: 'Quality assurance methodology',
   },
   body: {
-    principles: ['Write tests first', 'Test edge cases', 'Maintain test coverage'],
+    principles: [
+      'Write tests first',
+      'Test edge cases',
+      'Maintain test coverage',
+    ],
   },
 };
 
@@ -87,7 +91,9 @@ describe('resolver', () => {
       const registry = createModuleRegistry(modules);
 
       expect(registry.size).toBe(3);
-      expect(registry.get('foundation/logic/deductive-reasoning')).toEqual(mockModule1);
+      expect(registry.get('foundation/logic/deductive-reasoning')).toEqual(
+        mockModule1
+      );
       expect(registry.get('technology/react/hooks')).toEqual(mockModule2);
       expect(registry.get('principle/quality/testing')).toEqual(mockModule3);
     });
@@ -120,7 +126,10 @@ describe('resolver', () => {
 
       expect(result.modules).toHaveLength(1);
       expect(result.modules[0]).toEqual(mockModule1);
-      expect(result.missingModules).toEqual(['technology/react/hooks', 'principle/quality/testing']);
+      expect(result.missingModules).toEqual([
+        'technology/react/hooks',
+        'principle/quality/testing',
+      ]);
     });
 
     it('should generate deprecation warnings', () => {
@@ -187,7 +196,10 @@ describe('resolver', () => {
       const result = resolvePersonaModules(mockPersona, modules);
 
       expect(result.modules).toHaveLength(1);
-      expect(result.missingModules).toEqual(['technology/react/hooks', 'principle/quality/testing']);
+      expect(result.missingModules).toEqual([
+        'technology/react/hooks',
+        'principle/quality/testing',
+      ]);
     });
   });
 });

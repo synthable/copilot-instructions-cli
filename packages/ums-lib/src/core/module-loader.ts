@@ -3,7 +3,6 @@
  * Implements module parsing and validation per UMS v1.0 specification
  */
 
-import { readFile } from 'fs/promises';
 import { parse } from 'yaml';
 import {
   VALID_TIERS,
@@ -26,9 +25,6 @@ import type {
   ModuleMeta,
 } from '../types/index.js';
 
-/**
- * Loads and validates a UMS v1.0 module from file
- */
 // Raw parsed YAML structure before validation
 interface RawModuleData {
   id?: unknown;
@@ -42,34 +38,6 @@ interface RawModuleData {
 
 function isValidRawModuleData(data: unknown): data is RawModuleData {
   return data !== null && typeof data === 'object' && !Array.isArray(data);
-}
-
-export async function loadModule(filePath: string): Promise<UMSModule> {
-  try {
-    // Read and parse YAML file
-    const content = await readFile(filePath, 'utf-8');
-    const parsed: unknown = parse(content);
-
-    if (!isValidRawModuleData(parsed)) {
-      throw new Error('Invalid YAML: expected object at root');
-    }
-
-    // Validate the module structure
-    const validation = validateModule(parsed);
-    if (!validation.valid) {
-      const errorMessages = validation.errors.map(e => e.message).join('\n');
-      throw new Error(`Module validation failed:\n${errorMessages}`);
-    }
-
-    // Return the validated module with file path
-    return {
-      ...parsed,
-      filePath,
-    } as UMSModule;
-  } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    throw new Error(`Failed to load module from ${filePath}: ${message}`);
-  }
 }
 
 /**
@@ -91,7 +59,6 @@ export function parseModule(content: string): UMSModule {
     }
 
     // After validation, we know this is a valid UMSModule structure
-    // The only difference is the optional filePath which parseModule doesn't include
     return parsed as UMSModule;
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);

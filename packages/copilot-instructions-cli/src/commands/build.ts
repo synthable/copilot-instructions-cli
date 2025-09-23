@@ -103,7 +103,9 @@ async function setupBuildEnvironment(
 
   if (verbose) {
     console.log(
-      chalk.gray(`[INFO] build: Discovered ${moduleDiscoveryResult.modules.length} modules`)
+      chalk.gray(
+        `[INFO] build: Discovered ${moduleDiscoveryResult.modules.length} modules`
+      )
     );
     if (moduleDiscoveryResult.warnings.length > 0) {
       console.log(chalk.yellow('\nModule Discovery Warnings:'));
@@ -162,18 +164,30 @@ async function setupBuildEnvironment(
 
   // Resolve modules for persona
   progress.update('Resolving modules...');
-  const resolutionResult = resolvePersonaModules(persona, moduleDiscoveryResult.modules);
+  const resolutionResult = resolvePersonaModules(
+    persona,
+    moduleDiscoveryResult.modules
+  );
 
   // Check for missing modules
   if (resolutionResult.missingModules.length > 0) {
-    throw new Error(`Missing modules: ${resolutionResult.missingModules.join(', ')}`);
+    throw new Error(
+      `Missing modules: ${resolutionResult.missingModules.join(', ')}`
+    );
   }
 
   if (verbose) {
-    console.log(chalk.gray(`[INFO] build: Loaded ${resolutionResult.modules.length} modules`));
+    console.log(
+      chalk.gray(
+        `[INFO] build: Loaded ${resolutionResult.modules.length} modules`
+      )
+    );
   }
 
-  const allWarnings = [...moduleDiscoveryResult.warnings, ...resolutionResult.warnings];
+  const allWarnings = [
+    ...moduleDiscoveryResult.warnings,
+    ...resolutionResult.warnings,
+  ];
 
   return {
     modules: resolutionResult.modules,

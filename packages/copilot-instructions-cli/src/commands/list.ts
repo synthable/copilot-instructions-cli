@@ -6,37 +6,13 @@
 import chalk from 'chalk';
 import Table from 'cli-table3';
 import { handleError } from '../utils/error-handler.js';
-import { ModuleRegistry, type UMSModule } from 'ums-lib';
+import type { UMSModule } from 'ums-lib';
 import { createDiscoveryProgress } from '../utils/progress.js';
 import { discoverAllModules } from '../utils/module-discovery.js';
 
 interface ListOptions {
   tier?: string;
   verbose?: boolean;
-}
-
-/**
- * Loads all modules from the registry
- */
-function loadModulesFromRegistry(
-  registry: ModuleRegistry,
-  skipErrors: boolean
-): UMSModule[] {
-  const moduleIds = registry.getAllModuleIds();
-  const modules: UMSModule[] = [];
-
-  for (const moduleId of moduleIds) {
-    const module = registry.resolve(moduleId);
-    if (module) {
-      modules.push(module);
-    } else if (!skipErrors) {
-      console.warn(
-        chalk.yellow(`Warning: Module ${moduleId} not found in registry`)
-      );
-    }
-  }
-
-  return modules;
 }
 
 /**
@@ -121,22 +97,23 @@ export async function handleList(options: ListOptions): Promise<void> {
 
     // Use UMS v1.0 module discovery
     const moduleDiscoveryResult = await discoverAllModules();
-    const registry = new ModuleRegistry(
-      moduleDiscoveryResult.modules,
-      moduleDiscoveryResult.warnings
-    );
+    const modules = moduleDiscoveryResult.modules;
 
-    const moduleIds = registry.getAllModuleIds();
-    if (moduleIds.length === 0) {
+    if (modules.length === 0) {
       progress.succeed('Module discovery complete.');
       console.log(chalk.yellow('No UMS v1.0 modules found.'));
       return;
     }
 
-    progress.update(`Loading ${moduleIds.length} modules...`);
+    progress.update(`Processing ${modules.length} modules...`);
 
-    // Load all modules
-    const modules = loadModulesFromRegistry(registry, !!options.tier);
+    // Show warnings if any
+    if (moduleDiscoveryResult.warnings.length > 0 && options.verbose) {
+      console.log(chalk.yellow('\nModule Discovery Warnings:'));
+      for (const warning of moduleDiscoveryResult.warnings) {
+        console.log(chalk.yellow(`  - ${warning}`));
+      }
+    }
 
     progress.update('Filtering and sorting modules...');
 

@@ -15,7 +15,12 @@ import {
   renderExamples,
   inferLanguageFromMediaType,
 } from './renderer.js';
-import type { UMSModule, UMSPersona, DataDirective, ExampleDirective } from '../types/index.js';
+import type {
+  UMSModule,
+  UMSPersona,
+  DataDirective,
+  ExampleDirective,
+} from '../types/index.js';
 
 // Mock modules for testing
 const mockModule1: UMSModule = {
@@ -30,7 +35,11 @@ const mockModule1: UMSModule = {
   },
   body: {
     goal: 'Apply deductive reasoning principles',
-    principles: ['Start with general statements', 'Apply logical rules', 'Reach specific conclusions'],
+    principles: [
+      'Start with general statements',
+      'Apply logical rules',
+      'Reach specific conclusions',
+    ],
   },
 };
 
@@ -45,8 +54,15 @@ const mockModule2: UMSModule = {
     semantic: 'Frontend development patterns',
   },
   body: {
-    process: ['Import necessary hooks', 'Initialize state with useState', 'Handle side effects with useEffect'],
-    constraints: ['Always call hooks at top level', 'Never call hooks inside conditions'],
+    process: [
+      'Import necessary hooks',
+      'Initialize state with useState',
+      'Handle side effects with useEffect',
+    ],
+    constraints: [
+      'Always call hooks at top level',
+      'Never call hooks inside conditions',
+    ],
   },
 };
 
@@ -80,25 +96,41 @@ describe('renderer', () => {
 
   describe('renderPrinciples', () => {
     it('should render principles as bullet list', () => {
-      const principles = ['Start with general statements', 'Apply logical rules'];
+      const principles = [
+        'Start with general statements',
+        'Apply logical rules',
+      ];
       const result = renderPrinciples(principles);
-      expect(result).toBe('## Principles\n\n- Start with general statements\n- Apply logical rules\n');
+      expect(result).toBe(
+        '## Principles\n\n- Start with general statements\n- Apply logical rules\n'
+      );
     });
   });
 
   describe('renderConstraints', () => {
     it('should render constraints as bullet list', () => {
-      const constraints = ['Always call hooks at top level', 'Never call hooks inside conditions'];
+      const constraints = [
+        'Always call hooks at top level',
+        'Never call hooks inside conditions',
+      ];
       const result = renderConstraints(constraints);
-      expect(result).toBe('## Constraints\n\n- Always call hooks at top level\n- Never call hooks inside conditions\n');
+      expect(result).toBe(
+        '## Constraints\n\n- Always call hooks at top level\n- Never call hooks inside conditions\n'
+      );
     });
   });
 
   describe('renderProcess', () => {
     it('should render process as ordered list', () => {
-      const process = ['Import necessary hooks', 'Initialize state', 'Handle side effects'];
+      const process = [
+        'Import necessary hooks',
+        'Initialize state',
+        'Handle side effects',
+      ];
       const result = renderProcess(process);
-      expect(result).toBe('## Process\n\n1. Import necessary hooks\n2. Initialize state\n3. Handle side effects\n');
+      expect(result).toBe(
+        '## Process\n\n1. Import necessary hooks\n2. Initialize state\n3. Handle side effects\n'
+      );
     });
   });
 
@@ -106,7 +138,9 @@ describe('renderer', () => {
     it('should render criteria as task list', () => {
       const criteria = ['Hooks are imported correctly', 'State is initialized'];
       const result = renderCriteria(criteria);
-      expect(result).toBe('## Criteria\n\n- [ ] Hooks are imported correctly\n- [ ] State is initialized\n');
+      expect(result).toBe(
+        '## Criteria\n\n- [ ] Hooks are imported correctly\n- [ ] State is initialized\n'
+      );
     });
   });
 
@@ -141,7 +175,9 @@ describe('renderer', () => {
         },
       ];
       const result = renderExamples(examples);
-      expect(result).toBe('## Examples\n\n### Basic useState\n\nSimple state management\n\n```javascript\nconst [count, setCount] = useState(0);\n```\n');
+      expect(result).toBe(
+        '## Examples\n\n### Basic useState\n\nSimple state management\n\n```javascript\nconst [count, setCount] = useState(0);\n```\n'
+      );
     });
   });
 
@@ -150,7 +186,9 @@ describe('renderer', () => {
       expect(inferLanguageFromMediaType('application/json')).toBe('json');
       expect(inferLanguageFromMediaType('text/javascript')).toBe('javascript');
       expect(inferLanguageFromMediaType('text/x-python')).toBe('python');
-      expect(inferLanguageFromMediaType('text/x-typescript')).toBe('typescript');
+      expect(inferLanguageFromMediaType('text/x-typescript')).toBe(
+        'typescript'
+      );
       expect(inferLanguageFromMediaType('application/xml')).toBe('xml');
     });
 
@@ -163,8 +201,12 @@ describe('renderer', () => {
   describe('renderModule', () => {
     it('should render a complete module', () => {
       const result = renderModule(mockModule1);
-      expect(result).toContain('## Goal\n\nApply deductive reasoning principles');
-      expect(result).toContain('## Principles\n\n- Start with general statements');
+      expect(result).toContain(
+        '## Goal\n\nApply deductive reasoning principles'
+      );
+      expect(result).toContain(
+        '## Principles\n\n- Start with general statements'
+      );
     });
   });
 
@@ -173,10 +215,14 @@ describe('renderer', () => {
       const modules = [mockModule1, mockModule2];
       const result = renderMarkdown(mockPersona, modules);
 
-      expect(result).toContain('## Identity\n\nI am a test persona focused on quality and logic.');
+      expect(result).toContain(
+        '## Identity\n\nI am a test persona focused on quality and logic.'
+      );
       expect(result).toContain('# Foundation');
       expect(result).toContain('# Technology');
-      expect(result).toContain('## Goal\n\nApply deductive reasoning principles');
+      expect(result).toContain(
+        '## Goal\n\nApply deductive reasoning principles'
+      );
       expect(result).toContain('## Process\n\n1. Import necessary hooks');
     });
 
@@ -211,7 +257,9 @@ describe('renderer', () => {
       const result = renderMarkdown(personaWithoutGroupNames, modules);
 
       expect(result).not.toContain('# Foundation');
-      expect(result).toContain('## Goal\n\nApply deductive reasoning principles');
+      expect(result).toContain(
+        '## Goal\n\nApply deductive reasoning principles'
+      );
     });
 
     it('should add attribution when enabled', () => {
@@ -228,7 +276,9 @@ describe('renderer', () => {
       const modules = [mockModule1];
       const result = renderMarkdown(personaWithAttribution, modules);
 
-      expect(result).toContain('[Attribution: foundation/logic/deductive-reasoning]');
+      expect(result).toContain(
+        '[Attribution: foundation/logic/deductive-reasoning]'
+      );
     });
   });
 });

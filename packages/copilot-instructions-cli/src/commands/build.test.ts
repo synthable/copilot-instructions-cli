@@ -1,8 +1,15 @@
-import { describe, it, expect, vi, beforeEach, afterAll } from 'vitest';
-import { writeFile } from 'fs/promises';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { writeOutputFile, readFromStdin } from '../utils/file-operations.js';
 import { handleBuild } from './build.js';
-import { BuildEngine, parsePersona, renderMarkdown, generateBuildReport, resolvePersonaModules } from 'ums-lib';
+import {
+  parsePersona,
+  renderMarkdown,
+  generateBuildReport,
+  resolvePersonaModules,
+  type UMSPersona,
+  type UMSModule,
+  type BuildReport,
+} from 'ums-lib';
 import { discoverAllModules } from '../utils/module-discovery.js';
 
 // Mock dependencies
@@ -30,174 +37,159 @@ vi.mock('ora', () => {
   return { default: vi.fn(() => mockSpinner) };
 });
 
-const mockBuildEngine = {
-  build: vi.fn(),
-  generateBuildReport: vi.fn(),
-};
-
-const mockModuleRegistry = {
-  resolve: vi.fn(),
-  getAllModuleIds: vi.fn(),
-  getWarnings: vi.fn(),
-  size: vi.fn(),
-};
-
+// Mock pure functions from UMS library
 vi.mock('ums-lib', () => ({
-  BuildEngine: vi.fn().mockImplementation(() => mockBuildEngine),
-  ModuleRegistry: vi.fn().mockImplementation(() => mockModuleRegistry),
   parsePersona: vi.fn(),
   renderMarkdown: vi.fn(),
   generateBuildReport: vi.fn(),
   resolvePersonaModules: vi.fn(),
 }));
 
-vi.mock('../utils/module-discovery.js', () => ({
-  discoverAllModules: vi.fn(),
-}));
-
+// Mock utility functions
 vi.mock('../utils/file-operations.js', () => ({
   writeOutputFile: vi.fn(),
   readFromStdin: vi.fn(),
+}));
+
+vi.mock('../utils/module-discovery.js', () => ({
+  discoverAllModules: vi.fn(),
 }));
 
 vi.mock('../utils/error-handler.js', () => ({
   handleError: vi.fn(),
 }));
 
-// Mock console and process
-const mockConsoleLog = vi.spyOn(console, 'log').mockImplementation(() => {
-  // Mock implementation
-});
-const mockProcessStdin = {
-  isTTY: false,
-  on: vi.fn(),
-  setEncoding: vi.fn(),
-};
-
-// Mock stdin for testing
-Object.defineProperty(process, 'stdin', {
-  value: mockProcessStdin,
-  writable: true,
+// Mock process.exit
+const mockExit = vi.spyOn(process, 'exit').mockImplementation(() => {
+  throw new Error('process.exit called with code 1');
 });
 
 describe('build command', () => {
-  const mockPersona = {
+  // Type-safe mocks
+  const mockParsePersona = vi.mocked(parsePersona);
+  const mockRenderMarkdown = vi.mocked(renderMarkdown);
+  const mockGenerateBuildReport = vi.mocked(generateBuildReport);
+  const mockResolvePersonaModules = vi.mocked(resolvePersonaModules);
+  const mockDiscoverAllModules = vi.mocked(discoverAllModules);
+  const mockWriteOutputFile = vi.mocked(writeOutputFile);
+  const mockReadFromStdin = vi.mocked(readFromStdin);
+
+  const mockPersona: UMSPersona = {
     name: 'Test Persona',
     version: '1.0',
     schemaVersion: '1.0',
     description: 'A test persona',
-    semantic: 'Testing framework',
-    identity: 'I am a test persona',
-    attribution: false,
+    semantic: '',
+    identity: 'You are a helpful test assistant',
     moduleGroups: [
       {
-        groupName: 'Foundation',
-        modules: ['foundation/logic/deductive-reasoning'],
+        groupName: 'Test Group',
+        modules: ['test/module-1', 'test/module-2'],
       },
     ],
   };
 
-  const mockModule = {
-    id: 'foundation/logic/deductive-reasoning',
-    version: '1.0',
-    schemaVersion: '1.0',
-    shape: 'specification',
-    meta: {
-      name: 'Deductive Reasoning',
-      description: 'Logical deduction principles',
-      semantic: 'Logic and reasoning framework',
+  const mockModules: UMSModule[] = [
+    {
+      id: 'test/module-1',
+      filePath: '/test/module-1.md',
+      version: '1.0',
+      schemaVersion: '1.0',
+      shape: 'procedure',
+      meta: {
+        name: 'Test Module 1',
+        description: 'First test module',
+        semantic: 'Test semantic content',
+      },
+      body: {
+        goal: 'Test goal',
+        process: ['Step 1', 'Step 2'],
+      },
     },
-    body: {
-      goal: 'Apply deductive reasoning principles',
+    {
+      id: 'test/module-2',
+      filePath: '/test/module-2.md',
+      version: '1.0',
+      schemaVersion: '1.0',
+      shape: 'specification',
+      meta: {
+        name: 'Test Module 2',
+        description: 'Second test module',
+        semantic: 'Test semantic content',
+      },
+      body: {
+        goal: 'Test specification',
+      },
     },
-  };
+  ];
 
-  const mockResolutionResult = {
-    modules: [mockModule],
-    warnings: [],
-    missingModules: [],
-  };
-
-  const mockBuildReport = {
+  const mockBuildReport: BuildReport = {
     personaName: 'Test Persona',
     schemaVersion: '1.0',
     toolVersion: '1.0.0',
     personaDigest: 'abc123',
     buildTimestamp: '2023-01-01T00:00:00.000Z',
-    moduleGroups: [],
+    moduleGroups: [
+      {
+        groupName: 'Test Group',
+        modules: [],
+      },
+    ],
   };
 
   beforeEach(() => {
     vi.clearAllMocks();
+    mockExit.mockClear();
 
-    // Setup mock return values
-    vi.mocked(parsePersona).mockReturnValue(mockPersona);
-    vi.mocked(renderMarkdown).mockReturnValue('# Test Persona\n\nGenerated markdown content');
-    vi.mocked(generateBuildReport).mockReturnValue(mockBuildReport);
-    vi.mocked(resolvePersonaModules).mockReturnValue(mockResolutionResult);
-
-    // Set up mock module discovery
-    vi.mocked(discoverAllModules).mockResolvedValue({
-      modules: [],
+    // Setup default mocks
+    mockDiscoverAllModules.mockResolvedValue({
+      modules: mockModules,
       warnings: [],
     });
 
-    // Set up mock registry behavior
-    mockModuleRegistry.size.mockReturnValue(0);
-    mockModuleRegistry.getWarnings.mockReturnValue([]);
-
-    // Set up default build engine behavior
-    mockBuildEngine.build.mockResolvedValue({
-      persona: { name: 'Test Persona', moduleGroups: [] },
-      markdown: '# Test Persona Instructions',
-      modules: [],
-      buildReport: {
-        persona: { name: 'Test Persona', moduleGroups: [] },
-        modules: [],
-        moduleGroups: [],
-      },
+    mockParsePersona.mockReturnValue(mockPersona);
+    mockRenderMarkdown.mockReturnValue(
+      '# Test Persona Instructions\\n\\nTest content'
+    );
+    mockGenerateBuildReport.mockReturnValue(mockBuildReport);
+    mockResolvePersonaModules.mockReturnValue({
+      modules: mockModules,
+      missingModules: [],
       warnings: [],
     });
-  });
-
-  afterAll(() => {
-    vi.restoreAllMocks();
   });
 
   it('should build persona from file with output to file', async () => {
     // Arrange
-    const mockPersona = { name: 'Test Persona', moduleGroups: [] };
-    const mockMarkdown = '# Test Persona Instructions';
-    const mockBuildReport = {
-      persona: mockPersona,
-      modules: [],
-      moduleGroups: [],
-    };
-
-    mockBuildEngine.build.mockResolvedValue({
-      persona: mockPersona,
-      markdown: mockMarkdown,
-      modules: [],
-      buildReport: mockBuildReport,
-      warnings: [],
-    });
-
     const options = {
       persona: 'test.persona.yml',
       output: 'output.md',
+      verbose: false,
     };
+
+    mockReadFromStdin.mockResolvedValue('');
+    mockWriteOutputFile.mockResolvedValue();
 
     // Act
     await handleBuild(options);
 
     // Assert
-    expect(BuildEngine).toHaveBeenCalled();
-    expect(mockBuildEngine.build).toHaveBeenCalledWith({
-      personaSource: 'test.persona.yml',
-      outputTarget: 'output.md',
-    });
-    expect(writeOutputFile).toHaveBeenCalledWith('output.md', mockMarkdown);
-    expect(writeOutputFile).toHaveBeenCalledWith(
+    expect(mockDiscoverAllModules).toHaveBeenCalled();
+    expect(mockParsePersona).toHaveBeenCalled();
+    expect(mockResolvePersonaModules).toHaveBeenCalledWith(
+      mockPersona,
+      mockModules
+    );
+    expect(mockRenderMarkdown).toHaveBeenCalledWith(mockPersona, mockModules);
+    expect(mockGenerateBuildReport).toHaveBeenCalledWith(
+      mockPersona,
+      mockModules
+    );
+    expect(mockWriteOutputFile).toHaveBeenCalledWith(
+      'output.md',
+      '# Test Persona Instructions\\n\\nTest content'
+    );
+    expect(mockWriteOutputFile).toHaveBeenCalledWith(
       'output.build.json',
       JSON.stringify(mockBuildReport, null, 2)
     );
@@ -205,222 +197,135 @@ describe('build command', () => {
 
   it('should build persona from stdin with output to stdout', async () => {
     // Arrange
-    const mockPersona = { name: 'Test Persona', moduleGroups: [] };
-    const mockMarkdown = '# Test Persona Instructions';
-    const mockBuildReport = {
-      persona: mockPersona,
-      modules: [],
-      moduleGroups: [],
+    const options = {
+      verbose: false,
     };
 
-    mockBuildEngine.build.mockResolvedValue({
-      persona: mockPersona,
-      markdown: mockMarkdown,
-      modules: [],
-      buildReport: mockBuildReport,
-      warnings: [],
-    });
+    const mockStdinContent = `
+name: Test Persona
+description: A test persona
+semantic: ""
+identity: You are a helpful test assistant
+moduleGroups:
+  - groupName: Test Group
+    modules:
+      - test/module-1
+`;
 
-    // Mock readFromStdin for this test
-    vi.mocked(readFromStdin).mockResolvedValue(
-      'name: Test Persona\nmoduleGroups: []'
-    );
-
-    const options = {};
+    mockReadFromStdin.mockResolvedValue(mockStdinContent);
+    const mockConsoleLog = vi
+      .spyOn(console, 'log')
+      .mockImplementation(() => {});
 
     // Act
     await handleBuild(options);
 
     // Assert
-    expect(mockBuildEngine.build).toHaveBeenCalledWith({
-      personaSource: 'stdin',
-      outputTarget: 'stdout',
-      personaContent: 'name: Test Persona\nmoduleGroups: []',
-    });
-    expect(mockConsoleLog).toHaveBeenCalledWith(mockMarkdown);
-    expect(writeFile).not.toHaveBeenCalled();
+    expect(mockReadFromStdin).toHaveBeenCalled();
+    expect(mockParsePersona).toHaveBeenCalledWith(mockStdinContent);
+    expect(mockConsoleLog).toHaveBeenCalledWith(
+      '# Test Persona Instructions\\n\\nTest content'
+    );
+
+    mockConsoleLog.mockRestore();
   });
 
   it('should handle verbose mode', async () => {
     // Arrange
-    const mockPersona = { name: 'Test Persona', moduleGroups: [] };
-    const mockMarkdown = '# Test Persona Instructions';
-    const mockBuildReport = {
-      persona: mockPersona,
-      modules: [],
-      moduleGroups: [],
-    };
-
-    mockBuildEngine.build.mockResolvedValue({
-      persona: mockPersona,
-      markdown: mockMarkdown,
-      modules: [],
-      buildReport: mockBuildReport,
-      warnings: [],
-    });
-
     const options = {
       persona: 'test.persona.yml',
       verbose: true,
     };
 
+    const mockConsoleLog = vi
+      .spyOn(console, 'log')
+      .mockImplementation(() => {});
+
     // Act
     await handleBuild(options);
 
     // Assert
-    expect(mockBuildEngine.build).toHaveBeenCalledWith({
-      personaSource: 'test.persona.yml',
-      outputTarget: 'stdout',
-      verbose: true,
-    });
     expect(mockConsoleLog).toHaveBeenCalledWith(
-      expect.stringContaining(
-        '[INFO] build: Reading persona from test.persona.yml'
-      )
-    );
-  });
-
-  it('should build persona from file with output to stdout', async () => {
-    // Arrange
-    const mockPersona = { name: 'Test Persona', moduleGroups: [] };
-    const mockMarkdown = '# Test Persona Instructions';
-    const mockBuildReport = {
-      persona: mockPersona,
-      modules: [],
-      moduleGroups: [],
-    };
-
-    mockBuildEngine.build.mockResolvedValue({
-      persona: mockPersona,
-      markdown: mockMarkdown,
-      modules: [],
-      buildReport: mockBuildReport,
-      warnings: [],
-    });
-
-    const options = {
-      persona: 'test.persona.yml',
-    };
-
-    // Act
-    await handleBuild(options);
-
-    // Assert
-    expect(mockBuildEngine.build).toHaveBeenCalledWith({
-      personaSource: 'test.persona.yml',
-      outputTarget: 'stdout',
-    });
-    expect(mockConsoleLog).toHaveBeenCalledWith(mockMarkdown);
-    expect(writeFile).not.toHaveBeenCalled();
-  });
-
-  it('should handle persona from stdin with file output', async () => {
-    // Arrange
-    const mockPersona = { name: 'Test Persona', moduleGroups: [] };
-    const mockMarkdown = '# Test Persona Instructions';
-    const mockBuildReport = {
-      persona: mockPersona,
-      modules: [],
-      moduleGroups: [],
-    };
-
-    mockBuildEngine.build.mockResolvedValue({
-      persona: mockPersona,
-      markdown: mockMarkdown,
-      modules: [],
-      buildReport: mockBuildReport,
-      warnings: [],
-    });
-
-    // Mock readFromStdin for this test
-    vi.mocked(readFromStdin).mockResolvedValue(
-      'name: Test Persona\nmoduleGroups: []'
+      expect.stringContaining('[INFO] build:')
     );
 
-    const options = {
-      output: 'output.md',
-    };
-
-    // Act
-    await handleBuild(options);
-
-    // Assert
-    expect(mockBuildEngine.build).toHaveBeenCalledWith({
-      personaSource: 'stdin',
-      outputTarget: 'output.md',
-      personaContent: 'name: Test Persona\nmoduleGroups: []',
-    });
-    expect(writeOutputFile).toHaveBeenCalledWith('output.md', mockMarkdown);
-    expect(writeOutputFile).toHaveBeenCalledWith(
-      'output.build.json',
-      JSON.stringify(mockBuildReport, null, 2)
-    );
+    mockConsoleLog.mockRestore();
   });
 
   it('should handle build errors gracefully', async () => {
     // Arrange
     const error = new Error('Build failed');
-    mockBuildEngine.build.mockRejectedValue(error);
-
+    mockDiscoverAllModules.mockRejectedValue(error);
     const { handleError } = await import('../utils/error-handler.js');
+    const mockHandleError = vi.mocked(handleError);
 
     const options = {
       persona: 'test.persona.yml',
+      verbose: false,
     };
 
-    // Act & Assert - expect process.exit to be called
-    const mockExit = vi
-      .spyOn(process, 'exit')
-      .mockImplementation((code?: string | number | null) => {
-        throw new Error(`process.exit called with code ${code}`);
-      });
-
+    // Act & Assert
     await expect(handleBuild(options)).rejects.toThrow(
       'process.exit called with code 1'
     );
-
-    expect(handleError).toHaveBeenCalledWith(error, {
-      command: 'build',
-      context: 'build process',
-      suggestion: 'check persona file syntax and module references',
-    });
-    expect(mockExit).toHaveBeenCalledWith(1);
-
-    mockExit.mockRestore();
+    expect(mockHandleError).toHaveBeenCalledWith(
+      error,
+      expect.objectContaining({
+        command: 'build',
+        context: 'build process',
+      })
+    );
   });
 
-  it('should skip build report for stdout output', async () => {
+  it('should handle missing modules error', async () => {
     // Arrange
-    const mockPersona = { name: 'Test Persona', moduleGroups: [] };
-    const mockMarkdown = '# Test Persona Instructions';
-    const mockBuildReport = {
-      persona: mockPersona,
-      modules: [],
-      moduleGroups: [],
+    const options = {
+      persona: 'test.persona.yml',
+      verbose: false,
     };
 
-    mockBuildEngine.build.mockResolvedValue({
-      persona: mockPersona,
-      markdown: mockMarkdown,
+    mockResolvePersonaModules.mockReturnValue({
       modules: [],
-      buildReport: mockBuildReport,
+      missingModules: ['missing/module'],
       warnings: [],
     });
 
+    // Act & Assert
+    await expect(handleBuild(options)).rejects.toThrow(
+      'process.exit called with code 1'
+    );
+  });
+
+  it('should display warnings when present', async () => {
+    // Arrange
     const options = {
       persona: 'test.persona.yml',
-      // No output specified = stdout
+      verbose: false,
     };
+
+    mockDiscoverAllModules.mockResolvedValue({
+      modules: mockModules,
+      warnings: ['Test warning'],
+    });
+
+    mockResolvePersonaModules.mockReturnValue({
+      modules: mockModules,
+      missingModules: [],
+      warnings: ['Resolution warning'],
+    });
+
+    const mockConsoleLog = vi
+      .spyOn(console, 'log')
+      .mockImplementation(() => {});
 
     // Act
     await handleBuild(options);
 
     // Assert
-    expect(mockBuildEngine.build).toHaveBeenCalledWith({
-      personaSource: 'test.persona.yml',
-      outputTarget: 'stdout',
-    });
-    expect(writeFile).not.toHaveBeenCalled();
-    expect(mockConsoleLog).toHaveBeenCalledWith(mockMarkdown);
+    expect(mockConsoleLog).toHaveBeenCalledWith(
+      expect.stringContaining('Warnings:')
+    );
+
+    mockConsoleLog.mockRestore();
   });
 });

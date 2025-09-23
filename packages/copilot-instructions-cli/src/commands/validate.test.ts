@@ -18,11 +18,11 @@ vi.mock('chalk', () => ({
 const mockConsoleLog = vi.spyOn(console, 'log').mockImplementation(() => {});
 
 import { handleValidate } from './validate.js';
-import { loadModule, loadPersona } from 'ums-lib';
+import { parseModule, parsePersona } from 'ums-lib';
 import { handleError } from '../utils/error-handler.js';
 
-const mockLoadModule = vi.mocked(loadModule);
-const mockLoadPersona = vi.mocked(loadPersona);
+const mockParseModule = vi.mocked(parseModule);
+const mockParsePersona = vi.mocked(parsePersona);
 const mockGlobFn = vi.mocked(glob);
 
 // Mock dependencies for UMS v1.0
@@ -35,8 +35,8 @@ vi.mock('fs', () => ({
 
 vi.mock('glob');
 vi.mock('ums-lib', () => ({
-  loadModule: vi.fn(),
-  loadPersona: vi.fn(),
+  parseModule: vi.fn(),
+  parsePersona: vi.fn(),
 }));
 vi.mock('../utils/error-handler.js');
 
@@ -77,8 +77,8 @@ describe('handleValidate', () => {
         return Promise.resolve([]);
       });
 
-      mockLoadModule.mockResolvedValue({} as any);
-      mockLoadPersona.mockResolvedValue({} as any);
+      mockParseModule.mockReturnValue({} as any);
+      mockParsePersona.mockReturnValue({} as any);
 
       // Act
       await handleValidate();
@@ -92,8 +92,8 @@ describe('handleValidate', () => {
         nodir: true,
         ignore: ['**/node_modules/**'],
       });
-      expect(loadModule).toHaveBeenCalledTimes(2);
-      expect(loadPersona).toHaveBeenCalledTimes(1);
+      expect(mockParseModule).toHaveBeenCalledTimes(2);
+      expect(mockParsePersona).toHaveBeenCalledTimes(1);
     });
 
     it('should handle no files found', async () => {
@@ -118,14 +118,14 @@ describe('handleValidate', () => {
         isFile: () => true,
         isDirectory: () => false,
       } as any);
-      mockLoadModule.mockResolvedValue({} as any);
+      mockParseModule.mockReturnValue({} as any);
 
       // Act
       await handleValidate({ targetPath: filePath });
 
       // Assert
       expect(fs.stat).toHaveBeenCalledWith(filePath);
-      expect(loadModule).toHaveBeenCalledWith(filePath);
+      expect(mockParseModule).toHaveBeenCalled();
     });
 
     it('should validate a single UMS v1.0 persona file', async () => {
@@ -135,14 +135,14 @@ describe('handleValidate', () => {
         isFile: () => true,
         isDirectory: () => false,
       } as any);
-      mockLoadPersona.mockResolvedValue({} as any);
+      mockParsePersona.mockReturnValue({} as any);
 
       // Act
       await handleValidate({ targetPath: filePath });
 
       // Assert
       expect(fs.stat).toHaveBeenCalledWith(filePath);
-      expect(loadPersona).toHaveBeenCalledWith(filePath);
+      expect(mockParsePersona).toHaveBeenCalled();
     });
 
     it('should handle unsupported file types', async () => {
@@ -182,8 +182,8 @@ describe('handleValidate', () => {
         }
         return Promise.resolve([]);
       });
-      mockLoadModule.mockResolvedValue({} as any);
-      mockLoadPersona.mockResolvedValue({} as any);
+      mockParseModule.mockReturnValue({} as any);
+      mockParsePersona.mockReturnValue({} as any);
 
       // Act
       await handleValidate({ targetPath: dirPath });
@@ -226,7 +226,9 @@ describe('handleValidate', () => {
       } as any);
 
       // Mock validation failure
-      mockLoadModule.mockRejectedValue(new Error('Validation error'));
+      mockParseModule.mockImplementation(() => {
+        throw new Error('Validation error');
+      });
 
       // Act
       await handleValidate({ targetPath: filePath, verbose: true });

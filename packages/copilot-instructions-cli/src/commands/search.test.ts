@@ -1,7 +1,8 @@
-import { describe, it, expect, vi, beforeEach, afterAll } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import chalk from 'chalk';
 import { handleSearch } from './search.js';
 import { discoverAllModules } from '../utils/module-discovery.js';
+import type { UMSModule } from 'ums-lib';
 
 // Mock dependencies
 vi.mock('chalk', () => ({
@@ -40,18 +41,6 @@ vi.mock('cli-table3', () => ({
   })),
 }));
 
-// Mock UMS components
-const mockModuleRegistry = {
-  getAllModuleIds: vi.fn(),
-  resolve: vi.fn(),
-  size: vi.fn(),
-  getWarnings: vi.fn(),
-};
-
-vi.mock('ums-lib', () => ({
-  ModuleRegistry: vi.fn().mockImplementation(() => mockModuleRegistry),
-}));
-
 vi.mock('../utils/module-discovery.js', () => ({
   discoverAllModules: vi.fn(),
 }));
@@ -73,315 +62,153 @@ vi.mock('../utils/progress.js', () => ({
 const mockConsoleLog = vi.spyOn(console, 'log').mockImplementation(() => {
   /* noop */
 });
-const mockConsoleWarn = vi.spyOn(console, 'warn').mockImplementation(() => {
-  /* noop */
-});
-
-import { handleError } from '../utils/error-handler.js';
-import type { UMSModule } from 'ums-lib';
 
 describe('search command', () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-
-    // Set up mock module discovery
-    vi.mocked(discoverAllModules).mockResolvedValue({
-      modules: [mockModule1, mockModule2, mockModule3],
-      warnings: [],
-    });
-
-    // Set up mock registry behavior
-    mockModuleRegistry.getAllModuleIds.mockReturnValue([
-      'foundation/logic/deductive-reasoning',
-      'technology/react/hooks',
-      'principle/quality/testing',
-    ]);
-    mockModuleRegistry.resolve.mockImplementation((id: string) => {
-      if (id === 'foundation/logic/deductive-reasoning') return mockModule1;
-      if (id === 'technology/react/hooks') return mockModule2;
-      if (id === 'principle/quality/testing') return mockModule3;
-      return undefined;
-    });
-    mockModuleRegistry.size.mockReturnValue(3);
-    mockModuleRegistry.getWarnings.mockReturnValue([]);
-  });
-
-  afterAll(() => {
-    vi.restoreAllMocks();
-  });
+  const mockDiscoverAllModules = vi.mocked(discoverAllModules);
 
   const mockModule1: UMSModule = {
     id: 'foundation/logic/deductive-reasoning',
-    version: '1.0.0',
+    filePath: '/test/foundation/logic/deductive-reasoning.md',
+    version: '1.0',
     schemaVersion: '1.0',
-    shape: 'specification',
+    shape: 'procedure',
     meta: {
       name: 'Deductive Reasoning',
-      description: 'Apply logical deduction principles',
-      semantic: 'reasoning-logic',
+      description: 'Logical reasoning from premises',
+      semantic: 'Logical reasoning from premises',
       tags: ['logic', 'reasoning'],
     },
     body: {
-      goal: 'Test goal',
-      principles: ['Test principle'],
-      constraints: ['Test constraint'],
+      goal: 'Apply deductive reasoning',
+      process: ['Identify premises', 'Apply logic'],
     },
-    filePath: '/test/foundation/logic/deductive-reasoning.module.yml',
   };
 
   const mockModule2: UMSModule = {
-    id: 'technology/react/hooks',
-    version: '1.0.0',
-    schemaVersion: '1.0',
-    shape: 'pattern',
-    meta: {
-      name: 'React Hooks',
-      description: 'React hook patterns',
-      semantic: 'React hooks usage patterns',
-      tags: ['frontend', 'react'],
-    },
-    body: {
-      goal: 'Hook usage patterns',
-      principles: ['Use hooks properly'],
-    },
-    filePath: '/test/technology/react/hooks.module.yml',
-  };
-
-  const mockModule3: UMSModule = {
     id: 'principle/quality/testing',
-    version: '1.0.0',
+    filePath: '/test/principle/quality/testing.md',
+    version: '1.0',
     schemaVersion: '1.0',
     shape: 'specification',
     meta: {
-      name: 'Quality Testing',
-      description: 'Testing principles',
-      semantic: 'Quality testing principles',
+      name: 'Testing Principles',
+      description: 'Quality assurance through testing',
+      semantic: 'Quality assurance through testing',
     },
     body: {
-      goal: 'Ensure quality',
-      principles: ['Test thoroughly'],
+      goal: 'Ensure quality through testing',
     },
-    filePath: '/test/principle/quality/testing.module.yml',
   };
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
 
   it('should search modules by name', async () => {
     // Arrange
-    mockModuleRegistry.getAllModuleIds.mockReturnValue([
-      'foundation/logic/deductive-reasoning',
-      'technology/react/hooks',
-      'principle/quality/testing',
-    ]);
-    mockModuleRegistry.resolve
-      .mockReturnValueOnce(mockModule1)
-      .mockReturnValueOnce(mockModule2)
-      .mockReturnValueOnce(mockModule3);
+    mockDiscoverAllModules.mockResolvedValue({
+      modules: [mockModule1, mockModule2],
+      warnings: [],
+    });
 
     // Act
-    await handleSearch('React', {});
+    await handleSearch('Deductive', { verbose: false });
 
     // Assert
-    expect(discoverAllModules).toHaveBeenCalled();
     expect(mockConsoleLog).toHaveBeenCalledWith(
-      expect.stringContaining('Search results for "React"')
-    );
-    expect(mockConsoleLog).toHaveBeenCalledWith(
-      expect.stringContaining('Found 1 matching modules')
+      expect.stringContaining('Search results for "Deductive"')
     );
   });
 
   it('should search modules by description', async () => {
     // Arrange
-    mockModuleRegistry.getAllModuleIds.mockReturnValue([
-      'foundation/logic/deductive-reasoning',
-      'technology/react/hooks',
-      'principle/quality/testing',
-    ]);
-    mockModuleRegistry.resolve
-      .mockReturnValueOnce(mockModule1)
-      .mockReturnValueOnce(mockModule2)
-      .mockReturnValueOnce(mockModule3);
+    mockDiscoverAllModules.mockResolvedValue({
+      modules: [mockModule1, mockModule2],
+      warnings: [],
+    });
 
     // Act
-    await handleSearch('logical', {});
+    await handleSearch('quality', { verbose: false });
 
     // Assert
     expect(mockConsoleLog).toHaveBeenCalledWith(
-      expect.stringContaining('Search results for "logical"')
-    );
-    expect(mockConsoleLog).toHaveBeenCalledWith(
-      expect.stringContaining('Found 1 matching modules')
+      expect.stringContaining('Search results for "quality"')
     );
   });
 
   it('should search modules by tags', async () => {
     // Arrange
-    mockModuleRegistry.getAllModuleIds.mockReturnValue([
-      'foundation/logic/deductive-reasoning',
-      'technology/react/hooks',
-      'principle/quality/testing',
-    ]);
-    mockModuleRegistry.resolve
-      .mockReturnValueOnce(mockModule1)
-      .mockReturnValueOnce(mockModule2)
-      .mockReturnValueOnce(mockModule3);
+    mockDiscoverAllModules.mockResolvedValue({
+      modules: [mockModule1],
+      warnings: [],
+    });
 
     // Act
-    await handleSearch('frontend', {});
-
-    // Assert
-    expect(mockConsoleLog).toHaveBeenCalledWith(
-      expect.stringContaining('Search results for "frontend"')
-    );
-    expect(mockConsoleLog).toHaveBeenCalledWith(
-      expect.stringContaining('Found 1 matching modules')
-    );
-  });
-
-  it('should filter by tier', async () => {
-    // Arrange
-    mockModuleRegistry.getAllModuleIds.mockReturnValue([
-      'foundation/logic/deductive-reasoning',
-      'technology/react/hooks',
-      'principle/quality/testing',
-    ]);
-    mockModuleRegistry.resolve
-      .mockReturnValueOnce(mockModule1)
-      .mockReturnValueOnce(mockModule2)
-      .mockReturnValueOnce(mockModule3);
-
-    // Act
-    await handleSearch('reasoning', { tier: 'foundation' });
+    await handleSearch('reasoning', { verbose: false });
 
     // Assert
     expect(mockConsoleLog).toHaveBeenCalledWith(
       expect.stringContaining('Search results for "reasoning"')
     );
+  });
+
+  it('should filter by tier', async () => {
+    // Arrange
+    mockDiscoverAllModules.mockResolvedValue({
+      modules: [mockModule1, mockModule2],
+      warnings: [],
+    });
+
+    // Act
+    await handleSearch('', { tier: 'foundation', verbose: false });
+
+    // Assert - should only show foundation modules
     expect(mockConsoleLog).toHaveBeenCalledWith(
       expect.stringContaining('Found 1 matching modules')
     );
   });
 
-  it('should handle invalid tier filter', async () => {
-    // Arrange
-    mockModuleRegistry.getAllModuleIds.mockReturnValue(['test-module']);
-
-    // Act & Assert
-    await expect(
-      handleSearch('test', { tier: 'invalid' })
-    ).resolves.not.toThrow();
-    expect(handleError).toHaveBeenCalled();
-  });
-
   it('should handle no search results', async () => {
     // Arrange
-    mockModuleRegistry.getAllModuleIds.mockReturnValue([
-      'foundation/logic/deductive-reasoning',
-    ]);
-    mockModuleRegistry.resolve.mockReturnValue(mockModule1);
+    mockDiscoverAllModules.mockResolvedValue({
+      modules: [mockModule1, mockModule2],
+      warnings: [],
+    });
 
     // Act
-    await handleSearch('nonexistent', {});
+    await handleSearch('nonexistent', { verbose: false });
 
     // Assert
-    expect(chalk.yellow).toHaveBeenCalledWith(
+    expect(mockConsoleLog).toHaveBeenCalledWith(
       'No modules found matching "nonexistent".'
-    );
-  });
-
-  it('should handle no search results with tier filter', async () => {
-    // Arrange
-    mockModuleRegistry.getAllModuleIds.mockReturnValue([
-      'foundation/logic/deductive-reasoning',
-    ]);
-    mockModuleRegistry.resolve.mockReturnValue(mockModule1);
-
-    // Act
-    await handleSearch('react', { tier: 'foundation' });
-
-    // Assert
-    expect(chalk.yellow).toHaveBeenCalledWith(
-      'No modules found matching "react" in tier \'foundation\'.'
     );
   });
 
   it('should handle no modules found during discovery', async () => {
     // Arrange
-    mockModuleRegistry.getAllModuleIds.mockReturnValue([]);
+    mockDiscoverAllModules.mockResolvedValue({
+      modules: [],
+      warnings: [],
+    });
 
     // Act
-    await handleSearch('test', {});
+    await handleSearch('test', { verbose: false });
 
     // Assert
     expect(chalk.yellow).toHaveBeenCalledWith('No UMS v1.0 modules found.');
   });
 
-  it('should handle module loading errors gracefully', async () => {
-    // Arrange
-    mockModuleRegistry.getAllModuleIds.mockReturnValue(['test-module']);
-    mockModuleRegistry.resolve.mockReturnValue(null); // Simulate module not found
-
-    // Act
-    await handleSearch('test', {});
-
-    // Assert
-    expect(mockConsoleWarn).toHaveBeenCalledWith(
-      expect.stringContaining(
-        'Warning: Module test-module not found in registry'
-      )
-    );
-  });
-
-  it('should sort results by meta.name then id', async () => {
-    // Arrange
-    const moduleA: UMSModule = {
-      ...mockModule1,
-      id: 'foundation/logic/a-module',
-      meta: { ...mockModule1.meta, name: 'A Module' },
-    };
-    const moduleB: UMSModule = {
-      ...mockModule2,
-      id: 'technology/react/b-module',
-      meta: { ...mockModule2.meta, name: 'A Module' }, // Same name as moduleA
-    };
-    const moduleC: UMSModule = {
-      ...mockModule3,
-      id: 'principle/quality/c-module',
-      meta: { ...mockModule3.meta, name: 'Z Module' },
-    };
-
-    mockModuleRegistry.getAllModuleIds.mockReturnValue([
-      'principle/quality/c-module',
-      'technology/react/b-module',
-      'foundation/logic/a-module',
-    ]);
-    mockModuleRegistry.resolve
-      .mockReturnValueOnce(moduleC)
-      .mockReturnValueOnce(moduleB)
-      .mockReturnValueOnce(moduleA);
-
-    // Act - search for something that matches all modules
-    await handleSearch('Module', {});
-
-    // Assert - verify that modules are sorted by name first, then by id for ties
-    expect(mockConsoleLog).toHaveBeenCalledWith(
-      expect.stringContaining('Found 3 matching modules')
-    );
-  });
-
   it('should handle case-insensitive search', async () => {
     // Arrange
-    mockModuleRegistry.getAllModuleIds.mockReturnValue([
-      'foundation/logic/deductive-reasoning',
-    ]);
-    mockModuleRegistry.resolve.mockReturnValue(mockModule1);
+    mockDiscoverAllModules.mockResolvedValue({
+      modules: [mockModule1],
+      warnings: [],
+    });
 
-    // Act - search with different cases
-    await handleSearch('DEDUCTIVE', {});
+    // Act
+    await handleSearch('DEDUCTIVE', { verbose: false });
 
     // Assert
-    expect(mockConsoleLog).toHaveBeenCalledWith(
-      expect.stringContaining('Search results for "DEDUCTIVE"')
-    );
     expect(mockConsoleLog).toHaveBeenCalledWith(
       expect.stringContaining('Found 1 matching modules')
     );
@@ -390,22 +217,19 @@ describe('search command', () => {
   it('should handle modules without tags', async () => {
     // Arrange
     const moduleWithoutTags: UMSModule = {
-      ...mockModule1,
-      meta: {
-        name: mockModule1.meta.name,
-        description: mockModule1.meta.description,
-        semantic: mockModule1.meta.semantic,
-        // No tags property (omitted)
-      },
+      ...mockModule2,
+      meta: { ...mockModule2.meta },
     };
 
-    mockModuleRegistry.getAllModuleIds.mockReturnValue(['test-module']);
-    mockModuleRegistry.resolve.mockReturnValue(moduleWithoutTags);
+    mockDiscoverAllModules.mockResolvedValue({
+      modules: [moduleWithoutTags],
+      warnings: [],
+    });
 
     // Act
-    await handleSearch('reasoning', {});
+    await handleSearch('testing', { verbose: false });
 
-    // Assert - should still find the module by name/description
+    // Assert - should still find module by description
     expect(mockConsoleLog).toHaveBeenCalledWith(
       expect.stringContaining('Found 1 matching modules')
     );

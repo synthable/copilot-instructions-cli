@@ -50,7 +50,6 @@ export function generateBuildReport(
           source: 'Local', // TODO: Distinguish between Standard Library and Local
           digest: moduleDigest ? `sha256:${moduleDigest}` : '',
           shape: module.shape,
-          filePath: module.filePath ?? '',
           deprecated: module.meta.deprecated ?? false,
         };
 
@@ -105,9 +104,7 @@ export function generatePersonaDigest(persona: UMSPersona): string {
     moduleGroups: persona.moduleGroups,
   });
 
-  return createHash('sha256')
-    .update(personaContent)
-    .digest('hex');
+  return createHash('sha256').update(personaContent).digest('hex');
 }
 
 /**
@@ -116,7 +113,5 @@ export function generatePersonaDigest(persona: UMSPersona): string {
  * @returns SHA-256 digest of module content
  */
 export function generateModuleDigest(content: string): string {
-  return createHash('sha256')
-    .update(content)
-    .digest('hex');
+  return createHash('sha256').update(content).digest('hex');
 }

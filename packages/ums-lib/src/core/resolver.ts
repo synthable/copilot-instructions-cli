@@ -3,7 +3,14 @@
  * Handles module resolution, dependency management, and validation
  */
 
-import type { UMSModule, UMSPersona, ModuleGroup, ValidationResult, ValidationError, ValidationWarning } from '../types/index.js';
+import type {
+  UMSModule,
+  UMSPersona,
+  ModuleGroup,
+  ValidationResult,
+  ValidationError,
+  ValidationWarning,
+} from '../types/index.js';
 
 /**
  * Result of module resolution operation
@@ -113,7 +120,9 @@ export function validateModuleReferences(
  * @param modules - Array of UMS modules
  * @returns Map with module ID as key and module as value
  */
-export function createModuleRegistry(modules: UMSModule[]): Map<string, UMSModule> {
+export function createModuleRegistry(
+  modules: UMSModule[]
+): Map<string, UMSModule> {
   const registry = new Map<string, UMSModule>();
 
   for (const module of modules) {
@@ -140,7 +149,10 @@ export function resolvePersonaModules(
   const basicResolution = resolveModules(persona.moduleGroups, registry);
 
   // Then resolve implementations for the found modules
-  const resolvedModules = resolveImplementations(basicResolution.modules, registry);
+  const resolvedModules = resolveImplementations(
+    basicResolution.modules,
+    registry
+  );
 
   return {
     modules: resolvedModules,

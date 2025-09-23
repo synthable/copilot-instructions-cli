@@ -185,8 +185,6 @@ export interface BuildReportModule {
   digest: string;
   /** Module shape */
   shape: string;
-  /** Absolute file path */
-  filePath: string;
   /** Whether module is deprecated */
   deprecated: boolean;
   /** Replacement module ID if deprecated */

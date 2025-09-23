@@ -17,7 +17,10 @@ import type {
  * @param modules - Array of resolved modules in correct order
  * @returns Rendered Markdown content
  */
-export function renderMarkdown(persona: UMSPersona, modules: UMSModule[]): string {
+export function renderMarkdown(
+  persona: UMSPersona,
+  modules: UMSModule[]
+): string {
   const sections: string[] = [];
 
   // Render persona identity if present and not empty (Section 7.1)
@@ -36,7 +39,6 @@ export function renderMarkdown(persona: UMSPersona, modules: UMSModule[]): strin
     }
 
     for (const module of group.modules.map(() => modules[moduleIndex++])) {
-
       // Render module content
       sections.push(renderModule(module));
 
@@ -79,7 +81,10 @@ export function renderModule(module: UMSModule): string {
  * @param content - The directive content
  * @returns Rendered directive content
  */
-export function renderDirective(directive: DirectiveKey, content: unknown): string {
+export function renderDirective(
+  directive: DirectiveKey,
+  content: unknown
+): string {
   switch (directive) {
     case 'goal':
       return renderGoal(content as string);
