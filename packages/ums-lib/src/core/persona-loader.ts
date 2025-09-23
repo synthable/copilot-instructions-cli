@@ -33,7 +33,25 @@ function isValidRawPersonaData(data: unknown): data is RawPersonaData {
 }
 
 /**
- * Parses and validates a UMS v1.0 persona from content string
+ * Parses and validates a UMS v1.0 persona from a YAML content string.
+ *
+ * The YAML content must define a persona object with the following structure:
+ *
+ * ```yaml
+ * name: string                # Required. The persona's name.
+ * version: string             # Required. The persona's version.
+ * schemaVersion: string       # Required. The UMS schema version (e.g., "1.0").
+ * description: string         # Required. Description of the persona.
+ * semantic: string            # Required. Semantic meaning or type.
+ * identity: string            # Required. Unique identity string.
+ * attribution: boolean        # Optional. Whether attribution is required.
+ * moduleGroups:               # Required. Array of module group objects.
+ *   - ...                     # ModuleGroup structure as defined in UMS spec.
+ * ```
+ *
+ * @param {string} content - The YAML string representing a UMS v1.0 persona.
+ * @returns {UMSPersona} The validated persona object.
+ * @throws {Error} If the YAML is invalid, or if the persona fails validation.
  */
 export function parsePersona(content: string): UMSPersona {
   try {
