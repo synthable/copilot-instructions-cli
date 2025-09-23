@@ -29,7 +29,7 @@ export interface UMSModule {
   meta: ModuleMeta;
   /** The instructional content */
   body: ModuleBody;
-  /** Absolute path to the source file (optional for parsed content) */
+  /** Absolute path to the source file (present when loaded from filesystem, absent for parsed content) */
   filePath?: string;
 }
 
