@@ -12,12 +12,14 @@ import {
   getConflictStrategy,
 } from './config-loader.js';
 
-/**
- * Discovers standard library modules from the default modules directory
- */
-export async function discoverStandardModules(): Promise<UMSModule[]> {
-  const standardModulesPath = './instructions-modules-v1-compliant';
+const DEFAULT_STANDARD_MODULES_PATH = './instructions-modules-v1-compliant';
 
+/**
+ * Discovers standard library modules from the specified modules directory
+ */
+export async function discoverStandardModules(
+  standardModulesPath: string = DEFAULT_STANDARD_MODULES_PATH
+): Promise<UMSModule[]> {
   try {
     const moduleFiles = await discoverModuleFiles([standardModulesPath]);
     const modules: UMSModule[] = [];
