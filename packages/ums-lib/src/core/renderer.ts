@@ -38,7 +38,9 @@ export function renderMarkdown(
       sections.push(`# ${group.groupName}\n`);
     }
 
-    for (const module of group.modules.map(() => modules[moduleIndex++])) {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    for (const _moduleId of group.modules) {
+      const module = modules[moduleIndex++];
       // Render module content
       sections.push(renderModule(module));
 
