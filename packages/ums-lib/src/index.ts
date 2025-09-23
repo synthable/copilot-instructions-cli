@@ -20,6 +20,7 @@ export {
   ModuleLoadError,
   PersonaLoadError,
   BuildError,
+  ConflictError,
   isUMSError,
   isValidationError,
 } from './utils/errors.js';
