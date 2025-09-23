@@ -41,7 +41,15 @@ function isValidRawModuleData(data: unknown): data is RawModuleData {
 }
 
 /**
- * Parses and validates a UMS v1.0 module from content string
+ * Parses and validates a UMS v1.0 module from a YAML content string.
+ *
+ * The input string must be valid YAML representing a UMS v1.0 module. The function will
+ * parse the YAML and validate the resulting object according to the UMS v1.0 specification.
+ * If the content is invalid YAML or fails validation, an error will be thrown.
+ *
+ * @param {string} content - The YAML string containing the UMS module definition.
+ * @returns {UMSModule} The validated UMS module object.
+ * @throws {Error} If the content is not valid YAML or fails UMS module validation.
  */
 export function parseModule(content: string): UMSModule {
   try {
