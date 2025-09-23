@@ -38,21 +38,18 @@ export function renderMarkdown(
       sections.push(`# ${group.groupName}\n`);
     }
 
+    const moduleBlocks: string[] = [];
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     for (const _moduleId of group.modules) {
       const module = modules[moduleIndex++];
-      // Render module content
-      sections.push(renderModule(module));
-
-      // Add attribution if enabled
+      let block = renderModule(module);
       if (persona.attribution) {
-        sections.push(`[Attribution: ${module.id}]\n`);
+        block += `\n[Attribution: ${module.id}]\n`;
       }
-
-      // Add separator between modules (but not after the last one)
-      if (moduleIndex < modules.length) {
-        sections.push('---\n');
-      }
+      moduleBlocks.push(block);
+    }
+    if (moduleBlocks.length > 0) {
+      sections.push(moduleBlocks.join('---\n'));
     }
   }
 
