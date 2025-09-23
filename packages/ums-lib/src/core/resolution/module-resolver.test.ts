@@ -9,8 +9,8 @@ import {
   validateModuleReferences,
   createModuleRegistry,
   resolvePersonaModules,
-} from './resolver.js';
-import type { UMSModule, UMSPersona } from '../types/index.js';
+} from './module-resolver.js';
+import type { UMSModule, UMSPersona } from '../../types/index.js';
 
 // Mock modules for testing
 const mockModule1: UMSModule = {

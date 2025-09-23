@@ -3,13 +3,13 @@
  * Implements Markdown rendering according to UMS v1.0 specification Section 7.1
  */
 
-import { RENDER_ORDER, type DirectiveKey } from '../constants.js';
+import { RENDER_ORDER, type DirectiveKey } from '../../constants.js';
 import type {
   UMSModule,
   UMSPersona,
   DataDirective,
   ExampleDirective,
-} from '../types/index.js';
+} from '../../types/index.js';
 
 /**
  * Renders a complete persona with modules to Markdown

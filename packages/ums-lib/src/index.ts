@@ -10,39 +10,8 @@ export * from './types/index.js';
 
 // Deprecated classes removed in Phase 4 - use pure functions instead
 
-// Export pure parsing functions (file-based loading removed in Phase 4)
-export { parseModule } from './core/module-loader.js';
-export { parsePersona } from './core/persona-loader.js';
-
-// Export pure functions for Phase 3 architecture
-export {
-  resolveModules,
-  resolveImplementations,
-  validateModuleReferences,
-  createModuleRegistry,
-  resolvePersonaModules,
-  type ModuleResolutionResult,
-} from './core/resolver.js';
-
-export {
-  renderMarkdown,
-  renderModule,
-  renderDirective,
-  renderGoal,
-  renderPrinciples,
-  renderConstraints,
-  renderProcess,
-  renderCriteria,
-  renderData,
-  renderExamples,
-  inferLanguageFromMediaType,
-} from './core/renderer.js';
-
-export {
-  generateBuildReport,
-  generatePersonaDigest,
-  generateModuleDigest,
-} from './core/report-generator.js';
+// Export all core functionality from organized domains
+export * from './core/index.js';
 
 // Export error types
 export {

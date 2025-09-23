@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { validateModule } from './module-loader.js';
+import { validateModule } from '../validation/module-validator.js';
 
 describe('UMS Module Loader', () => {
   describe('validateModule', () => {

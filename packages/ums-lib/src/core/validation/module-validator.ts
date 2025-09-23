@@ -1,9 +1,8 @@
 /**
- * UMS v1.0 Module loader and validator (M1)
- * Implements module parsing and validation per UMS v1.0 specification
+ * UMS v1.0 Module Validation
+ * Implements module validation per UMS v1.0 specification
  */
 
-import { parse } from 'yaml';
 import {
   VALID_TIERS,
   MODULE_ID_REGEX,
@@ -12,66 +11,76 @@ import {
   STANDARD_SHAPE_SPECS,
   type StandardShape,
   type ValidTier,
-} from '../constants.js';
+} from '../../constants.js';
 import {
   ID_VALIDATION_ERRORS,
   SCHEMA_VALIDATION_ERRORS,
-} from '../utils/errors.js';
+} from '../../utils/errors.js';
 import type {
-  UMSModule,
   ValidationResult,
   ValidationWarning,
   ValidationError,
   ModuleMeta,
-} from '../types/index.js';
-
-// Raw parsed YAML structure before validation
-interface RawModuleData {
-  id?: unknown;
-  version?: unknown;
-  schemaVersion?: unknown;
-  shape?: unknown;
-  meta?: unknown;
-  body?: unknown;
-  [key: string]: unknown;
-}
-
-function isValidRawModuleData(data: unknown): data is RawModuleData {
-  return data !== null && typeof data === 'object' && !Array.isArray(data);
-}
+} from '../../types/index.js';
 
 /**
- * Parses and validates a UMS v1.0 module from a YAML content string.
- *
- * The input string must be valid YAML representing a UMS v1.0 module. The function will
- * parse the YAML and validate the resulting object according to the UMS v1.0 specification.
- * If the content is invalid YAML or fails validation, an error will be thrown.
- *
- * @param {string} content - The YAML string containing the UMS module definition.
- * @returns {UMSModule} The validated UMS module object.
- * @throws {Error} If the content is not valid YAML or fails UMS module validation.
+ * Validates a parsed UMS v1.0 module object
  */
-export function parseModule(content: string): UMSModule {
-  try {
-    const parsed: unknown = parse(content);
+export function validateModule(obj: unknown): ValidationResult {
+  const errors: ValidationError[] = [];
+  const warnings: ValidationWarning[] = [];
 
-    if (!isValidRawModuleData(parsed)) {
-      throw new Error('Invalid YAML: expected object at root');
-    }
-
-    // Validate the module structure
-    const validation = validateModule(parsed);
-    if (!validation.valid) {
-      const errorMessages = validation.errors.map(e => e.message).join('\n');
-      throw new Error(`Module validation failed:\n${errorMessages}`);
-    }
-
-    // After validation, we know this is a valid UMSModule structure
-    return parsed as UMSModule;
-  } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    throw new Error(`Failed to parse module: ${message}`);
+  if (!obj || typeof obj !== 'object') {
+    errors.push({
+      path: '',
+      message: 'Module must be an object',
+      section: 'Section 2.1',
+    });
+    return { valid: false, errors, warnings };
   }
+
+  const module = obj as Record<string, unknown>;
+
+  // Validate top-level required keys (Section 2.1)
+  errors.push(...validateRequiredKeys(module));
+
+  // Validate id field (Section 3)
+  if ('id' in module) {
+    const idValidation = validateId(module.id as string);
+    if (!idValidation.valid) {
+      errors.push(...idValidation.errors);
+    }
+  }
+
+  // Validate version and schema version fields
+  errors.push(...validateVersionFields(module));
+
+  // Validate shape (Section 2.5)
+  if ('shape' in module) {
+    const shapeValidation = validateShape(module.shape);
+    errors.push(...shapeValidation.errors);
+    warnings.push(...shapeValidation.warnings);
+  }
+
+  // Validate meta block (Section 2.2)
+  if ('meta' in module) {
+    const moduleId = 'id' in module ? (module.id as string) : undefined;
+    const metaValidation = validateMeta(module.meta, moduleId);
+    errors.push(...metaValidation.errors);
+    warnings.push(...metaValidation.warnings);
+  }
+
+  // Check for deprecation warnings
+  warnings.push(...validateDeprecation(module));
+
+  // Validate body against shape requirements (Section 4)
+  if ('body' in module && 'shape' in module) {
+    const bodyValidation = validateBodyForShape(module.body, module.shape);
+    errors.push(...bodyValidation.errors);
+    warnings.push(...bodyValidation.warnings);
+  }
+
+  return { valid: errors.length === 0, errors, warnings };
 }
 
 /**
@@ -166,66 +175,6 @@ function validateDeprecation(
   }
 
   return warnings;
-}
-
-/**
- * Validates a parsed UMS v1.0 module object
- */
-export function validateModule(obj: unknown): ValidationResult {
-  const errors: ValidationError[] = [];
-  const warnings: ValidationWarning[] = [];
-
-  if (!obj || typeof obj !== 'object') {
-    errors.push({
-      path: '',
-      message: 'Module must be an object',
-      section: 'Section 2.1',
-    });
-    return { valid: false, errors, warnings };
-  }
-
-  const module = obj as Record<string, unknown>;
-
-  // Validate top-level required keys (Section 2.1)
-  errors.push(...validateRequiredKeys(module));
-
-  // Validate id field (Section 3)
-  if ('id' in module) {
-    const idValidation = validateId(module.id as string);
-    if (!idValidation.valid) {
-      errors.push(...idValidation.errors);
-    }
-  }
-
-  // Validate version and schema version fields
-  errors.push(...validateVersionFields(module));
-
-  // Validate shape (Section 2.5)
-  if ('shape' in module) {
-    const shapeValidation = validateShape(module.shape);
-    errors.push(...shapeValidation.errors);
-    warnings.push(...shapeValidation.warnings);
-  }
-
-  // Validate meta block (Section 2.2)
-  if ('meta' in module) {
-    const moduleId = 'id' in module ? (module.id as string) : undefined;
-    const metaValidation = validateMeta(module.meta, moduleId);
-    errors.push(...metaValidation.errors);
-    warnings.push(...metaValidation.warnings);
-  }
-
-  // Check for deprecation warnings
-  warnings.push(...validateDeprecation(module));
-
-  // Validate body against shape requirements (Section 4)
-  if ('body' in module && 'shape' in module) {
-    const bodyValidation = validateBodyForShape(module.body, module.shape);
-    errors.push(...bodyValidation.errors);
-    warnings.push(...bodyValidation.warnings);
-  }
-
-  return { valid: errors.length === 0, errors, warnings };
 }
 
 /**
