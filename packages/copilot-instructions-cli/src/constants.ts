@@ -40,7 +40,6 @@ export const RENDER_ORDER: DirectiveKey[] = [
   'examples',
 ];
 
-
 // Schema version for UMS v1.0
 export const UMS_SCHEMA_VERSION = '1.0';
 

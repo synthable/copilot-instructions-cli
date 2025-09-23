@@ -3,7 +3,6 @@
  * Implements persona parsing and validation per UMS v1.0 specification
  */
 
-import { readFile } from 'fs/promises';
 import { parse } from 'yaml';
 import { MODULE_ID_REGEX, UMS_SCHEMA_VERSION } from '../constants.js';
 import {
@@ -34,12 +33,28 @@ function isValidRawPersonaData(data: unknown): data is RawPersonaData {
 }
 
 /**
- * Loads and validates a UMS v1.0 persona from file
+ * Parses and validates a UMS v1.0 persona from a YAML content string.
+ *
+ * The YAML content must define a persona object with the following structure:
+ *
+ * ```yaml
+ * name: string                # Required. The persona's name.
+ * version: string             # Required. The persona's version.
+ * schemaVersion: string       # Required. The UMS schema version (e.g., "1.0").
+ * description: string         # Required. Description of the persona.
+ * semantic: string            # Required. Semantic meaning or type.
+ * identity: string            # Required. Unique identity string.
+ * attribution: boolean        # Optional. Whether attribution is required.
+ * moduleGroups:               # Required. Array of module group objects.
+ *   - ...                     # ModuleGroup structure as defined in UMS spec.
+ * ```
+ *
+ * @param {string} content - The YAML string representing a UMS v1.0 persona.
+ * @returns {UMSPersona} The validated persona object.
+ * @throws {Error} If the YAML is invalid, or if the persona fails validation.
  */
-export async function loadPersona(filePath: string): Promise<UMSPersona> {
+export function parsePersona(content: string): UMSPersona {
   try {
-    // Read and parse YAML file
-    const content = await readFile(filePath, 'utf-8');
     const parsed: unknown = parse(content);
 
     if (!isValidRawPersonaData(parsed)) {
@@ -67,12 +82,10 @@ export async function loadPersona(filePath: string): Promise<UMSPersona> {
       moduleGroups: parsed.moduleGroups as ModuleGroup[],
     };
 
-    // Add filePath as a dynamic property
-    (validatedPersona as UMSPersona & { filePath: string }).filePath = filePath;
-    return validatedPersona as UMSPersona & { filePath: string };
+    return validatedPersona;
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
-    throw new Error(`Failed to load persona from ${filePath}: ${message}`);
+    throw new Error(`Failed to parse persona: ${message}`);
   }
 }
 

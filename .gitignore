@@ -141,9 +141,9 @@ vite.config.ts.timestamp-*
 .DS_Store
 docs/archive/
 docs/todo.md
-CLAUDE.md
+#CLAUDE.md
 .geminiignore
 docs/old/
-GEMINI.md
+#GEMINI.md
 untracked/
-.gemini/
+#.gemini/

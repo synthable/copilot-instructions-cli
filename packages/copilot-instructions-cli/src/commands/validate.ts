@@ -8,8 +8,8 @@ import path from 'path';
 import chalk from 'chalk';
 import { glob } from 'glob';
 import {
-  loadModule,
-  loadPersona,
+  parseModule,
+  parsePersona,
   type ValidationError,
   type ValidationWarning,
 } from 'ums-lib';
@@ -37,7 +37,8 @@ interface ValidationResult {
  */
 async function validateModuleFile(filePath: string): Promise<ValidationResult> {
   try {
-    await loadModule(filePath);
+    const content = await fs.readFile(filePath, 'utf-8');
+    parseModule(content);
     return {
       filePath,
       fileType: 'module',
@@ -69,7 +70,8 @@ async function validatePersonaFile(
   filePath: string
 ): Promise<ValidationResult> {
   try {
-    await loadPersona(filePath);
+    const content = await fs.readFile(filePath, 'utf-8');
+    parsePersona(content);
     return {
       filePath,
       fileType: 'persona',

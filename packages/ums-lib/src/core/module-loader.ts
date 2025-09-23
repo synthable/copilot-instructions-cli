@@ -3,7 +3,6 @@
  * Implements module parsing and validation per UMS v1.0 specification
  */
 
-import { readFile } from 'fs/promises';
 import { parse } from 'yaml';
 import {
   VALID_TIERS,
@@ -26,9 +25,6 @@ import type {
   ModuleMeta,
 } from '../types/index.js';
 
-/**
- * Loads and validates a UMS v1.0 module from file
- */
 // Raw parsed YAML structure before validation
 interface RawModuleData {
   id?: unknown;
@@ -44,10 +40,19 @@ function isValidRawModuleData(data: unknown): data is RawModuleData {
   return data !== null && typeof data === 'object' && !Array.isArray(data);
 }
 
-export async function loadModule(filePath: string): Promise<UMSModule> {
+/**
+ * Parses and validates a UMS v1.0 module from a YAML content string.
+ *
+ * The input string must be valid YAML representing a UMS v1.0 module. The function will
+ * parse the YAML and validate the resulting object according to the UMS v1.0 specification.
+ * If the content is invalid YAML or fails validation, an error will be thrown.
+ *
+ * @param {string} content - The YAML string containing the UMS module definition.
+ * @returns {UMSModule} The validated UMS module object.
+ * @throws {Error} If the content is not valid YAML or fails UMS module validation.
+ */
+export function parseModule(content: string): UMSModule {
   try {
-    // Read and parse YAML file
-    const content = await readFile(filePath, 'utf-8');
     const parsed: unknown = parse(content);
 
     if (!isValidRawModuleData(parsed)) {
@@ -61,14 +66,11 @@ export async function loadModule(filePath: string): Promise<UMSModule> {
       throw new Error(`Module validation failed:\n${errorMessages}`);
     }
 
-    // Return the validated module with file path
-    return {
-      ...parsed,
-      filePath,
-    } as UMSModule;
+    // After validation, we know this is a valid UMSModule structure
+    return parsed as UMSModule;
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
-    throw new Error(`Failed to load module from ${filePath}: ${message}`);
+    throw new Error(`Failed to parse module: ${message}`);
   }
 }
 

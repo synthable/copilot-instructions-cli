@@ -3,11 +3,20 @@
  * @description UMS v1.0 build command implementation
  */
 
-import { writeFile } from 'fs/promises';
 import chalk from 'chalk';
 import { handleError } from '../utils/error-handler.js';
-import { BuildEngine, type BuildOptions as EngineBuildOptions } from 'ums-lib';
+import {
+  parsePersona,
+  renderMarkdown,
+  generateBuildReport,
+  resolvePersonaModules,
+  type UMSPersona,
+  type UMSModule,
+  type BuildReport,
+} from 'ums-lib';
 import { createBuildProgress } from '../utils/progress.js';
+import { writeOutputFile, readFromStdin } from '../utils/file-operations.js';
+import { discoverAllModules } from '../utils/module-discovery.js';
 
 /**
  * Options for the build command
@@ -35,7 +44,7 @@ export async function handleBuild(options: BuildOptions): Promise<void> {
     const buildEnvironment = await setupBuildEnvironment(options, progress);
 
     // Process persona and modules
-    const result = await processPersonaAndModules(buildEnvironment, progress);
+    const result = processPersonaAndModules(buildEnvironment, progress);
 
     // Generate output files
     await generateOutputFiles(result, buildEnvironment, verbose);
@@ -73,9 +82,10 @@ export async function handleBuild(options: BuildOptions): Promise<void> {
  * Build environment configuration
  */
 interface BuildEnvironment {
-  buildEngine: BuildEngine;
-  buildOptions: EngineBuildOptions;
+  modules: UMSModule[];
+  persona: UMSPersona;
   outputPath?: string | undefined;
+  warnings: string[];
 }
 
 /**
@@ -87,14 +97,32 @@ async function setupBuildEnvironment(
 ): Promise<BuildEnvironment> {
   const { persona: personaPath, output: outputPath, verbose } = options;
 
-  const buildEngine = new BuildEngine();
-  let personaContent: string | undefined;
+  // Discover modules
+  progress.update('Discovering modules...');
+  const moduleDiscoveryResult = await discoverAllModules();
 
-  // Determine persona source
-  let personaSource: string;
+  if (verbose) {
+    console.log(
+      chalk.gray(
+        `[INFO] build: Discovered ${moduleDiscoveryResult.modules.length} modules`
+      )
+    );
+    if (moduleDiscoveryResult.warnings.length > 0) {
+      console.log(chalk.yellow('\nModule Discovery Warnings:'));
+      for (const warning of moduleDiscoveryResult.warnings) {
+        console.log(chalk.yellow(`  - ${warning}`));
+      }
+    }
+  }
+
+  // Load persona
+  progress.update('Loading persona...');
+  let personaContent: string;
+
   if (personaPath) {
-    personaSource = personaPath;
     progress.update(`Reading persona file: ${personaPath}`);
+    const { readFile } = await import('fs/promises');
+    personaContent = await readFile(personaPath, 'utf-8');
 
     if (verbose) {
       console.log(
@@ -102,8 +130,6 @@ async function setupBuildEnvironment(
       );
     }
   } else {
-    // Read from stdin
-    personaSource = 'stdin';
     progress.update('Reading persona from stdin...');
 
     if (process.stdin.isTTY) {
@@ -123,65 +149,112 @@ async function setupBuildEnvironment(
           'Ensure YAML content is piped to stdin or use --persona <file>.'
       );
     }
+
+    if (verbose) {
+      console.log(chalk.gray('[INFO] build: Reading persona from stdin'));
+    }
   }
 
-  // Determine output target
-  const outputTarget = outputPath ?? 'stdout';
+  // Parse persona
+  const persona = parsePersona(personaContent);
 
-  // Prepare build options
-  const buildOptions: EngineBuildOptions = {
-    personaSource,
-    outputTarget,
-  };
+  if (verbose) {
+    console.log(chalk.gray(`[INFO] build: Loaded persona '${persona.name}'`));
+  }
 
-  if (personaContent) {
-    buildOptions.personaContent = personaContent;
+  // Resolve modules for persona
+  progress.update('Resolving modules...');
+  const resolutionResult = resolvePersonaModules(
+    persona,
+    moduleDiscoveryResult.modules
+  );
+
+  // Check for missing modules
+  if (resolutionResult.missingModules.length > 0) {
+    throw new Error(
+      `Missing modules: ${resolutionResult.missingModules.join(', ')}`
+    );
   }
 
   if (verbose) {
-    buildOptions.verbose = verbose;
+    console.log(
+      chalk.gray(
+        `[INFO] build: Loaded ${resolutionResult.modules.length} modules`
+      )
+    );
   }
 
+  const allWarnings = [
+    ...moduleDiscoveryResult.warnings,
+    ...resolutionResult.warnings,
+  ];
+
   return {
-    buildEngine,
-    buildOptions,
+    modules: resolutionResult.modules,
+    persona,
     outputPath,
+    warnings: allWarnings,
   };
+}
+
+/**
+ * Result of build process
+ */
+interface BuildResult {
+  markdown: string;
+  modules: UMSModule[];
+  persona: UMSPersona;
+  warnings: string[];
+  buildReport: BuildReport;
 }
 
 /**
  * Processes persona and modules to generate build result
  */
-async function processPersonaAndModules(
+function processPersonaAndModules(
   environment: BuildEnvironment,
   progress: ReturnType<typeof createBuildProgress>
-): Promise<Awaited<ReturnType<BuildEngine['build']>>> {
+): BuildResult {
   progress.update('Building persona...');
-  const result = await environment.buildEngine.build(environment.buildOptions);
+
+  // Generate Markdown
+  const markdown = renderMarkdown(environment.persona, environment.modules);
+
+  // Generate Build Report
+  const buildReport = generateBuildReport(
+    environment.persona,
+    environment.modules
+  );
 
   // Show warnings if any
-  if (result.warnings.length > 0) {
+  if (environment.warnings.length > 0) {
     console.log(chalk.yellow('\nWarnings:'));
-    for (const warning of result.warnings) {
+    for (const warning of environment.warnings) {
       console.log(chalk.yellow(`  • ${warning}`));
     }
     console.log();
   }
 
-  return result;
+  return {
+    markdown,
+    modules: environment.modules,
+    persona: environment.persona,
+    warnings: environment.warnings,
+    buildReport,
+  };
 }
 
 /**
  * Generates output files (Markdown and build report)
  */
 async function generateOutputFiles(
-  result: Awaited<ReturnType<BuildEngine['build']>>,
+  result: BuildResult,
   environment: BuildEnvironment,
   verbose?: boolean
 ): Promise<void> {
   if (environment.outputPath) {
     // Write markdown file
-    await writeFile(environment.outputPath, result.markdown, 'utf8');
+    await writeOutputFile(environment.outputPath, result.markdown);
     console.log(
       chalk.green(
         `✓ Persona instructions written to: ${environment.outputPath}`
@@ -193,10 +266,9 @@ async function generateOutputFiles(
       /\.md$/,
       '.build.json'
     );
-    await writeFile(
+    await writeOutputFile(
       buildReportPath,
-      JSON.stringify(result.buildReport, null, 2),
-      'utf8'
+      JSON.stringify(result.buildReport, null, 2)
     );
     console.log(chalk.green(`✓ Build report written to: ${buildReportPath}`));
 
@@ -215,46 +287,5 @@ async function generateOutputFiles(
   } else {
     // Write to stdout
     console.log(result.markdown);
-  }
-}
-
-/**
- * Reads content from stdin
- */
-async function readFromStdin(): Promise<string> {
-  return new Promise<string>((resolve, reject) => {
-    const chunks: Buffer[] = [];
-
-    process.stdin.on('data', (chunk: Buffer) => {
-      chunks.push(chunk);
-    });
-
-    process.stdin.on('end', () => {
-      resolve(Buffer.concat(chunks).toString('utf8'));
-    });
-
-    process.stdin.on('error', reject);
-
-    // Start reading
-    process.stdin.resume();
-  });
-}
-
-/**
- * Checks if a file path has a .persona.yml extension
- */
-export function isPersonaFile(filePath: string): boolean {
-  return filePath.endsWith('.persona.yml');
-}
-
-/**
- * Validates that the persona file has the correct extension
- */
-export function validatePersonaFile(filePath: string): void {
-  if (!isPersonaFile(filePath)) {
-    throw new Error(
-      `Persona file must have .persona.yml extension, got: ${filePath}\n` +
-        'UMS v1.0 requires persona files to use YAML format with .persona.yml extension.'
-    );
   }
 }

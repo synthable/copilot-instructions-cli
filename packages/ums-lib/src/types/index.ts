@@ -29,8 +29,8 @@ export interface UMSModule {
   meta: ModuleMeta;
   /** The instructional content */
   body: ModuleBody;
-  /** Absolute path to the source file */
-  filePath: string;
+  /** Absolute path to the source file (present when loaded from filesystem, absent for parsed content) */
+  filePath?: string;
 }
 
 // Module metadata block (Section 2.2)
@@ -117,8 +117,8 @@ export interface UMSPersona {
 
 // Module group within persona (Section 5.2)
 export interface ModuleGroup {
-  /** Name of the module group */
-  groupName: string;
+  /** Name of the module group (optional) */
+  groupName?: string;
   /** Array of module IDs in this group */
   modules: string[];
 }
@@ -185,8 +185,6 @@ export interface BuildReportModule {
   digest: string;
   /** Module shape */
   shape: string;
-  /** Absolute file path */
-  filePath: string;
   /** Whether module is deprecated */
   deprecated: boolean;
   /** Replacement module ID if deprecated */
