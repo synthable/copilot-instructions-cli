@@ -17,6 +17,44 @@ export const baseConfig = tseslint.config(
   // 2. Base configuration for ALL TypeScript files in the monorepo
   {
     files: ['packages/**/*.ts'],
+    rules: {
+      '@typescript-eslint/no-floating-promises': 'error', // Critical for async code
+      '@typescript-eslint/await-thenable': 'error',
+      '@typescript-eslint/no-misused-promises': 'error',
+      '@typescript-eslint/require-await': 'error',
+      '@typescript-eslint/return-await': 'error',
+
+      // '@typescript-eslint/prefer-readonly': 'warn',
+      '@typescript-eslint/prefer-as-const': 'error',
+      '@typescript-eslint/no-unnecessary-type-assertion': 'error',
+      '@typescript-eslint/prefer-optional-chain': 'error',
+
+      '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
+      '@typescript-eslint/explicit-function-return-type': 'warn',
+      '@typescript-eslint/no-explicit-any': 'warn',
+
+      '@typescript-eslint/no-unused-expressions': 'warn',
+      '@typescript-eslint/no-non-null-assertion': 'warn',
+      '@typescript-eslint/consistent-type-imports': 'warn',
+      '@typescript-eslint/prefer-nullish-coalescing': 'warn',
+      // '@typescript-eslint/strict-boolean-expressions': 'warn',
+      '@typescript-eslint/no-unsafe-argument': 'warn',
+
+      'no-undef': 'off', // 'no-undef' is handled by TypeScriptp
+      'prefer-const': 'error',
+      '@typescript-eslint/no-var-requires': 'error',
+      'no-console': 'off',
+      'complexity': ['warn', { max: 20 }],
+      'max-depth': ['warn', { max: 5 }],
+      'max-lines-per-function': ['warn', { max: 71, skipBlankLines: true, skipComments: true }],
+
+      '@typescript-eslint/restrict-template-expressions': 'off',
+
+      'no-restricted-syntax': ['error', {
+        selector: "TSTypeReference[typeName.type='TSQualifiedName'][typeName.left.type='TSImportType']",
+        message: 'Inline type imports are not allowed. Import types at the top of the file.'
+      }],
+    },
     languageOptions: {
       parserOptions: {
         ecmaVersion: '2022',
@@ -27,39 +65,6 @@ export const baseConfig = tseslint.config(
       globals: {
         ...globals.node,
       },
-    },
-    rules: {
-      '@typescript-eslint/no-floating-promises': 'error', // Critical for async code
-      // '@typescript-eslint/await-thenable': 'error',
-      '@typescript-eslint/no-misused-promises': 'error',
-      '@typescript-eslint/require-await': 'warn',
-      '@typescript-eslint/return-await': 'error',
-
-      // '@typescript-eslint/prefer-readonly': 'warn',
-      '@typescript-eslint/prefer-as-const': 'error',
-      '@typescript-eslint/no-unnecessary-type-assertion': 'warn',
-      '@typescript-eslint/prefer-optional-chain': 'warn',
-
-      '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
-      '@typescript-eslint/explicit-function-return-type': 'warn',
-      '@typescript-eslint/no-explicit-any': 'warn',
-
-      '@typescript-eslint/no-unused-expressions': 'warn',
-      // '@typescript-eslint/no-non-null-assertion': 'warn',
-      '@typescript-eslint/consistent-type-imports': 'warn',
-      '@typescript-eslint/prefer-nullish-coalescing': 'warn',
-      // '@typescript-eslint/strict-boolean-expressions': 'warn',
-      '@typescript-eslint/no-unsafe-argument': 'warn',
-
-      'no-undef': 'off', // 'no-undef' is handled by TypeScript
-      'prefer-const': 'error',
-      '@typescript-eslint/no-var-requires': 'error',
-      'no-console': 'off',
-      'complexity': ['warn', { max: 20 }],
-      'max-depth': ['warn', { max: 5 }],
-      'max-lines-per-function': ['warn', { max: 71, skipBlankLines: true, skipComments: true }],
-
-      '@typescript-eslint/restrict-template-expressions': 'off'
     },
   },
 
@@ -92,28 +97,15 @@ export const baseConfig = tseslint.config(
   {
     files: ['packages/*/src/**/*.{test,spec}.ts', 'packages/*/src/**/*.{test,spec}.tsx'],
     ...vitest.configs.recommended,
-    languageOptions: {
-      parserOptions: {
-        ecmaVersion: '2022',
-        sourceType: 'module',
-        project: true,
-        tsconfigRootDir: import.meta.dirname,
-      },
-      globals: {
-        ...vitest.environments.env.globals,
-      },
-      // Parser options are inherited from block #2 but can be specified if needed
-    },
-    settings: {
-      vitest: {
-        typecheck: true,
-      },
-    },
     rules: {
       // Relax rules for tests
       '@typescript-eslint/no-explicit-any': 'off',
-      'max-lines-per-function': 'off',
+      '@typescript-eslint/max-lines-per-function': 'off',
+      'no-console': 'off',
+      'max-lines': 'off',
       'complexity': 'off',
+      '@typescript-eslint/no-empty-function': 'off',
+      '@typescript-eslint/no-unsafe-return': 'off',
     },
   },
 

@@ -44,6 +44,9 @@ export interface BuildResult {
 
 /**
  * Module registry for resolving module IDs to file paths with modules.config.yml support
+ *
+ * @deprecated As of Phase 3, use `createModuleRegistry()` from resolver.js instead.
+ * This class will be removed in a future major version.
  */
 export class ModuleRegistry {
   private moduleMap = new Map<string, UMSModule>();
@@ -90,6 +93,13 @@ export class ModuleRegistry {
 
 /**
  * Main build engine that orchestrates the build process
+ *
+ * @deprecated As of Phase 3, use the pure functions from renderer.js, resolver.js, and report-generator.js instead.
+ * This class will be removed in a future major version. For new code, use:
+ * - `parsePersona()` for persona parsing
+ * - `resolvePersonaModules()` for module resolution
+ * - `renderMarkdown()` for markdown generation
+ * - `generateBuildReport()` for build reports
  */
 export class BuildEngine {
   private registry: ModuleRegistry;
@@ -218,7 +228,7 @@ export class BuildEngine {
       }
 
       moduleGroups.push({
-        groupName: group.groupName,
+        groupName: group.groupName ?? '',
         modules: reportModules,
       });
     }

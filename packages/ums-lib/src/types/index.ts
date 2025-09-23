@@ -117,8 +117,8 @@ export interface UMSPersona {
 
 // Module group within persona (Section 5.2)
 export interface ModuleGroup {
-  /** Name of the module group */
-  groupName: string;
+  /** Name of the module group (optional) */
+  groupName?: string;
   /** Array of module IDs in this group */
   modules: string[];
 }

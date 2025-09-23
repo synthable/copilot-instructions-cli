@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterAll } from 'vitest';
 import { writeFile } from 'fs/promises';
 import { writeOutputFile, readFromStdin } from '../utils/file-operations.js';
 import { handleBuild } from './build.js';
-import { BuildEngine } from 'ums-lib';
+import { BuildEngine, parsePersona, renderMarkdown, generateBuildReport, resolvePersonaModules } from 'ums-lib';
 import { discoverAllModules } from '../utils/module-discovery.js';
 
 // Mock dependencies
@@ -45,6 +45,10 @@ const mockModuleRegistry = {
 vi.mock('ums-lib', () => ({
   BuildEngine: vi.fn().mockImplementation(() => mockBuildEngine),
   ModuleRegistry: vi.fn().mockImplementation(() => mockModuleRegistry),
+  parsePersona: vi.fn(),
+  renderMarkdown: vi.fn(),
+  generateBuildReport: vi.fn(),
+  resolvePersonaModules: vi.fn(),
 }));
 
 vi.mock('../utils/module-discovery.js', () => ({
@@ -77,8 +81,60 @@ Object.defineProperty(process, 'stdin', {
 });
 
 describe('build command', () => {
+  const mockPersona = {
+    name: 'Test Persona',
+    version: '1.0',
+    schemaVersion: '1.0',
+    description: 'A test persona',
+    semantic: 'Testing framework',
+    identity: 'I am a test persona',
+    attribution: false,
+    moduleGroups: [
+      {
+        groupName: 'Foundation',
+        modules: ['foundation/logic/deductive-reasoning'],
+      },
+    ],
+  };
+
+  const mockModule = {
+    id: 'foundation/logic/deductive-reasoning',
+    version: '1.0',
+    schemaVersion: '1.0',
+    shape: 'specification',
+    meta: {
+      name: 'Deductive Reasoning',
+      description: 'Logical deduction principles',
+      semantic: 'Logic and reasoning framework',
+    },
+    body: {
+      goal: 'Apply deductive reasoning principles',
+    },
+  };
+
+  const mockResolutionResult = {
+    modules: [mockModule],
+    warnings: [],
+    missingModules: [],
+  };
+
+  const mockBuildReport = {
+    personaName: 'Test Persona',
+    schemaVersion: '1.0',
+    toolVersion: '1.0.0',
+    personaDigest: 'abc123',
+    buildTimestamp: '2023-01-01T00:00:00.000Z',
+    moduleGroups: [],
+  };
+
   beforeEach(() => {
     vi.clearAllMocks();
+
+    // Setup mock return values
+    vi.mocked(parsePersona).mockReturnValue(mockPersona);
+    vi.mocked(renderMarkdown).mockReturnValue('# Test Persona\n\nGenerated markdown content');
+    vi.mocked(generateBuildReport).mockReturnValue(mockBuildReport);
+    vi.mocked(resolvePersonaModules).mockReturnValue(mockResolutionResult);
 
     // Set up mock module discovery
     vi.mocked(discoverAllModules).mockResolvedValue({

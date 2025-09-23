@@ -2,17 +2,18 @@
 /* eslint-disable no-undef */
 /* eslint-disable no-unused-vars */
 /**
- * This script automatically generates the README.md file for the
- * 'instructions-modules' directory. It scans all module files, reads their
- * frontmatter, and builds a nested list that matches the directory structure.
+ * Generate instructions-modules/README.md from UMS v1.0 modules.
  *
- * This is designed to run on Node.js and is ideal for your development
- * environment on your MacBook Pro.
+ * Changes for UMS v1.0:
+ * - Scan .module.yml files instead of Markdown with frontmatter
+ * - Parse YAML and read meta.name, meta.description
+ * - Build hierarchy from module id: <tier>/<subject>/<module-name>
  */
 
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import YAML from 'yaml';
 
 // Get current directory for ES modules
 const __filename = fileURLToPath(import.meta.url);
@@ -22,74 +23,109 @@ const __dirname = path.dirname(__filename);
 const TARGET_DIRECTORY = 'instructions-modules';
 const README_FILENAME = 'README.md';
 const README_PATH = path.join(TARGET_DIRECTORY, README_FILENAME);
+const VALID_TIERS = new Set([
+  'foundation',
+  'principle',
+  'technology',
+  'execution',
+]);
 
+// --- Helpers ---
 /**
- * Parses a YAML frontmatter block from a file's content.
- * @param {string} fileContent - The full content of the file.
- * @returns {object|null} A key-value map of the frontmatter or null if not found.
+ * Parse a .module.yml file and return minimal metadata for listing.
+ * @param {string} fullPath
+ * @returns {{id:string, name:string, description:string}|null}
  */
-function parseFrontmatter(fileContent) {
-  if (!fileContent.trim().startsWith('---')) return null;
-  const endOfFrontmatter = fileContent.indexOf('\n---', 1);
-  if (endOfFrontmatter === -1) return null;
-
-  const frontmatterBlock = fileContent.substring(4, endOfFrontmatter);
-  const data = {};
-  frontmatterBlock.split('\n').forEach(line => {
-    const parts = line.split(':');
-    if (parts.length >= 2) {
-      const key = parts[0].trim();
-      let value = parts.slice(1).join(':').trim();
-      // Check for and remove matching single or double quotes from the value
-      if (
-        (value.startsWith("'") && value.endsWith("'")) ||
-        (value.startsWith('"') && value.endsWith('"'))
-      ) {
-        value = value.substring(1, value.length - 1);
-      }
-      if (key) data[key] = value;
+function parseModuleYaml(fullPath) {
+  try {
+    const raw = fs.readFileSync(fullPath, 'utf8');
+    const doc = YAML.parse(raw);
+    if (!doc || typeof doc !== 'object') return null;
+    const id = doc.id;
+    const meta = doc.meta || {};
+    const name = meta.name;
+    const description = meta.description;
+    if (
+      typeof id !== 'string' ||
+      typeof name !== 'string' ||
+      typeof description !== 'string'
+    ) {
+      return null; // skip invalid/incomplete modules
     }
-  });
-  return data;
+    return { id, name, description };
+  } catch (err) {
+    console.warn(`⚠️ Failed to parse ${fullPath}: ${err.message}`);
+    return null;
+  }
 }
 
 /**
- * Recursively scans for modules and builds a nested object structure.
- * @param {string} dir - The directory to scan.
- * @returns {object} A nested object representing the directory structure.
+ * Recursively collect all modules under a directory.
+ * @param {string} dir
+ * @returns {Array<{id:string,name:string,description:string,path:string}>}
  */
-function buildModuleTree(dir) {
-  const tree = { modules: [], subcategories: {} };
+function collectModules(dir) {
+  const acc = [];
   const list = fs.readdirSync(dir);
-
-  list.forEach(item => {
+  for (const item of list) {
     const fullPath = path.join(dir, item);
     const stat = fs.statSync(fullPath);
-
     if (stat.isDirectory()) {
-      tree.subcategories[item] = buildModuleTree(fullPath);
-    } else if (path.extname(item) === '.md' && item !== README_FILENAME) {
-      const content = fs.readFileSync(fullPath, 'utf8');
-      const frontmatter = parseFrontmatter(content);
-      if (frontmatter && frontmatter.name && frontmatter.description) {
-        tree.modules.push({
-          name: frontmatter.name,
-          description: frontmatter.description,
-          path: path.relative(TARGET_DIRECTORY, fullPath).replace(/\\/g, '/'),
-        });
-      }
+      acc.push(...collectModules(fullPath));
+    } else if (item.endsWith('.module.yml')) {
+      const parsed = parseModuleYaml(fullPath);
+      if (!parsed) continue;
+      const relPath = path
+        .relative(TARGET_DIRECTORY, fullPath)
+        .replace(/\\/g, '/');
+      acc.push({ ...parsed, path: relPath });
     }
-  });
-  // Sort modules alphabetically by name
-  tree.modules.sort((a, b) => a.name.localeCompare(b.name));
-  return tree;
+  }
+  return acc;
 }
 
 /**
- * Generates markdown for a category and its subcategories recursively.
- * @param {object} categoryNode - The node from the module tree.
- * @param {number} indentLevel - The current indentation level for the list.
- * @returns {string} The generated markdown string.
+ * Build a hierarchical tree from module ids.
+ * @param {Array<{id:string,name:string,description:string,path:string}>} modules
+ */
+function buildTreeFromModules(modules) {
+  const root = { modules: [], subcategories: {} };
+  for (const mod of modules) {
+    const segments = mod.id.split('/');
+    const startIdx = segments[0].startsWith('@') ? 1 : 0;
+    const rel = segments.slice(startIdx);
+    const tier = rel[0];
+    if (!VALID_TIERS.has(tier)) continue;
+    const subjectSegments = rel.slice(1, rel.length - 1);
+    let node =
+      root.subcategories[tier] ||
+      (root.subcategories[tier] = { modules: [], subcategories: {} });
+    for (const seg of subjectSegments) {
+      node =
+        node.subcategories[seg] ||
+        (node.subcategories[seg] = { modules: [], subcategories: {} });
+    }
+    node.modules.push({
+      name: mod.name,
+      description: mod.description,
+      path: mod.path,
+    });
+  }
+  sortTree(root);
+  return root;
+}
+
+function sortTree(node) {
+  if (node.modules) node.modules.sort((a, b) => a.name.localeCompare(b.name));
+  const keys = Object.keys(node.subcategories || {});
+  for (const k of keys) sortTree(node.subcategories[k]);
+}
+
+/**
+ * Render a node (modules + subcategories) into nested markdown list.
+ * @param {{modules:Array, subcategories:object}} categoryNode
+ * @param {number} indentLevel
+ * @returns {string}
  */
 function generateMarkdownForCategory(categoryNode, indentLevel = 0) {
   let markdown = '';
@@ -124,14 +160,17 @@ function generateMarkdownForCategory(categoryNode, indentLevel = 0) {
  * Main execution function.
  */
 function main() {
-  console.log(`🚀 Generating README.md for '${TARGET_DIRECTORY}'...`);
+  console.log(
+    `🚀 Generating README.md for '${TARGET_DIRECTORY}' (UMS v1.0)...`
+  );
 
   if (!fs.existsSync(TARGET_DIRECTORY)) {
     console.error(`❌ Error: Directory "${TARGET_DIRECTORY}" not found.`);
     process.exit(1);
   }
 
-  const moduleTree = buildModuleTree(TARGET_DIRECTORY);
+  const collected = collectModules(TARGET_DIRECTORY);
+  const moduleTree = buildTreeFromModules(collected);
 
   // --- Static Header ---
   let readmeContent = `# Instruction Modules
@@ -172,4 +211,9 @@ The modules are organized into a hierarchical structure. Below is a list of all 
   console.log(`✅ Successfully updated ${README_PATH}`);
 }
 
-main();
+try {
+  main();
+} catch (err) {
+  console.error('❌ Error generating README:', err);
+  process.exit(1);
+}

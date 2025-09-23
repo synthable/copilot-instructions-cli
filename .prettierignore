@@ -64,4 +64,6 @@ LICENSE
 .gemini/
 .github/
 archive/
-docs/
+docs/**
+!docs/spec/
+!docs/spec/**
