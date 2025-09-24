@@ -143,19 +143,27 @@ export class ConflictAwareRegistry implements ModuleRegistry {
     strategy: ConflictStrategy
   ): UMSModule {
     switch (strategy) {
-      case 'error':
+      case 'error': {
+        const sources = entries
+          .map(e => `${e.source.type}:${e.source.path}`)
+          .join(', ');
         throw new ConflictError(
-          `Module conflict for '${moduleId}': ${entries.length} candidates found`,
+          `Module conflict for '${moduleId}': ${entries.length} candidates found from sources [${sources}]. Use --conflict-strategy=warn or --conflict-strategy=replace to resolve.`,
           moduleId,
           entries.length
         );
+      }
 
-      case 'warn':
+      case 'warn': {
         // Log warning and return the first entry
+        const allSources = entries
+          .map(e => `${e.source.type}:${e.source.path}`)
+          .join(', ');
         console.warn(
-          `Warning: Module conflict for '${moduleId}': ${entries.length} candidates found. Using first entry from ${entries[0].source.type}:${entries[0].source.path}`
+          `Warning: Module conflict for '${moduleId}': ${entries.length} candidates found from [${allSources}]. Using first entry from ${entries[0].source.type}:${entries[0].source.path}`
         );
         return entries[0].module;
+      }
 
       case 'replace':
         // Return the last entry (most recently added)
