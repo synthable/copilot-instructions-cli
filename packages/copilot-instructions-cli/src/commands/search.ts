@@ -131,7 +131,8 @@ export async function handleSearch(
 
     // Use UMS v1.0 module discovery
     const moduleDiscoveryResult = await discoverAllModules();
-    const modules = moduleDiscoveryResult.modules;
+    const modulesMap = moduleDiscoveryResult.registry.resolveAll('warn');
+    const modules = Array.from(modulesMap.values());
 
     if (modules.length === 0) {
       progress.succeed('Module discovery complete.');

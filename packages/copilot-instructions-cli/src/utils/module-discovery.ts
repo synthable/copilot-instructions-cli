@@ -1,10 +1,10 @@
 /**
  * CLI Module Discovery Utilities
- * Handles module discovery and conflict resolution for CLI operations
+ * Handles module discovery and populates ConflictAwareRegistry for CLI operations
  */
 
-import type { UMSModule, ModuleConfig } from 'ums-lib';
-import { parseModule } from 'ums-lib';
+import type { UMSModule, ModuleConfig, ConflictStrategy } from 'ums-lib';
+import { parseModule, ConflictAwareRegistry } from 'ums-lib';
 import { discoverModuleFiles, readModuleFile } from './file-operations.js';
 import {
   loadModuleConfig,
@@ -77,76 +77,57 @@ export async function discoverLocalModules(
 }
 
 /**
- * Conflict resolution strategies
+ * Result of module discovery operation
  */
-export type ConflictStrategy = 'error' | 'replace' | 'warn';
-
-/**
- * Result of conflict resolution
- */
-export interface ConflictResolutionResult {
-  /** Final resolved modules */
-  modules: UMSModule[];
-  /** Warnings generated during resolution */
+export interface ModuleDiscoveryResult {
+  /** Populated registry with all discovered modules */
+  registry: ConflictAwareRegistry;
+  /** Warnings generated during discovery */
   warnings: string[];
 }
 
 /**
- * Resolves conflicts between modules based on strategy
+ * Discovers all modules (standard + local) and populates ConflictAwareRegistry
  */
-export function resolveConflicts(
-  standardModules: UMSModule[],
-  localModules: UMSModule[],
-  config: ModuleConfig
-): ConflictResolutionResult {
-  const warnings: string[] = [];
-  const moduleMap = new Map<string, UMSModule>();
+export async function discoverAllModules(): Promise<ModuleDiscoveryResult> {
+  const config = await loadModuleConfig();
 
-  // Add standard modules first
-  for (const module of standardModules) {
-    moduleMap.set(module.id, module);
+  // Determine default conflict strategy from config
+  let defaultStrategy: ConflictStrategy = 'error';
+  if (config?.localModulePaths.length) {
+    defaultStrategy = getConflictStrategy(
+      config,
+      config.localModulePaths[0].path
+    );
   }
 
-  // Process local modules with conflict resolution
-  for (const localModule of localModules) {
-    const existing = moduleMap.get(localModule.id);
+  const registry = new ConflictAwareRegistry(defaultStrategy);
+  const warnings: string[] = [];
 
-    if (!existing) {
-      moduleMap.set(localModule.id, localModule);
-      continue;
-    }
+  // Discover and add standard modules
+  const standardModules = await discoverStandardModules();
+  for (const module of standardModules) {
+    registry.add(module, {
+      type: 'standard',
+      path: 'instructions-modules-v1-compliant',
+    });
+  }
 
-    // Find which local path this module came from to determine strategy
-    const localPath = findModulePath(localModule, config);
-    const strategy = localPath
-      ? getConflictStrategy(config, localPath)
-      : 'error';
-
-    switch (strategy) {
-      case 'error':
-        throw new Error(
-          `Module ID conflict: '${localModule.id}' exists in both standard library and local modules. ` +
-            `Use onConflict: 'replace' or 'warn' in modules.config.yml to resolve.`
-        );
-
-      case 'replace':
-        moduleMap.set(localModule.id, localModule);
-        warnings.push(
-          `Replaced standard module '${localModule.id}' with local version from '${localModule.filePath}'`
-        );
-        break;
-
-      case 'warn':
-        warnings.push(
-          `Module ID conflict: '${localModule.id}' exists in both standard library and local modules. ` +
-            `Using standard library version. Local version at '${localModule.filePath}' ignored.`
-        );
-        break;
+  // Discover and add local modules if config exists
+  if (config) {
+    const localModules = await discoverLocalModules(config);
+    for (const module of localModules) {
+      // Find which local path this module belongs to
+      const localPath = findModulePath(module, config);
+      registry.add(module, {
+        type: 'local',
+        path: localPath ?? 'unknown',
+      });
     }
   }
 
   return {
-    modules: Array.from(moduleMap.values()),
+    registry,
     warnings,
   };
 }
@@ -167,30 +148,4 @@ function findModulePath(
   }
 
   return null;
-}
-
-/**
- * Discovers all modules (standard + local) with conflict resolution
- */
-export async function discoverAllModules(): Promise<ConflictResolutionResult> {
-  const config = await loadModuleConfig();
-
-  // Discover standard modules
-  const standardModules = await discoverStandardModules();
-
-  // Discover local modules if config exists
-  let localModules: UMSModule[] = [];
-  if (config) {
-    localModules = await discoverLocalModules(config);
-  }
-
-  // Resolve conflicts
-  if (config) {
-    return resolveConflicts(standardModules, localModules, config);
-  } else {
-    return {
-      modules: standardModules,
-      warnings: [],
-    };
-  }
 }

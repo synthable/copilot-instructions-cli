@@ -27,7 +27,7 @@ export class ConflictAwareRegistry implements ModuleRegistry {
    * Add a module to the registry without resolving conflicts
    */
   add(module: UMSModule, source: ModuleSource): void {
-    const existing = this.modules.get(module.id) || [];
+    const existing = this.modules.get(module.id) ?? [];
     existing.push({ module, source, addedAt: Date.now() });
     this.modules.set(module.id, existing);
   }
@@ -58,7 +58,7 @@ export class ConflictAwareRegistry implements ModuleRegistry {
     return this.resolveConflict(
       moduleId,
       entries,
-      strategy || this.defaultStrategy
+      strategy ?? this.defaultStrategy
     );
   }
 

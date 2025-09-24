@@ -3,7 +3,6 @@ import type { UMSModule, ModuleConfig } from 'ums-lib';
 import {
   discoverStandardModules,
   discoverLocalModules,
-  resolveConflicts,
   discoverAllModules,
 } from './module-discovery.js';
 
@@ -19,9 +18,13 @@ vi.mock('./config-loader.js', () => ({
   getConflictStrategy: vi.fn(),
 }));
 
-vi.mock('ums-lib', () => ({
-  parseModule: vi.fn(),
-}));
+vi.mock('ums-lib', async importOriginal => {
+  const actual = await importOriginal();
+  return {
+    ...actual,
+    parseModule: vi.fn(),
+  };
+});
 
 // Import mocked functions
 import { discoverModuleFiles, readModuleFile } from './file-operations.js';
@@ -35,6 +38,8 @@ import { parseModule } from 'ums-lib';
 describe('module-discovery', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    // Setup default mock return value for getConflictStrategy
+    vi.mocked(getConflictStrategy).mockReturnValue('warn');
   });
 
   describe('discoverStandardModules', () => {
@@ -165,122 +170,6 @@ describe('module-discovery', () => {
     });
   });
 
-  describe('resolveConflicts', () => {
-    const createMockModule = (id: string, filePath?: string): UMSModule => {
-      const module: UMSModule = {
-        id,
-        version: '1.0',
-        schemaVersion: '1.0',
-        shape: 'specification',
-        meta: {
-          name: id,
-          description: 'Test module',
-          semantic: 'Test',
-        },
-        body: {},
-      };
-      if (filePath) {
-        module.filePath = filePath;
-      }
-      return module;
-    };
-
-    it('should handle no conflicts', () => {
-      const standardModules = [
-        createMockModule('standard/module', './standard/module.yml'),
-      ];
-      const localModules = [
-        createMockModule('local/module', './local/module.yml'),
-      ];
-      const config: ModuleConfig = {
-        localModulePaths: [{ path: './local' }],
-      };
-
-      const result = resolveConflicts(standardModules, localModules, config);
-
-      expect(result.modules).toHaveLength(2);
-      expect(result.warnings).toHaveLength(0);
-    });
-
-    it('should throw error on conflict with error strategy', () => {
-      const standardModules = [
-        createMockModule('shared/module', './standard/shared.yml'),
-      ];
-      const localModules = [
-        createMockModule('shared/module', './local/shared.yml'),
-      ];
-      const config: ModuleConfig = {
-        localModulePaths: [{ path: './local', onConflict: 'error' }],
-      };
-
-      vi.mocked(getConflictStrategy).mockReturnValue('error');
-
-      expect(() => {
-        resolveConflicts(standardModules, localModules, config);
-      }).toThrow(
-        "Module ID conflict: 'shared/module' exists in both standard library and local modules"
-      );
-    });
-
-    it('should replace module with replace strategy', () => {
-      const standardModules = [
-        createMockModule('shared/module', './standard/shared.yml'),
-      ];
-      const localModules = [
-        createMockModule('shared/module', './local/shared.yml'),
-      ];
-      const config: ModuleConfig = {
-        localModulePaths: [{ path: './local', onConflict: 'replace' }],
-      };
-
-      vi.mocked(getConflictStrategy).mockReturnValue('replace');
-
-      const result = resolveConflicts(standardModules, localModules, config);
-
-      expect(result.modules).toHaveLength(1);
-      expect(result.modules[0].filePath).toBe('./local/shared.yml');
-      expect(result.warnings).toHaveLength(1);
-      expect(result.warnings[0]).toContain('Replaced standard module');
-    });
-
-    it('should warn and keep standard module with warn strategy', () => {
-      const standardModules = [
-        createMockModule('shared/module', './standard/shared.yml'),
-      ];
-      const localModules = [
-        createMockModule('shared/module', './local/shared.yml'),
-      ];
-      const config: ModuleConfig = {
-        localModulePaths: [{ path: './local', onConflict: 'warn' }],
-      };
-
-      vi.mocked(getConflictStrategy).mockReturnValue('warn');
-
-      const result = resolveConflicts(standardModules, localModules, config);
-
-      expect(result.modules).toHaveLength(1);
-      expect(result.modules[0].filePath).toBe('./standard/shared.yml');
-      expect(result.warnings).toHaveLength(1);
-      expect(result.warnings[0]).toContain('Module ID conflict');
-    });
-
-    it('should default to error strategy for modules without matching path', () => {
-      const standardModules = [
-        createMockModule('shared/module', './standard/shared.yml'),
-      ];
-      const localModules = [createMockModule('shared/module', undefined)]; // No filePath
-      const config: ModuleConfig = {
-        localModulePaths: [{ path: './local', onConflict: 'warn' }],
-      };
-
-      vi.mocked(getConflictStrategy).mockReturnValue('error');
-
-      expect(() => {
-        resolveConflicts(standardModules, localModules, config);
-      }).toThrow('Module ID conflict');
-    });
-  });
-
   describe('discoverAllModules', () => {
     it('should discover all modules with configuration', async () => {
       const mockConfig: ModuleConfig = {
@@ -310,7 +199,7 @@ describe('module-discovery', () => {
 
       const result = await discoverAllModules();
 
-      expect(result.modules).toHaveLength(1);
+      expect(result.registry.size()).toBe(1);
       expect(result.warnings).toHaveLength(0);
     });
 
@@ -338,7 +227,7 @@ describe('module-discovery', () => {
 
       const result = await discoverAllModules();
 
-      expect(result.modules).toHaveLength(1);
+      expect(result.registry.size()).toBe(1);
       expect(result.warnings).toHaveLength(0);
     });
   });

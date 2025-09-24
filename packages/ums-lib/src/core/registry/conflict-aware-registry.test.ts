@@ -5,7 +5,11 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { ConflictAwareRegistry } from './conflict-aware-registry.js';
 import { ConflictError } from '../../utils/errors.js';
-import type { UMSModule, ModuleSource } from '../../types/index.js';
+import type {
+  UMSModule,
+  ModuleSource,
+  ConflictStrategy,
+} from '../../types/index.js';
 
 describe('ConflictAwareRegistry', () => {
   let registry: ConflictAwareRegistry;
@@ -156,8 +160,8 @@ describe('ConflictAwareRegistry', () => {
     it('should detect conflicts correctly', () => {
       const conflicts = registry.getConflicts('foundation/logic/reasoning');
       expect(conflicts).toHaveLength(2);
-      expect(conflicts![0].module).toBe(mockModule1);
-      expect(conflicts![1].module).toBe(mockModule2);
+      expect(conflicts?.[0]?.module).toBe(mockModule1);
+      expect(conflicts?.[1]?.module).toBe(mockModule2);
     });
 
     it('should return null for non-conflicting modules', () => {
@@ -227,7 +231,10 @@ describe('ConflictAwareRegistry', () => {
 
     it('should throw error for unknown strategy', () => {
       expect(() =>
-        registry.resolve('foundation/logic/reasoning', 'unknown' as any)
+        registry.resolve(
+          'foundation/logic/reasoning',
+          'unknown' as ConflictStrategy
+        )
       ).toThrow('Unknown conflict strategy: unknown');
     });
   });
@@ -334,9 +341,10 @@ describe('ConflictAwareRegistry', () => {
 
       const entries = registry
         .getAllEntries()
-        .get('foundation/logic/reasoning')!;
-      expect(entries[0].addedAt).toBeGreaterThanOrEqual(before);
-      expect(entries[0].addedAt).toBeLessThanOrEqual(after);
+        .get('foundation/logic/reasoning');
+      expect(entries).toBeDefined();
+      expect(entries?.[0]?.addedAt).toBeGreaterThanOrEqual(before);
+      expect(entries?.[0]?.addedAt).toBeLessThanOrEqual(after);
     });
   });
 });

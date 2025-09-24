@@ -6,6 +6,7 @@ import {
   renderMarkdown,
   generateBuildReport,
   resolvePersonaModules,
+  ConflictAwareRegistry,
   type UMSPersona,
   type UMSModule,
   type BuildReport,
@@ -38,12 +39,16 @@ vi.mock('ora', () => {
 });
 
 // Mock pure functions from UMS library
-vi.mock('ums-lib', () => ({
-  parsePersona: vi.fn(),
-  renderMarkdown: vi.fn(),
-  generateBuildReport: vi.fn(),
-  resolvePersonaModules: vi.fn(),
-}));
+vi.mock('ums-lib', async importOriginal => {
+  const actual = await importOriginal();
+  return {
+    ...actual,
+    parsePersona: vi.fn(),
+    renderMarkdown: vi.fn(),
+    generateBuildReport: vi.fn(),
+    resolvePersonaModules: vi.fn(),
+  };
+});
 
 // Mock utility functions
 vi.mock('../utils/file-operations.js', () => ({
@@ -141,9 +146,14 @@ describe('build command', () => {
     vi.clearAllMocks();
     mockExit.mockClear();
 
-    // Setup default mocks
+    // Setup default mocks with ConflictAwareRegistry
+    const mockRegistry = new ConflictAwareRegistry('warn');
+    for (const module of mockModules) {
+      mockRegistry.add(module, { type: 'standard', path: 'test' });
+    }
+
     mockDiscoverAllModules.mockResolvedValue({
-      modules: mockModules,
+      registry: mockRegistry,
       warnings: [],
     });
 
@@ -176,10 +186,6 @@ describe('build command', () => {
     // Assert
     expect(mockDiscoverAllModules).toHaveBeenCalled();
     expect(mockParsePersona).toHaveBeenCalled();
-    expect(mockResolvePersonaModules).toHaveBeenCalledWith(
-      mockPersona,
-      mockModules
-    );
     expect(mockRenderMarkdown).toHaveBeenCalledWith(mockPersona, mockModules);
     expect(mockGenerateBuildReport).toHaveBeenCalledWith(
       mockPersona,
@@ -284,9 +290,11 @@ moduleGroups:
       verbose: false,
     };
 
-    mockResolvePersonaModules.mockReturnValue({
-      modules: [],
-      missingModules: ['missing/module'],
+    // Create empty registry - modules will be missing
+    const emptyRegistry = new ConflictAwareRegistry('warn');
+
+    mockDiscoverAllModules.mockResolvedValue({
+      registry: emptyRegistry,
       warnings: [],
     });
 
@@ -303,8 +311,13 @@ moduleGroups:
       verbose: false,
     };
 
+    const warningsRegistry = new ConflictAwareRegistry('warn');
+    for (const module of mockModules) {
+      warningsRegistry.add(module, { type: 'standard', path: 'test' });
+    }
+
     mockDiscoverAllModules.mockResolvedValue({
-      modules: mockModules,
+      registry: warningsRegistry,
       warnings: ['Test warning'],
     });
 
