@@ -18,13 +18,24 @@ vi.mock('./config-loader.js', () => ({
   getConflictStrategy: vi.fn(),
 }));
 
-vi.mock('ums-lib', async importOriginal => {
-  const actual = await importOriginal();
-  return {
-    ...actual,
-    parseModule: vi.fn(),
-  };
-});
+vi.mock('ums-lib', () => ({
+  parseModule: vi.fn(),
+  ConflictAwareRegistry: vi.fn().mockImplementation((strategy = 'warn') => {
+    let mockSize = 0;
+    return {
+      strategy: strategy as string,
+      modules: new Map(),
+      add: vi.fn().mockImplementation(() => {
+        mockSize++;
+      }),
+      resolve: vi.fn(),
+      resolveAll: vi.fn(),
+      size: vi.fn(() => mockSize),
+      getConflicts: vi.fn(() => []),
+      getConflictingIds: vi.fn(() => []),
+    };
+  }),
+}));
 
 // Import mocked functions
 import { discoverModuleFiles, readModuleFile } from './file-operations.js';

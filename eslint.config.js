@@ -34,15 +34,14 @@ export const baseConfig = tseslint.config(
       '@typescript-eslint/no-explicit-any': 'warn',
 
       '@typescript-eslint/no-unused-expressions': 'warn',
-      '@typescript-eslint/no-non-null-assertion': 'warn',
+      '@typescript-eslint/no-non-null-assertion': 'error',
       '@typescript-eslint/consistent-type-imports': 'warn',
-      '@typescript-eslint/prefer-nullish-coalescing': 'warn',
+      '@typescript-eslint/prefer-nullish-coalescing': 'error',
       // '@typescript-eslint/strict-boolean-expressions': 'warn',
-      '@typescript-eslint/no-unsafe-argument': 'warn',
+      '@typescript-eslint/no-unsafe-argument': 'error',
 
       'no-undef': 'off', // 'no-undef' is handled by TypeScriptp
       'prefer-const': 'error',
-      '@typescript-eslint/no-var-requires': 'error',
       'no-console': 'off',
       'complexity': ['warn', { max: 20 }],
       'max-depth': ['warn', { max: 5 }],
@@ -59,8 +58,7 @@ export const baseConfig = tseslint.config(
       parserOptions: {
         ecmaVersion: '2022',
         sourceType: 'module',
-        project: true,
-        tsconfigRootDir: import.meta.dirname,
+        projectService: true
       },
       globals: {
         ...globals.node,
@@ -71,7 +69,7 @@ export const baseConfig = tseslint.config(
   // 3. Specific overrides for SOURCE files in the stricter `ums-lib` package
   {
     files: ['packages/ums-lib/src/**/*.ts'],
-    ignores: ['packages/ums-lib/src/**/*.{test,spec}.ts'],
+    ignores: ['packages/ums-lib/src/**/*.test.ts'],
     rules: {
       // Stricter rules for the library
       '@typescript-eslint/no-explicit-any': 'error',
@@ -83,7 +81,7 @@ export const baseConfig = tseslint.config(
   // 4. Specific overrides for SOURCE files in the stricter `copilot-instructions-cli` package
   {
     files: ['packages/copilot-instructions-cli/src/**/*.ts'],
-    ignores: ['packages/copilot-instructions-cli/src/**/*.{test,spec}.ts'],
+    ignores: ['packages/copilot-instructions-cli/src/**/*.test.ts'],
     rules: {
       // CLI-specific rules (more lenient than library)
       '@typescript-eslint/explicit-function-return-type': 'warn',
@@ -95,17 +93,23 @@ export const baseConfig = tseslint.config(
 
   // 5. Configuration specifically for ALL TEST files across all packages
   {
-    files: ['packages/*/src/**/*.{test,spec}.ts', 'packages/*/src/**/*.{test,spec}.tsx'],
+    files: ['packages/*/src/**/*.test.ts'],
     ...vitest.configs.recommended,
     rules: {
+      ...vitest.configs.recommended.rules,
       // Relax rules for tests
+      '@typescript-eslint/no-non-null-assertion': 'off',
+      '@typescript-eslint/prefer-nullish-coalescing': 'off',
+      '@typescript-eslint/no-unsafe-argument': 'off',
+
       '@typescript-eslint/no-explicit-any': 'off',
-      '@typescript-eslint/max-lines-per-function': 'off',
+      'max-lines-per-function': 'off',
       'no-console': 'off',
       'max-lines': 'off',
       'complexity': 'off',
       '@typescript-eslint/no-empty-function': 'off',
       '@typescript-eslint/no-unsafe-return': 'off',
+
     },
   },
 

@@ -39,16 +39,29 @@ vi.mock('ora', () => {
 });
 
 // Mock pure functions from UMS library
-vi.mock('ums-lib', async importOriginal => {
-  const actual = await importOriginal();
-  return {
-    ...actual,
-    parsePersona: vi.fn(),
-    renderMarkdown: vi.fn(),
-    generateBuildReport: vi.fn(),
-    resolvePersonaModules: vi.fn(),
-  };
-});
+vi.mock('ums-lib', () => ({
+  parsePersona: vi.fn(),
+  renderMarkdown: vi.fn(),
+  generateBuildReport: vi.fn(),
+  resolvePersonaModules: vi.fn(),
+  ConflictAwareRegistry: vi.fn().mockImplementation((strategy = 'warn') => {
+    let mockSize = 0;
+    const mockModules = new Map();
+    return {
+      strategy: strategy as string,
+      modules: mockModules,
+      add: vi.fn().mockImplementation((module: { id: string }) => {
+        mockModules.set(module.id, module);
+        mockSize++;
+      }),
+      resolve: vi.fn().mockImplementation(id => mockModules.get(id)),
+      resolveAll: vi.fn(),
+      size: vi.fn(() => mockSize),
+      getConflicts: vi.fn(() => []),
+      getConflictingIds: vi.fn(() => []),
+    };
+  }),
+}));
 
 // Mock utility functions
 vi.mock('../utils/file-operations.js', () => ({
