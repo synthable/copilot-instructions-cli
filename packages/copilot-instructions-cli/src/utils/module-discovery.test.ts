@@ -20,7 +20,7 @@ vi.mock('./config-loader.js', () => ({
 
 vi.mock('ums-lib', () => ({
   parseModule: vi.fn(),
-  ConflictAwareRegistry: vi.fn().mockImplementation((strategy = 'warn') => {
+  ModuleRegistry: vi.fn().mockImplementation((strategy = 'warn') => {
     let mockSize = 0;
     return {
       strategy: strategy as string,

@@ -8,14 +8,14 @@ import type {
   UMSModule,
   ModuleEntry,
   ModuleSource,
-  ModuleRegistry,
+  IModuleRegistry,
   ConflictStrategy,
 } from '../../types/index.js';
 
 /**
  * Registry that can store multiple modules per ID and resolve conflicts on-demand
  */
-export class ConflictAwareRegistry implements ModuleRegistry {
+export class ModuleRegistry implements IModuleRegistry {
   private modules = new Map<string, ModuleEntry[]>();
   private defaultStrategy: ConflictStrategy;
 

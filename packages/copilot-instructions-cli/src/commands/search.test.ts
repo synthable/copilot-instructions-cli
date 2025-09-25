@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import chalk from 'chalk';
 import { handleSearch } from './search.js';
 import { discoverAllModules } from '../utils/module-discovery.js';
-import { ConflictAwareRegistry, type UMSModule } from 'ums-lib';
+import { ModuleRegistry, type UMSModule } from 'ums-lib';
 
 // Mock dependencies
 vi.mock('chalk', () => ({
@@ -101,8 +101,8 @@ describe('search command', () => {
   };
 
   // Helper function to create registry with test modules
-  function createMockRegistry(modules: UMSModule[]): ConflictAwareRegistry {
-    const registry = new ConflictAwareRegistry('warn');
+  function createMockRegistry(modules: UMSModule[]): ModuleRegistry {
+    const registry = new ModuleRegistry('warn');
     for (const module of modules) {
       registry.add(module, { type: 'standard', path: 'test' });
     }

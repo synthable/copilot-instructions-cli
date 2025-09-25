@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { handleInspect } from './inspect.js';
-import type { UMSModule, ConflictAwareRegistry } from 'ums-lib';
+import type { UMSModule, ModuleRegistry } from 'ums-lib';
 
 // Mock dependencies
 vi.mock('../utils/error-handler.js', () => ({
@@ -81,7 +81,7 @@ describe('inspect command', () => {
     '1.1.0'
   );
 
-  const createMockRegistry = (hasConflicts = false): ConflictAwareRegistry => {
+  const createMockRegistry = (hasConflicts = false): ModuleRegistry => {
     const modules = new Map<string, MockModuleEntry[]>();
 
     if (hasConflicts) {
@@ -159,7 +159,7 @@ describe('inspect command', () => {
       addAll: vi.fn(),
       resolveAll: vi.fn(),
       getAllEntries: vi.fn(() => modules),
-    } as unknown as ConflictAwareRegistry;
+    } as unknown as ModuleRegistry;
   };
 
   describe('registry overview', () => {

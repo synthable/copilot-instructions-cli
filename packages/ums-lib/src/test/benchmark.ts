@@ -1,9 +1,9 @@
 /**
- * Performance benchmarks for UMS ConflictAwareRegistry
+ * Performance benchmarks for UMS ModuleRegistry
  * Run with: npm run benchmark
  */
 
-import { ConflictAwareRegistry } from '../core/registry/conflict-aware-registry.js';
+import { ModuleRegistry } from '../core/registry/module-registry.js';
 import type { UMSModule, ModuleSource } from '../types/index.js';
 
 // Create mock modules for benchmarking
@@ -42,9 +42,9 @@ function benchmark(name: string, fn: () => void, iterations = 1000): number {
 }
 
 function runBenchmarks(): void {
-  console.log('🏃 Running ConflictAwareRegistry Performance Benchmarks\n');
+  console.log('🏃 Running ModuleRegistry Performance Benchmarks\n');
 
-  const registry = new ConflictAwareRegistry('warn');
+  const registry = new ModuleRegistry('warn');
   const source: ModuleSource = { type: 'standard', path: 'benchmark' };
 
   // Pre-populate with some modules

@@ -1,9 +1,9 @@
 /**
- * Tests for ConflictAwareRegistry
+ * Tests for ModuleRegistry
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { ConflictAwareRegistry } from './conflict-aware-registry.js';
+import { ModuleRegistry } from './module-registry.js';
 import { ConflictError } from '../../utils/errors.js';
 import type {
   UMSModule,
@@ -11,8 +11,8 @@ import type {
   ConflictStrategy,
 } from '../../types/index.js';
 
-describe('ConflictAwareRegistry', () => {
-  let registry: ConflictAwareRegistry;
+describe('ModuleRegistry', () => {
+  let registry: ModuleRegistry;
   let consoleWarnSpy: ReturnType<typeof vi.spyOn>;
 
   // Mock modules for testing
@@ -72,7 +72,7 @@ describe('ConflictAwareRegistry', () => {
   };
 
   beforeEach(() => {
-    registry = new ConflictAwareRegistry();
+    registry = new ModuleRegistry();
     consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
   });
 
@@ -82,13 +82,13 @@ describe('ConflictAwareRegistry', () => {
 
   describe('constructor', () => {
     it('should create registry with default "error" strategy', () => {
-      const reg = new ConflictAwareRegistry();
-      expect(reg).toBeInstanceOf(ConflictAwareRegistry);
+      const reg = new ModuleRegistry();
+      expect(reg).toBeInstanceOf(ModuleRegistry);
     });
 
     it('should create registry with custom default strategy', () => {
-      const reg = new ConflictAwareRegistry('warn');
-      expect(reg).toBeInstanceOf(ConflictAwareRegistry);
+      const reg = new ModuleRegistry('warn');
+      expect(reg).toBeInstanceOf(ModuleRegistry);
     });
   });
 
@@ -304,7 +304,7 @@ describe('ConflictAwareRegistry', () => {
 
   describe('default strategy behavior', () => {
     it('should use custom default strategy', () => {
-      const warnRegistry = new ConflictAwareRegistry('warn');
+      const warnRegistry = new ModuleRegistry('warn');
       warnRegistry.add(mockModule1, standardSource);
       warnRegistry.add(mockModule2, localSource);
 
@@ -314,7 +314,7 @@ describe('ConflictAwareRegistry', () => {
     });
 
     it('should override default strategy with explicit parameter', () => {
-      const warnRegistry = new ConflictAwareRegistry('warn');
+      const warnRegistry = new ModuleRegistry('warn');
       warnRegistry.add(mockModule1, standardSource);
       warnRegistry.add(mockModule2, localSource);
 

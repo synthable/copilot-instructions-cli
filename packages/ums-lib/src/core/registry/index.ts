@@ -3,4 +3,4 @@
  * Handles conflict-aware module registry and resolution strategies
  */
 
-export { ConflictAwareRegistry } from './conflict-aware-registry.js';
+export { ModuleRegistry } from './module-registry.js';

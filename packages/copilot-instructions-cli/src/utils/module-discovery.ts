@@ -1,10 +1,10 @@
 /**
  * CLI Module Discovery Utilities
- * Handles module discovery and populates ConflictAwareRegistry for CLI operations
+ * Handles module discovery and populates ModuleRegistry for CLI operations
  */
 
 import type { UMSModule, ModuleConfig, ConflictStrategy } from 'ums-lib';
-import { parseModule, ConflictAwareRegistry } from 'ums-lib';
+import { parseModule, ModuleRegistry } from 'ums-lib';
 import { discoverModuleFiles, readModuleFile } from './file-operations.js';
 import {
   loadModuleConfig,
@@ -81,13 +81,13 @@ export async function discoverLocalModules(
  */
 export interface ModuleDiscoveryResult {
   /** Populated registry with all discovered modules */
-  registry: ConflictAwareRegistry;
+  registry: ModuleRegistry;
   /** Warnings generated during discovery */
   warnings: string[];
 }
 
 /**
- * Discovers all modules (standard + local) and populates ConflictAwareRegistry
+ * Discovers all modules (standard + local) and populates ModuleRegistry
  */
 export async function discoverAllModules(): Promise<ModuleDiscoveryResult> {
   const config = await loadModuleConfig();
@@ -101,7 +101,7 @@ export async function discoverAllModules(): Promise<ModuleDiscoveryResult> {
     );
   }
 
-  const registry = new ConflictAwareRegistry(defaultStrategy);
+  const registry = new ModuleRegistry(defaultStrategy);
   const warnings: string[] = [];
 
   // Discover and add standard modules

@@ -6,10 +6,10 @@ import {
   renderMarkdown,
   generateBuildReport,
   resolvePersonaModules,
-  ConflictAwareRegistry,
   type UMSPersona,
   type UMSModule,
   type BuildReport,
+  ModuleRegistry,
 } from 'ums-lib';
 import { discoverAllModules } from '../utils/module-discovery.js';
 
@@ -44,7 +44,7 @@ vi.mock('ums-lib', () => ({
   renderMarkdown: vi.fn(),
   generateBuildReport: vi.fn(),
   resolvePersonaModules: vi.fn(),
-  ConflictAwareRegistry: vi.fn().mockImplementation((strategy = 'warn') => {
+  ModuleRegistry: vi.fn().mockImplementation((strategy = 'warn') => {
     let mockSize = 0;
     const mockModules = new Map();
     return {
@@ -159,8 +159,8 @@ describe('build command', () => {
     vi.clearAllMocks();
     mockExit.mockClear();
 
-    // Setup default mocks with ConflictAwareRegistry
-    const mockRegistry = new ConflictAwareRegistry('warn');
+    // Setup default mocks with ModuleRegistry
+    const mockRegistry = new ModuleRegistry('warn');
     for (const module of mockModules) {
       mockRegistry.add(module, { type: 'standard', path: 'test' });
     }
@@ -304,7 +304,7 @@ moduleGroups:
     };
 
     // Create empty registry - modules will be missing
-    const emptyRegistry = new ConflictAwareRegistry('warn');
+    const emptyRegistry = new ModuleRegistry('warn');
 
     mockDiscoverAllModules.mockResolvedValue({
       registry: emptyRegistry,
@@ -324,7 +324,7 @@ moduleGroups:
       verbose: false,
     };
 
-    const warningsRegistry = new ConflictAwareRegistry('warn');
+    const warningsRegistry = new ModuleRegistry('warn');
     for (const module of mockModules) {
       warningsRegistry.add(module, { type: 'standard', path: 'test' });
     }

@@ -212,7 +212,7 @@ export interface ModuleSource {
 
 export type ConflictStrategy = 'error' | 'warn' | 'replace';
 
-export interface ModuleRegistry {
+export interface IModuleRegistry {
   /** Add a module to the registry */
   add(module: UMSModule, source: ModuleSource): void;
 

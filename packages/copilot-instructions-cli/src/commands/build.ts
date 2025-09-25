@@ -13,7 +13,7 @@ import {
   type UMSPersona,
   type UMSModule,
   type BuildReport,
-  type ConflictAwareRegistry,
+  type ModuleRegistry,
 } from 'ums-lib';
 import { createBuildProgress } from '../utils/progress.js';
 import { writeOutputFile, readFromStdin } from '../utils/file-operations.js';
@@ -83,7 +83,7 @@ export async function handleBuild(options: BuildOptions): Promise<void> {
  * Build environment configuration
  */
 interface BuildEnvironment {
-  registry: ConflictAwareRegistry;
+  registry: ModuleRegistry;
   persona: UMSPersona;
   outputPath?: string | undefined;
   warnings: string[];

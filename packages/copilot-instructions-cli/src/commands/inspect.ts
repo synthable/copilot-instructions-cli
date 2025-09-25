@@ -6,7 +6,7 @@
 import chalk from 'chalk';
 import Table from 'cli-table3';
 import { handleError } from '../utils/error-handler.js';
-import type { ConflictAwareRegistry } from 'ums-lib';
+import type { ModuleRegistry } from 'ums-lib';
 import { createDiscoveryProgress } from '../utils/progress.js';
 import { discoverAllModules } from '../utils/module-discovery.js';
 
@@ -80,7 +80,7 @@ export async function handleInspect(
  * Inspect a specific module for conflicts
  */
 function inspectSpecificModule(
-  registry: ConflictAwareRegistry,
+  registry: ModuleRegistry,
   moduleId: string,
   format: string,
   verbose: boolean
@@ -184,7 +184,7 @@ function inspectSpecificModule(
  * Inspect all conflicts in the registry
  */
 function inspectConflicts(
-  registry: ConflictAwareRegistry,
+  registry: ModuleRegistry,
   format: string,
   verbose: boolean
 ): void {
@@ -268,7 +268,7 @@ function inspectConflicts(
  * Inspect registry sources summary
  */
 function inspectSources(
-  registry: ConflictAwareRegistry,
+  registry: ModuleRegistry,
   format: string,
   verbose: boolean
 ): void {
@@ -335,7 +335,7 @@ function inspectSources(
  * Show registry overview
  */
 function inspectRegistryOverview(
-  registry: ConflictAwareRegistry,
+  registry: ModuleRegistry,
   format: string,
   verbose: boolean
 ): void {

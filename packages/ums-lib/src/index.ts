@@ -13,6 +13,9 @@ export * from './types/index.js';
 // Export all core functionality from organized domains
 export * from './core/index.js';
 
+// Explicitly export the ModuleRegistry class to avoid conflicts
+export { ModuleRegistry } from './core/registry/index.js';
+
 // Export error types
 export {
   UMSError,
