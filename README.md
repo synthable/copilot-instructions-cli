@@ -84,9 +84,10 @@ That's it! You now have a custom-built instruction set in `concise-assistant.md`
 | Command    | Description                                                     | Example Usage                                |
 | :--------- | :-------------------------------------------------------------- | :------------------------------------------- |
 | `build`    | Compiles a `.persona.yml` into a single instruction document.   | `npm start build ./personas/my-persona.yml`  |
-| `list`     | Lists all discoverable modules.                                 | `npm start list --category technology`       |
+| `list`     | Lists all discoverable modules.                                 | `npm start list --tier technology`       |
 | `search`   | Searches for modules by keyword.                                | `npm start search "error handling"`          |
 | `validate` | Validates the syntax and integrity of module and persona files. | `npm start validate ./instructions-modules/` |
+| `inspect`  | Inspects module conflicts and registry state.                   | `npm start inspect --conflicts-only` |
 
 ## Documentation
 

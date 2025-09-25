@@ -101,6 +101,8 @@ export const baseConfig = tseslint.config(
       '@typescript-eslint/no-non-null-assertion': 'off',
       '@typescript-eslint/prefer-nullish-coalescing': 'off',
       '@typescript-eslint/no-unsafe-argument': 'off',
+      '@typescript-eslint/no-unsafe-assignment': 'off',
+      '@typescript-eslint/explicit-function-return-type': 'warn',
 
       '@typescript-eslint/no-explicit-any': 'off',
       'max-lines-per-function': 'off',
