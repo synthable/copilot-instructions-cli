@@ -4,7 +4,7 @@
  */
 
 import { createHash } from 'node:crypto';
-import pkg from '../../../package.json' with { type: 'json' };
+import pkg from '@/package.json' with { type: 'json' };
 import type {
   UMSModule,
   UMSPersona,

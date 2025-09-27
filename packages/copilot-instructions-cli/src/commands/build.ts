@@ -221,9 +221,11 @@ function processPersonaAndModules(
         missingModules.push(moduleId);
       }
     } catch (error) {
-      // Handle ConflictError specifically - these should fail the build
+      // A ConflictError is only thrown by the registry if the conflict
+      // strategy is set to 'error'. In that case, we want the build to
+      // fail as intended by the strict strategy, so we re-throw.
       if (error instanceof ConflictError) {
-        throw error; // Re-throw ConflictError to fail the build
+        throw error;
       }
 
       // Handle other errors as warnings

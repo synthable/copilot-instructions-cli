@@ -12,7 +12,14 @@
     "sourceMap": true,
     // --- Stricter Library Rules ---
     "noUnusedLocals": true,
-    "noUnusedParameters": true
+    "noUnusedParameters": true,
+    // --- Path Aliases ---
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./*"],
+      "@src/*": ["./src/*"],
+      "@core/*": ["./src/core/*"]
+    }
   },
   "include": ["src/**/*"]
 }

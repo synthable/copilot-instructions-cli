@@ -1,5 +1,5 @@
 /**
- * ConflictAwareRegistry - stores conflicting modules and resolves them on-demand
+ * ModuleRegistry - stores conflicting modules and resolves them on-demand
  * Implements the conflict-aware registry pattern for UMS v1.0
  */
 
@@ -155,13 +155,8 @@ export class ModuleRegistry implements IModuleRegistry {
       }
 
       case 'warn': {
-        // Log warning and return the first entry
-        const allSources = entries
-          .map(e => `${e.source.type}:${e.source.path}`)
-          .join(', ');
-        console.warn(
-          `Warning: Module conflict for '${moduleId}': ${entries.length} candidates found from [${allSources}]. Using first entry from ${entries[0].source.type}:${entries[0].source.path}`
-        );
+        // Return the first entry found.
+        // Callers can use getConflicts(moduleId) to inspect other candidates.
         return entries[0].module;
       }
 
