@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-argument */
 import { describe, it, expect, vi, beforeEach, afterAll } from 'vitest';
 import { promises as fs } from 'fs';
 import { glob } from 'glob';

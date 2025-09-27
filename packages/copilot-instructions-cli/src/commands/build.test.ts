@@ -9,6 +9,7 @@ import {
   type UMSPersona,
   type UMSModule,
   type BuildReport,
+  ModuleRegistry,
 } from 'ums-lib';
 import { discoverAllModules } from '../utils/module-discovery.js';
 
@@ -43,6 +44,23 @@ vi.mock('ums-lib', () => ({
   renderMarkdown: vi.fn(),
   generateBuildReport: vi.fn(),
   resolvePersonaModules: vi.fn(),
+  ModuleRegistry: vi.fn().mockImplementation((strategy = 'warn') => {
+    let mockSize = 0;
+    const mockModules = new Map();
+    return {
+      strategy: strategy as string,
+      modules: mockModules,
+      add: vi.fn().mockImplementation((module: { id: string }) => {
+        mockModules.set(module.id, module);
+        mockSize++;
+      }),
+      resolve: vi.fn().mockImplementation(id => mockModules.get(id)),
+      resolveAll: vi.fn(),
+      size: vi.fn(() => mockSize),
+      getConflicts: vi.fn(() => []),
+      getConflictingIds: vi.fn(() => []),
+    };
+  }),
 }));
 
 // Mock utility functions
@@ -141,9 +159,14 @@ describe('build command', () => {
     vi.clearAllMocks();
     mockExit.mockClear();
 
-    // Setup default mocks
+    // Setup default mocks with ModuleRegistry
+    const mockRegistry = new ModuleRegistry('warn');
+    for (const module of mockModules) {
+      mockRegistry.add(module, { type: 'standard', path: 'test' });
+    }
+
     mockDiscoverAllModules.mockResolvedValue({
-      modules: mockModules,
+      registry: mockRegistry,
       warnings: [],
     });
 
@@ -176,10 +199,6 @@ describe('build command', () => {
     // Assert
     expect(mockDiscoverAllModules).toHaveBeenCalled();
     expect(mockParsePersona).toHaveBeenCalled();
-    expect(mockResolvePersonaModules).toHaveBeenCalledWith(
-      mockPersona,
-      mockModules
-    );
     expect(mockRenderMarkdown).toHaveBeenCalledWith(mockPersona, mockModules);
     expect(mockGenerateBuildReport).toHaveBeenCalledWith(
       mockPersona,
@@ -284,9 +303,11 @@ moduleGroups:
       verbose: false,
     };
 
-    mockResolvePersonaModules.mockReturnValue({
-      modules: [],
-      missingModules: ['missing/module'],
+    // Create empty registry - modules will be missing
+    const emptyRegistry = new ModuleRegistry('warn');
+
+    mockDiscoverAllModules.mockResolvedValue({
+      registry: emptyRegistry,
       warnings: [],
     });
 
@@ -303,8 +324,13 @@ moduleGroups:
       verbose: false,
     };
 
+    const warningsRegistry = new ModuleRegistry('warn');
+    for (const module of mockModules) {
+      warningsRegistry.add(module, { type: 'standard', path: 'test' });
+    }
+
     mockDiscoverAllModules.mockResolvedValue({
-      modules: mockModules,
+      registry: warningsRegistry,
       warnings: ['Test warning'],
     });
 

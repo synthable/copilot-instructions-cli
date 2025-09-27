@@ -192,3 +192,54 @@ export interface BuildReportModule {
   /** Modules this module was composed from (for replace operations) */
   composedFrom?: string[];
 }
+
+// Conflict-aware registry types (Phase 2)
+export interface ModuleEntry {
+  /** The UMS module */
+  module: UMSModule;
+  /** Source information for the module */
+  source: ModuleSource;
+  /** Timestamp when the module was added to registry */
+  addedAt: number;
+}
+
+export interface ModuleSource {
+  /** Type of module source */
+  type: 'standard' | 'local' | 'remote';
+  /** Path to the module source */
+  path: string;
+}
+
+export type ConflictStrategy = 'error' | 'warn' | 'replace';
+
+export interface IModuleRegistry {
+  /** Add a module to the registry */
+  add(module: UMSModule, source: ModuleSource): void;
+
+  /** Resolve a module by ID, applying conflict resolution if needed */
+  resolve(id: string, strategy?: ConflictStrategy): UMSModule | null;
+
+  /** Check if registry has a module by ID */
+  has(id: string): boolean;
+
+  /** Get total number of unique module IDs */
+  size(): number;
+
+  /** Get all conflicting entries for a module ID */
+  getConflicts(id: string): ModuleEntry[] | null;
+
+  /** Get all module IDs that have conflicts */
+  getConflictingIds(): string[];
+
+  /** Resolve all modules using a specific strategy */
+  resolveAll(strategy: ConflictStrategy): Map<string, UMSModule>;
+
+  /** Add multiple modules at once */
+  addAll(modules: UMSModule[], source: ModuleSource): void;
+
+  /** Get all entries in the registry */
+  getAllEntries(): Map<string, ModuleEntry[]>;
+
+  /** Get summary of sources in registry */
+  getSourceSummary(): Record<string, number>;
+}

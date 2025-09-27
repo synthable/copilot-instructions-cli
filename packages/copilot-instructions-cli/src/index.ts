@@ -5,6 +5,7 @@ import { handleBuild } from './commands/build.js';
 import { handleList } from './commands/list.js';
 import { handleSearch } from './commands/search.js';
 import { handleValidate } from './commands/validate.js';
+import { handleInspect } from './commands/inspect.js';
 import pkg from '../package.json' with { type: 'json' };
 
 const program = new Command();
@@ -141,5 +142,44 @@ program
     const verbose = options.verbose ?? false;
     await handleValidate({ targetPath: path, verbose });
   });
+
+program
+  .command('inspect')
+  .description('Inspect module conflicts and registry state.')
+  .option('-m, --module-id <id>', 'Inspect a specific module for conflicts')
+  .option('-c, --conflicts-only', 'Show only modules with conflicts')
+  .option('-s, --sources', 'Show registry sources summary')
+  .option('-f, --format <format>', 'Output format (table|json)', 'table')
+  .option('-v, --verbose', 'Enable verbose output with detailed information')
+  .addHelpText(
+    'after',
+    `  Examples:
+    $ copilot-instructions inspect                                    # Registry overview
+    $ copilot-instructions inspect --conflicts-only                  # Show only conflicts
+    $ copilot-instructions inspect --sources                         # Sources summary
+    $ copilot-instructions inspect --module-id foundation/logic      # Specific module
+    $ copilot-instructions inspect --format json                     # JSON output
+    $ copilot-instructions inspect --verbose                         # Detailed info
+    `
+  )
+  .showHelpAfterError()
+  .action(
+    async (options: {
+      moduleId?: string;
+      conflictsOnly?: boolean;
+      sources?: boolean;
+      format?: string;
+      verbose?: boolean;
+    }) => {
+      const verbose = options.verbose ?? false;
+      await handleInspect({
+        ...(options.moduleId && { moduleId: options.moduleId }),
+        ...(options.conflictsOnly && { conflictsOnly: options.conflictsOnly }),
+        ...(options.sources && { sources: options.sources }),
+        ...(options.format && { format: options.format as 'table' | 'json' }),
+        verbose,
+      });
+    }
+  );
 
 void program.parseAsync();

@@ -9,10 +9,11 @@ import {
   parsePersona,
   renderMarkdown,
   generateBuildReport,
-  resolvePersonaModules,
+  ConflictError,
   type UMSPersona,
   type UMSModule,
   type BuildReport,
+  type ModuleRegistry,
 } from 'ums-lib';
 import { createBuildProgress } from '../utils/progress.js';
 import { writeOutputFile, readFromStdin } from '../utils/file-operations.js';
@@ -82,7 +83,7 @@ export async function handleBuild(options: BuildOptions): Promise<void> {
  * Build environment configuration
  */
 interface BuildEnvironment {
-  modules: UMSModule[];
+  registry: ModuleRegistry;
   persona: UMSPersona;
   outputPath?: string | undefined;
   warnings: string[];
@@ -97,16 +98,26 @@ async function setupBuildEnvironment(
 ): Promise<BuildEnvironment> {
   const { persona: personaPath, output: outputPath, verbose } = options;
 
-  // Discover modules
+  // Discover modules and populate registry
   progress.update('Discovering modules...');
   const moduleDiscoveryResult = await discoverAllModules();
 
   if (verbose) {
+    const totalModules = moduleDiscoveryResult.registry.size();
+    const conflictingIds = moduleDiscoveryResult.registry.getConflictingIds();
+
     console.log(
-      chalk.gray(
-        `[INFO] build: Discovered ${moduleDiscoveryResult.modules.length} modules`
-      )
+      chalk.gray(`[INFO] build: Discovered ${totalModules} unique module IDs`)
     );
+
+    if (conflictingIds.length > 0) {
+      console.log(
+        chalk.yellow(
+          `[INFO] build: Found ${conflictingIds.length} modules with conflicts`
+        )
+      );
+    }
+
     if (moduleDiscoveryResult.warnings.length > 0) {
       console.log(chalk.yellow('\nModule Discovery Warnings:'));
       for (const warning of moduleDiscoveryResult.warnings) {
@@ -162,35 +173,10 @@ async function setupBuildEnvironment(
     console.log(chalk.gray(`[INFO] build: Loaded persona '${persona.name}'`));
   }
 
-  // Resolve modules for persona
-  progress.update('Resolving modules...');
-  const resolutionResult = resolvePersonaModules(
-    persona,
-    moduleDiscoveryResult.modules
-  );
-
-  // Check for missing modules
-  if (resolutionResult.missingModules.length > 0) {
-    throw new Error(
-      `Missing modules: ${resolutionResult.missingModules.join(', ')}`
-    );
-  }
-
-  if (verbose) {
-    console.log(
-      chalk.gray(
-        `[INFO] build: Loaded ${resolutionResult.modules.length} modules`
-      )
-    );
-  }
-
-  const allWarnings = [
-    ...moduleDiscoveryResult.warnings,
-    ...resolutionResult.warnings,
-  ];
+  const allWarnings = [...moduleDiscoveryResult.warnings];
 
   return {
-    modules: resolutionResult.modules,
+    registry: moduleDiscoveryResult.registry,
     persona,
     outputPath,
     warnings: allWarnings,
@@ -215,21 +201,60 @@ function processPersonaAndModules(
   environment: BuildEnvironment,
   progress: ReturnType<typeof createBuildProgress>
 ): BuildResult {
+  progress.update('Resolving modules from registry...');
+
+  // Resolve all required modules from registry using the registry's default strategy
+  const requiredModuleIds = environment.persona.moduleGroups.flatMap(
+    group => group.modules
+  );
+
+  const resolvedModules: UMSModule[] = [];
+  const resolutionWarnings: string[] = [];
+  const missingModules: string[] = [];
+
+  for (const moduleId of requiredModuleIds) {
+    try {
+      const module = environment.registry.resolve(moduleId);
+      if (module) {
+        resolvedModules.push(module);
+      } else {
+        missingModules.push(moduleId);
+      }
+    } catch (error) {
+      // A ConflictError is only thrown by the registry if the conflict
+      // strategy is set to 'error'. In that case, we want the build to
+      // fail as intended by the strict strategy, so we re-throw.
+      if (error instanceof ConflictError) {
+        throw error;
+      }
+
+      // Handle other errors as warnings
+      if (error instanceof Error) {
+        resolutionWarnings.push(error.message);
+      }
+      missingModules.push(moduleId);
+    }
+  }
+
+  // Check for missing modules
+  if (missingModules.length > 0) {
+    throw new Error(`Missing modules: ${missingModules.join(', ')}`);
+  }
+
   progress.update('Building persona...');
 
   // Generate Markdown
-  const markdown = renderMarkdown(environment.persona, environment.modules);
+  const markdown = renderMarkdown(environment.persona, resolvedModules);
 
   // Generate Build Report
-  const buildReport = generateBuildReport(
-    environment.persona,
-    environment.modules
-  );
+  const buildReport = generateBuildReport(environment.persona, resolvedModules);
+
+  const allWarnings = [...environment.warnings, ...resolutionWarnings];
 
   // Show warnings if any
-  if (environment.warnings.length > 0) {
+  if (allWarnings.length > 0) {
     console.log(chalk.yellow('\nWarnings:'));
-    for (const warning of environment.warnings) {
+    for (const warning of allWarnings) {
       console.log(chalk.yellow(`  • ${warning}`));
     }
     console.log();
@@ -237,9 +262,9 @@ function processPersonaAndModules(
 
   return {
     markdown,
-    modules: environment.modules,
+    modules: resolvedModules,
     persona: environment.persona,
-    warnings: environment.warnings,
+    warnings: allWarnings,
     buildReport,
   };
 }

@@ -10,7 +10,7 @@ import type {
   ValidationResult,
   ValidationError,
   ValidationWarning,
-} from '../types/index.js';
+} from '../../types/index.js';
 
 /**
  * Result of module resolution operation

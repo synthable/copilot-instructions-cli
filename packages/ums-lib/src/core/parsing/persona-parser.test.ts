@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { validatePersona } from './persona-loader.js';
+import { validatePersona } from '../validation/persona-validator.js';
 import { readFileSync } from 'fs';
 import { parse } from 'yaml';
 import { join } from 'path';

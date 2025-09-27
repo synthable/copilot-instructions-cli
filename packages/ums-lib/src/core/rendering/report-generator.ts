@@ -4,14 +4,14 @@
  */
 
 import { createHash } from 'node:crypto';
-import pkg from '../../package.json' with { type: 'json' };
+import pkg from '#package.json' with { type: 'json' };
 import type {
   UMSModule,
   UMSPersona,
   BuildReport,
   BuildReportGroup,
   BuildReportModule,
-} from '../types/index.js';
+} from '../../types/index.js';
 
 /**
  * Generates a build report with UMS v1.0 spec compliance (Section 9.3)

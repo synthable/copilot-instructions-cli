@@ -14,13 +14,13 @@ import {
   renderData,
   renderExamples,
   inferLanguageFromMediaType,
-} from './renderer.js';
+} from './markdown-renderer.js';
 import type {
   UMSModule,
   UMSPersona,
   DataDirective,
   ExampleDirective,
-} from '../types/index.js';
+} from '../../types/index.js';
 
 // Mock modules for testing
 const mockModule1: UMSModule = {

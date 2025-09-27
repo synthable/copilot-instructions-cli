@@ -84,6 +84,21 @@ export class BuildError extends UMSError {
 }
 
 /**
+ * Error for module conflicts
+ */
+export class ConflictError extends UMSError {
+  public readonly moduleId: string;
+  public readonly conflictCount: number;
+
+  constructor(message: string, moduleId: string, conflictCount: number) {
+    super(message, 'CONFLICT_ERROR');
+    this.name = 'ConflictError';
+    this.moduleId = moduleId;
+    this.conflictCount = conflictCount;
+  }
+}
+
+/**
  * Type guard to check if error is a UMS error
  */
 export function isUMSError(error: unknown): error is UMSError {

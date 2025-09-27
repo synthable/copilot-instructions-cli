@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import chalk from 'chalk';
 import { handleSearch } from './search.js';
 import { discoverAllModules } from '../utils/module-discovery.js';
-import type { UMSModule } from 'ums-lib';
+import { ModuleRegistry, type UMSModule } from 'ums-lib';
 
 // Mock dependencies
 vi.mock('chalk', () => ({
@@ -100,6 +100,15 @@ describe('search command', () => {
     },
   };
 
+  // Helper function to create registry with test modules
+  function createMockRegistry(modules: UMSModule[]): ModuleRegistry {
+    const registry = new ModuleRegistry('warn');
+    for (const module of modules) {
+      registry.add(module, { type: 'standard', path: 'test' });
+    }
+    return registry;
+  }
+
   beforeEach(() => {
     vi.clearAllMocks();
   });
@@ -107,7 +116,7 @@ describe('search command', () => {
   it('should search modules by name', async () => {
     // Arrange
     mockDiscoverAllModules.mockResolvedValue({
-      modules: [mockModule1, mockModule2],
+      registry: createMockRegistry([mockModule1, mockModule2]),
       warnings: [],
     });
 
@@ -123,7 +132,7 @@ describe('search command', () => {
   it('should search modules by description', async () => {
     // Arrange
     mockDiscoverAllModules.mockResolvedValue({
-      modules: [mockModule1, mockModule2],
+      registry: createMockRegistry([mockModule1, mockModule2]),
       warnings: [],
     });
 
@@ -139,7 +148,7 @@ describe('search command', () => {
   it('should search modules by tags', async () => {
     // Arrange
     mockDiscoverAllModules.mockResolvedValue({
-      modules: [mockModule1],
+      registry: createMockRegistry([mockModule1]),
       warnings: [],
     });
 
@@ -155,7 +164,7 @@ describe('search command', () => {
   it('should filter by tier', async () => {
     // Arrange
     mockDiscoverAllModules.mockResolvedValue({
-      modules: [mockModule1, mockModule2],
+      registry: createMockRegistry([mockModule1, mockModule2]),
       warnings: [],
     });
 
@@ -171,7 +180,7 @@ describe('search command', () => {
   it('should handle no search results', async () => {
     // Arrange
     mockDiscoverAllModules.mockResolvedValue({
-      modules: [mockModule1, mockModule2],
+      registry: createMockRegistry([mockModule1, mockModule2]),
       warnings: [],
     });
 
@@ -187,7 +196,7 @@ describe('search command', () => {
   it('should handle no modules found during discovery', async () => {
     // Arrange
     mockDiscoverAllModules.mockResolvedValue({
-      modules: [],
+      registry: createMockRegistry([]),
       warnings: [],
     });
 
@@ -201,7 +210,7 @@ describe('search command', () => {
   it('should handle case-insensitive search', async () => {
     // Arrange
     mockDiscoverAllModules.mockResolvedValue({
-      modules: [mockModule1],
+      registry: createMockRegistry([mockModule1]),
       warnings: [],
     });
 
@@ -222,7 +231,7 @@ describe('search command', () => {
     };
 
     mockDiscoverAllModules.mockResolvedValue({
-      modules: [moduleWithoutTags],
+      registry: createMockRegistry([moduleWithoutTags]),
       warnings: [],
     });
 

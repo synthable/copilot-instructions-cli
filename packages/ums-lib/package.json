@@ -3,13 +3,49 @@
   "version": "1.0.0",
   "type": "module",
   "private": false,
+  "sideEffects": false,
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "exports": {
     ".": {
       "import": "./dist/index.js",
       "types": "./dist/index.d.ts"
+    },
+    "./core": {
+      "import": "./dist/core/index.js",
+      "types": "./dist/core/index.d.ts"
+    },
+    "./core/parsing": {
+      "import": "./dist/core/parsing/index.js",
+      "types": "./dist/core/parsing/index.d.ts"
+    },
+    "./core/validation": {
+      "import": "./dist/core/validation/index.js",
+      "types": "./dist/core/validation/index.d.ts"
+    },
+    "./core/resolution": {
+      "import": "./dist/core/resolution/index.js",
+      "types": "./dist/core/resolution/index.d.ts"
+    },
+    "./core/rendering": {
+      "import": "./dist/core/rendering/index.js",
+      "types": "./dist/core/rendering/index.d.ts"
+    },
+    "./core/registry": {
+      "import": "./dist/core/registry/index.js",
+      "types": "./dist/core/registry/index.d.ts"
+    },
+    "./types": {
+      "import": "./dist/types/index.js",
+      "types": "./dist/types/index.d.ts"
+    },
+    "./utils": {
+      "import": "./dist/utils/index.js",
+      "types": "./dist/utils/index.d.ts"
     }
+  },
+  "imports": {
+    "#package.json": "./package.json"
   },
   "author": "synthable",
   "license": "GPL-3.0-or-later",
@@ -34,13 +70,14 @@
     "test:coverage": "vitest run --coverage",
     "lint": "eslint 'src/**/*.ts'",
     "lint:fix": "eslint 'src/**/*.ts' --fix",
-    "format": "prettier --write .",
-    "format:check": "prettier --check .",
+    "format": "prettier --write 'src/**/*.ts'",
+    "format:check": "prettier --check 'src/**/*.ts'",
     "typecheck": "tsc --noEmit",
     "clean": "rm -rf dist",
     "prepublishOnly": "npm run clean && npm run build",
     "pretest": "npm run typecheck",
     "prebuild": "npm run clean",
+    "benchmark": "npm run build && node dist/test/benchmark.js",
     "quality-check": "npm run typecheck && npm run lint && npm run format:check && npm run test"
   },
   "dependencies": {
