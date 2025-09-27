@@ -37,13 +37,18 @@ npm install ums-lib
 
 The library provides both pure functional APIs and a conflict-aware registry for handling module conflicts. Here are the main usage patterns:
 
-### Basic Usage with ConflictAwareRegistry
+### Basic Usage with ModuleRegistry
 
 ```typescript
-import { ConflictAwareRegistry, parseModule, parsePersona, renderMarkdown } from 'ums-lib';
+import {
+  ModuleRegistry,
+  parseModule,
+  parsePersona,
+  renderMarkdown,
+} from 'ums-lib';
 
 // 1. Create a registry with conflict resolution strategy
-const registry = new ConflictAwareRegistry('warn'); // or 'error', 'replace'
+const registry = new ModuleRegistry('warn'); // or 'error', 'replace'
 
 // 2. Parse and add modules to the registry
 const moduleContent = `
@@ -76,8 +81,9 @@ moduleGroups:
 const persona = parsePersona(personaContent);
 
 // 4. Resolve modules from registry (handles conflicts automatically)
+const requiredModuleIds = persona.moduleGroups.flatMap(group => group.modules);
 const resolvedModules = [];
-for (const moduleId of getRequiredModuleIds(persona)) {
+for (const moduleId of requiredModuleIds) {
   const module = registry.resolve(moduleId);
   if (module) resolvedModules.push(module);
 }
@@ -110,16 +116,16 @@ const markdownOutput = renderMarkdown(persona, resolutionResult.modules);
 ### Conflict Resolution Strategies
 
 ```typescript
-import { ConflictAwareRegistry } from 'ums-lib/core/registry';
+import { ModuleRegistry } from 'ums-lib/core/registry';
 
 // Error on conflicts (default)
-const strictRegistry = new ConflictAwareRegistry('error');
+const strictRegistry = new ModuleRegistry('error');
 
 // Warn on conflicts, use first registered module
-const warnRegistry = new ConflictAwareRegistry('warn');
+const warnRegistry = new ModuleRegistry('warn');
 
 // Replace conflicts, use last registered module
-const replaceRegistry = new ConflictAwareRegistry('replace');
+const replaceRegistry = new ModuleRegistry('replace');
 
 // Check for conflicts
 const conflicts = registry.getConflicts('module-id');
@@ -130,8 +136,8 @@ const conflictingIds = registry.getConflictingIds();
 
 ### Core Registry
 
-- `ConflictAwareRegistry` - Main registry class for handling module conflicts
-- `ModuleRegistry` (interface) - Registry contract
+- `ModuleRegistry` - Main registry class for handling module conflicts
+- `IModuleRegistry` (interface) - Registry contract
 - `ConflictStrategy` - Type for conflict resolution strategies ('error', 'warn', 'replace')
 - `ModuleSource` - Type for tracking module sources
 - `ModuleEntry` - Type for registry entries with metadata
@@ -142,7 +148,7 @@ The library supports tree-shaking with specific imports:
 
 ```typescript
 // Registry only
-import { ConflictAwareRegistry } from 'ums-lib/core/registry';
+import { ModuleRegistry } from 'ums-lib/core/registry';
 
 // Parsing only
 import { parseModule, parsePersona } from 'ums-lib/core/parsing';
@@ -174,7 +180,6 @@ import { UMSError, UMSValidationError } from 'ums-lib/utils';
 
 - `resolvePersonaModules(persona: UMSPersona, modules: UMSModule[]): ModuleResolutionResult`
 - `validateModuleReferences(persona: UMSPersona, registry: Map<string, UMSModule>): ValidationResult`
-- `getRequiredModuleIds(persona: UMSPersona): string[]`
 
 ### Rendering
 
@@ -198,6 +203,7 @@ import { UMSError, UMSValidationError } from 'ums-lib/utils';
 ### Type Definitions
 
 All UMS v1.0 interfaces are exported from `/types`:
+
 - `UMSModule`, `UMSPersona`, `BuildReport`
 - `ConflictStrategy`, `ModuleSource`, `ModuleEntry`
 - `ValidationResult`, `ModuleResolutionResult`

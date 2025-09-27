@@ -166,7 +166,7 @@ function inspectSpecificModule(
 
   // Show current resolution strategy result
   console.log(chalk.blue('\nCurrent Resolution:'));
-  const resolved = registry.resolve(moduleId);
+  const resolved = registry.resolve(moduleId, 'warn');
   if (resolved) {
     const resolvedEntry = conflicts.find(e => e.module === resolved);
     if (resolvedEntry) {
@@ -245,7 +245,7 @@ function inspectConflicts(
       ];
 
       if (verbose) {
-        const resolved = registry.resolve(moduleId);
+        const resolved = registry.resolve(moduleId, 'warn');
         const resolvedEntry = conflicts?.find(e => e.module === resolved);
         const resolution = resolvedEntry
           ? `${resolvedEntry.source.type}:${resolvedEntry.source.path}`

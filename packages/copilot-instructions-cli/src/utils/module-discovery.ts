@@ -3,14 +3,10 @@
  * Handles module discovery and populates ModuleRegistry for CLI operations
  */
 
-import type { UMSModule, ModuleConfig, ConflictStrategy } from 'ums-lib';
+import type { UMSModule, ModuleConfig } from 'ums-lib';
 import { parseModule, ModuleRegistry } from 'ums-lib';
 import { discoverModuleFiles, readModuleFile } from './file-operations.js';
-import {
-  loadModuleConfig,
-  getConfiguredModulePaths,
-  getConflictStrategy,
-} from './config-loader.js';
+import { loadModuleConfig, getConfiguredModulePaths } from './config-loader.js';
 
 const DEFAULT_STANDARD_MODULES_PATH = './instructions-modules-v1-compliant';
 
@@ -92,16 +88,8 @@ export interface ModuleDiscoveryResult {
 export async function discoverAllModules(): Promise<ModuleDiscoveryResult> {
   const config = await loadModuleConfig();
 
-  // Determine default conflict strategy from config
-  let defaultStrategy: ConflictStrategy = 'error';
-  if (config?.localModulePaths.length) {
-    defaultStrategy = getConflictStrategy(
-      config,
-      config.localModulePaths[0].path
-    );
-  }
-
-  const registry = new ModuleRegistry(defaultStrategy);
+  // Use 'error' as fallback default for registry
+  const registry = new ModuleRegistry('error');
   const warnings: string[] = [];
 
   // Discover and add standard modules
@@ -110,6 +98,7 @@ export async function discoverAllModules(): Promise<ModuleDiscoveryResult> {
     registry.add(module, {
       type: 'standard',
       path: 'instructions-modules-v1-compliant',
+      // No per-path strategy for standard modules
     });
   }
 
