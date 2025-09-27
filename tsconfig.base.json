@@ -25,6 +25,7 @@
     "forceConsistentCasingInFileNames": true,
     "isolatedModules": true,
     "skipLibCheck": true,
+    "resolvePackageJsonImports": true,
 
     // --- Modern Module Behavior ---
     "verbatimModuleSyntax": true,

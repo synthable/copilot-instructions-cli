@@ -44,6 +44,9 @@
       "types": "./dist/utils/index.d.ts"
     }
   },
+  "imports": {
+    "#package.json": "./package.json"
+  },
   "author": "synthable",
   "license": "GPL-3.0-or-later",
   "description": "A reusable library for UMS (Unified Module System) v1.0 operations - parsing, validating, and building modular AI instructions.",
