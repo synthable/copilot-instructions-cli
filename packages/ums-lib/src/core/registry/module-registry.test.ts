@@ -208,14 +208,21 @@ describe('ModuleRegistry', () => {
     });
 
     describe('warn strategy', () => {
-      it('should resolve to first module and log warning', () => {
+      it('should resolve to first module silently', () => {
         const resolved = registry.resolve('foundation/logic/reasoning', 'warn');
         expect(resolved).toBe(mockModule1);
-        expect(consoleWarnSpy).toHaveBeenCalledWith(
-          expect.stringContaining(
-            "Warning: Module conflict for 'foundation/logic/reasoning'"
-          )
-        );
+        expect(consoleWarnSpy).not.toHaveBeenCalled();
+      });
+
+      it('should allow caller to inspect conflicts separately', () => {
+        const resolved = registry.resolve('foundation/logic/reasoning', 'warn');
+        expect(resolved).toBe(mockModule1);
+
+        // Caller can check for conflicts if they want to handle warnings
+        const conflicts = registry.getConflicts('foundation/logic/reasoning');
+        expect(conflicts).toHaveLength(2);
+        expect(conflicts?.[0]?.module).toBe(mockModule1);
+        expect(conflicts?.[1]?.module).toBe(mockModule2);
       });
     });
 
@@ -310,7 +317,7 @@ describe('ModuleRegistry', () => {
 
       const resolved = warnRegistry.resolve('foundation/logic/reasoning');
       expect(resolved).toBe(mockModule1);
-      expect(consoleWarnSpy).toHaveBeenCalled();
+      expect(consoleWarnSpy).not.toHaveBeenCalled();
     });
 
     it('should override default strategy with explicit parameter', () => {
