@@ -11,7 +11,14 @@ function createMockModule(id: string): UMSModule {
   return {
     id,
     version: '1.0.0',
-    schemaVersion: '1.0',
+    schemaVersion: '2.0',
+    capabilities: ['specification'],
+    metadata: {
+      name: `Module ${id}`,
+      description: `Test module ${id}`,
+      semantic: `test module ${id}`,
+    },
+    // v1.0 backwards compatibility fields
     shape: 'specification',
     meta: {
       name: `Module ${id}`,

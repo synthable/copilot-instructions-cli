@@ -21,12 +21,19 @@ import type {
   DataDirective,
   ExampleDirective,
 } from '../../types/index.js';
+import { ComponentType } from '../../types/index.js';
 
 // Mock modules for testing
 const mockModule1: UMSModule = {
   id: 'foundation/logic/deductive-reasoning',
   version: '1.0',
-  schemaVersion: '1.0',
+  schemaVersion: '2.0',
+  capabilities: ['reasoning', 'logic'],
+  metadata: {
+    name: 'Deductive Reasoning',
+    description: 'Logical deduction principles',
+    semantic: 'Logic and reasoning framework',
+  },
   shape: 'specification',
   meta: {
     name: 'Deductive Reasoning',
@@ -46,7 +53,13 @@ const mockModule1: UMSModule = {
 const mockModule2: UMSModule = {
   id: 'technology/react/hooks',
   version: '1.0',
-  schemaVersion: '1.0',
+  schemaVersion: '2.0',
+  capabilities: ['react', 'hooks'],
+  metadata: {
+    name: 'React Hooks',
+    description: 'React hooks best practices',
+    semantic: 'Frontend development patterns',
+  },
   shape: 'procedure',
   meta: {
     name: 'React Hooks',
@@ -69,17 +82,22 @@ const mockModule2: UMSModule = {
 const mockPersona: UMSPersona = {
   name: 'Test Persona',
   version: '1.0',
-  schemaVersion: '1.0',
+  schemaVersion: '2.0',
   description: 'A test persona',
   semantic: 'Testing framework',
   identity: 'I am a test persona focused on quality and logic.',
   attribution: false,
+  modules: ['foundation/logic/deductive-reasoning', 'technology/react/hooks'],
   moduleGroups: [
     {
+      group: 'Foundation',
+      ids: ['foundation/logic/deductive-reasoning'],
       groupName: 'Foundation',
       modules: ['foundation/logic/deductive-reasoning'],
     },
     {
+      group: 'Technology',
+      ids: ['technology/react/hooks'],
       groupName: 'Technology',
       modules: ['technology/react/hooks'],
     },
@@ -147,8 +165,12 @@ describe('renderer', () => {
   describe('renderData', () => {
     it('should render data directive with inferred language', () => {
       const data: DataDirective = {
-        mediaType: 'application/json',
-        value: '{"key": "value"}',
+        type: ComponentType.Data,
+        data: {
+          format: 'application/json',
+          mediaType: 'application/json',
+          value: '{"key": "value"}',
+        },
       };
       const result = renderData(data);
       expect(result).toBe('## Data\n\n```json\n{"key": "value"}\n```\n');
@@ -156,8 +178,12 @@ describe('renderer', () => {
 
     it('should render data directive without language when not recognized', () => {
       const data: DataDirective = {
-        mediaType: 'text/unknown',
-        value: 'some content',
+        type: ComponentType.Data,
+        data: {
+          format: 'text/unknown',
+          mediaType: 'text/unknown',
+          value: 'some content',
+        },
       };
       const result = renderData(data);
       expect(result).toBe('## Data\n\n```\nsome content\n```\n');
@@ -232,6 +258,8 @@ describe('renderer', () => {
         identity: '',
         moduleGroups: [
           {
+            group: 'Foundation',
+            ids: ['foundation/logic/deductive-reasoning'],
             groupName: 'Foundation',
             modules: ['foundation/logic/deductive-reasoning'],
           },
@@ -249,6 +277,7 @@ describe('renderer', () => {
         ...mockPersona,
         moduleGroups: [
           {
+            ids: ['foundation/logic/deductive-reasoning'],
             modules: ['foundation/logic/deductive-reasoning'],
           },
         ],
@@ -268,6 +297,8 @@ describe('renderer', () => {
         attribution: true,
         moduleGroups: [
           {
+            group: 'Foundation',
+            ids: ['foundation/logic/deductive-reasoning'],
             groupName: 'Foundation',
             modules: ['foundation/logic/deductive-reasoning'],
           },

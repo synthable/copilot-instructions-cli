@@ -1,8 +1,12 @@
 /**
- * Parsing domain exports for UMS v1.0
- * Handles YAML parsing and basic structure validation
+ * Parsing domain exports for UMS v2.0
+ * Handles parsing and basic structure validation
  */
 
-export { parseModule } from './module-parser.js';
-export { parsePersona } from './persona-parser.js';
+export { parseModuleObject } from './module-parser.js';
+export { parsePersonaObject } from './persona-parser.js';
 export { parseYaml, isValidObject } from './yaml-utils.js';
+
+// v1.0 backwards compatibility aliases
+export { parseModuleObject as parseModule } from './module-parser.js';
+export { parsePersonaObject as parsePersona } from './persona-parser.js';

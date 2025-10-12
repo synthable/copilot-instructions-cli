@@ -112,6 +112,11 @@ export function isValidationError(error: unknown): error is UMSValidationError {
   return error instanceof UMSValidationError;
 }
 
+// Type aliases for v2.0 spec-compliant naming
+export const ValidationError = UMSValidationError;
+export const ModuleParseError = ModuleLoadError;
+export const PersonaParseError = PersonaLoadError;
+
 /**
  * Validation error constants
  */

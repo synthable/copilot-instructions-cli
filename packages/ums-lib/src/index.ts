@@ -8,6 +8,9 @@
 // Export all UMS v1.0 types
 export * from './types/index.js';
 
+// Export adapter types (loader contracts for implementation layer)
+export * from './adapters/index.js';
+
 // Deprecated classes removed in Phase 4 - use pure functions instead
 
 // Export all core functionality from organized domains
@@ -23,4 +26,8 @@ export {
   ConflictError,
   isUMSError,
   isValidationError,
+  // v2.0 spec-compliant aliases
+  ValidationError,
+  ModuleParseError,
+  PersonaParseError,
 } from './utils/errors.js';

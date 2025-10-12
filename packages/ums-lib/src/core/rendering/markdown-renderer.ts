@@ -24,15 +24,15 @@ export function renderMarkdown(
   const sections: string[] = [];
 
   // Render persona identity if present and not empty (Section 7.1)
-  if (persona.identity.trim()) {
+  if (persona.identity && persona.identity.trim()) {
     sections.push('## Identity\n');
     sections.push(`${persona.identity}\n`);
   }
 
-  // Group modules by their moduleGroups for proper ordering
+  // Group modules by their moduleGroups for proper ordering (v1.0 compatibility)
   let moduleIndex = 0;
 
-  for (const group of persona.moduleGroups) {
+  for (const group of persona.moduleGroups || []) {
     // Optional group heading (non-normative)
     if (group.groupName) {
       sections.push(`# ${group.groupName}\n`);
@@ -40,7 +40,7 @@ export function renderMarkdown(
 
     const moduleBlocks: string[] = [];
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    for (const _moduleId of group.modules) {
+    for (const _moduleId of group.modules || []) {
       const module = modules[moduleIndex++];
       let block = renderModule(module);
       if (persona.attribution) {
@@ -64,10 +64,12 @@ export function renderMarkdown(
 export function renderModule(module: UMSModule): string {
   const sections: string[] = [];
 
-  // Render directives in stable order (Section 7.1)
-  for (const directive of RENDER_ORDER) {
-    if (directive in module.body) {
-      sections.push(renderDirective(directive, module.body[directive]));
+  // Render directives in stable order (Section 7.1) - v1.0 compatibility
+  if (module.body) {
+    for (const directive of RENDER_ORDER) {
+      if (directive in module.body) {
+        sections.push(renderDirective(directive, module.body[directive]));
+      }
     }
   }
 
@@ -161,11 +163,16 @@ export function renderCriteria(content: string[]): string {
  * @returns Rendered data section
  */
 export function renderData(content: DataDirective): string {
+  // v1.0 compatibility: access mediaType/value from nested data object
+  // Also check deprecated direct properties for old v1.0 data structures
+  const mediaType = (content.data?.mediaType || content.data?.format) as string | undefined;
+  const value = content.data?.value as string | undefined;
+  
   // Infer language from mediaType
-  const language = inferLanguageFromMediaType(content.mediaType);
+  const language = mediaType ? inferLanguageFromMediaType(mediaType) : null;
   const codeBlock = language
-    ? `\`\`\`${language}\n${content.value}\n\`\`\``
-    : `\`\`\`\n${content.value}\n\`\`\``;
+    ? `\`\`\`${language}\n${value}\n\`\`\``
+    : `\`\`\`\n${value}\n\`\`\``;
   return `## Data\n\n${codeBlock}\n`;
 }
 

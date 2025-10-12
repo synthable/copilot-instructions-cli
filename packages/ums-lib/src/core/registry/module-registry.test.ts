@@ -19,7 +19,13 @@ describe('ModuleRegistry', () => {
   const mockModule1: UMSModule = {
     id: 'foundation/logic/reasoning',
     version: '1.0.0',
-    schemaVersion: '1.0',
+    schemaVersion: '2.0',
+    capabilities: ['reasoning', 'logic'],
+    metadata: {
+      name: 'Reasoning Framework',
+      description: 'A framework for logical reasoning',
+      semantic: 'logical reasoning cognitive framework',
+    },
     shape: 'specification',
     meta: {
       name: 'Reasoning Framework',
@@ -34,7 +40,13 @@ describe('ModuleRegistry', () => {
   const mockModule2: UMSModule = {
     id: 'foundation/logic/reasoning',
     version: '2.0.0',
-    schemaVersion: '1.0',
+    schemaVersion: '2.0',
+    capabilities: ['reasoning', 'logic', 'advanced'],
+    metadata: {
+      name: 'Advanced Reasoning Framework',
+      description: 'An advanced framework for logical reasoning',
+      semantic: 'advanced logical reasoning cognitive framework',
+    },
     shape: 'specification',
     meta: {
       name: 'Advanced Reasoning Framework',
@@ -49,7 +61,13 @@ describe('ModuleRegistry', () => {
   const mockModule3: UMSModule = {
     id: 'principle/design/modularity',
     version: '1.0.0',
-    schemaVersion: '1.0',
+    schemaVersion: '2.0',
+    capabilities: ['design', 'modularity'],
+    metadata: {
+      name: 'Modularity Pattern',
+      description: 'Design pattern for modular systems',
+      semantic: 'modularity design pattern architecture',
+    },
     shape: 'pattern',
     meta: {
       name: 'Modularity Pattern',

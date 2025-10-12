@@ -1,22 +1,21 @@
 /**
  * ModuleRegistry - stores conflicting modules and resolves them on-demand
- * Implements the conflict-aware registry pattern for UMS v1.0
+ * Implements the conflict-aware registry pattern for UMS v2.0
  */
 
 import { ConflictError } from '../../utils/errors.js';
 import type {
-  UMSModule,
-  ModuleEntry,
+  Module,
+  RegistryEntry,
   ModuleSource,
-  IModuleRegistry,
   ConflictStrategy,
 } from '../../types/index.js';
 
 /**
  * Registry that can store multiple modules per ID and resolve conflicts on-demand
  */
-export class ModuleRegistry implements IModuleRegistry {
-  private modules = new Map<string, ModuleEntry[]>();
+export class ModuleRegistry {
+  private modules = new Map<string, RegistryEntry[]>();
   private defaultStrategy: ConflictStrategy;
 
   constructor(defaultStrategy: ConflictStrategy = 'error') {
@@ -26,7 +25,7 @@ export class ModuleRegistry implements IModuleRegistry {
   /**
    * Add a module to the registry without resolving conflicts
    */
-  add(module: UMSModule, source: ModuleSource): void {
+  add(module: Module, source: ModuleSource): void {
     const existing = this.modules.get(module.id) ?? [];
     existing.push({ module, source, addedAt: Date.now() });
     this.modules.set(module.id, existing);
@@ -35,7 +34,7 @@ export class ModuleRegistry implements IModuleRegistry {
   /**
    * Add multiple modules at once
    */
-  addAll(modules: UMSModule[], source: ModuleSource): void {
+  addAll(modules: Module[], source: ModuleSource): void {
     for (const module of modules) {
       this.add(module, source);
     }
@@ -44,7 +43,7 @@ export class ModuleRegistry implements IModuleRegistry {
   /**
    * Resolve a module by ID, applying conflict resolution if needed
    */
-  resolve(moduleId: string, strategy?: ConflictStrategy): UMSModule | null {
+  resolve(moduleId: string, strategy?: ConflictStrategy): Module | null {
     const entries = this.modules.get(moduleId);
     if (!entries || entries.length === 0) {
       return null;
@@ -58,7 +57,7 @@ export class ModuleRegistry implements IModuleRegistry {
     return this.resolveConflict(
       moduleId,
       entries,
-      strategy ?? this.defaultStrategy
+      strategy ?? this.defaultStrategy,
     );
   }
 
@@ -81,7 +80,7 @@ export class ModuleRegistry implements IModuleRegistry {
    * Get all conflicting entries for a module ID
    * Returns null if no conflicts (0 or 1 entries)
    */
-  getConflicts(moduleId: string): ModuleEntry[] | null {
+  getConflicts(moduleId: string): RegistryEntry[] | null {
     const entries = this.modules.get(moduleId);
     return entries && entries.length > 1 ? entries : null;
   }
@@ -98,8 +97,8 @@ export class ModuleRegistry implements IModuleRegistry {
   /**
    * Resolve all modules using a specific strategy
    */
-  resolveAll(strategy: ConflictStrategy): Map<string, UMSModule> {
-    const resolved = new Map<string, UMSModule>();
+  resolveAll(strategy: ConflictStrategy): Map<string, Module> {
+    const resolved = new Map<string, Module>();
 
     for (const [moduleId] of this.modules) {
       const module = this.resolve(moduleId, strategy);
@@ -114,7 +113,7 @@ export class ModuleRegistry implements IModuleRegistry {
   /**
    * Get all entries in the registry
    */
-  getAllEntries(): Map<string, ModuleEntry[]> {
+  getAllEntries(): Map<string, RegistryEntry[]> {
     return new Map(this.modules);
   }
 
@@ -139,9 +138,9 @@ export class ModuleRegistry implements IModuleRegistry {
    */
   private resolveConflict(
     moduleId: string,
-    entries: ModuleEntry[],
-    strategy: ConflictStrategy
-  ): UMSModule {
+    entries: RegistryEntry[],
+    strategy: ConflictStrategy,
+  ): Module {
     switch (strategy) {
       case 'error': {
         const sources = entries
@@ -150,7 +149,7 @@ export class ModuleRegistry implements IModuleRegistry {
         throw new ConflictError(
           `Module conflict for '${moduleId}': ${entries.length} candidates found from sources [${sources}]. Use --conflict-strategy=warn or --conflict-strategy=replace to resolve.`,
           moduleId,
-          entries.length
+          entries.length,
         );
       }
 
@@ -169,3 +168,4 @@ export class ModuleRegistry implements IModuleRegistry {
     }
   }
 }
+

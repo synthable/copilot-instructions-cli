@@ -39,7 +39,7 @@ export function resolveModules(
   const missingModules: string[] = [];
 
   for (const group of moduleGroups) {
-    for (const moduleId of group.modules) {
+    for (const moduleId of group.modules || []) {
       const module = registry.get(moduleId);
 
       if (!module) {
@@ -49,10 +49,11 @@ export function resolveModules(
 
       modules.push(module);
 
-      // Check for deprecation warnings
-      if (module.meta.deprecated) {
-        const warning = module.meta.replacedBy
-          ? `Module '${moduleId}' is deprecated and has been replaced by '${module.meta.replacedBy}'. Please update your persona file.`
+      // Check for deprecation warnings (v1.0 compatibility)
+      const moduleMeta = module.meta || module.metadata;
+      if (moduleMeta.deprecated) {
+        const warning = moduleMeta.replacedBy
+          ? `Module '${moduleId}' is deprecated and has been replaced by '${moduleMeta.replacedBy}'. Please update your persona file.`
           : `Module '${moduleId}' is deprecated. This module may be removed in a future version.`;
         warnings.push(warning);
       }
@@ -96,8 +97,8 @@ export function validateModuleReferences(
   const errors: ValidationError[] = [];
   const warnings: ValidationWarning[] = [];
 
-  for (const group of persona.moduleGroups) {
-    for (const moduleId of group.modules) {
+  for (const group of persona.moduleGroups || []) {
+    for (const moduleId of group.modules || []) {
       if (!registry.has(moduleId)) {
         errors.push({
           path: `moduleGroups[].modules`,
@@ -145,8 +146,8 @@ export function resolvePersonaModules(
 ): ModuleResolutionResult {
   const registry = createModuleRegistry(modules);
 
-  // First resolve the basic module references
-  const basicResolution = resolveModules(persona.moduleGroups, registry);
+  // First resolve the basic module references (v1.0 compatibility)
+  const basicResolution = resolveModules(persona.moduleGroups || [], registry);
 
   // Then resolve implementations for the found modules
   const resolvedModules = resolveImplementations(

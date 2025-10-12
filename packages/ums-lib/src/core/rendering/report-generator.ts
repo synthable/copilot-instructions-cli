@@ -28,10 +28,10 @@ export function generateBuildReport(
   // Create build report groups following UMS v1.0 spec
   const moduleGroups: BuildReportGroup[] = [];
 
-  for (const group of persona.moduleGroups) {
+  for (const group of persona.moduleGroups || []) {
     const reportModules: BuildReportModule[] = [];
 
-    for (const moduleId of group.modules) {
+    for (const moduleId of group.modules || []) {
       const module = modules.find(m => m.id === moduleId);
       if (module) {
         // Generate module file digest (only if content is provided)
@@ -43,18 +43,20 @@ export function generateBuildReport(
             .digest('hex');
         }
 
+        // v1.0 compatibility: use meta or metadata
+        const moduleMeta = module.meta || module.metadata;
+
         const reportModule: BuildReportModule = {
           id: module.id,
-          name: module.meta.name,
+          name: moduleMeta.name,
           version: module.version,
           source: 'Local', // TODO: Distinguish between Standard Library and Local
           digest: moduleDigest ? `sha256:${moduleDigest}` : '',
-          shape: module.shape,
-          deprecated: module.meta.deprecated ?? false,
+          deprecated: moduleMeta.deprecated ?? false,
         };
 
-        if (module.meta.replacedBy) {
-          reportModule.replacedBy = module.meta.replacedBy;
+        if (moduleMeta.replacedBy) {
+          reportModule.replacedBy = moduleMeta.replacedBy;
         }
 
         reportModules.push(reportModule);

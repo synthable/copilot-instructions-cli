@@ -16,7 +16,13 @@ import type { UMSModule, UMSPersona } from '../../types/index.js';
 const mockModule1: UMSModule = {
   id: 'foundation/logic/deductive-reasoning',
   version: '1.0',
-  schemaVersion: '1.0',
+  schemaVersion: '2.0',
+  capabilities: ['reasoning', 'logic'],
+  metadata: {
+    name: 'Deductive Reasoning',
+    description: 'Logical deduction principles',
+    semantic: 'Logic and reasoning framework',
+  },
   shape: 'specification',
   meta: {
     name: 'Deductive Reasoning',
@@ -31,7 +37,15 @@ const mockModule1: UMSModule = {
 const mockModule2: UMSModule = {
   id: 'technology/react/hooks',
   version: '1.0',
-  schemaVersion: '1.0',
+  schemaVersion: '2.0',
+  capabilities: ['react', 'hooks'],
+  metadata: {
+    name: 'React Hooks',
+    description: 'React hooks best practices',
+    semantic: 'Frontend development patterns',
+    deprecated: true,
+    replacedBy: 'technology/react/modern-hooks',
+  },
   shape: 'procedure',
   meta: {
     name: 'React Hooks',
@@ -48,7 +62,13 @@ const mockModule2: UMSModule = {
 const mockModule3: UMSModule = {
   id: 'principle/quality/testing',
   version: '1.0',
-  schemaVersion: '1.0',
+  schemaVersion: '2.0',
+  capabilities: ['testing', 'quality'],
+  metadata: {
+    name: 'Testing Principles',
+    description: 'Software testing best practices',
+    semantic: 'Quality assurance methodology',
+  },
   shape: 'pattern',
   meta: {
     name: 'Testing Principles',
@@ -67,17 +87,22 @@ const mockModule3: UMSModule = {
 const mockPersona: UMSPersona = {
   name: 'Test Persona',
   version: '1.0',
-  schemaVersion: '1.0',
+  schemaVersion: '2.0',
   description: 'A test persona',
   semantic: 'Testing framework',
   identity: 'I am a test persona',
   attribution: false,
+  modules: ['foundation/logic/deductive-reasoning', 'technology/react/hooks', 'principle/quality/testing'],
   moduleGroups: [
     {
+      group: 'Foundation',
+      ids: ['foundation/logic/deductive-reasoning'],
       groupName: 'Foundation',
       modules: ['foundation/logic/deductive-reasoning'],
     },
     {
+      group: 'Technology',
+      ids: ['technology/react/hooks', 'principle/quality/testing'],
       groupName: 'Technology',
       modules: ['technology/react/hooks', 'principle/quality/testing'],
     },
@@ -109,7 +134,7 @@ describe('resolver', () => {
       const modules = [mockModule1, mockModule2, mockModule3];
       const registry = createModuleRegistry(modules);
 
-      const result = resolveModules(mockPersona.moduleGroups, registry);
+      const result = resolveModules(mockPersona.moduleGroups || [], registry);
 
       expect(result.modules).toHaveLength(3);
       expect(result.modules[0]).toEqual(mockModule1);
@@ -122,7 +147,7 @@ describe('resolver', () => {
       const modules = [mockModule1]; // Missing mockModule2 and mockModule3
       const registry = createModuleRegistry(modules);
 
-      const result = resolveModules(mockPersona.moduleGroups, registry);
+      const result = resolveModules(mockPersona.moduleGroups || [], registry);
 
       expect(result.modules).toHaveLength(1);
       expect(result.modules[0]).toEqual(mockModule1);
@@ -136,7 +161,7 @@ describe('resolver', () => {
       const modules = [mockModule1, mockModule2, mockModule3];
       const registry = createModuleRegistry(modules);
 
-      const result = resolveModules(mockPersona.moduleGroups, registry);
+      const result = resolveModules(mockPersona.moduleGroups || [], registry);
 
       expect(result.warnings).toHaveLength(1);
       expect(result.warnings[0]).toContain('deprecated');

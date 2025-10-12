@@ -1,5 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { validateModule } from '../validation/module-validator.js';
+import { ComponentType } from '../../types/index.js';
+import type { Module } from '../../types/index.js';
 
 describe('UMS Module Loader', () => {
   describe('validateModule', () => {
@@ -7,9 +9,9 @@ describe('UMS Module Loader', () => {
       const validModule = {
         id: 'principle/architecture/separation-of-concerns',
         version: '1.0.0',
-        schemaVersion: '1.0',
-        shape: 'specification',
-        meta: {
+        schemaVersion: '2.0',
+        capabilities: ['specification', 'architecture'],
+        metadata: {
           name: 'Separation of Concerns',
           description: 'A specification that mandates decomposing systems.',
           semantic:
@@ -19,12 +21,15 @@ describe('UMS Module Loader', () => {
           authors: ['Jane Doe <jane.doe@example.com>'],
           homepage: 'https://github.com/example/modules',
         },
-        body: {
-          goal: 'Define mandatory rules to ensure each component addresses a single responsibility.',
-          constraints: [
-            'Components MUST encapsulate a single responsibility.',
-            'Dependencies MUST flow in one direction.',
-          ],
+        instruction: {
+          type: ComponentType.Instruction as ComponentType.Instruction,
+          instruction: {
+            purpose: 'Define mandatory rules to ensure each component addresses a single responsibility.',
+            constraints: [
+              'Components MUST encapsulate a single responsibility.',
+              'Dependencies MUST flow in one direction.',
+            ],
+          },
         },
       };
 
@@ -38,6 +43,12 @@ describe('UMS Module Loader', () => {
         id: 'execution/release/cut-minor-release',
         version: '1.0.0',
         schemaVersion: '1.0',
+        capabilities: ['procedure'],
+        metadata: {
+          name: 'Cut Minor Release',
+          description: 'A procedure to cut a minor release.',
+          semantic: 'Step-by-step process for minor releases.',
+        },
         shape: 'procedure',
         meta: {
           name: 'Cut Minor Release',
@@ -64,6 +75,12 @@ describe('UMS Module Loader', () => {
         id: 'technology/config/build-target-matrix',
         version: '1.0.0',
         schemaVersion: '1.0',
+        capabilities: ['data'],
+        metadata: {
+          name: 'Build Target Matrix',
+          description: 'Provides a JSON matrix of supported build targets.',
+          semantic: 'Data block listing supported build targets and versions.',
+        },
         shape: 'data',
         meta: {
           name: 'Build Target Matrix',
@@ -89,6 +106,12 @@ describe('UMS Module Loader', () => {
         id: 'principle/testing/unit-testing-examples',
         version: '1.0.0',
         schemaVersion: '1.0',
+        capabilities: ['specification'],
+        metadata: {
+          name: 'Unit Testing Examples',
+          description: 'Examples of unit testing patterns.',
+          semantic: 'Collection of unit testing examples and patterns.',
+        },
         shape: 'specification',
         meta: {
           name: 'Unit Testing Examples',
@@ -126,6 +149,12 @@ describe('UMS Module Loader', () => {
         id: 'invalid-format',
         version: '1.0.0',
         schemaVersion: '1.0',
+        capabilities: ['specification'],
+        metadata: {
+          name: 'Test',
+          description: 'Test',
+          semantic: 'Test',
+        },
         shape: 'specification',
         meta: {
           name: 'Test',
@@ -150,6 +179,12 @@ describe('UMS Module Loader', () => {
         id: 'Principle/testing/tdd',
         version: '1.0.0',
         schemaVersion: '1.0',
+        capabilities: ['specification'],
+        metadata: {
+          name: 'Test',
+          description: 'Test',
+          semantic: 'Test',
+        },
         shape: 'specification',
         meta: {
           name: 'Test',
@@ -174,6 +209,12 @@ describe('UMS Module Loader', () => {
         id: 'principle/testing/tdd',
         version: '1.0.0',
         schemaVersion: '2.0',
+        capabilities: ['specification'],
+        metadata: {
+          name: 'Test',
+          description: 'Test',
+          semantic: 'Test',
+        },
         shape: 'specification',
         meta: {
           name: 'Test',
@@ -198,7 +239,7 @@ describe('UMS Module Loader', () => {
         id: 'principle/testing/tdd',
         version: '1.0.0',
         // missing schemaVersion, shape, meta, body
-      };
+      } as unknown as Module;
 
       const result = validateModule(invalidModule);
       expect(result.valid).toBe(false);
@@ -215,6 +256,12 @@ describe('UMS Module Loader', () => {
         id: 'execution/build/invalid-undeclared-key',
         version: '1.0.0',
         schemaVersion: '1.0',
+        capabilities: ['procedure'],
+        metadata: {
+          name: 'Invalid Module',
+          description: 'Contains undeclared directive.',
+          semantic: 'Test semantic content.',
+        },
         shape: 'procedure',
         meta: {
           name: 'Invalid Module',
@@ -240,6 +287,12 @@ describe('UMS Module Loader', () => {
         id: 'execution/build/missing-required',
         version: '1.0.0',
         schemaVersion: '1.0',
+        capabilities: ['procedure'],
+        metadata: {
+          name: 'Invalid Module',
+          description: 'Missing required directive.',
+          semantic: 'Test semantic content.',
+        },
         shape: 'procedure',
         meta: {
           name: 'Invalid Module',
@@ -264,6 +317,12 @@ describe('UMS Module Loader', () => {
         id: 'execution/build/wrong-types',
         version: '1.0.0',
         schemaVersion: '1.0',
+        capabilities: ['procedure'],
+        metadata: {
+          name: 'Invalid Module',
+          description: 'Wrong directive types.',
+          semantic: 'Test semantic content.',
+        },
         shape: 'procedure',
         meta: {
           name: 'Invalid Module',
@@ -288,6 +347,12 @@ describe('UMS Module Loader', () => {
         id: 'technology/config/invalid-data',
         version: '1.0.0',
         schemaVersion: '1.0',
+        capabilities: ['data'],
+        metadata: {
+          name: 'Invalid Data Module',
+          description: 'Invalid data directive.',
+          semantic: 'Test semantic content.',
+        },
         shape: 'data',
         meta: {
           name: 'Invalid Data Module',
@@ -314,6 +379,12 @@ describe('UMS Module Loader', () => {
         id: 'principle/testing/duplicate-titles',
         version: '1.0.0',
         schemaVersion: '1.0',
+        capabilities: ['specification'],
+        metadata: {
+          name: 'Duplicate Titles',
+          description: 'Examples with duplicate titles.',
+          semantic: 'Test semantic content.',
+        },
         shape: 'specification',
         meta: {
           name: 'Duplicate Titles',
@@ -349,6 +420,14 @@ describe('UMS Module Loader', () => {
         id: 'execution/refactoring/old-refactor',
         version: '1.0.0',
         schemaVersion: '1.0',
+        capabilities: ['procedure'],
+        metadata: {
+          name: 'Old Refactoring Procedure',
+          description: 'Deprecated refactoring procedure.',
+          semantic: 'Old refactoring approach.',
+          deprecated: true,
+          replacedBy: 'execution/refactoring/new-refactor',
+        },
         shape: 'procedure',
         meta: {
           name: 'Old Refactoring Procedure',
@@ -382,6 +461,14 @@ describe('UMS Module Loader', () => {
         id: 'execution/refactoring/bad-replacement',
         version: '1.0.0',
         schemaVersion: '1.0',
+        capabilities: ['procedure'],
+        metadata: {
+          name: 'Bad Replacement',
+          description: 'Invalid replacement reference.',
+          semantic: 'Test semantic content.',
+          deprecated: true,
+          replacedBy: 'Invalid-ID-Format',
+        },
         shape: 'procedure',
         meta: {
           name: 'Bad Replacement',
@@ -406,6 +493,14 @@ describe('UMS Module Loader', () => {
         id: 'execution/refactoring/non-deprecated-with-replacement',
         version: '1.0.0',
         schemaVersion: '1.0',
+        capabilities: ['procedure'],
+        metadata: {
+          name: 'Non-deprecated with replacement',
+          description: 'Should not have replacedBy.',
+          semantic: 'Test semantic content.',
+          deprecated: false,
+          replacedBy: 'execution/refactoring/some-other-module',
+        },
         shape: 'procedure',
         meta: {
           name: 'Non-deprecated with replacement',
@@ -430,6 +525,13 @@ describe('UMS Module Loader', () => {
         id: 'principle/testing/uppercase-tags',
         version: '1.0.0',
         schemaVersion: '1.0',
+        capabilities: ['specification'],
+        metadata: {
+          name: 'Uppercase Tags',
+          description: 'Module with uppercase tags.',
+          semantic: 'Test semantic content.',
+          tags: ['testing', 'UPPERCASE', 'valid-tag'], // UPPERCASE is invalid
+        },
         shape: 'specification',
         meta: {
           name: 'Uppercase Tags',

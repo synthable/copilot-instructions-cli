@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { validatePersona } from '../validation/persona-validator.js';
+import type { Persona } from '../../types/index.js';
 import { readFileSync } from 'fs';
 import { parse } from 'yaml';
 import { join } from 'path';
@@ -16,7 +17,7 @@ describe('UMS Persona Loader', () => {
     it('should validate a complete valid persona', () => {
       const validPersona = loadPersonaFixture(
         'valid-persona.persona.yml'
-      ) as Record<string, unknown>;
+      ) as Persona;
 
       const result = validatePersona(validPersona);
       expect(result.valid).toBe(true);
@@ -26,7 +27,7 @@ describe('UMS Persona Loader', () => {
     it('should validate a minimal valid persona', () => {
       const validPersona = loadPersonaFixture(
         'valid-minimal.persona.yml'
-      ) as Record<string, unknown>;
+      ) as Persona;
 
       const result = validatePersona(validPersona);
       expect(result.valid).toBe(true);
@@ -36,7 +37,7 @@ describe('UMS Persona Loader', () => {
     it('should validate persona without optional fields', () => {
       const validPersona = loadPersonaFixture(
         'valid-basic.persona.yml'
-      ) as Record<string, unknown>;
+      ) as Persona;
 
       const result = validatePersona(validPersona);
       expect(result.valid).toBe(true);
@@ -44,7 +45,7 @@ describe('UMS Persona Loader', () => {
     });
 
     it('should reject non-object persona', () => {
-      const invalidPersona = 'not an object';
+      const invalidPersona = 'not an object' as unknown as Persona;
 
       const result = validatePersona(invalidPersona);
       expect(result.valid).toBe(false);
@@ -56,7 +57,7 @@ describe('UMS Persona Loader', () => {
       const invalidPersona = {
         name: 'Test Persona',
         // missing description, semantic, moduleGroups
-      };
+      } as unknown as Persona;
 
       const result = validatePersona(invalidPersona);
       expect(result.valid).toBe(false);
@@ -76,7 +77,7 @@ describe('UMS Persona Loader', () => {
         role: 456, // Should be string
         attribution: 'yes', // Should be boolean
         moduleGroups: 'not an array', // Should be array
-      };
+      } as unknown as Persona;
 
       const result = validatePersona(invalidPersona);
       expect(result.valid).toBe(false);
@@ -118,7 +119,7 @@ describe('UMS Persona Loader', () => {
     it('should handle undefined optional fields correctly', () => {
       const validPersona = loadPersonaFixture(
         'valid-undefined-optional.persona.yml'
-      ) as Record<string, unknown>;
+      ) as Persona;
 
       const result = validatePersona(validPersona);
       expect(result.valid).toBe(true);
@@ -128,7 +129,7 @@ describe('UMS Persona Loader', () => {
     it('should reject empty moduleGroups array', () => {
       const invalidPersona = loadPersonaFixture(
         'valid-empty-modulegroups.persona.yml'
-      ) as Record<string, unknown>;
+      ) as Persona;
 
       const result = validatePersona(invalidPersona);
       expect(result.valid).toBe(true); // Valid but should have warning
@@ -139,7 +140,7 @@ describe('UMS Persona Loader', () => {
     it('should reject moduleGroups with non-object entries', () => {
       const invalidPersona = loadPersonaFixture(
         'invalid-non-object-modulegroups.persona.yml'
-      ) as Record<string, unknown>;
+      ) as Persona;
 
       const result = validatePersona(invalidPersona);
       expect(result.valid).toBe(false);
@@ -153,7 +154,7 @@ describe('UMS Persona Loader', () => {
     it('should reject moduleGroups with missing required fields', () => {
       const invalidPersona = loadPersonaFixture(
         'invalid-missing-modules.persona.yml'
-      ) as Record<string, unknown>;
+      ) as Persona;
 
       const result = validatePersona(invalidPersona);
       expect(result.valid).toBe(false);
@@ -166,7 +167,7 @@ describe('UMS Persona Loader', () => {
     it('should reject duplicate group names', () => {
       const invalidPersona = loadPersonaFixture(
         'invalid-duplicate-groups.persona.yml'
-      ) as Record<string, unknown>;
+      ) as Persona;
 
       const result = validatePersona(invalidPersona);
       expect(result.valid).toBe(false);
@@ -182,10 +183,29 @@ describe('UMS Persona Loader', () => {
     it('should reject invalid module IDs', () => {
       const invalidPersona = {
         name: 'Invalid Module IDs Persona',
+        version: '1.0.0',
+        schemaVersion: '2.0',
         description: 'Persona with invalid module IDs.',
         semantic: 'Test semantic',
+        modules: [
+          {
+            id: 'invalid-format',
+          },
+          {
+            id: 'foundation/ethics/do-no-harm',
+          },
+          {
+            id: 'Uppercase/module/id',
+          },
+        ],
         moduleGroups: [
           {
+            group: 'Bad Modules',
+            ids: [
+              'invalid-format', // Invalid ID format
+              'foundation/ethics/do-no-harm', // Valid
+              'Uppercase/module/id', // Invalid uppercase
+            ],
             groupName: 'Bad Modules',
             modules: [
               'invalid-format', // Invalid ID format
@@ -194,7 +214,7 @@ describe('UMS Persona Loader', () => {
             ],
           },
         ],
-      };
+      } as unknown as Persona;
 
       const result = validatePersona(invalidPersona);
       expect(result.valid).toBe(false);
@@ -210,7 +230,7 @@ describe('UMS Persona Loader', () => {
     it('should reject duplicate module IDs within a group', () => {
       const invalidPersona = loadPersonaFixture(
         'invalid-duplicate-modules.persona.yml'
-      ) as Record<string, unknown>;
+      ) as Persona;
 
       const result = validatePersona(invalidPersona);
       expect(result.valid).toBe(false);
@@ -226,7 +246,7 @@ describe('UMS Persona Loader', () => {
     it('should allow same module ID in different groups', () => {
       const validPersona = loadPersonaFixture(
         'valid-same-module-different-groups.persona.yml'
-      ) as Record<string, unknown>;
+      ) as Persona;
 
       const result = validatePersona(validPersona);
       expect(result.valid).toBe(true);
@@ -236,10 +256,21 @@ describe('UMS Persona Loader', () => {
     it('should reject non-string module IDs', () => {
       const invalidPersona = {
         name: 'Non-String Module IDs',
+        version: '1.0.0',
+        schemaVersion: '2.0',
         description: 'Persona with non-string module IDs.',
         semantic: 'Test semantic',
+        modules: [
+          {
+            id: 'foundation/ethics/do-no-harm',
+          },
+        ],
         moduleGroups: [
           {
+            group: 'Bad Module Types',
+            ids: [
+              'foundation/ethics/do-no-harm', // Valid string
+            ],
             groupName: 'Bad Module Types',
             modules: [
               'foundation/ethics/do-no-harm', // Valid string
@@ -248,7 +279,7 @@ describe('UMS Persona Loader', () => {
             ],
           },
         ],
-      };
+      } as unknown as Persona;
 
       const result = validatePersona(invalidPersona);
       expect(result.valid).toBe(false);
@@ -264,7 +295,7 @@ describe('UMS Persona Loader', () => {
     it('should warn about empty modules array', () => {
       const validPersona = loadPersonaFixture(
         'valid-empty-modules.persona.yml'
-      ) as Record<string, unknown>;
+      ) as Persona;
 
       const result = validatePersona(validPersona);
       expect(result.valid).toBe(true);
@@ -275,7 +306,7 @@ describe('UMS Persona Loader', () => {
     it('should handle wrong modules field type', () => {
       const invalidPersona = loadPersonaFixture(
         'invalid-wrong-modules-type.persona.yml'
-      ) as Record<string, unknown>;
+      ) as Persona;
 
       const result = validatePersona(invalidPersona);
       expect(result.valid).toBe(false);
@@ -289,7 +320,7 @@ describe('UMS Persona Loader', () => {
     it('should handle wrong groupName type', () => {
       const invalidPersona = loadPersonaFixture(
         'invalid-wrong-groupname-type.persona.yml'
-      ) as Record<string, unknown>;
+      ) as Persona;
 
       const result = validatePersona(invalidPersona);
       expect(result.valid).toBe(false);
