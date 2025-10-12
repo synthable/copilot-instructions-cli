@@ -30,4 +30,12 @@ export {
   ValidationError,
   ModuleParseError,
   PersonaParseError,
+  // Error location type
+  type ErrorLocation,
 } from './utils/errors.js';
+
+// Export utility functions
+export { moduleIdToExportName } from './utils/transforms.js';
+
+// Export configuration types (for CLI layer)
+export type { ModuleConfig } from './adapters/index.js';

@@ -177,6 +177,26 @@ export interface ModuleEntryForRegistry {
 }
 
 // ============================================================================
+// Configuration Types
+// ============================================================================
+
+/**
+ * Configuration for module loading paths and conflict resolution
+ *
+ * Defines local module paths and their conflict resolution strategies.
+ * Used by CLI implementations to configure module discovery.
+ */
+export interface ModuleConfig {
+  /** List of local module paths with optional conflict resolution strategies */
+  localModulePaths: {
+    /** Path to local module directory */
+    path: string;
+    /** Conflict resolution strategy for this path (default: 'error') */
+    onConflict?: 'error' | 'replace' | 'warn';
+  }[];
+}
+
+// ============================================================================
 // Usage Examples (Type-Only, Not Executed)
 // ============================================================================
 

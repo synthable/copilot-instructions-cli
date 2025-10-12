@@ -1,10 +1,23 @@
 /**
- * Progress indicators and structured logging for UMS v1.0 CLI
+ * Progress indicators and structured logging for UMS CLI
  * Implements M8 requirements for better user experience
+ * Enhanced for v2.0 with statistics and CI environment support
  */
 
 import chalk from 'chalk';
 import ora, { type Ora } from 'ora';
+
+/**
+ * Check if running in CI environment
+ */
+function isCI(): boolean {
+  return Boolean(
+    process.env.CI || // Generic CI environment
+    process.env.CONTINUOUS_INTEGRATION || // Travis CI, CircleCI
+    process.env.BUILD_NUMBER || // Jenkins, Hudson
+    process.env.RUN_ID // GitHub Actions
+  );
+}
 
 /**
  * Structured log context for operations
@@ -113,7 +126,7 @@ export class ProgressIndicator {
 }
 
 /**
- * Simple progress tracker for batch operations
+ * Enhanced progress tracker for batch operations with statistics
  */
 export class BatchProgress {
   private total: number;
@@ -121,11 +134,14 @@ export class BatchProgress {
   private context: LogContext;
   private verbose: boolean;
   private spinner: Ora;
+  private startTime: number = 0;
+  private ci: boolean;
 
   constructor(total: number, context: LogContext, verbose = false) {
     this.total = total;
     this.context = context;
     this.verbose = verbose;
+    this.ci = isCI();
     this.spinner = ora();
   }
 
@@ -133,9 +149,10 @@ export class BatchProgress {
    * Start batch processing
    */
   start(message: string): void {
+    this.startTime = Date.now();
     this.spinner.start(`${message} (0/${this.total})`);
 
-    if (this.verbose) {
+    if (this.verbose || this.ci) {
       const timestamp = new Date().toISOString();
       console.log(
         chalk.gray(
@@ -146,14 +163,25 @@ export class BatchProgress {
   }
 
   /**
-   * Increment progress
+   * Increment progress with ETA calculation
    */
   increment(item?: string): void {
     this.current++;
     const progress = `(${this.current}/${this.total})`;
-    const itemMsg = item ? ` - ${item}` : '';
+    const percentage = Math.round((this.current / this.total) * 100);
 
-    this.spinner.text = `${this.context.operation} ${progress}${itemMsg}`;
+    // Calculate ETA
+    const elapsed = Date.now() - this.startTime;
+    const rate = this.current / elapsed; // items per ms
+    const remaining = this.total - this.current;
+    const eta = remaining / rate; // ms remaining
+    const etaSeconds = Math.round(eta / 1000);
+
+    const itemMsg = item ? ` - ${item}` : '';
+    const etaMsg =
+      etaSeconds > 0 && remaining > 0 ? ` ETA: ${etaSeconds}s` : '';
+
+    this.spinner.text = `${this.context.operation} ${progress} ${percentage}%${itemMsg}${etaMsg}`;
 
     if (this.verbose && item) {
       const timestamp = new Date().toISOString();
@@ -163,16 +191,30 @@ export class BatchProgress {
         )
       );
     }
+
+    // Log progress milestones in CI
+    if (this.ci && this.current % Math.ceil(this.total / 10) === 0) {
+      const timestamp = new Date().toISOString();
+      console.log(
+        chalk.gray(
+          `[${timestamp}] [INFO] Progress: ${progress} ${percentage}% complete`
+        )
+      );
+    }
   }
 
   /**
-   * Complete batch processing
+   * Complete batch processing with statistics
    */
   complete(message?: string): void {
-    const finalMessage = message ?? `Processed ${this.total} items`;
+    const duration = Date.now() - this.startTime;
+    const throughput = (this.total / duration) * 1000; // items per second
+    const finalMessage =
+      message ??
+      `Processed ${this.total} items in ${(duration / 1000).toFixed(1)}s (${throughput.toFixed(1)} items/s)`;
     this.spinner.succeed(finalMessage);
 
-    if (this.verbose) {
+    if (this.verbose || this.ci) {
       const timestamp = new Date().toISOString();
       console.log(
         chalk.green(
@@ -183,14 +225,16 @@ export class BatchProgress {
   }
 
   /**
-   * Fail batch processing
+   * Fail batch processing with error details
    */
   fail(message?: string): void {
+    const duration = Date.now() - this.startTime;
     const failMessage =
-      message ?? `Failed after processing ${this.current}/${this.total} items`;
+      message ??
+      `Failed after processing ${this.current}/${this.total} items in ${(duration / 1000).toFixed(1)}s`;
     this.spinner.fail(failMessage);
 
-    if (this.verbose) {
+    if (this.verbose || this.ci) {
       const timestamp = new Date().toISOString();
       console.log(
         chalk.red(
@@ -229,4 +273,26 @@ export function createBuildProgress(
   verbose = false
 ): ProgressIndicator {
   return new ProgressIndicator({ command, operation: 'build' }, verbose);
+}
+
+/**
+ * Create a batch progress tracker for module loading
+ */
+export function createModuleLoadProgress(
+  total: number,
+  command: string,
+  verbose = false
+): BatchProgress {
+  return new BatchProgress(total, { command, operation: 'loading modules' }, verbose);
+}
+
+/**
+ * Create a batch progress tracker for module resolution
+ */
+export function createModuleResolveProgress(
+  total: number,
+  command: string,
+  verbose = false
+): BatchProgress {
+  return new BatchProgress(total, { command, operation: 'resolving modules' }, verbose);
 }

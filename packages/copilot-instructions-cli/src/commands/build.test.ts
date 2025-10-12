@@ -6,8 +6,8 @@ import {
   renderMarkdown,
   generateBuildReport,
   resolvePersonaModules,
-  type UMSPersona,
-  type UMSModule,
+  type Persona,
+  type Module,
   type BuildReport,
   ModuleRegistry,
 } from 'ums-lib';
@@ -92,29 +92,42 @@ describe('build command', () => {
   const mockWriteOutputFile = vi.mocked(writeOutputFile);
   const mockReadFromStdin = vi.mocked(readFromStdin);
 
-  const mockPersona: UMSPersona = {
+  const mockPersona: Persona = {
     name: 'Test Persona',
     version: '1.0',
     schemaVersion: '1.0',
     description: 'A test persona',
     semantic: '',
     identity: 'You are a helpful test assistant',
-    moduleGroups: [
+    modules: [ // v2.0 spec-compliant
       {
         groupName: 'Test Group',
+        ids: ['test/module-1', 'test/module-2'],
+        modules: ['test/module-1', 'test/module-2'], // v1.0 compat
+      },
+    ],
+    moduleGroups: [ // v1.0 backwards compat
+      {
+        groupName: 'Test Group',
+        ids: ['test/module-1', 'test/module-2'],
         modules: ['test/module-1', 'test/module-2'],
       },
     ],
   };
 
-  const mockModules: UMSModule[] = [
+  const mockModules: Module[] = [
     {
       id: 'test/module-1',
-      filePath: '/test/module-1.md',
       version: '1.0',
       schemaVersion: '1.0',
       shape: 'procedure',
+      capabilities: [],
       meta: {
+        name: 'Test Module 1',
+        description: 'First test module',
+        semantic: 'Test semantic content',
+      },
+      metadata: {
         name: 'Test Module 1',
         description: 'First test module',
         semantic: 'Test semantic content',
@@ -123,14 +136,19 @@ describe('build command', () => {
         goal: 'Test goal',
         process: ['Step 1', 'Step 2'],
       },
-    },
+    } as Module,
     {
       id: 'test/module-2',
-      filePath: '/test/module-2.md',
       version: '1.0',
       schemaVersion: '1.0',
       shape: 'specification',
+      capabilities: [],
       meta: {
+        name: 'Test Module 2',
+        description: 'Second test module',
+        semantic: 'Test semantic content',
+      },
+      metadata: {
         name: 'Test Module 2',
         description: 'Second test module',
         semantic: 'Test semantic content',
@@ -138,7 +156,7 @@ describe('build command', () => {
       body: {
         goal: 'Test specification',
       },
-    },
+    } as Module,
   ];
 
   const mockBuildReport: BuildReport = {

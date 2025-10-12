@@ -2,7 +2,8 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import chalk from 'chalk';
 import { handleSearch } from './search.js';
 import { discoverAllModules } from '../utils/module-discovery.js';
-import { ModuleRegistry, type UMSModule } from 'ums-lib';
+import { ModuleRegistry, type Module } from 'ums-lib';
+import type { CLIModule } from '../types/cli-extensions.js';
 
 // Mock dependencies
 vi.mock('chalk', () => ({
@@ -66,13 +67,20 @@ const mockConsoleLog = vi.spyOn(console, 'log').mockImplementation(() => {
 describe('search command', () => {
   const mockDiscoverAllModules = vi.mocked(discoverAllModules);
 
-  const mockModule1: UMSModule = {
+  const mockModule1: CLIModule = {
     id: 'foundation/logic/deductive-reasoning',
     filePath: '/test/foundation/logic/deductive-reasoning.md',
     version: '1.0',
     schemaVersion: '1.0',
     shape: 'procedure',
+    capabilities: [],
     meta: {
+      name: 'Deductive Reasoning',
+      description: 'Logical reasoning from premises',
+      semantic: 'Logical reasoning from premises',
+      tags: ['logic', 'reasoning'],
+    },
+    metadata: {
       name: 'Deductive Reasoning',
       description: 'Logical reasoning from premises',
       semantic: 'Logical reasoning from premises',
@@ -84,13 +92,19 @@ describe('search command', () => {
     },
   };
 
-  const mockModule2: UMSModule = {
+  const mockModule2: CLIModule = {
     id: 'principle/quality/testing',
     filePath: '/test/principle/quality/testing.md',
     version: '1.0',
     schemaVersion: '1.0',
     shape: 'specification',
+    capabilities: [],
     meta: {
+      name: 'Testing Principles',
+      description: 'Quality assurance through testing',
+      semantic: 'Quality assurance through testing',
+    },
+    metadata: {
       name: 'Testing Principles',
       description: 'Quality assurance through testing',
       semantic: 'Quality assurance through testing',
@@ -101,10 +115,10 @@ describe('search command', () => {
   };
 
   // Helper function to create registry with test modules
-  function createMockRegistry(modules: UMSModule[]): ModuleRegistry {
+  function createMockRegistry(modules: CLIModule[]): ModuleRegistry {
     const registry = new ModuleRegistry('warn');
     for (const module of modules) {
-      registry.add(module, { type: 'standard', path: 'test' });
+      registry.add(module as Module, { type: 'standard', path: 'test' });
     }
     return registry;
   }
@@ -224,10 +238,14 @@ describe('search command', () => {
   });
 
   it('should handle modules without tags', async () => {
-    // Arrange
-    const moduleWithoutTags: UMSModule = {
+    // Arrange - Create module without tags property
+    const moduleWithoutTags: CLIModule = {
       ...mockModule2,
-      meta: { ...mockModule2.meta },
+      metadata: {
+        name: 'Testing Principles',
+        description: 'Quality assurance through testing',
+        semantic: 'Quality assurance through testing',
+      },
     };
 
     mockDiscoverAllModules.mockResolvedValue({

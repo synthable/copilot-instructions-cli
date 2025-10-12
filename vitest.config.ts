@@ -15,6 +15,15 @@ export default defineConfig({
       functions: 80,
       lines: 80,
       statements: 80,
+      exclude: [
+        '**/node_modules/**',
+        '**/dist/**',
+        '**/*.test.ts',
+        '**/*.config.ts',
+        '**/src/index.ts', // CLI entry point
+        '**/src/commands/mcp.ts', // MCP stub implementations
+        '**/src/test/**', // Test utilities
+      ],
     },
   },
   workspace: ['packages/*'],

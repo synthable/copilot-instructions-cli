@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import type { UMSModule, ModuleConfig } from 'ums-lib';
+import type { Module, ModuleConfig } from 'ums-lib';
+import type { CLIModule } from '../types/cli-extensions.js';
 import {
   discoverStandardModules,
   discoverLocalModules,
@@ -60,31 +61,41 @@ describe('module-discovery', () => {
         './instructions-modules-v1-compliant/principle/solid.module.yml',
       ];
       const mockContent = 'id: foundation/logic\nversion: 1.0';
-      const mockModule1: UMSModule = {
+      const mockModule1: Module = {
         id: 'foundation/logic',
         version: '1.0',
         schemaVersion: '1.0',
         shape: 'specification',
+        capabilities: [],
         meta: {
           name: 'Logic',
           description: 'Basic logic',
           semantic: 'Logic principles',
         },
+        metadata: {
+          name: 'Logic',
+          description: 'Basic logic',
+          semantic: 'Logic principles',
+        },
         body: {},
-        filePath: '', // Will be set by the function
       };
-      const mockModule2: UMSModule = {
+      const mockModule2: Module = {
         id: 'principle/solid',
         version: '1.0',
         schemaVersion: '1.0',
         shape: 'specification',
+        capabilities: [],
         meta: {
           name: 'SOLID',
           description: 'SOLID principles',
           semantic: 'SOLID principles',
         },
+        metadata: {
+          name: 'SOLID',
+          description: 'SOLID principles',
+          semantic: 'SOLID principles',
+        },
         body: {},
-        filePath: '', // Will be set by the function
       };
 
       vi.mocked(discoverModuleFiles).mockResolvedValue(mockFiles);
@@ -140,18 +151,23 @@ describe('module-discovery', () => {
       };
       const mockFiles = ['./custom-modules/custom.module.yml'];
       const mockContent = 'id: custom/module\nversion: 1.0';
-      const mockModule: UMSModule = {
+      const mockModule: Module = {
         id: 'custom/module',
         version: '1.0',
         schemaVersion: '1.0',
         shape: 'procedure',
+        capabilities: [],
         meta: {
           name: 'Custom',
           description: 'Custom module',
           semantic: 'Custom logic',
         },
+        metadata: {
+          name: 'Custom',
+          description: 'Custom module',
+          semantic: 'Custom logic',
+        },
         body: {},
-        filePath: './custom-modules/custom.module.yml',
       };
 
       vi.mocked(getConfiguredModulePaths).mockReturnValue(['./custom-modules']);
@@ -186,23 +202,29 @@ describe('module-discovery', () => {
       const mockConfig: ModuleConfig = {
         localModulePaths: [{ path: './local' }],
       };
-      const standardModule = {
+      const standardModule: CLIModule = {
         id: 'standard/module',
         version: '1.0',
         schemaVersion: '1.0',
         shape: 'specification',
+        capabilities: [],
         meta: {
           name: 'Standard',
           description: 'Standard module',
           semantic: 'Standard',
         },
+        metadata: {
+          name: 'Standard',
+          description: 'Standard module',
+          semantic: 'Standard',
+        },
         body: {},
-        filePath: './standard/module.yml',
-      } as UMSModule;
+        filePath: './standard/module.module.yml',
+      };
 
       vi.mocked(loadModuleConfig).mockResolvedValue(mockConfig);
       vi.mocked(discoverModuleFiles)
-        .mockResolvedValueOnce(['./standard/module.yml']) // Standard modules
+        .mockResolvedValueOnce(['./standard/module.module.yml']) // Standard modules
         .mockResolvedValueOnce([]); // Local modules
       vi.mocked(readModuleFile).mockResolvedValue('content');
       vi.mocked(parseModule).mockReturnValue(standardModule);
@@ -215,23 +237,29 @@ describe('module-discovery', () => {
     });
 
     it('should handle no configuration file', async () => {
-      const standardModule = {
+      const standardModule: CLIModule = {
         id: 'standard/module',
         version: '1.0',
         schemaVersion: '1.0',
         shape: 'specification',
+        capabilities: [],
         meta: {
           name: 'Standard',
           description: 'Standard module',
           semantic: 'Standard',
         },
+        metadata: {
+          name: 'Standard',
+          description: 'Standard module',
+          semantic: 'Standard',
+        },
         body: {},
-        filePath: './standard/module.yml',
-      } as UMSModule;
+        filePath: './standard/module.module.yml',
+      };
 
       vi.mocked(loadModuleConfig).mockResolvedValue(null);
       vi.mocked(discoverModuleFiles).mockResolvedValue([
-        './standard/module.yml',
+        './standard/module.module.yml',
       ]);
       vi.mocked(readModuleFile).mockResolvedValue('content');
       vi.mocked(parseModule).mockReturnValue(standardModule);

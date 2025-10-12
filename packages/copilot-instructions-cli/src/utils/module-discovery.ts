@@ -1,30 +1,59 @@
 /**
  * CLI Module Discovery Utilities
  * Handles module discovery and populates ModuleRegistry for CLI operations
+ * Supports both v1.0 (.module.yml) and v2.0 (.module.ts) formats
  */
 
-import type { UMSModule, ModuleConfig } from 'ums-lib';
+import type { ModuleConfig } from 'ums-lib';
 import { parseModule, ModuleRegistry } from 'ums-lib';
 import { discoverModuleFiles, readModuleFile } from './file-operations.js';
 import { loadModuleConfig, getConfiguredModulePaths } from './config-loader.js';
+import {
+  loadTypeScriptModule,
+  detectUMSVersion,
+} from './typescript-loader.js';
+import { basename } from 'path';
+import type { CLIModule } from '../types/cli-extensions.js';
 
 const DEFAULT_STANDARD_MODULES_PATH = './instructions-modules-v1-compliant';
 
 /**
+ * Loads a module file, detecting format (v1.0 YAML or v2.0 TypeScript) automatically
+ */
+async function loadModuleFile(filePath: string): Promise<CLIModule> {
+  const version = detectUMSVersion(filePath);
+
+  if (version === '2.0') {
+    // v2.0 TypeScript format - extract module ID from filename
+    const fileName = basename(filePath, '.module.ts');
+    // For now, use filename as module ID - this may need refinement
+    // based on actual module structure
+    const module = await loadTypeScriptModule(filePath, fileName) as CLIModule;
+    module.filePath = filePath;
+    return module;
+  } else {
+    // v1.0 YAML format
+    const content = await readModuleFile(filePath);
+    const module = parseModule(content) as CLIModule;
+    module.filePath = filePath;
+    return module;
+  }
+}
+
+/**
  * Discovers standard library modules from the specified modules directory
+ * Supports both v1.0 (.module.yml) and v2.0 (.module.ts) formats
  */
 export async function discoverStandardModules(
   standardModulesPath: string = DEFAULT_STANDARD_MODULES_PATH
-): Promise<UMSModule[]> {
+): Promise<CLIModule[]> {
   try {
     const moduleFiles = await discoverModuleFiles([standardModulesPath]);
-    const modules: UMSModule[] = [];
+    const modules: CLIModule[] = [];
 
     for (const filePath of moduleFiles) {
       try {
-        const content = await readModuleFile(filePath);
-        const module = parseModule(content);
-        module.filePath = filePath;
+        const module = await loadModuleFile(filePath);
         modules.push(module);
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
@@ -49,19 +78,18 @@ export async function discoverStandardModules(
 
 /**
  * Discovers local modules based on configuration
+ * Supports both v1.0 (.module.yml) and v2.0 (.module.ts) formats
  */
 export async function discoverLocalModules(
   config: ModuleConfig
-): Promise<UMSModule[]> {
+): Promise<CLIModule[]> {
   const localPaths = getConfiguredModulePaths(config);
   const moduleFiles = await discoverModuleFiles(localPaths);
-  const modules: UMSModule[] = [];
+  const modules: CLIModule[] = [];
 
   for (const filePath of moduleFiles) {
     try {
-      const content = await readModuleFile(filePath);
-      const module = parseModule(content);
-      module.filePath = filePath;
+      const module = await loadModuleFile(filePath);
       modules.push(module);
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
@@ -125,7 +153,7 @@ export async function discoverAllModules(): Promise<ModuleDiscoveryResult> {
  * Finds which configured path a module belongs to
  */
 function findModulePath(
-  module: UMSModule,
+  module: CLIModule,
   config: ModuleConfig
 ): string | null {
   if (!module.filePath) return null;

@@ -52,16 +52,19 @@ export async function writeOutputFile(
 
 /**
  * Discovers module files in the given paths
+ * Supports both v1.0 (.module.yml) and v2.0 (.module.ts) formats
  */
 export async function discoverModuleFiles(paths: string[]): Promise<string[]> {
-  const MODULE_FILE_EXTENSION = '.module.yml';
+  const MODULE_FILE_EXTENSIONS = ['.module.yml', '.module.ts'];
   const allFiles: string[] = [];
 
   for (const path of paths) {
     try {
-      const pattern = join(path, '**', `*${MODULE_FILE_EXTENSION}`);
-      const files = await glob(pattern, { nodir: true });
-      allFiles.push(...files);
+      for (const extension of MODULE_FILE_EXTENSIONS) {
+        const pattern = join(path, '**', `*${extension}`);
+        const files = await glob(pattern, { nodir: true });
+        allFiles.push(...files);
+      }
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       throw new Error(
@@ -103,20 +106,22 @@ export async function readFromStdin(): Promise<string> {
 }
 
 /**
- * Checks if a file path has a .persona.yml extension
+ * Checks if a file path has a .persona.yml or .persona.ts extension
+ * Supports both v1.0 (YAML) and v2.0 (TypeScript) formats
  */
 export function isPersonaFile(filePath: string): boolean {
-  return filePath.endsWith('.persona.yml');
+  return filePath.endsWith('.persona.yml') || filePath.endsWith('.persona.ts');
 }
 
 /**
  * Validates that the persona file has the correct extension
+ * Supports both v1.0 (.persona.yml) and v2.0 (.persona.ts) formats
  */
 export function validatePersonaFile(filePath: string): void {
   if (!isPersonaFile(filePath)) {
     throw new Error(
-      `Persona file must have .persona.yml extension, got: ${filePath}\n` +
-        'UMS v1.0 requires persona files to use YAML format with .persona.yml extension.'
+      `Persona file must have .persona.yml (v1.0) or .persona.ts (v2.0) extension, got: ${filePath}\n` +
+        'UMS supports YAML format (.persona.yml) for v1.0 and TypeScript format (.persona.ts) for v2.0.'
     );
   }
 }

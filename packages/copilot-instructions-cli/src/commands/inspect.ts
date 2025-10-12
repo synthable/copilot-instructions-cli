@@ -9,6 +9,7 @@ import { handleError } from '../utils/error-handler.js';
 import type { ModuleRegistry } from 'ums-lib';
 import { createDiscoveryProgress } from '../utils/progress.js';
 import { discoverAllModules } from '../utils/module-discovery.js';
+import { getModuleMetadata } from '../types/cli-extensions.js';
 
 export interface InspectOptions {
   verbose?: boolean;
@@ -101,15 +102,16 @@ function inspectSpecificModule(
     // Show the single module entry
     const resolvedModule = registry.resolve(moduleId);
     if (resolvedModule && verbose) {
+      const metadata = getModuleMetadata(resolvedModule);
       console.log(chalk.gray('\nModule Details:'));
-      console.log(chalk.gray(`  Name: ${resolvedModule.meta.name}`));
-      console.log(
-        chalk.gray(`  Description: ${resolvedModule.meta.description}`)
-      );
-      console.log(chalk.gray(`  Shape: ${resolvedModule.shape}`));
+      console.log(chalk.gray(`  Name: ${metadata.name}`));
+      console.log(chalk.gray(`  Description: ${metadata.description}`));
+      // eslint-disable-next-line @typescript-eslint/no-deprecated
+      console.log(chalk.gray(`  Shape: ${resolvedModule.shape ?? 'unknown'}`));
       console.log(chalk.gray(`  Version: ${resolvedModule.version}`));
-      if (resolvedModule.filePath) {
-        console.log(chalk.gray(`  File: ${resolvedModule.filePath}`));
+      const filePath = (resolvedModule as { filePath?: string }).filePath;
+      if (filePath) {
+        console.log(chalk.gray(`  File: ${filePath}`));
       }
     }
     return;
@@ -123,19 +125,24 @@ function inspectSpecificModule(
   );
 
   if (format === 'json') {
-    const conflictData = conflicts.map((entry, index) => ({
-      index: index + 1,
-      moduleId: entry.module.id,
-      version: entry.module.version,
-      source: `${entry.source.type}:${entry.source.path}`,
-      addedAt: new Date(entry.addedAt).toISOString(),
-      ...(verbose && {
-        name: entry.module.meta.name,
-        description: entry.module.meta.description,
-        shape: entry.module.shape,
-        filePath: entry.module.filePath,
-      }),
-    }));
+    const conflictData = conflicts.map((entry, index) => {
+      const metadata = getModuleMetadata(entry.module);
+      const filePath = (entry.module as { filePath?: string }).filePath;
+      return {
+        index: index + 1,
+        moduleId: entry.module.id,
+        version: entry.module.version,
+        source: `${entry.source.type}:${entry.source.path}`,
+        addedAt: new Date(entry.addedAt).toISOString(),
+        ...(verbose && {
+          name: metadata.name,
+          description: metadata.description,
+          // eslint-disable-next-line @typescript-eslint/no-deprecated
+          shape: entry.module.shape ?? 'unknown',
+          filePath,
+        }),
+      };
+    });
 
     console.log(JSON.stringify(conflictData, null, 2));
   } else {
@@ -152,12 +159,14 @@ function inspectSpecificModule(
 
     conflicts.forEach((entry, index) => {
       const addedAt = new Date(entry.addedAt).toLocaleString();
+      const metadata = getModuleMetadata(entry.module);
       table.push([
         (index + 1).toString(),
         entry.module.version,
         `${entry.source.type}:${entry.source.path}`,
         addedAt,
-        ...(verbose ? [entry.module.meta.name, entry.module.shape] : []),
+        // eslint-disable-next-line @typescript-eslint/no-deprecated
+        ...(verbose ? [metadata.name, entry.module.shape ?? 'unknown'] : []),
       ]);
     });
 
@@ -210,12 +219,15 @@ function inspectConflicts(
         sources: conflicts?.map(e => `${e.source.type}:${e.source.path}`) ?? [],
         ...(verbose && {
           entries:
-            conflicts?.map(entry => ({
-              version: entry.module.version,
-              source: `${entry.source.type}:${entry.source.path}`,
-              name: entry.module.meta.name,
-              addedAt: new Date(entry.addedAt).toISOString(),
-            })) ?? [],
+            conflicts?.map(entry => {
+              const metadata = getModuleMetadata(entry.module);
+              return {
+                version: entry.module.version,
+                source: `${entry.source.type}:${entry.source.path}`,
+                name: metadata.name,
+                addedAt: new Date(entry.addedAt).toISOString(),
+              };
+            }) ?? [],
         }),
       };
     });

@@ -10,7 +10,6 @@ import { glob } from 'glob';
 import {
   parseModule,
   parsePersona,
-  type ValidationError,
   type ValidationWarning,
 } from 'ums-lib';
 import { handleError } from '../utils/error-handler.js';
@@ -19,6 +18,15 @@ import { createValidationProgress, BatchProgress } from '../utils/progress.js';
 interface ValidateOptions {
   targetPath?: string;
   verbose?: boolean;
+}
+
+/**
+ * Simple validation error for CLI usage
+ */
+interface ValidationError {
+  path: string;
+  message: string;
+  section?: string;
 }
 
 /**

@@ -3,18 +3,41 @@
  */
 
 /**
+ * Location information for errors
+ */
+export interface ErrorLocation {
+  filePath?: string;
+  line?: number;
+  column?: number;
+}
+
+/**
  * Base error class for UMS operations
  */
 export class UMSError extends Error {
   public readonly code: string;
   public readonly context?: string;
+  public readonly location?: ErrorLocation;
+  public readonly specSection?: string;
 
-  constructor(message: string, code: string, context?: string) {
+  constructor(
+    message: string,
+    code: string,
+    context?: string,
+    location?: ErrorLocation,
+    specSection?: string
+  ) {
     super(message);
     this.name = 'UMSError';
     this.code = code;
     if (context !== undefined) {
       this.context = context;
+    }
+    if (location !== undefined) {
+      this.location = location;
+    }
+    if (specSection !== undefined) {
+      this.specSection = specSection;
     }
   }
 }
@@ -30,9 +53,11 @@ export class UMSValidationError extends UMSError {
     message: string,
     path?: string,
     section?: string,
-    context?: string
+    context?: string,
+    location?: ErrorLocation,
+    specSection?: string
   ) {
-    super(message, 'VALIDATION_ERROR', context);
+    super(message, 'VALIDATION_ERROR', context, location, specSection);
     this.name = 'UMSValidationError';
     if (path !== undefined) {
       this.path = path;
@@ -49,8 +74,20 @@ export class UMSValidationError extends UMSError {
 export class ModuleLoadError extends UMSError {
   public readonly filePath?: string;
 
-  constructor(message: string, filePath?: string, context?: string) {
-    super(message, 'MODULE_LOAD_ERROR', context);
+  constructor(
+    message: string,
+    filePath?: string,
+    context?: string,
+    location?: ErrorLocation,
+    specSection?: string
+  ) {
+    super(
+      message,
+      'MODULE_LOAD_ERROR',
+      context,
+      location ?? (filePath ? { filePath } : undefined),
+      specSection
+    );
     this.name = 'ModuleLoadError';
     if (filePath !== undefined) {
       this.filePath = filePath;
@@ -64,8 +101,20 @@ export class ModuleLoadError extends UMSError {
 export class PersonaLoadError extends UMSError {
   public readonly filePath?: string;
 
-  constructor(message: string, filePath?: string, context?: string) {
-    super(message, 'PERSONA_LOAD_ERROR', context);
+  constructor(
+    message: string,
+    filePath?: string,
+    context?: string,
+    location?: ErrorLocation,
+    specSection?: string
+  ) {
+    super(
+      message,
+      'PERSONA_LOAD_ERROR',
+      context,
+      location ?? (filePath ? { filePath } : undefined),
+      specSection
+    );
     this.name = 'PersonaLoadError';
     if (filePath !== undefined) {
       this.filePath = filePath;
@@ -77,8 +126,13 @@ export class PersonaLoadError extends UMSError {
  * Error for build process failures
  */
 export class BuildError extends UMSError {
-  constructor(message: string, context?: string) {
-    super(message, 'BUILD_ERROR', context);
+  constructor(
+    message: string,
+    context?: string,
+    location?: ErrorLocation,
+    specSection?: string
+  ) {
+    super(message, 'BUILD_ERROR', context, location, specSection);
     this.name = 'BuildError';
   }
 }
