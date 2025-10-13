@@ -7,11 +7,7 @@ import { promises as fs } from 'fs';
 import path from 'path';
 import chalk from 'chalk';
 import { glob } from 'glob';
-import {
-  parseModule,
-  parsePersona,
-  type ValidationWarning,
-} from 'ums-lib';
+import { parseModule, parsePersona, type ValidationWarning } from 'ums-lib';
 import { handleError } from '../utils/error-handler.js';
 import { createValidationProgress, BatchProgress } from '../utils/progress.js';
 

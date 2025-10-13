@@ -57,7 +57,7 @@ export class ModuleRegistry {
     return this.resolveConflict(
       moduleId,
       entries,
-      strategy ?? this.defaultStrategy,
+      strategy ?? this.defaultStrategy
     );
   }
 
@@ -139,7 +139,7 @@ export class ModuleRegistry {
   private resolveConflict(
     moduleId: string,
     entries: RegistryEntry[],
-    strategy: ConflictStrategy,
+    strategy: ConflictStrategy
   ): Module {
     switch (strategy) {
       case 'error': {
@@ -149,7 +149,7 @@ export class ModuleRegistry {
         throw new ConflictError(
           `Module conflict for '${moduleId}': ${entries.length} candidates found from sources [${sources}]. Use --conflict-strategy=warn or --conflict-strategy=replace to resolve.`,
           moduleId,
-          entries.length,
+          entries.length
         );
       }
 
@@ -168,4 +168,3 @@ export class ModuleRegistry {
     }
   }
 }
-

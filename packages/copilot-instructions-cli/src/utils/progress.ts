@@ -12,10 +12,10 @@ import ora, { type Ora } from 'ora';
  */
 function isCI(): boolean {
   return Boolean(
-    process.env.CI || // Generic CI environment
-    process.env.CONTINUOUS_INTEGRATION || // Travis CI, CircleCI
-    process.env.BUILD_NUMBER || // Jenkins, Hudson
-    process.env.RUN_ID // GitHub Actions
+    process.env.CI ?? // Generic CI environment
+      process.env.CONTINUOUS_INTEGRATION ?? // Travis CI, CircleCI
+      process.env.BUILD_NUMBER ?? // Jenkins, Hudson
+      process.env.RUN_ID // GitHub Actions
   );
 }
 
@@ -134,7 +134,7 @@ export class BatchProgress {
   private context: LogContext;
   private verbose: boolean;
   private spinner: Ora;
-  private startTime: number = 0;
+  private startTime = 0;
   private ci: boolean;
 
   constructor(total: number, context: LogContext, verbose = false) {
@@ -283,7 +283,11 @@ export function createModuleLoadProgress(
   command: string,
   verbose = false
 ): BatchProgress {
-  return new BatchProgress(total, { command, operation: 'loading modules' }, verbose);
+  return new BatchProgress(
+    total,
+    { command, operation: 'loading modules' },
+    verbose
+  );
 }
 
 /**
@@ -294,5 +298,9 @@ export function createModuleResolveProgress(
   command: string,
   verbose = false
 ): BatchProgress {
-  return new BatchProgress(total, { command, operation: 'resolving modules' }, verbose);
+  return new BatchProgress(
+    total,
+    { command, operation: 'resolving modules' },
+    verbose
+  );
 }

@@ -102,7 +102,9 @@ function handleValidationError(
 
   // Location information
   if (error.location) {
-    console.error(chalk.yellow(`   Location: ${formatLocation(error.location)}`));
+    console.error(
+      chalk.yellow(`   Location: ${formatLocation(error.location)}`)
+    );
   } else if (error.path) {
     console.error(chalk.yellow(`   File: ${error.path}`));
   }
@@ -148,7 +150,9 @@ function handleLoadError(
 
   // Location information
   if (error.location) {
-    console.error(chalk.yellow(`   Location: ${formatLocation(error.location)}`));
+    console.error(
+      chalk.yellow(`   Location: ${formatLocation(error.location)}`)
+    );
   } else if (error.filePath) {
     console.error(chalk.yellow(`   File: ${error.filePath}`));
   }
@@ -214,15 +218,15 @@ function handleUMSError(error: UMSError, options: ErrorHandlerOptions): void {
     });
   } else {
     // Generic UMS error
-    const contextPart = context ?? 'UMS operation';
-
     // Error header
     console.error(chalk.red(`❌ Error: ${error.message}`));
     console.error();
 
     // Location information
     if (error.location) {
-      console.error(chalk.yellow(`   Location: ${formatLocation(error.location)}`));
+      console.error(
+        chalk.yellow(`   Location: ${formatLocation(error.location)}`)
+      );
     }
 
     // Context

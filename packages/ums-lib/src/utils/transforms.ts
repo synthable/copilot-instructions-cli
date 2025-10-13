@@ -34,7 +34,7 @@ export function moduleIdToExportName(moduleId: string): string {
   return finalSegment
     .split('-')
     .map((part, index) =>
-      index === 0 ? part : part.charAt(0).toUpperCase() + part.slice(1),
+      index === 0 ? part : part.charAt(0).toUpperCase() + part.slice(1)
     )
     .join('');
 }

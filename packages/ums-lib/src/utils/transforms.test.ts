@@ -8,14 +8,14 @@ describe('moduleIdToExportName', () => {
 
   it('should handle multi-segment kebab-case IDs', () => {
     expect(moduleIdToExportName('test-driven-development')).toBe(
-      'testDrivenDevelopment',
+      'testDrivenDevelopment'
     );
   });
 
   it('should handle multi-segment IDs with slashes', () => {
-    expect(moduleIdToExportName('principle/testing/test-driven-development')).toBe(
-      'testDrivenDevelopment',
-    );
+    expect(
+      moduleIdToExportName('principle/testing/test-driven-development')
+    ).toBe('testDrivenDevelopment');
   });
 
   it('should handle IDs with single-word segments', () => {
@@ -24,7 +24,7 @@ describe('moduleIdToExportName', () => {
 
   it('should handle IDs with numbers', () => {
     expect(moduleIdToExportName('technology/frameworks/react-v18')).toBe(
-      'reactV18',
+      'reactV18'
     );
   });
 
@@ -33,7 +33,9 @@ describe('moduleIdToExportName', () => {
   });
 
   it('should handle a complex multi-slash ID', () => {
-    expect(moduleIdToExportName('foundation/ethics/do-no-harm')).toBe('doNoHarm');
+    expect(moduleIdToExportName('foundation/ethics/do-no-harm')).toBe(
+      'doNoHarm'
+    );
   });
 
   it('should handle an empty string input', () => {

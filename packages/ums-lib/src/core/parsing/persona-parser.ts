@@ -26,35 +26,36 @@ export function parsePersonaObject(obj: unknown): Persona {
 
   // Validate required top-level fields
   if (typeof persona.name !== 'string') {
-    throw new PersonaParseError('Persona missing or invalid required field: name');
+    throw new PersonaParseError(
+      'Persona missing or invalid required field: name'
+    );
   }
   if (persona.schemaVersion !== '2.0') {
     throw new PersonaParseError(
-      `Persona schemaVersion must be "2.0", but found "${persona.schemaVersion}"`,
+      `Persona schemaVersion must be "2.0", but found "${persona.schemaVersion}"`
     );
   }
   if (typeof persona.version !== 'string') {
     throw new PersonaParseError(
-      'Persona missing or invalid required field: version',
+      'Persona missing or invalid required field: version'
     );
   }
   if (typeof persona.description !== 'string') {
     throw new PersonaParseError(
-      'Persona missing or invalid required field: description',
+      'Persona missing or invalid required field: description'
     );
   }
   if (typeof persona.semantic !== 'string') {
     throw new PersonaParseError(
-      'Persona missing or invalid required field: semantic',
+      'Persona missing or invalid required field: semantic'
     );
   }
   if (!Array.isArray(persona.modules)) {
     throw new PersonaParseError(
-      'Persona missing or invalid required field: modules',
+      'Persona missing or invalid required field: modules'
     );
   }
 
   // Full validation can be done separately using `validatePersona`
   return persona;
 }
-

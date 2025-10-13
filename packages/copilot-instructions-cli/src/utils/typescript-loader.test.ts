@@ -8,9 +8,7 @@ import {
 describe('TypeScript Loader Utilities', () => {
   describe('detectUMSVersion', () => {
     it('should detect v2.0 from .module.ts files', () => {
-      expect(detectUMSVersion('/path/to/error-handling.module.ts')).toBe(
-        '2.0'
-      );
+      expect(detectUMSVersion('/path/to/error-handling.module.ts')).toBe('2.0');
     });
 
     it('should detect v2.0 from .persona.ts files', () => {
