@@ -3,7 +3,7 @@
 [![NPM Version](https://img.shields.io/npm/v/ums-lib.svg)](https://www.npmjs.com/package/ums-lib)
 [![License](https://img.shields.io/npm/l/ums-lib.svg)](https://github.com/synthable/copilot-instructions-cli/blob/main/LICENSE)
 
-A reusable, platform-agnostic library for UMS (Unified Module System) v1.0 operations, providing pure functions for parsing, validating, and building modular AI instructions.
+A reusable, platform-agnostic library for UMS (Unified Module System) v2.0 operations, providing pure functions for parsing, validating, and building modular AI instructions.
 
 ## Core Philosophy
 
@@ -17,7 +17,7 @@ The calling application is responsible for all I/O operations (like reading file
 - ✅ **Conflict-Aware Registry**: Intelligent handling of module conflicts with configurable resolution strategies.
 - ✅ **Tree-Shakable**: Modular exports allow importing only what you need for optimal bundle size.
 - ✅ **Pure Functional API**: Operates on data structures and strings, not file paths, ensuring predictable behavior.
-- ✅ **UMS v1.0 Compliant**: Full implementation of the specification for parsing, validation, and rendering.
+- ✅ **UMS v2.0 Compliant**: Full implementation of the specification for parsing, validation, and rendering.
 - ✅ **TypeScript Support**: Fully typed for a robust developer experience.
 - ✅ **Comprehensive Validation**: Detailed validation for both modules and personas against the UMS specification.
 - ✅ **Performance Optimized**: Microsecond-level operations with comprehensive benchmarking.
@@ -157,8 +157,8 @@ This exports all core functions, types, and error classes.
 
 ### Validation (`ums-lib/core/validation`)
 
-- `validateModule(data: unknown): ValidationResult`: Validates a raw JavaScript object against the UMS v1.0 module schema.
-- `validatePersona(data: unknown): ValidationResult`: Validates a raw JavaScript object against the UMS v1.0 persona schema.
+- `validateModule(data: unknown): ValidationResult`: Validates a raw JavaScript object against the UMS v2.0 module schema.
+- `validatePersona(data: unknown): ValidationResult`: Validates a raw JavaScript object against the UMS v2.0 persona schema.
 
 ### Resolution (`ums-lib/core/resolution`)
 
@@ -170,7 +170,7 @@ This exports all core functions, types, and error classes.
 
 - `renderMarkdown(persona: UMSPersona, modules: UMSModule[]): string`: Renders a complete persona and its resolved modules into a final Markdown string.
 - `renderModule(module: UMSModule): string`: Renders a single module to a Markdown string.
-- `generateBuildReport(...)`: Generates a build report compliant with the UMS v1.0 specification.
+- `generateBuildReport(...)`: Generates a build report compliant with the UMS v2.0 specification.
 
 ### Registry (`ums-lib/core/registry`)
 
@@ -184,8 +184,9 @@ This exports all core functions, types, and error classes.
 
 ### Types (`ums-lib/types`)
 
-All UMS v1.0 interfaces are exported, including:
-- `UMSModule`, `UMSPersona`, `ModuleBody`, `ModuleMeta`, `ModuleGroup`
+All UMS v2.0 interfaces are exported, including:
+
+- `Module`, `Persona`, `Component`, `ModuleMetadata`, `ModuleGroup`
 - `ValidationResult`, `ValidationError`, `ValidationWarning`
 - `ModuleResolutionResult`
 - `IModuleRegistry`, `ModuleEntry`, `ModuleSource`, `ConflictStrategy`
@@ -194,6 +195,7 @@ All UMS v1.0 interfaces are exported, including:
 ### Utilities (`ums-lib/utils`)
 
 Custom error classes for robust error handling:
+
 - `UMSError` (base class)
 - `UMSValidationError`
 - `ModuleLoadError`
