@@ -1,0 +1,69 @@
+{
+  "name": "ums-sdk",
+  "version": "1.0.0",
+  "type": "module",
+  "private": false,
+  "sideEffects": false,
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "author": "synthable",
+  "license": "GPL-3.0-or-later",
+  "description": "Node.js SDK for UMS v2.0 - file loading, orchestration, and high-level workflows",
+  "homepage": "https://github.com/synthable/copilot-instructions-cli/tree/main/packages/ums-sdk",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/synthable/copilot-instructions-cli.git",
+    "directory": "packages/ums-sdk"
+  },
+  "keywords": [
+    "ums",
+    "unified-module-system",
+    "sdk",
+    "ai",
+    "instructions",
+    "typescript",
+    "loader"
+  ],
+  "scripts": {
+    "build": "tsc --build --pretty",
+    "test": "vitest run --run",
+    "test:coverage": "vitest run --coverage",
+    "lint": "eslint 'src/**/*.ts'",
+    "lint:fix": "eslint 'src/**/*.ts' --fix",
+    "format": "prettier --write 'src/**/*.ts'",
+    "format:check": "prettier --check 'src/**/*.ts'",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist",
+    "prepublishOnly": "npm run clean && npm run build",
+    "pretest": "npm run typecheck",
+    "prebuild": "npm run clean",
+    "quality-check": "npm run typecheck && npm run lint && npm run format:check && npm run test"
+  },
+  "dependencies": {
+    "ums-lib": "^2.0.0",
+    "yaml": "^2.6.0",
+    "glob": "^10.0.0"
+  },
+  "peerDependencies": {
+    "typescript": ">=5.0.0"
+  },
+  "peerDependenciesMeta": {
+    "typescript": {
+      "optional": true
+    }
+  },
+  "optionalDependencies": {
+    "tsx": "^4.0.0"
+  },
+  "devDependencies": {},
+  "files": [
+    "dist",
+    "README.md"
+  ]
+}
