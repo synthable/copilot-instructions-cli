@@ -6,7 +6,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { ModuleRegistry } from './module-registry.js';
 import { ConflictError } from '../../utils/errors.js';
 import type {
-  UMSModule,
+  Module,
   ModuleSource,
   ConflictStrategy,
 } from '../../types/index.js';
@@ -16,7 +16,7 @@ describe('ModuleRegistry', () => {
   let consoleWarnSpy: ReturnType<typeof vi.spyOn>;
 
   // Mock modules for testing
-  const mockModule1: UMSModule = {
+  const mockModule1: Module = {
     id: 'foundation/logic/reasoning',
     version: '1.0.0',
     schemaVersion: '2.0',
@@ -26,18 +26,9 @@ describe('ModuleRegistry', () => {
       description: 'A framework for logical reasoning',
       semantic: 'logical reasoning cognitive framework',
     },
-    shape: 'specification',
-    meta: {
-      name: 'Reasoning Framework',
-      description: 'A framework for logical reasoning',
-      semantic: 'logical reasoning cognitive framework',
-    },
-    body: {
-      goal: 'Provide structured reasoning capabilities',
-    },
   };
 
-  const mockModule2: UMSModule = {
+  const mockModule2: Module = {
     id: 'foundation/logic/reasoning',
     version: '2.0.0',
     schemaVersion: '2.0',
@@ -47,18 +38,9 @@ describe('ModuleRegistry', () => {
       description: 'An advanced framework for logical reasoning',
       semantic: 'advanced logical reasoning cognitive framework',
     },
-    shape: 'specification',
-    meta: {
-      name: 'Advanced Reasoning Framework',
-      description: 'An advanced framework for logical reasoning',
-      semantic: 'advanced logical reasoning cognitive framework',
-    },
-    body: {
-      goal: 'Provide advanced structured reasoning capabilities',
-    },
   };
 
-  const mockModule3: UMSModule = {
+  const mockModule3: Module = {
     id: 'principle/design/modularity',
     version: '1.0.0',
     schemaVersion: '2.0',
@@ -67,15 +49,6 @@ describe('ModuleRegistry', () => {
       name: 'Modularity Pattern',
       description: 'Design pattern for modular systems',
       semantic: 'modularity design pattern architecture',
-    },
-    shape: 'pattern',
-    meta: {
-      name: 'Modularity Pattern',
-      description: 'Design pattern for modular systems',
-      semantic: 'modularity design pattern architecture',
-    },
-    body: {
-      goal: 'Enable modular system design',
     },
   };
 

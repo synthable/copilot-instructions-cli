@@ -4,10 +4,10 @@
  */
 
 import { ModuleRegistry } from '../core/registry/module-registry.js';
-import type { UMSModule, ModuleSource } from '../types/index.js';
+import type { Module, ModuleSource } from '../types/index.js';
 
 // Create mock modules for benchmarking
-function createMockModule(id: string): UMSModule {
+function createMockModule(id: string): Module {
   return {
     id,
     version: '1.0.0',
@@ -17,16 +17,6 @@ function createMockModule(id: string): UMSModule {
       name: `Module ${id}`,
       description: `Test module ${id}`,
       semantic: `test module ${id}`,
-    },
-    // v1.0 backwards compatibility fields
-    shape: 'specification',
-    meta: {
-      name: `Module ${id}`,
-      description: `Test module ${id}`,
-      semantic: `test module ${id}`,
-    },
-    body: {
-      goal: `Test goal for ${id}`,
     },
   };
 }
@@ -55,7 +45,7 @@ function runBenchmarks(): void {
   const source: ModuleSource = { type: 'standard', path: 'benchmark' };
 
   // Pre-populate with some modules
-  const modules: UMSModule[] = [];
+  const modules: Module[] = [];
   for (let i = 0; i < 100; i++) {
     const module = createMockModule(`module-${i}`);
     modules.push(module);

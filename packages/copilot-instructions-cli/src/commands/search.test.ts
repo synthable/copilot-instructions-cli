@@ -72,23 +72,12 @@ describe('search command', () => {
     filePath: '/test/foundation/logic/deductive-reasoning.md',
     version: '1.0',
     schemaVersion: '1.0',
-    shape: 'procedure',
     capabilities: [],
-    meta: {
-      name: 'Deductive Reasoning',
-      description: 'Logical reasoning from premises',
-      semantic: 'Logical reasoning from premises',
-      tags: ['logic', 'reasoning'],
-    },
     metadata: {
       name: 'Deductive Reasoning',
       description: 'Logical reasoning from premises',
       semantic: 'Logical reasoning from premises',
       tags: ['logic', 'reasoning'],
-    },
-    body: {
-      goal: 'Apply deductive reasoning',
-      process: ['Identify premises', 'Apply logic'],
     },
   };
 
@@ -97,20 +86,11 @@ describe('search command', () => {
     filePath: '/test/principle/quality/testing.md',
     version: '1.0',
     schemaVersion: '1.0',
-    shape: 'specification',
     capabilities: [],
-    meta: {
-      name: 'Testing Principles',
-      description: 'Quality assurance through testing',
-      semantic: 'Quality assurance through testing',
-    },
     metadata: {
       name: 'Testing Principles',
       description: 'Quality assurance through testing',
       semantic: 'Quality assurance through testing',
-    },
-    body: {
-      goal: 'Ensure quality through testing',
     },
   };
 

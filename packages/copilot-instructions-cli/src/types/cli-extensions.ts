@@ -20,18 +20,13 @@ export interface CLIModule extends Module {
 }
 
 /**
- * Helper to get module metadata with fallback for v1.0/v2.0 compatibility
+ * Helper to get module metadata
  *
- * @param module - Module with either meta (v1.0) or metadata (v2.0)
+ * @param module - UMS v2.0 Module
  * @returns The module's metadata object
  */
-export function getModuleMetadata(module: Module): NonNullable<Module['metadata']> {
-  // v2.0 uses metadata, v1.0 uses meta (both exist for compatibility)
-  // eslint-disable-next-line @typescript-eslint/no-deprecated, @typescript-eslint/no-unnecessary-condition
-  const metadata = module.metadata ?? module.meta;
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-  if (!metadata) {
-    throw new Error(`Module ${module.id} is missing metadata/meta property`);
-  }
-  return metadata;
+export function getModuleMetadata(module: Module): Module['metadata'] {
+  // In v2.0, metadata is required by the type system
+  // No runtime check needed since it's enforced at the type level
+  return module.metadata;
 }

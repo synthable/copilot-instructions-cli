@@ -8,14 +8,11 @@ import type { ModuleConfig } from 'ums-lib';
 import { parseModule, ModuleRegistry } from 'ums-lib';
 import { discoverModuleFiles, readModuleFile } from './file-operations.js';
 import { loadModuleConfig, getConfiguredModulePaths } from './config-loader.js';
-import {
-  loadTypeScriptModule,
-  detectUMSVersion,
-} from './typescript-loader.js';
+import { loadTypeScriptModule, detectUMSVersion } from './typescript-loader.js';
 import { basename } from 'path';
 import type { CLIModule } from '../types/cli-extensions.js';
 
-const DEFAULT_STANDARD_MODULES_PATH = './instructions-modules-v1-compliant';
+const DEFAULT_STANDARD_MODULES_PATH = './instructions-modules';
 
 /**
  * Loads a module file, detecting format (v1.0 YAML or v2.0 TypeScript) automatically
@@ -28,7 +25,10 @@ async function loadModuleFile(filePath: string): Promise<CLIModule> {
     const fileName = basename(filePath, '.module.ts');
     // For now, use filename as module ID - this may need refinement
     // based on actual module structure
-    const module = await loadTypeScriptModule(filePath, fileName) as CLIModule;
+    const module = (await loadTypeScriptModule(
+      filePath,
+      fileName
+    )) as CLIModule;
     module.filePath = filePath;
     return module;
   } else {
@@ -120,15 +120,16 @@ export async function discoverAllModules(): Promise<ModuleDiscoveryResult> {
   const registry = new ModuleRegistry('error');
   const warnings: string[] = [];
 
-  // Discover and add standard modules
-  const standardModules = await discoverStandardModules();
-  for (const module of standardModules) {
-    registry.add(module, {
-      type: 'standard',
-      path: 'instructions-modules-v1-compliant',
-      // No per-path strategy for standard modules
-    });
-  }
+  // Skip standard modules discovery - rely on modules.config.yml instead
+  // This prevents loading test modules and allows full configuration control
+  // const standardModules = await discoverStandardModules();
+  // for (const module of standardModules) {
+  //   registry.add(module, {
+  //     type: 'standard',
+  //     path: DEFAULT_STANDARD_MODULES_PATH,
+  //     // No per-path strategy for standard modules
+  //   });
+  // }
 
   // Discover and add local modules if config exists
   if (config) {

@@ -106,8 +106,6 @@ function inspectSpecificModule(
       console.log(chalk.gray('\nModule Details:'));
       console.log(chalk.gray(`  Name: ${metadata.name}`));
       console.log(chalk.gray(`  Description: ${metadata.description}`));
-      // eslint-disable-next-line @typescript-eslint/no-deprecated
-      console.log(chalk.gray(`  Shape: ${resolvedModule.shape ?? 'unknown'}`));
       console.log(chalk.gray(`  Version: ${resolvedModule.version}`));
       const filePath = (resolvedModule as { filePath?: string }).filePath;
       if (filePath) {
@@ -137,8 +135,6 @@ function inspectSpecificModule(
         ...(verbose && {
           name: metadata.name,
           description: metadata.description,
-          // eslint-disable-next-line @typescript-eslint/no-deprecated
-          shape: entry.module.shape ?? 'unknown',
           filePath,
         }),
       };
@@ -152,9 +148,9 @@ function inspectSpecificModule(
         chalk.cyan('Version'),
         chalk.cyan('Source'),
         chalk.cyan('Added At'),
-        ...(verbose ? [chalk.cyan('Name'), chalk.cyan('Shape')] : []),
+        ...(verbose ? [chalk.cyan('Name')] : []),
       ],
-      colWidths: [4, 10, 30, 25, ...(verbose ? [25, 12] : [])],
+      colWidths: [4, 10, 30, 25, ...(verbose ? [30] : [])],
     });
 
     conflicts.forEach((entry, index) => {
@@ -165,8 +161,7 @@ function inspectSpecificModule(
         entry.module.version,
         `${entry.source.type}:${entry.source.path}`,
         addedAt,
-        // eslint-disable-next-line @typescript-eslint/no-deprecated
-        ...(verbose ? [metadata.name, entry.module.shape ?? 'unknown'] : []),
+        ...(verbose ? [metadata.name] : []),
       ]);
     });
 

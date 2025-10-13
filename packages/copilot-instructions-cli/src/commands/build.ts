@@ -1,35 +1,31 @@
 /**
  * @module commands/ums-build
  * @description UMS build command implementation
- * Supports both v1.0 (YAML) and v2.0 (TypeScript) formats
+ * Supports UMS v2.0 (TypeScript) format only
  */
 
 import chalk from 'chalk';
 import { handleError } from '../utils/error-handler.js';
 import {
-  parsePersona,
   renderMarkdown,
   generateBuildReport,
   ConflictError,
-  type UMSPersona,
-  type UMSModule,
+  type Persona,
+  type Module,
   type BuildReport,
   type ModuleRegistry,
 } from 'ums-lib';
 import { createBuildProgress } from '../utils/progress.js';
-import { writeOutputFile, readFromStdin } from '../utils/file-operations.js';
+import { writeOutputFile } from '../utils/file-operations.js';
 import { discoverAllModules } from '../utils/module-discovery.js';
-import {
-  loadTypeScriptPersona,
-  detectUMSVersion,
-} from '../utils/typescript-loader.js';
+import { loadTypeScriptPersona } from '../utils/typescript-loader.js';
 
 /**
  * Options for the build command
  */
 export interface BuildOptions {
-  /** Path to persona file, or undefined for stdin */
-  persona?: string;
+  /** Path to persona .ts file */
+  persona: string;
   /** Output file path, or undefined for stdout */
   output?: string;
   /** Enable verbose output */
@@ -65,19 +61,15 @@ export async function handleBuild(options: BuildOptions): Promise<void> {
         )
       );
 
-      // Count module groups (supporting both v1.0 and v2.0 formats)
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-      const moduleGroups = result.persona.modules?.filter(
+      // Count module groups (v2.0 format)
+      const moduleGroups = result.persona.modules.filter(
         entry => typeof entry !== 'string'
       );
-      // eslint-disable-next-line @typescript-eslint/no-deprecated, @typescript-eslint/no-unnecessary-condition
-      const groupCount = moduleGroups?.length ?? result.persona.moduleGroups?.length ?? 0;
+      const groupCount = moduleGroups.length;
 
       if (groupCount > 1) {
         console.log(
-          chalk.gray(
-            `[INFO] build: Organized into ${groupCount} module groups`
-          )
+          chalk.gray(`[INFO] build: Organized into ${groupCount} module groups`)
         );
       }
     }
@@ -98,8 +90,7 @@ export async function handleBuild(options: BuildOptions): Promise<void> {
  */
 interface BuildEnvironment {
   registry: ModuleRegistry;
-  // eslint-disable-next-line @typescript-eslint/no-deprecated
-  persona: UMSPersona;
+  persona: Persona;
   outputPath?: string | undefined;
   warnings: string[];
 }
@@ -141,69 +132,16 @@ async function setupBuildEnvironment(
     }
   }
 
-  // Load persona
+  // Load persona (v2.0 TypeScript format only)
   progress.update('Loading persona...');
-  // eslint-disable-next-line @typescript-eslint/no-deprecated
-  let persona: UMSPersona;
+  progress.update(`Reading persona file: ${personaPath}`);
 
-  if (personaPath) {
-    // Detect format and load accordingly
-    const version = detectUMSVersion(personaPath);
-    progress.update(
-      `Reading persona file (UMS v${version}): ${personaPath}`
-    );
-
-    if (version === '2.0') {
-      // v2.0 TypeScript format
-      persona = (await loadTypeScriptPersona(personaPath));
-      if (verbose) {
-        console.log(
-          chalk.gray(
-            `[INFO] build: Loaded TypeScript persona from ${personaPath}`
-          )
-        );
-      }
-    } else {
-      // v1.0 YAML format
-      const { readFile } = await import('fs/promises');
-      const personaContent = await readFile(personaPath, 'utf-8');
-      persona = parsePersona(personaContent);
-      if (verbose) {
-        console.log(
-          chalk.gray(`[INFO] build: Loaded YAML persona from ${personaPath}`)
-        );
-      }
-    }
-  } else {
-    // stdin is always treated as v1.0 YAML
-    progress.update('Reading persona from stdin...');
-
-    if (process.stdin.isTTY) {
-      progress.fail('No persona file specified and stdin is not available');
-      throw new Error(
-        'No persona file specified and stdin is not available. ' +
-          'Use --persona <file> to specify a persona file or pipe YAML content to stdin.'
-      );
-    }
-
-    const personaContent = await readFromStdin();
-
-    if (!personaContent.trim()) {
-      progress.fail('No persona content provided via stdin');
-      throw new Error(
-        'No persona content received from stdin. ' +
-          'Ensure YAML content is piped to stdin or use --persona <file>.'
-      );
-    }
-
-    persona = parsePersona(personaContent);
-
-    if (verbose) {
-      console.log(chalk.gray('[INFO] build: Reading persona from stdin'));
-    }
-  }
+  const persona = await loadTypeScriptPersona(personaPath);
 
   if (verbose) {
+    console.log(
+      chalk.gray(`[INFO] build: Loaded TypeScript persona from ${personaPath}`)
+    );
     console.log(chalk.gray(`[INFO] build: Loaded persona '${persona.name}'`));
   }
 
@@ -222,17 +160,15 @@ async function setupBuildEnvironment(
  */
 interface BuildResult {
   markdown: string;
-  // eslint-disable-next-line @typescript-eslint/no-deprecated
-  modules: UMSModule[];
-  // eslint-disable-next-line @typescript-eslint/no-deprecated
-  persona: UMSPersona;
+  modules: Module[];
+  persona: Persona;
   warnings: string[];
   buildReport: BuildReport;
 }
 
 /**
  * Processes persona and modules to generate build result
- * Handles both v1.0 (moduleGroups) and v2.0 (modules) formats
+ * Handles v2.0 (modules) format only
  */
 function processPersonaAndModules(
   environment: BuildEnvironment,
@@ -240,39 +176,19 @@ function processPersonaAndModules(
 ): BuildResult {
   progress.update('Resolving modules from registry...');
 
-  // Extract module IDs from persona (supporting both v1.0 and v2.0 formats)
-  let requiredModuleIds: string[];
-
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-  if (environment.persona.modules?.length) {
-    // v2.0 format: modules array with ModuleEntry union type
-    requiredModuleIds = environment.persona.modules.flatMap(entry => {
+  // Extract module IDs from persona (v2.0 format only)
+  const requiredModuleIds: string[] = environment.persona.modules.flatMap(
+    entry => {
       if (typeof entry === 'string') {
         return [entry];
       } else {
         // ModuleGroup: extract IDs from group
-        // eslint-disable-next-line @typescript-eslint/no-deprecated, @typescript-eslint/no-unnecessary-condition
-        return entry.ids ?? entry.modules ?? [];
+        return entry.ids;
       }
-    });
-  } else if (
-    // eslint-disable-next-line @typescript-eslint/no-deprecated
-    environment.persona.moduleGroups?.length
-  ) {
-    // v1.0 format: moduleGroups array
-    // eslint-disable-next-line @typescript-eslint/no-deprecated
-    requiredModuleIds = environment.persona.moduleGroups.flatMap(
-      // eslint-disable-next-line @typescript-eslint/no-deprecated, @typescript-eslint/no-unnecessary-condition
-      group => group.modules ?? group.ids ?? []
-    );
-  } else {
-    throw new Error(
-      'Persona has no modules. Either "modules" (v2.0) or "moduleGroups" (v1.0) must be specified.'
-    );
-  }
+    }
+  );
 
-  // eslint-disable-next-line @typescript-eslint/no-deprecated
-  const resolvedModules: UMSModule[] = [];
+  const resolvedModules: Module[] = [];
   const resolutionWarnings: string[] = [];
   const missingModules: string[] = [];
 

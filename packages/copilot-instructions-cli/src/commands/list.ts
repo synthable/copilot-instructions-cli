@@ -6,7 +6,7 @@
 import chalk from 'chalk';
 import Table from 'cli-table3';
 import { handleError } from '../utils/error-handler.js';
-import type { UMSModule } from 'ums-lib';
+import type { Module } from 'ums-lib';
 import { createDiscoveryProgress } from '../utils/progress.js';
 import { discoverAllModules } from '../utils/module-discovery.js';
 import { getModuleMetadata } from '../types/cli-extensions.js';
@@ -20,11 +20,9 @@ interface ListOptions {
  * Filters and sorts modules according to M5 requirements
  */
 function filterAndSortModules(
-  // eslint-disable-next-line @typescript-eslint/no-deprecated
-  modules: UMSModule[],
+  modules: Module[],
   tierFilter?: string
-  // eslint-disable-next-line @typescript-eslint/no-deprecated
-): UMSModule[] {
+): Module[] {
   let filteredModules = modules;
 
   if (tierFilter) {
@@ -56,8 +54,7 @@ function filterAndSortModules(
 /**
  * Renders the modules table with consistent styling
  */
-// eslint-disable-next-line @typescript-eslint/no-deprecated
-function renderModulesTable(modules: UMSModule[]): void {
+function renderModulesTable(modules: Module[]): void {
   const table = new Table({
     head: ['ID', 'Tier/Subject', 'Name', 'Description'],
     style: {

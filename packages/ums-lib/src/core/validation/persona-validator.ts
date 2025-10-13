@@ -9,31 +9,30 @@ import {
   type ValidationWarning,
   type Persona,
 } from '../../types/index.js';
-import {
-  ValidationError as ValidationErrorClass,
-} from '../../utils/errors.js';
+import { ValidationError as ValidationErrorClass } from '../../utils/errors.js';
 
-const SEMVER_REGEX = /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/;
+const SEMVER_REGEX =
+  /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/;
 
 /**
- * Validates a parsed UMS persona object.
- * Supports both v1.0 (moduleGroups) and v2.0 (modules) formats.
+ * Validates a parsed UMS v2.0 persona object.
  *
  * @param persona - The persona object to validate.
  * @returns A validation result object containing errors and warnings.
  */
+// eslint-disable-next-line max-lines-per-function
 export function validatePersona(persona: Persona): ValidationResult {
   const errors: ValidationError[] = [];
   const warnings: ValidationWarning[] = [];
 
-  // Validate schema version (accepts both 1.0 and 2.0 for compatibility)
-  if (persona.schemaVersion !== '2.0' && persona.schemaVersion !== '1.0') {
+  // Validate schema version (v2.0 only)
+  if (persona.schemaVersion !== '2.0') {
     errors.push(
       new ValidationErrorClass(
-        `Invalid schema version: ${persona.schemaVersion}, expected '1.0' or '2.0'`,
+        `Invalid schema version: ${persona.schemaVersion}, expected '2.0'`,
         'schemaVersion',
-        'Section 4',
-      ),
+        'Section 4'
+      )
     );
   }
 
@@ -43,25 +42,21 @@ export function validatePersona(persona: Persona): ValidationResult {
       new ValidationErrorClass(
         `Invalid version format: ${persona.version}, expected SemVer`,
         'version',
-        'Section 4',
-      ),
+        'Section 4'
+      )
     );
   }
 
-  // Determine which format to validate (v2.0 modules or v1.0 moduleGroups)
-  const moduleGroups = persona.modules || persona.moduleGroups;
-  const fieldName = persona.modules ? 'modules' : 'moduleGroups';
-
-  // Validate module groups array exists and has content
-  if (!Array.isArray(moduleGroups) || moduleGroups.length === 0) {
+  // Validate modules array exists and has content
+  if (!Array.isArray(persona.modules) || persona.modules.length === 0) {
     errors.push(
       new ValidationErrorClass(
-        'Persona must have at least one module group',
-        fieldName,
-        'Section 4',
-      ),
+        'Persona must have at least one module entry',
+        'modules',
+        'Section 4.2'
+      )
     );
-    // Return early if no module groups
+    // Return early if no modules
     return {
       valid: errors.length === 0,
       errors,
@@ -69,10 +64,10 @@ export function validatePersona(persona: Persona): ValidationResult {
     };
   }
 
-  // Validate each module group and check for duplicate module IDs across all groups
+  // Validate each module entry and check for duplicate module IDs across all entries
   const allModuleIds = new Set<string>();
-  for (let i = 0; i < moduleGroups.length; i++) {
-    const entry = moduleGroups[i];
+  for (let i = 0; i < persona.modules.length; i++) {
+    const entry = persona.modules[i];
 
     // Handle v2.0 ModuleEntry union type (string | ModuleGroup)
     if (typeof entry === 'string') {
@@ -81,37 +76,38 @@ export function validatePersona(persona: Persona): ValidationResult {
         errors.push(
           new ValidationErrorClass(
             `Duplicate module ID found: ${entry}`,
-            `${fieldName}[${i}]`,
-            'Section 4',
-          ),
+            `modules[${i}]`,
+            'Section 4.2'
+          )
         );
       }
       allModuleIds.add(entry);
       continue;
     }
 
-    // Handle ModuleGroup object
+    // Handle ModuleGroup object (runtime check for malformed data)
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     if (!entry || typeof entry !== 'object') {
       errors.push(
         new ValidationErrorClass(
-          `Module group at index ${i} must be a string or object`,
-          `${fieldName}[${i}]`,
-          'Section 4',
-        ),
+          `Module entry at index ${i} must be a string or object`,
+          `modules[${i}]`,
+          'Section 4.2'
+        )
       );
       continue;
     }
 
-    // Get module IDs from either 'ids' (v2.0) or 'modules' (v1.0)
-    const moduleIds = entry.ids || entry.modules;
+    // Get module IDs from 'ids' array
+    const moduleIds = entry.ids;
 
     if (!Array.isArray(moduleIds) || moduleIds.length === 0) {
       errors.push(
         new ValidationErrorClass(
-          `Module group ${i} must have a non-empty 'ids' or 'modules' array`,
-          `${fieldName}[${i}].${entry.ids ? 'ids' : 'modules'}`,
-          'Section 4',
-        ),
+          `Module group ${i} must have a non-empty 'ids' array`,
+          `modules[${i}].ids`,
+          'Section 4.2'
+        )
       );
     } else {
       // Check for duplicate module IDs
@@ -120,17 +116,17 @@ export function validatePersona(persona: Persona): ValidationResult {
           errors.push(
             new ValidationErrorClass(
               `Module ID must be a string, found ${typeof id}`,
-              `${fieldName}[${i}].${entry.ids ? 'ids' : 'modules'}`,
-              'Section 4',
-            ),
+              `modules[${i}].ids`,
+              'Section 4.2'
+            )
           );
         } else if (allModuleIds.has(id)) {
           errors.push(
             new ValidationErrorClass(
               `Duplicate module ID found across groups: ${id}`,
-              `${fieldName}[${i}].${entry.ids ? 'ids' : 'modules'}`,
-              'Section 4',
-            ),
+              `modules[${i}].ids`,
+              'Section 4.2'
+            )
           );
         }
         allModuleIds.add(id);
@@ -144,4 +140,3 @@ export function validatePersona(persona: Persona): ValidationResult {
     warnings,
   };
 }
-

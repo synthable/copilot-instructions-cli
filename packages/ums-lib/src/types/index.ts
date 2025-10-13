@@ -34,24 +34,6 @@ export interface Module {
   knowledge?: KnowledgeComponent;
   /** Shorthand for a single data component. Mutually exclusive with `components`. */
   data?: DataComponent;
-
-  // #region v1.0 Backwards Compatibility (DEPRECATED)
-  /**
-   * @deprecated UMS v1.0 field. Use `metadata` instead.
-   * Provided for backwards compatibility with v1.0 code.
-   */
-  meta?: ModuleMetadata;
-  /**
-   * @deprecated UMS v1.0 field. Use `instruction`, `knowledge`, or `data` shorthand properties instead.
-   * Provided for backwards compatibility with v1.0 directive-based modules.
-   */
-  body?: Record<string, unknown>;
-  /**
-   * @deprecated UMS v1.0 field. In v2.0, module type is determined by which shorthand property is used.
-   * Provided for backwards compatibility with v1.0 code.
-   */
-  shape?: string;
-  // #endregion
 }
 
 /**
@@ -259,11 +241,6 @@ export interface Example {
   snippet: string;
   /** The language of the snippet for syntax highlighting. */
   language?: string;
-  /**
-   * @deprecated Legacy alias for `snippet`. Use `snippet` instead.
-   * Provided for backwards compatibility.
-   */
-  code?: string;
 }
 
 /**
@@ -300,11 +277,6 @@ export interface DataComponent {
     value: unknown;
     /** A description of the data's purpose and format. */
     description?: string;
-    /**
-     * @deprecated UMS v1.0 field. Use `format` instead.
-     * Provided for backwards compatibility with v1.0 code.
-     */
-    mediaType?: string;
   };
 }
 
@@ -321,7 +293,10 @@ export interface ComponentMetadata {
 /**
  * A union type for all possible components.
  */
-export type Component = InstructionComponent | KnowledgeComponent | DataComponent;
+export type Component =
+  | InstructionComponent
+  | KnowledgeComponent
+  | DataComponent;
 
 // #endregion
 
@@ -351,14 +326,6 @@ export interface Persona {
   attribution?: boolean;
   /** The ordered list of module entries that compose the persona (spec-compliant). */
   modules: ModuleEntry[];
-
-  // #region v1.0 Backwards Compatibility (DEPRECATED)
-  /**
-   * @deprecated UMS v1.0 field. Use `modules` instead.
-   * Provided for backwards compatibility with v1.0 code.
-   */
-  moduleGroups?: PersonaModuleGroup[];
-  // #endregion
 }
 
 /**
@@ -369,16 +336,6 @@ export interface PersonaModuleGroup {
   group?: string;
   /** The list of module IDs in this group, in order of composition. */
   ids: string[];
-  /**
-   * @deprecated UMS v1.0 field. Use `ids` instead.
-   * Provided for backwards compatibility with v1.0 code.
-   */
-  modules?: string[];
-  /**
-   * @deprecated UMS v1.0 field. Use `group` instead.
-   * Provided for backwards compatibility with v1.0 code.
-   */
-  groupName?: string;
 }
 
 /**
@@ -517,29 +474,5 @@ export interface BuildReportModule {
   /** The ID of a successor module, if this module is deprecated. */
   replacedBy?: string;
 }
-
-// #endregion
-
-// #region v1.0 Backwards Compatibility Aliases
-
-/**
- * @deprecated Use Module instead. Kept for v1.0 backwards compatibility.
- */
-export type UMSModule = Module;
-
-/**
- * @deprecated Use Persona instead. Kept for v1.0 backwards compatibility.
- */
-export type UMSPersona = Persona;
-
-/**
- * @deprecated Use DataComponent instead. Kept for v1.0 backwards compatibility.
- */
-export type DataDirective = DataComponent;
-
-/**
- * @deprecated Use Example instead. Kept for v1.0 backwards compatibility.
- */
-export type ExampleDirective = Example;
 
 // #endregion

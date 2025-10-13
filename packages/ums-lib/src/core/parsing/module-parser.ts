@@ -30,36 +30,38 @@ export function parseModuleObject(obj: unknown): Module {
   }
   if (module.schemaVersion !== '2.0') {
     throw new ModuleParseError(
-      `Module schemaVersion must be "2.0", but found "${module.schemaVersion}"`,
+      `Module schemaVersion must be "2.0", but found "${module.schemaVersion}"`
     );
   }
   if (typeof module.version !== 'string') {
     throw new ModuleParseError(
-      'Module missing or invalid required field: version',
+      'Module missing or invalid required field: version'
     );
   }
   if (!Array.isArray(module.capabilities)) {
     throw new ModuleParseError(
-      'Module missing or invalid required field: capabilities',
+      'Module missing or invalid required field: capabilities'
     );
   }
+  // Runtime check for malformed data (metadata should be required by type but may be missing in raw data)
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
   if (typeof module.metadata !== 'object' || module.metadata === null) {
     throw new ModuleParseError(
-      'Module missing or invalid required field: metadata',
+      'Module missing or invalid required field: metadata'
     );
   }
 
   // Validate that at least one component type is present
-  const hasComponents = Array.isArray(module.components) && module.components.length > 0;
-  const hasShorthand = module.instruction || module.knowledge || module.data;
+  const hasComponents =
+    Array.isArray(module.components) && module.components.length > 0;
+  const hasShorthand = module.instruction ?? module.knowledge ?? module.data;
 
   if (!hasComponents && !hasShorthand) {
     throw new ModuleParseError(
-      'Module must have at least one component via `components` array or a shorthand property.',
+      'Module must have at least one component via `components` array or a shorthand property.'
     );
   }
 
   // Full validation can be done separately using `validateModule`
   return module;
 }
-

@@ -6,7 +6,7 @@
 import chalk from 'chalk';
 import Table from 'cli-table3';
 import { handleError } from '../utils/error-handler.js';
-import type { UMSModule } from 'ums-lib';
+import type { Module } from 'ums-lib';
 import { createDiscoveryProgress } from '../utils/progress.js';
 import { discoverAllModules } from '../utils/module-discovery.js';
 import { getModuleMetadata } from '../types/cli-extensions.js';
@@ -19,8 +19,7 @@ interface SearchOptions {
 /**
  * Searches modules by query across name, description, and tags
  */
-// eslint-disable-next-line @typescript-eslint/no-deprecated
-function searchModules(modules: UMSModule[], query: string): UMSModule[] {
+function searchModules(modules: Module[], query: string): Module[] {
   const lowerCaseQuery = query.toLowerCase();
 
   return modules.filter(module => {
@@ -51,11 +50,9 @@ function searchModules(modules: UMSModule[], query: string): UMSModule[] {
  * Filters and sorts modules according to M6 requirements (same as M5)
  */
 function filterAndSortModules(
-  // eslint-disable-next-line @typescript-eslint/no-deprecated
-  modules: UMSModule[],
+  modules: Module[],
   tierFilter?: string
-  // eslint-disable-next-line @typescript-eslint/no-deprecated
-): UMSModule[] {
+): Module[] {
   let filteredModules = modules;
 
   if (tierFilter) {
@@ -87,8 +84,7 @@ function filterAndSortModules(
 /**
  * Renders the search results table with consistent styling
  */
-// eslint-disable-next-line @typescript-eslint/no-deprecated
-function renderSearchResults(modules: UMSModule[], query: string): void {
+function renderSearchResults(modules: Module[], query: string): void {
   const table = new Table({
     head: ['ID', 'Tier/Subject', 'Name', 'Description'],
     style: {

@@ -57,45 +57,31 @@ describe('module-discovery', () => {
   describe('discoverStandardModules', () => {
     it('should discover and parse standard modules', async () => {
       const mockFiles = [
-        './instructions-modules-v1-compliant/foundation/logic.module.yml',
-        './instructions-modules-v1-compliant/principle/solid.module.yml',
+        './instructions-modules/foundation/logic.module.yml',
+        './instructions-modules/principle/solid.module.yml',
       ];
       const mockContent = 'id: foundation/logic\nversion: 1.0';
       const mockModule1: Module = {
         id: 'foundation/logic',
         version: '1.0',
         schemaVersion: '1.0',
-        shape: 'specification',
         capabilities: [],
-        meta: {
-          name: 'Logic',
-          description: 'Basic logic',
-          semantic: 'Logic principles',
-        },
         metadata: {
           name: 'Logic',
           description: 'Basic logic',
           semantic: 'Logic principles',
         },
-        body: {},
       };
       const mockModule2: Module = {
         id: 'principle/solid',
         version: '1.0',
         schemaVersion: '1.0',
-        shape: 'specification',
         capabilities: [],
-        meta: {
-          name: 'SOLID',
-          description: 'SOLID principles',
-          semantic: 'SOLID principles',
-        },
         metadata: {
           name: 'SOLID',
           description: 'SOLID principles',
           semantic: 'SOLID principles',
         },
-        body: {},
       };
 
       vi.mocked(discoverModuleFiles).mockResolvedValue(mockFiles);
@@ -107,7 +93,7 @@ describe('module-discovery', () => {
       const result = await discoverStandardModules();
 
       expect(discoverModuleFiles).toHaveBeenCalledWith([
-        './instructions-modules-v1-compliant',
+        './instructions-modules',
       ]);
       expect(readModuleFile).toHaveBeenCalledTimes(2);
       expect(parseModule).toHaveBeenCalledTimes(2);
@@ -121,7 +107,7 @@ describe('module-discovery', () => {
     it('should return empty array when no standard modules directory exists', async () => {
       vi.mocked(discoverModuleFiles).mockRejectedValue(
         new Error(
-          "Failed to discover modules in path './instructions-modules-v1-compliant': ENOENT"
+          "Failed to discover modules in path './instructions-modules': ENOENT"
         )
       );
 
@@ -155,19 +141,12 @@ describe('module-discovery', () => {
         id: 'custom/module',
         version: '1.0',
         schemaVersion: '1.0',
-        shape: 'procedure',
         capabilities: [],
-        meta: {
-          name: 'Custom',
-          description: 'Custom module',
-          semantic: 'Custom logic',
-        },
         metadata: {
           name: 'Custom',
           description: 'Custom module',
           semantic: 'Custom logic',
         },
-        body: {},
       };
 
       vi.mocked(getConfiguredModulePaths).mockReturnValue(['./custom-modules']);
@@ -206,19 +185,12 @@ describe('module-discovery', () => {
         id: 'standard/module',
         version: '1.0',
         schemaVersion: '1.0',
-        shape: 'specification',
         capabilities: [],
-        meta: {
-          name: 'Standard',
-          description: 'Standard module',
-          semantic: 'Standard',
-        },
         metadata: {
           name: 'Standard',
           description: 'Standard module',
           semantic: 'Standard',
         },
-        body: {},
         filePath: './standard/module.module.yml',
       };
 
@@ -237,36 +209,13 @@ describe('module-discovery', () => {
     });
 
     it('should handle no configuration file', async () => {
-      const standardModule: CLIModule = {
-        id: 'standard/module',
-        version: '1.0',
-        schemaVersion: '1.0',
-        shape: 'specification',
-        capabilities: [],
-        meta: {
-          name: 'Standard',
-          description: 'Standard module',
-          semantic: 'Standard',
-        },
-        metadata: {
-          name: 'Standard',
-          description: 'Standard module',
-          semantic: 'Standard',
-        },
-        body: {},
-        filePath: './standard/module.module.yml',
-      };
-
       vi.mocked(loadModuleConfig).mockResolvedValue(null);
-      vi.mocked(discoverModuleFiles).mockResolvedValue([
-        './standard/module.module.yml',
-      ]);
-      vi.mocked(readModuleFile).mockResolvedValue('content');
-      vi.mocked(parseModule).mockReturnValue(standardModule);
 
       const result = await discoverAllModules();
 
-      expect(result.registry.size()).toBe(1);
+      // With no config, no modules should be discovered
+      // (standard modules discovery is disabled - see line 123-132 in module-discovery.ts)
+      expect(result.registry.size()).toBe(0);
       expect(result.warnings).toHaveLength(0);
     });
   });
