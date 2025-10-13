@@ -1,5 +1,5 @@
 /**
- * Validation domain exports for UMS v1.0
+ * Validation domain exports for UMS v2.0
  * Handles validation of modules and personas against UMS specification
  */
 

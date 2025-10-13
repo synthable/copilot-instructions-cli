@@ -18,8 +18,8 @@ export const RENDER_ORDER = [
 
 export type DirectiveKey = (typeof RENDER_ORDER)[number];
 
-// UMS v1.0 specification constants
-export const UMS_SCHEMA_VERSION = '1.0';
+// UMS v2.0 specification constants
+export const UMS_SCHEMA_VERSION = '2.0';
 
 // Valid tiers for modules
 export const VALID_TIERS = [
@@ -43,11 +43,11 @@ export const STANDARD_SHAPES = [
 ] as const;
 export type StandardShape = (typeof STANDARD_SHAPES)[number];
 
-// Module ID validation regex (UMS v1.0 compliant)
+// Module ID validation regex (UMS v2.0 compliant)
 export const MODULE_ID_REGEX =
   /^(foundation|principle|technology|execution)\/(?:[a-z0-9-]+(?:\/[a-z0-9-]+)*\/[a-z0-9][a-z0-9-]*|[a-z0-9][a-z0-9-]*)$/;
 
-// Standard shape directive specifications (UMS v1.0 compliant)
+// Standard shape directive specifications (UMS v2.0 compliant)
 export const STANDARD_SHAPE_SPECS = {
   procedure: {
     required: ['goal', 'process'],

@@ -1,5 +1,5 @@
 /**
- * Resolution domain exports for UMS v1.0
+ * Resolution domain exports for UMS v2.0
  * Handles module resolution, dependency management, and conflict resolution
  */
 

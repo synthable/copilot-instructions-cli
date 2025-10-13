@@ -1,5 +1,5 @@
 /**
- * Utility exports for UMS v1.0
+ * Utility exports for UMS v2.0
  * Provides error classes and utility functions
  */
 
