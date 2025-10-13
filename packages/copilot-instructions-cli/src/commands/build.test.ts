@@ -2,7 +2,6 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { writeOutputFile, readFromStdin } from '../utils/file-operations.js';
 import { handleBuild } from './build.js';
 import {
-  parsePersona,
   renderMarkdown,
   generateBuildReport,
   resolvePersonaModules,
@@ -41,7 +40,6 @@ vi.mock('ora', () => {
 
 // Mock pure functions from UMS library
 vi.mock('ums-lib', () => ({
-  parsePersona: vi.fn(),
   renderMarkdown: vi.fn(),
   generateBuildReport: vi.fn(),
   resolvePersonaModules: vi.fn(),
@@ -89,7 +87,6 @@ const mockExit = vi.spyOn(process, 'exit').mockImplementation(() => {
 
 describe('build command', () => {
   // Type-safe mocks
-  const mockParsePersona = vi.mocked(parsePersona);
   const mockRenderMarkdown = vi.mocked(renderMarkdown);
   const mockGenerateBuildReport = vi.mocked(generateBuildReport);
   const mockResolvePersonaModules = vi.mocked(resolvePersonaModules);
@@ -181,7 +178,6 @@ describe('build command', () => {
     });
 
     mockLoadTypeScriptPersona.mockResolvedValue(mockPersona);
-    mockParsePersona.mockReturnValue(mockPersona);
     mockRenderMarkdown.mockReturnValue(
       '# Test Persona Instructions\\n\\nTest content'
     );

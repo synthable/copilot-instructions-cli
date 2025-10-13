@@ -1,48 +1,35 @@
 /**
  * CLI Module Discovery Utilities
  * Handles module discovery and populates ModuleRegistry for CLI operations
- * Supports both v1.0 (.module.yml) and v2.0 (.module.ts) formats
+ * Supports UMS v2.0 TypeScript format only
  */
 
 import type { ModuleConfig } from 'ums-lib';
-import { parseModule, ModuleRegistry } from 'ums-lib';
-import { discoverModuleFiles, readModuleFile } from './file-operations.js';
+import { ModuleRegistry } from 'ums-lib';
+import { discoverModuleFiles } from './file-operations.js';
 import { loadModuleConfig, getConfiguredModulePaths } from './config-loader.js';
-import { loadTypeScriptModule, detectUMSVersion } from './typescript-loader.js';
+import { loadTypeScriptModule } from './typescript-loader.js';
 import { basename } from 'path';
 import type { CLIModule } from '../types/cli-extensions.js';
 
 const DEFAULT_STANDARD_MODULES_PATH = './instructions-modules';
 
 /**
- * Loads a module file, detecting format (v1.0 YAML or v2.0 TypeScript) automatically
+ * Loads a v2.0 TypeScript module file
  */
 async function loadModuleFile(filePath: string): Promise<CLIModule> {
-  const version = detectUMSVersion(filePath);
-
-  if (version === '2.0') {
-    // v2.0 TypeScript format - extract module ID from filename
-    const fileName = basename(filePath, '.module.ts');
-    // For now, use filename as module ID - this may need refinement
-    // based on actual module structure
-    const module = (await loadTypeScriptModule(
-      filePath,
-      fileName
-    )) as CLIModule;
-    module.filePath = filePath;
-    return module;
-  } else {
-    // v1.0 YAML format
-    const content = await readModuleFile(filePath);
-    const module = parseModule(content) as CLIModule;
-    module.filePath = filePath;
-    return module;
-  }
+  // v2.0 TypeScript format - extract module ID from filename
+  const fileName = basename(filePath, '.module.ts');
+  // For now, use filename as module ID - this may need refinement
+  // based on actual module structure
+  const module = (await loadTypeScriptModule(filePath, fileName)) as CLIModule;
+  module.filePath = filePath;
+  return module;
 }
 
 /**
  * Discovers standard library modules from the specified modules directory
- * Supports both v1.0 (.module.yml) and v2.0 (.module.ts) formats
+ * Supports UMS v2.0 TypeScript format only
  */
 export async function discoverStandardModules(
   standardModulesPath: string = DEFAULT_STANDARD_MODULES_PATH
@@ -78,7 +65,7 @@ export async function discoverStandardModules(
 
 /**
  * Discovers local modules based on configuration
- * Supports both v1.0 (.module.yml) and v2.0 (.module.ts) formats
+ * Supports UMS v2.0 TypeScript format only
  */
 export async function discoverLocalModules(
   config: ModuleConfig

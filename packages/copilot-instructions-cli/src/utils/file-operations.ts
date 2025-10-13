@@ -52,10 +52,10 @@ export async function writeOutputFile(
 
 /**
  * Discovers module files in the given paths
- * Supports both v1.0 (.module.yml) and v2.0 (.module.ts) formats
+ * Supports UMS v2.0 TypeScript format only
  */
 export async function discoverModuleFiles(paths: string[]): Promise<string[]> {
-  const MODULE_FILE_EXTENSIONS = ['.module.yml', '.module.ts'];
+  const MODULE_FILE_EXTENSIONS = ['.module.ts'];
   const allFiles: string[] = [];
 
   for (const path of paths) {
@@ -106,22 +106,22 @@ export async function readFromStdin(): Promise<string> {
 }
 
 /**
- * Checks if a file path has a .persona.yml or .persona.ts extension
- * Supports both v1.0 (YAML) and v2.0 (TypeScript) formats
+ * Checks if a file path has a .persona.ts extension
+ * Supports UMS v2.0 TypeScript format only
  */
 export function isPersonaFile(filePath: string): boolean {
-  return filePath.endsWith('.persona.yml') || filePath.endsWith('.persona.ts');
+  return filePath.endsWith('.persona.ts');
 }
 
 /**
  * Validates that the persona file has the correct extension
- * Supports both v1.0 (.persona.yml) and v2.0 (.persona.ts) formats
+ * Supports UMS v2.0 TypeScript format only
  */
 export function validatePersonaFile(filePath: string): void {
   if (!isPersonaFile(filePath)) {
     throw new Error(
-      `Persona file must have .persona.yml (v1.0) or .persona.ts (v2.0) extension, got: ${filePath}\n` +
-        'UMS supports YAML format (.persona.yml) for v1.0 and TypeScript format (.persona.ts) for v2.0.'
+      `Persona file must have .persona.ts extension, got: ${filePath}\n` +
+        'UMS v2.0 uses TypeScript format (.persona.ts) for personas.'
     );
   }
 }

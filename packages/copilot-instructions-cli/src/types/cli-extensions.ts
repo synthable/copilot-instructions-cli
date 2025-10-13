@@ -20,6 +20,16 @@ export interface CLIModule extends Module {
 }
 
 /**
+ * Type guard to check if a Module is a CLIModule with filePath
+ *
+ * @param module - UMS v2.0 Module
+ * @returns true if module has a filePath property
+ */
+export function isCLIModule(module: Module): module is CLIModule {
+  return 'filePath' in module;
+}
+
+/**
  * Helper to get module metadata
  *
  * @param module - UMS v2.0 Module

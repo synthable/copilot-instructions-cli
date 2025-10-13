@@ -11,8 +11,6 @@ import type { Module, Persona } from 'ums-lib';
 const FILE_EXTENSIONS = {
   MODULE_TS: '.module.ts',
   PERSONA_TS: '.persona.ts',
-  MODULE_YML: '.module.yml',
-  PERSONA_YML: '.persona.yml',
 } as const;
 
 /**
@@ -148,42 +146,11 @@ export async function loadTypeScriptPersona(
 }
 
 /**
- * Determine the UMS version from file extension
- * @param filePath - Path to module or persona file
- * @returns Version string ('1.0' or '2.0')
- */
-export function detectUMSVersion(filePath: string): '1.0' | '2.0' {
-  if (
-    filePath.endsWith(FILE_EXTENSIONS.MODULE_TS) ||
-    filePath.endsWith(FILE_EXTENSIONS.PERSONA_TS)
-  ) {
-    return '2.0';
-  }
-  if (
-    filePath.endsWith(FILE_EXTENSIONS.MODULE_YML) ||
-    filePath.endsWith(FILE_EXTENSIONS.PERSONA_YML)
-  ) {
-    return '1.0';
-  }
-  throw new Error(`Unknown UMS file format: ${filePath}`);
-}
-
-/**
  * Check if a file is a TypeScript UMS file
  */
 export function isTypeScriptUMSFile(filePath: string): boolean {
   return (
     filePath.endsWith(FILE_EXTENSIONS.MODULE_TS) ||
     filePath.endsWith(FILE_EXTENSIONS.PERSONA_TS)
-  );
-}
-
-/**
- * Check if a file is a YAML UMS file (v1.0)
- */
-export function isYAMLUMSFile(filePath: string): boolean {
-  return (
-    filePath.endsWith(FILE_EXTENSIONS.MODULE_YML) ||
-    filePath.endsWith(FILE_EXTENSIONS.PERSONA_YML)
   );
 }

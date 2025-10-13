@@ -9,7 +9,7 @@ import { handleError } from '../utils/error-handler.js';
 import type { ModuleRegistry } from 'ums-lib';
 import { createDiscoveryProgress } from '../utils/progress.js';
 import { discoverAllModules } from '../utils/module-discovery.js';
-import { getModuleMetadata } from '../types/cli-extensions.js';
+import { getModuleMetadata, isCLIModule } from '../types/cli-extensions.js';
 
 export interface InspectOptions {
   verbose?: boolean;
@@ -107,9 +107,8 @@ function inspectSpecificModule(
       console.log(chalk.gray(`  Name: ${metadata.name}`));
       console.log(chalk.gray(`  Description: ${metadata.description}`));
       console.log(chalk.gray(`  Version: ${resolvedModule.version}`));
-      const filePath = (resolvedModule as { filePath?: string }).filePath;
-      if (filePath) {
-        console.log(chalk.gray(`  File: ${filePath}`));
+      if (isCLIModule(resolvedModule) && resolvedModule.filePath) {
+        console.log(chalk.gray(`  File: ${resolvedModule.filePath}`));
       }
     }
     return;
@@ -125,7 +124,10 @@ function inspectSpecificModule(
   if (format === 'json') {
     const conflictData = conflicts.map((entry, index) => {
       const metadata = getModuleMetadata(entry.module);
-      const filePath = (entry.module as { filePath?: string }).filePath;
+      const filePath =
+        isCLIModule(entry.module) && entry.module.filePath
+          ? entry.module.filePath
+          : undefined;
       return {
         index: index + 1,
         moduleId: entry.module.id,

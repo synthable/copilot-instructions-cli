@@ -149,9 +149,9 @@ program
     `
   )
   .showHelpAfterError()
-  .action(async (path: string, options: { verbose?: boolean }) => {
+  .action((path: string, options: { verbose?: boolean }) => {
     const verbose = options.verbose ?? false;
-    await handleValidate({ targetPath: path, verbose });
+    handleValidate({ targetPath: path, verbose });
   });
 
 program

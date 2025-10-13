@@ -172,14 +172,25 @@ export class BatchProgress {
 
     // Calculate ETA
     const elapsed = Date.now() - this.startTime;
-    const rate = this.current / elapsed; // items per ms
     const remaining = this.total - this.current;
-    const eta = remaining / rate; // ms remaining
-    const etaSeconds = Math.round(eta / 1000);
+    let rate: number;
+    let eta: number;
+    let etaSeconds: number;
+    if (elapsed > 0) {
+      rate = this.current / elapsed; // items per ms
+      eta = rate > 0 ? remaining / rate : Infinity; // ms remaining
+      etaSeconds = Math.round(eta / 1000);
+    } else {
+      rate = 0;
+      eta = Infinity;
+      etaSeconds = 0;
+    }
 
     const itemMsg = item ? ` - ${item}` : '';
     const etaMsg =
-      etaSeconds > 0 && remaining > 0 ? ` ETA: ${etaSeconds}s` : '';
+      etaSeconds > 0 && etaSeconds !== Infinity && remaining > 0
+        ? ` ETA: ${etaSeconds}s`
+        : '';
 
     this.spinner.text = `${this.context.operation} ${progress} ${percentage}%${itemMsg}${etaMsg}`;
 
