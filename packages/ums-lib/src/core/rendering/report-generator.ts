@@ -84,7 +84,7 @@ export function generateBuildReport(
 
   return {
     personaName: persona.name,
-    schemaVersion: '1.0',
+    schemaVersion: persona.schemaVersion,
     toolVersion: pkg.version,
     personaDigest,
     buildTimestamp: new Date().toISOString(),
