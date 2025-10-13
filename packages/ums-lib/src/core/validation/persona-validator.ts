@@ -85,8 +85,11 @@ export function validatePersona(persona: Persona): ValidationResult {
       continue;
     }
 
-    // Handle ModuleGroup object (runtime check for malformed data)
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+    // Handle ModuleGroup object
+    // Runtime validation required: persona data comes from external files (YAML/JSON)
+    // which may not conform to TypeScript types. TypeScript provides compile-time safety
+    // only - we must validate at runtime to catch malformed input data.
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- Runtime check for external data
     if (!entry || typeof entry !== 'object') {
       errors.push(
         new ValidationErrorClass(

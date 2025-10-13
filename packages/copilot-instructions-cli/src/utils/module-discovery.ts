@@ -112,6 +112,10 @@ export interface ModuleDiscoveryResult {
 
 /**
  * Discovers all modules (standard + local) and populates ModuleRegistry
+ *
+ * Note: Standard modules discovery is intentionally skipped.
+ * All modules should be configured via modules.config.yml to prevent
+ * loading test modules and to allow full configuration control.
  */
 export async function discoverAllModules(): Promise<ModuleDiscoveryResult> {
   const config = await loadModuleConfig();
@@ -119,17 +123,6 @@ export async function discoverAllModules(): Promise<ModuleDiscoveryResult> {
   // Use 'error' as fallback default for registry
   const registry = new ModuleRegistry('error');
   const warnings: string[] = [];
-
-  // Skip standard modules discovery - rely on modules.config.yml instead
-  // This prevents loading test modules and allows full configuration control
-  // const standardModules = await discoverStandardModules();
-  // for (const module of standardModules) {
-  //   registry.add(module, {
-  //     type: 'standard',
-  //     path: DEFAULT_STANDARD_MODULES_PATH,
-  //     // No per-path strategy for standard modules
-  //   });
-  // }
 
   // Discover and add local modules if config exists
   if (config) {

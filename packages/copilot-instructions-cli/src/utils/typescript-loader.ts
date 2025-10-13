@@ -7,6 +7,14 @@ import { pathToFileURL } from 'node:url';
 import { moduleIdToExportName } from 'ums-lib';
 import type { Module, Persona } from 'ums-lib';
 
+// File extension constants
+const FILE_EXTENSIONS = {
+  MODULE_TS: '.module.ts',
+  PERSONA_TS: '.persona.ts',
+  MODULE_YML: '.module.yml',
+  PERSONA_YML: '.persona.yml',
+} as const;
+
 /**
  * Type guard to check if an unknown value is a Module-like object
  * We only validate the essential 'id' property at runtime and trust the TypeScript export
@@ -145,10 +153,16 @@ export async function loadTypeScriptPersona(
  * @returns Version string ('1.0' or '2.0')
  */
 export function detectUMSVersion(filePath: string): '1.0' | '2.0' {
-  if (filePath.endsWith('.module.ts') || filePath.endsWith('.persona.ts')) {
+  if (
+    filePath.endsWith(FILE_EXTENSIONS.MODULE_TS) ||
+    filePath.endsWith(FILE_EXTENSIONS.PERSONA_TS)
+  ) {
     return '2.0';
   }
-  if (filePath.endsWith('.module.yml') || filePath.endsWith('.persona.yml')) {
+  if (
+    filePath.endsWith(FILE_EXTENSIONS.MODULE_YML) ||
+    filePath.endsWith(FILE_EXTENSIONS.PERSONA_YML)
+  ) {
     return '1.0';
   }
   throw new Error(`Unknown UMS file format: ${filePath}`);
@@ -158,12 +172,18 @@ export function detectUMSVersion(filePath: string): '1.0' | '2.0' {
  * Check if a file is a TypeScript UMS file
  */
 export function isTypeScriptUMSFile(filePath: string): boolean {
-  return filePath.endsWith('.module.ts') || filePath.endsWith('.persona.ts');
+  return (
+    filePath.endsWith(FILE_EXTENSIONS.MODULE_TS) ||
+    filePath.endsWith(FILE_EXTENSIONS.PERSONA_TS)
+  );
 }
 
 /**
  * Check if a file is a YAML UMS file (v1.0)
  */
 export function isYAMLUMSFile(filePath: string): boolean {
-  return filePath.endsWith('.module.yml') || filePath.endsWith('.persona.yml');
+  return (
+    filePath.endsWith(FILE_EXTENSIONS.MODULE_YML) ||
+    filePath.endsWith(FILE_EXTENSIONS.PERSONA_YML)
+  );
 }

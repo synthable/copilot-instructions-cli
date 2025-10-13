@@ -38,7 +38,19 @@ describe('moduleIdToExportName', () => {
     );
   });
 
-  it('should handle an empty string input', () => {
-    expect(moduleIdToExportName('')).toBe('');
+  it('should throw error for empty string input', () => {
+    expect(() => moduleIdToExportName('')).toThrow('Module ID cannot be empty');
+  });
+
+  it('should throw error for whitespace-only input', () => {
+    expect(() => moduleIdToExportName('   ')).toThrow(
+      'Module ID cannot be empty'
+    );
+  });
+
+  it('should throw error for malformed ID with trailing slash', () => {
+    expect(() => moduleIdToExportName('foundation/')).toThrow(
+      'Invalid module ID format'
+    );
   });
 });

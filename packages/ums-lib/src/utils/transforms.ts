@@ -24,11 +24,21 @@
  * moduleIdToExportName("foundation/ethics/do-no-harm");
  */
 export function moduleIdToExportName(moduleId: string): string {
+  // Validate input
+  if (!moduleId || moduleId.trim().length === 0) {
+    throw new Error('Module ID cannot be empty');
+  }
+
   // Get the final segment after the last '/'.
   // If no '/', the whole string is the final segment.
   const finalSegment = moduleId.includes('/')
     ? moduleId.substring(moduleId.lastIndexOf('/') + 1)
     : moduleId;
+
+  // Additional validation: final segment should not be empty
+  if (finalSegment.length === 0) {
+    throw new Error(`Invalid module ID format: ${moduleId}`);
+  }
 
   // Transform kebab-case to camelCase.
   return finalSegment
