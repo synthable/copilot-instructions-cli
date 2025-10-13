@@ -1,0 +1,71 @@
+// @ts-nocheck - Test scaffolds without implementations
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { StandardLibrary } from './standard-library.js';
+
+describe('StandardLibrary', () => {
+  describe('constructor', () => {
+    it('should create a StandardLibrary instance');
+
+    it('should initialize with default standard library path');
+
+    it('should accept custom library path');
+  });
+
+  describe('loadAll', () => {
+    it('should load all modules from standard library');
+
+    it('should organize modules by tier');
+
+    it('should return Module array');
+
+    it('should handle missing standard library gracefully');
+  });
+
+  describe('getByTier', () => {
+    it('should return modules filtered by tier');
+
+    it('should support foundation tier');
+
+    it('should support principle tier');
+
+    it('should support technology tier');
+
+    it('should support execution tier');
+
+    it('should return empty array for unknown tier');
+  });
+
+  describe('getByCapability', () => {
+    it('should filter modules by capability tag');
+
+    it('should return modules matching capability');
+
+    it('should handle multiple capabilities');
+
+    it('should return empty array when no matches');
+  });
+
+  describe('search', () => {
+    it('should search modules by semantic description');
+
+    it('should search module names');
+
+    it('should search module IDs');
+
+    it('should return relevance-sorted results');
+
+    it('should support case-insensitive search');
+
+    it('should handle empty query');
+  });
+
+  describe('getMetadata', () => {
+    it('should return library statistics');
+
+    it('should count modules by tier');
+
+    it('should list all capabilities');
+
+    it('should include version information');
+  });
+});
