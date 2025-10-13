@@ -1,0 +1,84 @@
+name: ums-v2-toolkit
+version: 1.0.0
+description: Comprehensive toolkit for developing and maintaining UMS v2.0 modules, personas, and build system
+author: Instructions Composer Team
+homepage: https://github.com/yourusername/instructions-composer
+
+# Plugin commands available via slash commands
+commands:
+  - name: create
+    description: Create a new UMS v2.0 module with interactive guidance
+    file: commands/create.md
+
+  - name: validate-module
+    description: Validate a UMS v2.0 module file for spec compliance
+    file: commands/validate-module.md
+
+  - name: validate-persona
+    description: Validate a UMS v2.0 persona file for spec compliance and quality
+    file: commands/validate-persona.md
+
+  - name: audit
+    description: Run comprehensive quality audit on modules and personas
+    file: commands/audit.md
+
+  - name: curate
+    description: Evaluate and manage standard library modules
+    file: commands/curate.md
+
+  - name: build
+    description: Develop and maintain the UMS v2.0 build system
+    file: commands/build.md
+
+# Specialized agents included in this plugin
+agents:
+  - name: module-validator
+    description: Validates UMS v2.0 module files for spec compliance
+    file: agents/module-validator.md
+
+  - name: persona-validator
+    description: Validates UMS v2.0 persona files for spec compliance and quality
+    file: agents/persona-validator.md
+
+  - name: module-generator
+    description: Generates UMS v2.0 compliant module files
+    file: agents/module-generator.md
+
+  - name: build-developer
+    description: Develops and maintains the UMS v2.0 build system
+    file: agents/build-developer.md
+
+  - name: library-curator
+    description: Curates and maintains the standard library of modules
+    file: agents/library-curator.md
+
+# Reusable workflows
+procedures:
+  - name: complete-module-workflow
+    description: End-to-end module creation, validation, and library addition
+    file: procedures/complete-module-workflow.md
+
+  - name: quality-audit-workflow
+    description: Comprehensive validation of all modules and personas
+    file: procedures/quality-audit-workflow.md
+
+  - name: library-addition-workflow
+    description: Validate and add module to standard library
+    file: procedures/library-addition-workflow.md
+
+# Plugin configuration
+config:
+  default_modules_path: instruct-modules-v2/modules
+  default_personas_path: instruct-modules-v2/personas
+  default_output_path: dist
+  standard_library_path: instruct-modules-v2/modules
+
+# Tags for discoverability
+tags:
+  - ums
+  - unified-module-system
+  - ai-instructions
+  - module-development
+  - persona-composition
+  - validation
+  - code-generation

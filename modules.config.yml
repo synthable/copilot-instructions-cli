@@ -1,3 +1,3 @@
 localModulePaths:
-  - path: "./instructions-modules"
+  - path: "./instruct-modules-v2"
     onConflict: "error"
