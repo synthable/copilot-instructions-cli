@@ -1,329 +1,307 @@
 # Command: /ums:validate-module
 
-Validate a UMS v2.0 module file for specification compliance.
+Validate UMS v2.0 module files for specification compliance.
 
-## Your Task
+## Execution Workflow
 
-Validate one or more module files against the UMS v2.0 specification by:
+```yaml
+step_1_parse_input:
+  action: Determine target modules
+  patterns:
+    specific_file: path/to/module.module.ts
+    all_modules: all | * | instruct-modules-v2/modules/
+    by_tier: foundation | principle | technology | execution
+    by_category: technology/typescript | execution/debugging
+  default_if_empty: prompt user for target
+  output: file_list
 
-1. Identifying which module(s) to validate
-2. Launching the module-validator agent
-3. Presenting results clearly
-4. Suggesting fixes for any issues
+step_2_validate:
+  action: Launch module-validator agent
+  agent: ums-v2-module-validator
+  input: file_list from step_1
+  validation_checks:
+    - spec_compliance
+    - required_fields
+    - export_conventions
+    - component_structure
+    - metadata_quality
+  output: validation_results
 
-## Usage Patterns
+step_3_format_output:
+  action: Format results for user
+  templates:
+    single_pass: use pass_template
+    single_warnings: use warnings_template
+    single_fail: use fail_template
+    multiple: use summary_template
+  output: formatted_report
 
-### Pattern 1: Validate Specific Module
-
+step_4_offer_action:
+  action: Suggest next steps
+  options:
+    if_failures: [fix_manually, regenerate_module, show_details]
+    if_warnings: [fix_warnings, accept_as_is, show_details]
+    if_all_pass: [continue, audit_all]
+  output: action_prompt
 ```
-/ums:validate-module path/to/module.module.ts
+
+## Path Resolution Decision Tree
+
+```yaml
+path_resolution:
+  input_is_specific_file:
+    condition: ends_with(.module.ts) AND file_exists
+    action: validate_single_file
+    output: [file_path]
+
+  input_is_all:
+    condition: input in ['all', '*', 'instruct-modules-v2/modules/']
+    action: glob('instruct-modules-v2/modules/**/*.module.ts')
+    output: [file_paths]
+
+  input_is_tier:
+    condition: input in [foundation, principle, technology, execution]
+    action: glob('instruct-modules-v2/modules/{tier}/**/*.module.ts')
+    output: [file_paths]
+
+  input_is_category:
+    condition: matches pattern '{tier}/{category}'
+    action: glob('instruct-modules-v2/modules/{tier}/{category}/**/*.module.ts')
+    output: [file_paths]
+
+  input_is_empty:
+    condition: no argument provided
+    action: prompt_user_for_target
+    output: wait_for_input
+
+  input_not_found:
+    condition: file/pattern not found
+    action: suggest_alternatives
+    output: error_with_suggestions
 ```
 
-### Pattern 2: Validate All Modules
+## Agent Invocation Templates
 
-```
-/ums:validate-module all
-/ums:validate-module *
-/ums:validate-module instruct-modules-v2/modules/
-```
-
-### Pattern 3: Validate by Tier
-
-```
-/ums:validate-module foundation
-/ums:validate-module principle tier
-/ums:validate-module technology/typescript
-```
-
-## Workflow
-
-### Step 1: Identify Target
-
-Determine what needs validation:
-
-**If user provides path:**
-
-- Use the provided path directly
-
-**If user says "all" or "\*":**
-
-- Use Glob to find all `.module.ts` files
-- Default path: `instruct-modules-v2/modules/**/*.module.ts`
-
-**If user specifies tier/category:**
-
-- Build path: `instruct-modules-v2/modules/{tier}/**/*.module.ts`
-
-**If no argument provided:**
-
-- Ask user what to validate
-
-### Step 2: Launch Validator
-
-Use Task tool to launch the module-validator agent:
+### Single Module Validation
 
 ```typescript
-// For single module
 Task(
-  subagent_type: "module-validator",
+  subagent_type: "ums-v2-module-validator",
   description: "Validate UMS v2.0 module",
-  prompt: `Validate the UMS v2.0 module file at: [path]
+  prompt: `Validate: ${module_path}
 
-Provide a detailed validation report including:
-- Spec compliance status (PASS/WARNINGS/FAIL)
-- Required field checks
-- Export naming convention verification
-- Component structure validation
-- Metadata quality assessment
-- Specific errors and warnings
-- Actionable recommendations`
-)
+Checks:
+- schemaVersion: "2.0"
+- required fields: [id, version, schemaVersion, capabilities, metadata]
+- export convention: camelCase(lastSegment(id))
+- component structure
+- metadata completeness
 
-// For multiple modules
-Task(
-  subagent_type: "module-validator",
-  description: "Validate multiple UMS v2.0 modules",
-  prompt: `Validate all UMS v2.0 module files in: [path]
-
-For each module, check:
-- Spec compliance
-- Required fields
-- Export conventions
-- Component structure
-- Metadata quality
-
-Provide a summary report with:
-- Total modules validated
-- Pass/Warning/Fail counts
-- List of modules with issues
-- Recommended fixes`
+Output format:
+{
+  status: "PASS|WARNINGS|FAIL",
+  module_id: string,
+  quality_score: number,
+  errors: [{field, issue, fix}],
+  warnings: [{field, issue, recommendation}]
+}`
 )
 ```
 
-### Step 3: Present Results
+### Batch Module Validation
 
-Format results clearly based on validation outcome:
+```typescript
+Task(
+  subagent_type: "ums-v2-module-validator",
+  description: "Validate multiple UMS v2.0 modules",
+  prompt: `Validate all modules in: ${path}
 
-**Single Module - PASS:**
+For each module:
+- Run full spec compliance check
+- Assess quality
+- Check relationships
+
+Summary output:
+{
+  total: number,
+  pass: number,
+  warnings: number,
+  fail: number,
+  issues: [{module_id, status, problems}]
+}`
+)
+```
+
+## Output Templates
+
+### PASS Template
 
 ```markdown
 ✅ **Module Validation: PASS**
 
-**Module**: foundation/ethics/do-no-harm
-**File**: instruct-modules-v2/modules/foundation/ethics/do-no-harm.module.ts
-**Version**: 1.0.0
-**Schema**: 2.0
+**Module**: ${module_id}
+**File**: ${file_path}
+**Version**: ${version}
+**Quality Score**: ${quality_score}/10
 
-**Validation Results:**
-
-- [x] File structure valid
-- [x] Required fields present
-- [x] Export convention followed
-- [x] Component structure valid
-- [x] Metadata complete
-
-**Quality Score**: 9/10
-
-This module is fully spec-compliant and ready to use.
+All validation checks passed. Module is spec-compliant and production-ready.
 ```
 
-**Single Module - WARNINGS:**
+### WARNINGS Template
 
-````markdown
+```markdown
 ⚠️ **Module Validation: PASS WITH WARNINGS**
 
-**Module**: principle/testing/unit-testing
+**Module**: ${module_id}
 **Status**: Spec-compliant with recommendations
 
-**Warnings (2):**
+**Warnings** (${warning_count}):
+${warnings.map((w, i) => `${i+1}. ${w.field}: ${w.issue}\n   Recommendation: ${w.recommendation}`).join('\n')}
 
-1. Missing recommended field: `cognitiveLevel` (foundation modules should specify)
-2. Semantic metadata could be more keyword-rich (current: 45 chars, recommended: 100+)
+Module is usable but improvements recommended.
 
-**Recommendations:**
+**Next actions**:
+1. Fix warnings for better quality
+2. Accept as-is if warnings acceptable
+3. Show detailed validation report
+```
 
-1. Add `cognitiveLevel: 1` to place in cognitive hierarchy
-2. Enhance semantic field with more keywords:
-   ```typescript
-   semantic: 'Unit testing, isolated testing, test suites, mocking, stubbing, TDD, red-green-refactor, automated testing, regression prevention';
-   ```
-````
-
-Would you like me to help fix these issues?
-
-**Single Module - FAIL:**
+### FAIL Template
 
 ```markdown
 ❌ **Module Validation: FAIL**
 
-**Module**: Invalid Module
-**Errors**: 3 critical issues found
+**Module**: ${module_id}
+**Errors**: ${error_count} critical issues
 
-**Critical Errors:**
-1. ❌ Missing required field: `schemaVersion`
-   - Location: Root level
-   - Fix: Add `schemaVersion: "2.0"`
+**Critical Errors**:
+${errors.map((e, i) => `${i+1}. ${e.field}: ${e.issue}\n   Fix: ${e.fix}`).join('\n')}
 
-2. ❌ Invalid module ID format: `ErrorHandling`
-   - Location: `id` field
-   - Current: `"ErrorHandling"`
-   - Expected: `"error-handling"` (kebab-case)
-   - Fix: Change to lowercase kebab-case
+Module cannot be used until errors are fixed.
 
-3. ❌ Export name doesn't match convention
-   - Current export: `export const ErrorModule`
-   - Expected export: `export const errorHandling`
-   - Fix: Use camelCase transformation of final segment
-
-**Action Required:**
-This module cannot be used until these errors are fixed.
-
-Would you like me to:
-A) Show you how to fix these manually
-B) Regenerate the module with correct structure
+**Next actions**:
+A) Show how to fix manually
+B) Regenerate module with correct structure
+C) Delete invalid module
 ```
 
-**Multiple Modules - Summary:**
+### SUMMARY Template (Multiple Modules)
 
 ```markdown
 📊 **Module Validation Summary**
 
-**Total Modules**: 12
+**Total**: ${total}
+- ✅ ${pass_count} PASS (${pass_percent}%)
+- ⚠️ ${warning_count} WARNINGS (${warning_percent}%)
+- ❌ ${fail_count} FAIL (${fail_percent}%)
 
-- ✅ 9 PASS (75%)
-- ⚠️ 2 WARNINGS (17%)
-- ❌ 1 FAIL (8%)
+**Modules with Issues**:
 
-**Modules with Issues:**
+${issues.filter(i => i.status === 'WARNINGS').map(i =>
+  `⚠️ ${i.module_id}: ${i.problems.join(', ')}`
+).join('\n')}
 
-**Warnings:**
+${issues.filter(i => i.status === 'FAIL').map(i =>
+  `❌ ${i.module_id}: ${i.problems.join(', ')}`
+).join('\n')}
 
-1. `principle/testing/unit-testing`
-   - Missing cognitiveLevel
-   - Sparse semantic metadata
-
-2. `technology/python/async-programming`
-   - No quality metadata
-
-**Failures:**
-
-1. `foundation/reasoning/critical-thinking`
-   - Missing schemaVersion
-   - Invalid export name
-
-**Recommended Actions:**
-
-1. Fix the 1 failing module immediately
+**Recommended Actions**:
+1. Fix ${fail_count} failing module(s) immediately
 2. Address warnings to improve quality
-3. Run `/ums:audit` for comprehensive assessment
-
-Would you like details on any specific module?
+3. Run /ums:audit for comprehensive assessment
 ```
 
-## Examples
+## Error Handling Templates
 
-### Example 1: Validate Single Module
-
-```
-User: /ums:validate-module instruct-modules-v2/modules/foundation/ethics/do-no-harm.module.ts
-
-You: Validating do-no-harm module...
-
-[Launch module-validator agent]
-
-You: ✅ Validation complete!
-
-**Module**: foundation/ethics/do-no-harm
-**Status**: PASS - Fully spec-compliant
-**Quality**: 10/10
-
-All checks passed. This module is production-ready.
-```
-
-### Example 2: Validate All Foundation Modules
-
-```
-User: /ums:validate-module foundation
-
-You: Validating all foundation tier modules...
-
-[Discover modules with Glob]
-
-Found 9 foundation modules. Running validation...
-
-[Launch module-validator for batch]
-
-You: 📊 Foundation Tier Validation Complete
-
-**Total**: 9 modules
-- ✅ 8 PASS
-- ⚠️ 1 WARNING
-
-**Warning**:
-- `foundation/analysis/root-cause-analysis`: Missing quality metadata
-
-Overall: Foundation tier is in excellent shape!
-
-Would you like to see the detailed report or fix the warning?
-```
-
-### Example 3: No Path Provided
-
-```
-User: /ums:validate-module
-
-You: I'll help you validate module(s). What would you like to validate?
-
-Options:
-1. **Specific module**: Provide the file path
-2. **All modules**: Type "all" or "*"
-3. **By tier**: Specify tier (foundation, principle, technology, execution)
-4. **By category**: Specify path like "technology/typescript"
-
-Example: `/ums:validate-module all`
-```
-
-## Error Handling
-
-**Module file not found:**
+### Module Not Found
 
 ```markdown
-❌ Module file not found: [path]
+❌ **Module file not found**: ${path}
 
-Did you mean one of these?
+Did you mean:
+${suggestions.map(s => `- ${s}`).join('\n')}
 
-- instruct-modules-v2/modules/foundation/ethics/do-no-harm.module.ts
-- instruct-modules-v2/modules/principle/testing/test-driven-development.module.ts
-
-Or use `/ums:validate-module all` to validate all modules.
+Or use: /ums:validate-module all
 ```
 
-**Invalid file format:**
+### Invalid File Format
 
 ```markdown
-❌ File is not a UMS v2.0 module file
+❌ **Not a UMS v2.0 module file**
 
-Expected: `.module.ts` file
-Received: [filename]
+Expected: .module.ts file
+Received: ${filename}
 
-Module files must:
-
-1. End with `.module.ts`
-2. Export a named const matching camelCase convention
-3. Conform to UMS v2.0 Module interface
+Requirements:
+- File extension: .module.ts
+- Named export: camelCase convention
+- UMS v2.0 Module interface
 ```
 
-## Tips
+## Usage Examples
 
-1. **Use Glob for Discovery**: When path is ambiguous, use Glob to find matching files
-2. **Provide Context**: Always show the file path being validated
-3. **Suggest Fixes**: For errors, provide concrete fix suggestions
-4. **Offer Actions**: After showing results, ask if user wants help fixing issues
-5. **Batch Efficiently**: For multiple modules, summarize instead of detailed reports for each
+```yaml
+examples:
+  single_module:
+    command: /ums:validate-module instruct-modules-v2/modules/foundation/ethics/do-no-harm.module.ts
+    flow:
+      - parse: specific file path
+      - validate: single module
+      - format: pass_template
+      - result: validation report
+
+  all_modules:
+    command: /ums:validate-module all
+    flow:
+      - parse: all pattern
+      - glob: find all .module.ts files
+      - validate: batch validation
+      - format: summary_template
+      - result: summary report
+
+  by_tier:
+    command: /ums:validate-module foundation
+    flow:
+      - parse: tier pattern
+      - glob: foundation/**/*.module.ts
+      - validate: batch validation
+      - format: summary_template
+      - result: foundation tier report
+
+  by_category:
+    command: /ums:validate-module technology/typescript
+    flow:
+      - parse: category pattern
+      - glob: technology/typescript/**/*.module.ts
+      - validate: batch validation
+      - format: summary_template
+      - result: typescript modules report
+
+  no_argument:
+    command: /ums:validate-module
+    flow:
+      - parse: empty
+      - prompt: show options
+      - wait: user input
+      - execute: based on user choice
+```
+
+## Implementation Checklist
+
+```yaml
+checklist:
+  - [ ] Parse command argument
+  - [ ] Resolve to file path(s)
+  - [ ] Handle file not found error
+  - [ ] Launch module-validator agent with appropriate prompt
+  - [ ] Receive validation results
+  - [ ] Select appropriate output template
+  - [ ] Format results with template
+  - [ ] Offer next action options
+  - [ ] Execute follow-up if requested
+```
 
 ## Agent Dependencies
 
-- **Primary**: module-validator (required)
-- **Optional**: module-generator (if user wants to regenerate)
-
-Remember: Your goal is to make validation results clear and actionable. Always provide specific guidance on how to resolve issues.
+- **Primary**: ums-v2-module-validator (required)
+- **Optional**: ums-v2-module-generator (for regeneration)

@@ -43,55 +43,6 @@ Commands are shortcuts that expand into detailed prompts for specific tasks. Typ
 
 ---
 
-### 🏗️ /ums:build
-
-**Purpose**: Build personas and develop the build system
-
-**Usage**:
-```
-/ums:build implement [feature]
-/ums:build fix [bug-description]
-/ums:build optimize [aspect]
-/ums:build test [component]
-```
-
-**What it does**:
-- Implements new build system features
-- Fixes build pipeline bugs
-- Optimizes build performance
-- Tests build components
-- Maintains build infrastructure
-
-**Common tasks**:
-
-**Implement feature**:
-```
-/ums:build implement module caching
-```
-
-**Fix bug**:
-```
-/ums:build fix Data component rendering adds extra backticks
-```
-
-**Optimize**:
-```
-/ums:build optimize module loading performance
-```
-
-**Test**:
-```
-/ums:build test markdown renderer with complex personas
-```
-
-**When to use**:
-- Adding build system features
-- Debugging build issues
-- Improving build performance
-- Testing build components
-
----
-
 ### ✨ /ums:create
 
 **Purpose**: Create new modules or personas interactively
@@ -444,15 +395,6 @@ Commands support batch operations:
 5. /ums:curate document
 ```
 
-### Build System Development
-
-```bash
-1. /ums:build implement [feature]
-2. /ums:build test [component]
-3. /ums:validate-module [test output]
-4. [Commit changes]
-```
-
 ---
 
 ## Command Chaining
@@ -465,11 +407,6 @@ Commands can be used sequentially for complex workflows:
 [...module created...]
 /ums:validate-module [new-module]
 /ums:audit modules
-
-# Build feature and test
-/ums:build implement caching
-/ums:build test module-loader
-/ums:validate-module [test output]
 ```
 
 ---
@@ -570,7 +507,6 @@ Commands typically delegate to specialized agents:
 | Command | Primary Agent | Supporting Agents |
 |---------|--------------|-------------------|
 | `/ums:audit` | module-validator | persona-validator, library-curator |
-| `/ums:build` | build-developer | module-validator |
 | `/ums:create` | module-generator | module-validator |
 | `/ums:curate` | library-curator | module-validator |
 | `/ums:validate-module` | module-validator | - |
@@ -587,7 +523,6 @@ Error: Command '/ums:my-command' not found
 
 Available commands:
 - /ums:audit
-- /ums:build
 - /ums:create
 - /ums:curate
 - /ums:validate-module
