@@ -225,7 +225,6 @@ interface ModuleConfig {
 
 interface LocalModulePath {
   path: string;
-  onConflict?: "error" | "warn" | "replace";
 }
 ```
 
@@ -233,9 +232,10 @@ interface LocalModulePath {
 
 1. MUST parse YAML format
 2. MUST validate required fields (`localModulePaths`)
-3. MUST validate `onConflict` values
-4. MUST return null or empty config if file doesn't exist (not an error)
-5. MUST validate that configured paths exist
+3. MUST return empty config if file doesn't exist (not an error)
+4. MUST validate that configured paths exist
+
+**Note**: Per-path conflict resolution (`onConflict`) is reserved for v2.x. Use global `conflictStrategy` in `BuildOptions`.
 
 ### 3.4. ModuleDiscovery
 
@@ -549,10 +549,10 @@ export const myPersona: Persona = {
 ```yaml
 localModulePaths:
   - path: "./company-modules"
-    onConflict: "error"
   - path: "./project-modules"
-    onConflict: "replace"
 ```
+
+**Note**: Conflict resolution is controlled globally via `BuildOptions.conflictStrategy`, not per-path.
 
 ---
 

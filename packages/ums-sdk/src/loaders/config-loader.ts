@@ -127,19 +127,6 @@ export class ConfigManager {
       errors.push(`${prefix}.path must be a string`);
     }
 
-    // Validate onConflict field (optional)
-    if ('onConflict' in pathEntry) {
-      const onConflict = pathEntry.onConflict;
-      if (
-        typeof onConflict !== 'string' ||
-        !['error', 'warn', 'replace'].includes(onConflict)
-      ) {
-        errors.push(
-          `${prefix}.onConflict must be one of: 'error', 'warn', 'replace'`
-        );
-      }
-    }
-
     return errors;
   }
 
