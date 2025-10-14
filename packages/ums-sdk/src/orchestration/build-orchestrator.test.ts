@@ -1,8 +1,9 @@
-// @ts-nocheck - Test scaffolds without implementations
+/* eslint-disable vitest/expect-expect */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { BuildOrchestrator } from './build-orchestrator.js';
 
-describe('BuildOrchestrator', () => {
+describe.skip('BuildOrchestrator', () => {
   describe('constructor', () => {
     it('should create a BuildOrchestrator instance');
 

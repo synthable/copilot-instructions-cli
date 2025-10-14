@@ -1,6 +1,15 @@
 /**
  * Module Loader - Loads TypeScript module files from the file system
  * Part of the UMS SDK v1.0
+ *
+ * Responsibilities:
+ * - File I/O (loading TypeScript files with tsx)
+ * - Export extraction (finding correct named export)
+ * - Error wrapping (adding file path context to ums-lib errors)
+ *
+ * Delegates to ums-lib for:
+ * - Parsing (structure validation, type checking)
+ * - Validation (UMS v2.0 spec compliance)
  */
 
 import { readFile } from 'node:fs/promises';
@@ -18,29 +27,17 @@ import {
 } from '../errors/index.js';
 
 /**
- * Type guard to check if an unknown value is a Module-like object
- */
-function isModuleLike(value: unknown): value is Module {
-  return (
-    typeof value === 'object' &&
-    value !== null &&
-    'id' in value &&
-    typeof value.id === 'string'
-  );
-}
-
-/**
  * ModuleLoader - Loads and validates TypeScript module files
  */
 export class ModuleLoader {
   /**
    * Load a single .module.ts file
    * @param filePath - Absolute path to module file
-   * @param moduleId - Expected module ID (for validation)
+   * @param moduleId - Expected module ID (for export name calculation)
    * @returns Validated Module object
    * @throws ModuleNotFoundError if file doesn't exist
    * @throws InvalidExportError if export name doesn't match
-   * @throws ModuleLoadError for other loading failures
+   * @throws ModuleLoadError for parsing or validation failures
    */
   async loadModule(filePath: string, moduleId: string): Promise<Module> {
     try {
@@ -66,31 +63,23 @@ export class ModuleLoader {
         throw new InvalidExportError(filePath, exportName, availableExports);
       }
 
-      // Validate it's actually a Module object with type guard
-      if (!isModuleLike(moduleObject)) {
-        throw new ModuleLoadError(
-          `Export '${exportName}' in ${filePath} is not a valid Module object`,
-          filePath
-        );
-      }
-
-      // Verify the ID matches
-      if (moduleObject.id !== moduleId) {
-        throw new ModuleLoadError(
-          `Module ID mismatch: file exports '${moduleObject.id}' but expected '${moduleId}'`,
-          filePath
-        );
-      }
-
-      // Parse using ums-lib (normalizes structure)
+      // Delegate to ums-lib for parsing (structure validation, type checking)
       const parsedModule = parseModuleObject(moduleObject);
 
-      // Validate using ums-lib
+      // SDK responsibility: Verify the module's ID matches expected ID from file path
+      if (parsedModule.id !== moduleId) {
+        throw new ModuleLoadError(
+          `Module ID mismatch: file exports module with id '${parsedModule.id}' but expected '${moduleId}' based on file path`,
+          filePath
+        );
+      }
+
+      // Delegate to ums-lib for full UMS v2.0 spec validation
       const validation = validateModule(parsedModule);
       if (!validation.valid) {
         const errorMessages = validation.errors
-          .map(e => `${e.path}: ${e.message}`)
-          .join(', ');
+          .map(e => `${e.path ?? 'module'}: ${e.message}`)
+          .join('; ');
         throw new ModuleLoadError(
           `Module validation failed: ${errorMessages}`,
           filePath
@@ -108,7 +97,7 @@ export class ModuleLoader {
         throw error;
       }
 
-      // Wrap other errors
+      // Wrap ums-lib parsing errors with file context
       if (error instanceof Error) {
         throw new ModuleLoadError(
           `Failed to load module from ${filePath}: ${error.message}`,

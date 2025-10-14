@@ -3,7 +3,7 @@
  * Part of the UMS SDK v1.0
  */
 
-import { join, basename, resolve } from 'node:path';
+import { join, resolve } from 'node:path';
 import { glob } from 'glob';
 import type { Module } from 'ums-lib';
 import { ModuleLoader } from '../loaders/module-loader.js';
@@ -27,8 +27,16 @@ export class ModuleDiscovery {
    * @throws DiscoveryError if discovery fails
    */
   async discover(config: ModuleConfig): Promise<Module[]> {
-    const paths = config.localModulePaths.map(entry => resolve(entry.path));
-    return this.discoverInPaths(paths);
+    const modules: Module[] = [];
+
+    // Discover from each configured path separately to maintain base path context
+    for (const entry of config.localModulePaths) {
+      const basePath = resolve(entry.path);
+      const pathModules = await this.discoverInPath(basePath);
+      modules.push(...pathModules);
+    }
+
+    return modules;
   }
 
   /**
@@ -37,9 +45,26 @@ export class ModuleDiscovery {
    * @returns Array of loaded modules
    */
   async discoverInPaths(paths: string[]): Promise<Module[]> {
+    const modules: Module[] = [];
+
+    for (const path of paths) {
+      const pathModules = await this.discoverInPath(path);
+      modules.push(...pathModules);
+    }
+
+    return modules;
+  }
+
+  /**
+   * Discover modules in a single directory
+   * @param basePath - Base directory path
+   * @returns Array of loaded modules
+   * @private
+   */
+  private async discoverInPath(basePath: string): Promise<Module[]> {
     try {
-      // Find all module files
-      const filePaths = await this.findModuleFiles(paths);
+      // Find all module files in this path
+      const filePaths = await this.findModuleFiles([basePath]);
 
       // Load each module (skip failures with warnings)
       const modules: Module[] = [];
@@ -47,7 +72,7 @@ export class ModuleDiscovery {
 
       for (const filePath of filePaths) {
         try {
-          const moduleId = this.extractModuleId(filePath);
+          const moduleId = this.extractModuleId(filePath, basePath);
           const module = await this.loader.loadModule(filePath, moduleId);
           modules.push(module);
         } catch (error) {
@@ -69,7 +94,7 @@ export class ModuleDiscovery {
       return modules;
     } catch (error) {
       if (error instanceof Error) {
-        throw new DiscoveryError(error.message, paths);
+        throw new DiscoveryError(error.message, [basePath]);
       }
       throw error;
     }
@@ -95,18 +120,28 @@ export class ModuleDiscovery {
   }
 
   /**
-   * Extract module ID from file path
+   * Extract module ID from file path relative to base path
    * @private
    * @param filePath - Absolute path to module file
-   * @returns Module ID
+   * @param basePath - Base directory path (configured module path)
+   * @returns Module ID (relative path without extension)
    * @example
-   * '/path/to/error-handling.module.ts' → 'error-handling'
-   * '/path/to/foundation/ethics/do-no-harm.module.ts' → 'foundation/ethics/do-no-harm'
+   * filePath: '/project/modules/error-handling.module.ts'
+   * basePath: '/project/modules'
+   * returns: 'error-handling'
+   *
+   * @example
+   * filePath: '/project/modules/foundation/ethics/do-no-harm.module.ts'
+   * basePath: '/project/modules'
+   * returns: 'foundation/ethics/do-no-harm'
    */
-  private extractModuleId(filePath: string): string {
-    // For now, just use the filename without extension
-    // In the future, we might want to extract from directory structure
-    const fileName = basename(filePath, '.module.ts');
-    return fileName;
+  private extractModuleId(filePath: string, basePath: string): string {
+    // Get path relative to base
+    const relativePath = filePath.replace(basePath, '').replace(/^\/+/, '');
+
+    // Remove .module.ts extension
+    const moduleId = relativePath.replace(/\.module\.ts$/, '');
+
+    return moduleId;
   }
 }

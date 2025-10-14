@@ -1,8 +1,9 @@
-// @ts-nocheck - Test scaffolds without implementations
+/* eslint-disable vitest/expect-expect */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { StandardLibrary } from './standard-library.js';
 
-describe('StandardLibrary', () => {
+describe.skip('StandardLibrary', () => {
   describe('constructor', () => {
     it('should create a StandardLibrary instance');
 

@@ -1,15 +1,9 @@
-// @ts-nocheck - Test scaffolds without implementations
+/* eslint-disable vitest/expect-expect */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { describe, it, expect } from 'vitest';
-import {
-  SDKError,
-  ModuleLoadError,
-  PersonaLoadError,
-  ConfigLoadError,
-  DiscoveryError,
-  OrchestrationError,
-} from './index.js';
+import { SDKError, ModuleLoadError, DiscoveryError } from './index.js';
 
-describe('SDK Error Classes', () => {
+describe.skip('SDK Error Classes', () => {
   describe('SDKError', () => {
     it('should create base SDK error');
 

@@ -1,8 +1,9 @@
-// @ts-nocheck - Test scaffolds without implementations
+/* eslint-disable vitest/expect-expect */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { ModuleDiscovery } from './module-discovery.js';
 
-describe('ModuleDiscovery', () => {
+describe.skip('ModuleDiscovery', () => {
   describe('constructor', () => {
     it('should create a ModuleDiscovery instance');
 
@@ -28,7 +29,9 @@ describe('ModuleDiscovery', () => {
   });
 
   describe('discoverByTier', () => {
-    it('should filter modules by tier (foundation, principle, technology, execution)');
+    it(
+      'should filter modules by tier (foundation, principle, technology, execution)'
+    );
 
     it('should parse tier from file path structure');
 

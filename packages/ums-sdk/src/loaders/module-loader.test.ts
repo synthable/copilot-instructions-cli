@@ -1,8 +1,9 @@
-// @ts-nocheck - Test scaffolds without implementations
+/* eslint-disable vitest/expect-expect */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { ModuleLoader } from './module-loader.js';
 
-describe('ModuleLoader', () => {
+describe.skip('ModuleLoader', () => {
   describe('constructor', () => {
     it('should create a ModuleLoader instance');
 
