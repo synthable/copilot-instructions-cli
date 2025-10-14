@@ -21,7 +21,7 @@ The `copilot-instructions-cli` contains a set of core utilities in its `src/util
 *   **Key Functions:**
     *   `readModuleFile(path: string)` and `readPersonaFile(path: string)`: Read and return the content of module and persona files.
     *   `writeOutputFile(path: string, content: string)`: Writes content to a specified output file.
-    *   `discoverModuleFiles(paths: string[])`: Uses `glob` to find all `.module.yml` files within a given set of directories.
+    *   `discoverModuleFiles(paths: string[])`: Uses `glob` to find all `.module.ts` files within a given set of directories.
 
 ### 2.3 Error Handling (`error-handler.ts` & `error-formatting.ts`)
 

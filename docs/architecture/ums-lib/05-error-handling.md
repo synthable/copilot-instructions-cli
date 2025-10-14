@@ -15,7 +15,7 @@ The library defines a hierarchy of error classes to represent different types of
 
 *   **`UMSError`**: The base class for all custom errors in the library. It includes a `code` and an optional `context` property.
 
-    *   **`UMSValidationError`**: Thrown when a module or persona fails to validate against the UMS v1.0 specification. It includes an optional `path` to the invalid field and a `section` reference to the UMS specification.
+    *   **`UMSValidationError`**: Thrown when a module or persona fails to validate against the UMS v2.0 specification. It includes an optional `path` to the invalid field and a `section` reference to the UMS specification.
 
     *   **`ModuleLoadError`**: Thrown when there is an issue parsing a module. It includes the `filePath` of the module that failed to load.
 

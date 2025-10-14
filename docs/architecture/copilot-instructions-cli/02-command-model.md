@@ -47,9 +47,9 @@ The main entry point, `src/index.ts`, is responsible for initializing `commander
 ### 2.4 `validate`
 
 *   **Handler:** `handleValidate` in `src/commands/validate.ts`
-*   **Purpose:** To validate module and persona files against the UMS v1.0 specification.
+*   **Purpose:** To validate module and persona files against the UMS v2.0 specification.
 *   **Flow:**
-    1.  Uses `glob` to find all `.module.yml` and `.persona.yml` files in the target path.
+    1.  Uses `glob` to find all `.module.ts` and `.persona.ts` files in the target path.
     2.  For each file, it calls the appropriate parsing function (`parseModule` or `parsePersona`) from `ums-lib`.
     3.  The parsing functions in `ums-lib` contain the validation logic.
     4.  Reports the validation results to the console.

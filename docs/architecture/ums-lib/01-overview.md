@@ -19,7 +19,7 @@ The primary architectural goals for `ums-lib` are:
 
 *   **Platform Independence:** The library must operate in any JavaScript environment without platform-specific code.
 *   **Pure Functional Design:** Core operations are implemented as pure functions with no side effects, enhancing testability and predictability.
-*   **UMS v1.0 Compliance:** The library must fully implement the UMS v1.0 specification for modules, personas, and rendering.
+*   **UMS v2.0 Compliance:** The library must fully implement the UMS v2.0 specification for modules, personas, and rendering.
 *   **Developer Experience:** Provide clear, well-documented APIs with comprehensive TypeScript types and error messages.
 
 ## 4. High-Level Design
