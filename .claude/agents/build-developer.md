@@ -265,18 +265,16 @@ _Why_: {rationale}
 ```
 ````
 
-````
-
 **Data Component:**
-```markdown
+
+````markdown
 ## Data
 
 {description}
 
 ```{format}
 {value}
-````
-
+```
 ````
 
 ### 5. Build Report Generator (Section 7)
@@ -325,7 +323,7 @@ function generateBuildReport(
     }))
   };
 }
-````
+```
 
 ### 6. Configuration File Support (modules.config.yml)
 

@@ -151,9 +151,8 @@ This module is fully spec-compliant and ready to use.
 
 Would you like me to help fix these issues?
 
-````
-
 **Single Module - FAIL:**
+
 ```markdown
 ❌ **Module Validation: FAIL**
 
@@ -182,7 +181,7 @@ This module cannot be used until these errors are fixed.
 Would you like me to:
 A) Show you how to fix these manually
 B) Regenerate the module with correct structure
-````
+```
 
 **Multiple Modules - Summary:**
 
