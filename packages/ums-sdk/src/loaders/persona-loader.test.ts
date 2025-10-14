@@ -1,8 +1,9 @@
-// @ts-nocheck - Test scaffolds without implementations
+/* eslint-disable vitest/expect-expect */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { PersonaLoader } from './persona-loader.js';
 
-describe('PersonaLoader', () => {
+describe.skip('PersonaLoader', () => {
   describe('constructor', () => {
     it('should create a PersonaLoader instance');
 
