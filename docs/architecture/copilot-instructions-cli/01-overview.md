@@ -22,8 +22,8 @@ By isolating these side effects, the `copilot-instructions-cli` allows the `ums-
 
 The CLI provides the following key features, each corresponding to a command:
 
-*   **Build:** Compiles a `.persona.yml` file and its referenced modules into a single Markdown instruction document.
+*   **Build:** Compiles a `.persona.ts` file and its referenced modules into a single Markdown instruction document.
 *   **List:** Lists all discoverable UMS modules, with options for filtering by tier.
 *   **Search:** Searches for modules by keyword across their name, description, and tags.
-*   **Validate:** Validates the syntax and integrity of module and persona files against the UMS v1.0 specification.
+*   **Validate:** Validates the syntax and integrity of module and persona files against the UMS v2.0 specification.
 *   **Inspect:** Provides tools for inspecting the module registry, including conflict detection and source analysis.
