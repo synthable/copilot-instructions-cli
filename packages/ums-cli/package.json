@@ -1,29 +1,37 @@
 {
-  "name": "copilot-instructions-cli",
+  "name": "ums-cli",
   "version": "1.0.0",
   "type": "module",
   "private": false,
   "main": "dist/index.js",
   "bin": {
-    "copilot-instructions": "dist/index.js"
+    "copilot-instructions": "dist/index.js",
+    "ums": "dist/index.js"
   },
   "author": "synthable",
   "license": "GPL-3.0-or-later",
-  "description": "A CLI tool for composing, managing, and building modular AI assistant instructions using UMS v1.0.",
-  "homepage": "https://github.com/synthable/copilot-instructions-cli/tree/main/packages/copilot-instructions-cli",
+  "description": "Unified Module System (UMS) CLI for composing modular AI assistant instructions, GitHub Copilot personas, and Claude Code system prompts.",
+  "homepage": "https://github.com/synthable/copilot-instructions-cli/tree/main/packages/ums-cli",
   "repository": {
     "type": "git",
     "url": "https://github.com/synthable/copilot-instructions-cli.git",
-    "directory": "packages/copilot-instructions-cli"
+    "directory": "packages/ums-cli"
   },
   "keywords": [
-    "ai",
     "copilot",
-    "instructions",
-    "cli",
-    "persona",
+    "copilot-instructions",
+    "github-copilot",
+    "claude",
+    "claude-code",
+    "ai-instructions",
+    "ai-assistant",
+    "prompt-engineering",
     "ums",
-    "unified-module-system"
+    "unified-module-system",
+    "modular-prompts",
+    "instructions",
+    "persona",
+    "cli"
   ],
   "scripts": {
     "build": "tsc --build --pretty",

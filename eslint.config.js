@@ -78,10 +78,10 @@ export const baseConfig = tseslint.config(
     },
   },
 
-  // 4. Specific overrides for SOURCE files in the stricter `copilot-instructions-cli` package
+  // 4. Specific overrides for SOURCE files in the stricter `ums-cli` package
   {
-    files: ['packages/copilot-instructions-cli/src/**/*.ts'],
-    ignores: ['packages/copilot-instructions-cli/src/**/*.test.ts'],
+    files: ['packages/ums-cli/src/**/*.ts'],
+    ignores: ['packages/ums-cli/src/**/*.test.ts'],
     rules: {
       // CLI-specific rules (more lenient than library)
       '@typescript-eslint/explicit-function-return-type': 'warn',

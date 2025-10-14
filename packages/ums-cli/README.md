@@ -1,26 +1,32 @@
-# Copilot Instructions CLI
+# UMS CLI
 
-A CLI tool for composing, managing, and building modular AI assistant instructions using UMS v1.0.
+A CLI tool for composing, managing, and building modular AI assistant instructions using the Unified Module System (UMS) v2.0.
+
+**Package name**: `ums-cli`
+**Binary commands**: `copilot-instructions`, `ums`
 
 ## Installation
 
 ```bash
-npm install -g copilot-instructions-cli
+npm install -g ums-cli
 ```
 
 ## Usage
+
+**Note**: You can use either `copilot-instructions` or `ums` as the command. Both are equivalent.
 
 ### Build Instructions
 
 ```bash
 # Build from persona file
-copilot-instructions build --persona ./personas/my-persona.persona.yml
+copilot-instructions build --persona ./personas/my-persona.persona.ts
+# or: ums build --persona ./personas/my-persona.persona.ts
 
 # Build with custom output
-copilot-instructions build --persona ./personas/my-persona.persona.yml --output ./dist/instructions.md
+copilot-instructions build --persona ./personas/my-persona.persona.ts --output ./dist/instructions.md
 
 # Build from stdin
-cat persona.yml | copilot-instructions build --output ./dist/instructions.md
+cat persona.ts | copilot-instructions build --output ./dist/instructions.md
 ```
 
 ### List Modules
@@ -60,7 +66,7 @@ copilot-instructions validate --verbose
 
 ## Features
 
-- ✅ **UMS v1.0 Support**: Full UMS specification compliance
+- ✅ **UMS v2.0 Support**: Full UMS specification compliance with TypeScript-first module format
 - ✅ **Persona Building**: Convert persona configs to instruction markdown
 - ✅ **Module Management**: List, search, and validate UMS modules
 - ✅ **Rich Output**: Progress indicators, colored output, and detailed reporting

@@ -68,7 +68,7 @@ The UMS ecosystem follows a three-tier architecture:
 ```
 ┌─────────────────────────────────────────────┐
 │            CLI / UI Layer                    │
-│  (copilot-instructions-cli, ums-mcp)        │
+│  (ums-cli, ums-mcp)                         │
 │  - User interface                           │
 │  - Command handling                         │
 │  - Output formatting                        │
@@ -813,7 +813,7 @@ npm run test:coverage
 
 ### Consumers
 
-- **copilot-instructions-cli**: Command-line interface using the SDK
+- **ums-cli**: Command-line interface using the SDK
 - **ums-mcp**: MCP server for AI assistant integration
 
 ### Design Principles
@@ -832,7 +832,7 @@ GPL-3.0-or-later
 
 Copyright (c) 2025 synthable
 
-This package is part of the copilot-instructions-cli project.
+This package is part of the ums-cli project.
 
 ## Resources
 

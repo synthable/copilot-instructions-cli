@@ -5,7 +5,7 @@
 
 ## 1. Introduction
 
-The `copilot-instructions-cli` has a minimal and well-defined dependency architecture. Its primary goal is to consume the `ums-lib` for core logic and use a small set of libraries for CLI-specific functionality like argument parsing and terminal output styling.
+The `ums-cli` has a minimal and well-defined dependency architecture. Its primary goal is to consume the `ums-lib` for core logic and use a small set of libraries for CLI-specific functionality like argument parsing and terminal output styling.
 
 ## 2. Core Dependency: `ums-lib`
 
@@ -20,7 +20,7 @@ By relying on `ums-lib`, the CLI avoids duplicating business logic and remains f
 
 ## 3. Production Dependencies
 
-The `package.json` for `copilot-instructions-cli` lists the following production dependencies:
+The `package.json` for `ums-cli` lists the following production dependencies:
 
 *   **`ums-lib`**: The core functional library for all UMS operations.
 *   **`chalk`**: Used for adding color to terminal output, improving readability of messages and errors.

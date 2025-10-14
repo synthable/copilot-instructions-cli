@@ -5,7 +5,7 @@
 
 ## 1. Introduction
 
-The `copilot-instructions-cli` is a command-line interface for composing, managing, and building modular AI assistant instructions using the Unified Module System (UMS) v1.0. It serves as the primary user-facing tool for interacting with the UMS ecosystem.
+The `ums-cli` is a command-line interface for composing, managing, and building modular AI assistant instructions using the Unified Module System (UMS) v1.0. It serves as the primary user-facing tool for interacting with the UMS ecosystem.
 
 ## 2. Architectural Role: The Imperative Shell
 
@@ -16,7 +16,7 @@ This CLI package is the **"Imperative Shell"** that complements the **"Functiona
 *   **Console Output:** Displaying progress indicators, results, and error messages to the user.
 *   **Process Management:** Exiting with appropriate status codes.
 
-By isolating these side effects, the `copilot-instructions-cli` allows the `ums-lib` to remain pure, platform-agnostic, and highly reusable.
+By isolating these side effects, the `ums-cli` allows the `ums-lib` to remain pure, platform-agnostic, and highly reusable.
 
 ## 3. Core Features
 

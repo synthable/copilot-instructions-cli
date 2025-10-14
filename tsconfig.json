@@ -8,7 +8,7 @@
       "path": "packages/ums-sdk"
     },
     {
-      "path": "packages/copilot-instructions-cli"
+      "path": "packages/ums-cli"
     }
   ],
   "exclude": [

@@ -5,7 +5,7 @@ Welcome to the project documentation.
 ## Architecture Documentation
 
 - **[UMS Library Architecture](./architecture/ums-lib/):** Architecture documentation for the core UMS library
-- **[CLI Architecture](./architecture/copilot-instructions-cli/):** Architecture documentation for the CLI tool
+- **[CLI Architecture](./architecture/ums-cli/):** Architecture documentation for the CLI tool
 - **[Architecture Decision Records (ADRs)](./architecture/adr/):** Key architectural decisions and their rationale
 
 ## UMS Specification
