@@ -15,6 +15,9 @@ Welcome to the project documentation.
 
 ## Additional Resources
 
+- **[Proposal Process](./proposal-process.md):** Guidelines for submitting and reviewing proposals
+- **[Proposals](./spec/proposals/):** Technical proposals for new features and changes
 - **[Case Studies](./5-case-studies/):** Real-world examples and analyses
+- **[Processes](./processes/):** Defined processes for evaluation and contribution
 - **[Research](./research/):** Research and exploration of related concepts
 - **[Archive](./archive/):** Historical documentation and deprecated materials
