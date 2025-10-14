@@ -35,7 +35,7 @@ instructions-composer/
 
 **[ums-sdk](./packages/ums-sdk)**: Node.js SDK providing file system operations, TypeScript module loading, and high-level orchestration for UMS v2.0
 
-**[copilot-instructions-cli](./packages/copilot-instructions-cli)**: Command-line interface for building and managing personas using the UMS SDK
+**[ums-cli](./packages/copilot-instructions-cli)**: Command-line interface for building and managing personas using the UMS SDK
 
 **[ums-mcp](./packages/ums-mcp)**: MCP server providing AI assistants with module discovery capabilities
 
