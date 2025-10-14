@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { handleInspect } from './inspect.js';
-import type { UMSModule, ModuleRegistry } from 'ums-lib';
+import type { Module, ModuleRegistry } from 'ums-lib';
 
 // Mock dependencies
 vi.mock('../utils/error-handler.js', () => ({
@@ -41,25 +41,21 @@ afterEach(() => {
 });
 
 // Create mock modules
-const createMockModule = (id: string, version = '1.0.0'): UMSModule => ({
+const createMockModule = (id: string, version = '1.0.0'): Module => ({
   id,
   version,
   schemaVersion: '1.0',
-  shape: 'specification',
-  meta: {
+  capabilities: [],
+  metadata: {
     name: `Module ${id}`,
     description: `Test module ${id}`,
     semantic: `Test module ${id}`,
   },
-  body: {
-    goal: `Test goal for ${id}`,
-  },
-  filePath: `./modules/${id}.module.yml`,
 });
 
 // Mock module entry interface
 interface MockModuleEntry {
-  module: UMSModule;
+  module: Module;
   source: { type: string; path: string };
   addedAt: number;
 }

@@ -1,375 +1,145 @@
 /**
- * UMS v1.0 Persona Validation
- * Implements persona validation per UMS v1.0 specification
+ * UMS v2.0 Persona Validation
+ * Implements persona validation per UMS v2.0 specification
  */
 
-import { MODULE_ID_REGEX, UMS_SCHEMA_VERSION } from '../../constants.js';
 import {
-  ID_VALIDATION_ERRORS,
-  SCHEMA_VALIDATION_ERRORS,
-} from '../../utils/errors.js';
-import type {
-  ValidationResult,
-  ValidationWarning,
-  ValidationError,
+  type ValidationResult,
+  type ValidationError,
+  type ValidationWarning,
+  type Persona,
 } from '../../types/index.js';
+import { ValidationError as ValidationErrorClass } from '../../utils/errors.js';
+
+const SEMVER_REGEX =
+  /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/;
 
 /**
- * Validates a parsed UMS v1.0 persona object
+ * Validates a parsed UMS v2.0 persona object.
+ *
+ * @param persona - The persona object to validate.
+ * @returns A validation result object containing errors and warnings.
  */
-export function validatePersona(obj: unknown): ValidationResult {
+// eslint-disable-next-line max-lines-per-function
+export function validatePersona(persona: Persona): ValidationResult {
   const errors: ValidationError[] = [];
   const warnings: ValidationWarning[] = [];
 
-  if (!obj || typeof obj !== 'object') {
-    errors.push({
-      path: '',
-      message: 'Persona must be an object',
-      section: 'Section 5',
-    });
-    return { valid: false, errors, warnings };
+  // Validate schema version (v2.0 only)
+  if (persona.schemaVersion !== '2.0') {
+    errors.push(
+      new ValidationErrorClass(
+        `Invalid schema version: ${persona.schemaVersion}, expected '2.0'`,
+        'schemaVersion',
+        'Section 4'
+      )
+    );
   }
 
-  const persona = obj as Record<string, unknown>;
+  // Validate version format
+  if (!SEMVER_REGEX.test(persona.version)) {
+    errors.push(
+      new ValidationErrorClass(
+        `Invalid version format: ${persona.version}, expected SemVer`,
+        'version',
+        'Section 4'
+      )
+    );
+  }
 
-  // Validate required fields presence
-  validatePersonaFields(persona, errors);
+  // Validate modules array exists and has content
+  if (!Array.isArray(persona.modules) || persona.modules.length === 0) {
+    errors.push(
+      new ValidationErrorClass(
+        'Persona must have at least one module entry',
+        'modules',
+        'Section 4.2'
+      )
+    );
+    // Return early if no modules
+    return {
+      valid: errors.length === 0,
+      errors,
+      warnings,
+    };
+  }
 
-  // Validate field types
-  validatePersonaTypes(persona, errors);
+  // Validate each module entry and check for duplicate module IDs across all entries
+  const allModuleIds = new Set<string>();
+  for (let i = 0; i < persona.modules.length; i++) {
+    const entry = persona.modules[i];
 
-  // Validate moduleGroups structure
-  const moduleGroupsResult = validateModuleGroupsStructure(persona);
-  errors.push(...moduleGroupsResult.errors);
-  warnings.push(...moduleGroupsResult.warnings);
-
-  return { valid: errors.length === 0, errors, warnings };
-}
-
-/**
- * Validates presence of required persona fields
- */
-function validatePersonaFields(
-  persona: Record<string, unknown>,
-  errors: ValidationError[]
-): void {
-  const requiredFields = [
-    'name',
-    'version',
-    'schemaVersion',
-    'description',
-    'semantic',
-    'identity',
-    'moduleGroups',
-  ];
-
-  for (const field of requiredFields) {
-    if (!(field in persona)) {
-      errors.push({
-        path: field,
-        message: SCHEMA_VALIDATION_ERRORS.missingField(field),
-        section: 'Section 5.1',
-      });
+    // Handle v2.0 ModuleEntry union type (string | ModuleGroup)
+    if (typeof entry === 'string') {
+      // Simple string module ID
+      if (allModuleIds.has(entry)) {
+        errors.push(
+          new ValidationErrorClass(
+            `Duplicate module ID found: ${entry}`,
+            `modules[${i}]`,
+            'Section 4.2'
+          )
+        );
+      }
+      allModuleIds.add(entry);
+      continue;
     }
-  }
-}
 
-/**
- * Validates types of persona fields
- */
-function validatePersonaTypes(
-  persona: Record<string, unknown>,
-  errors: ValidationError[]
-): void {
-  // Validate required string fields
-  const stringFields = [
-    'name',
-    'description',
-    'semantic',
-    'version',
-    'identity',
-  ];
-  for (const field of stringFields) {
-    if (field in persona && typeof persona[field] !== 'string') {
-      errors.push({
-        path: field,
-        message: SCHEMA_VALIDATION_ERRORS.wrongType(
-          field,
-          'string',
-          typeof persona[field]
-        ),
-        section: 'Section 5.1',
-      });
-    }
-  }
-
-  // Validate schemaVersion field
-  if ('schemaVersion' in persona) {
-    if (persona.schemaVersion !== UMS_SCHEMA_VERSION) {
-      errors.push({
-        path: 'schemaVersion',
-        message: SCHEMA_VALIDATION_ERRORS.wrongSchemaVersion(
-          String(persona.schemaVersion)
-        ),
-        section: 'Section 5.1',
-      });
-    }
-  }
-
-  // Validate optional fields when present
-  if (
-    'role' in persona &&
-    persona.role !== undefined &&
-    typeof persona.role !== 'string'
-  ) {
-    errors.push({
-      path: 'role',
-      message: SCHEMA_VALIDATION_ERRORS.wrongType(
-        'role',
-        'string',
-        typeof persona.role
-      ),
-      section: 'Section 5.1',
-    });
-  }
-
-  if (
-    'attribution' in persona &&
-    persona.attribution !== undefined &&
-    typeof persona.attribution !== 'boolean'
-  ) {
-    errors.push({
-      path: 'attribution',
-      message: SCHEMA_VALIDATION_ERRORS.wrongType(
-        'attribution',
-        'boolean',
-        typeof persona.attribution
-      ),
-      section: 'Section 5.1',
-    });
-  }
-}
-
-/**
- * Validates moduleGroups structure
- */
-function validateModuleGroupsStructure(
-  persona: Record<string, unknown>
-): ValidationResult {
-  const errors: ValidationError[] = [];
-  const warnings: ValidationWarning[] = [];
-
-  if ('moduleGroups' in persona) {
-    if (!Array.isArray(persona.moduleGroups)) {
-      errors.push({
-        path: 'moduleGroups',
-        message: SCHEMA_VALIDATION_ERRORS.wrongType(
-          'moduleGroups',
-          'array',
-          typeof persona.moduleGroups
-        ),
-        section: 'Section 5.2',
-      });
-    } else {
-      const moduleGroupsValidation = validateModuleGroups(
-        persona.moduleGroups as unknown[]
+    // Handle ModuleGroup object
+    // Runtime validation required: persona data comes from external files (YAML/JSON)
+    // which may not conform to TypeScript types. TypeScript provides compile-time safety
+    // only - we must validate at runtime to catch malformed input data.
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- Runtime check for external data
+    if (!entry || typeof entry !== 'object') {
+      errors.push(
+        new ValidationErrorClass(
+          `Module entry at index ${i} must be a string or object`,
+          `modules[${i}]`,
+          'Section 4.2'
+        )
       );
-      errors.push(...moduleGroupsValidation.errors);
-      warnings.push(...moduleGroupsValidation.warnings);
+      continue;
     }
-  }
 
-  return { valid: errors.length === 0, errors, warnings };
-}
+    // Get module IDs from 'ids' array
+    const moduleIds = entry.ids;
 
-/**
- * Validates moduleGroups array
- */
-function validateModuleGroups(moduleGroups: unknown[]): ValidationResult {
-  const errors: ValidationError[] = [];
-  const warnings: ValidationWarning[] = [];
-
-  if (moduleGroups.length === 0) {
-    warnings.push({
-      path: 'moduleGroups',
-      message: 'moduleGroups array is empty - persona will have no modules',
-    });
-    return { valid: true, errors, warnings };
-  }
-
-  const groupNames = new Set<string>();
-
-  moduleGroups.forEach((group, index) => {
-    const groupResult = validateGroupStructure(group, index, groupNames);
-    errors.push(...groupResult.errors);
-    warnings.push(...groupResult.warnings);
-  });
-
-  return { valid: errors.length === 0, errors, warnings };
-}
-
-/**
- * Validates individual module group structure
- */
-function validateGroupStructure(
-  group: unknown,
-  index: number,
-  groupNames: Set<string>
-): ValidationResult {
-  const errors: ValidationError[] = [];
-  const warnings: ValidationWarning[] = [];
-
-  if (!group || typeof group !== 'object') {
-    errors.push({
-      path: `moduleGroups[${index}]`,
-      message: `Module group at index ${index} must be an object`,
-      section: 'Section 5.2',
-    });
-    return { valid: false, errors, warnings };
-  }
-
-  const groupObj = group as Record<string, unknown>;
-
-  // Validate required fields
-  if (!('groupName' in groupObj)) {
-    errors.push({
-      path: `moduleGroups[${index}].groupName`,
-      message: SCHEMA_VALIDATION_ERRORS.missingField('groupName'),
-      section: 'Section 5.2',
-    });
-  }
-
-  if (!('modules' in groupObj)) {
-    errors.push({
-      path: `moduleGroups[${index}].modules`,
-      message: SCHEMA_VALIDATION_ERRORS.missingField('modules'),
-      section: 'Section 5.2',
-    });
-  }
-
-  // Validate groupName and check for duplicates
-  const groupNameResult = validateGroupName(groupObj, index, groupNames);
-  errors.push(...groupNameResult.errors);
-
-  // Validate modules array
-  const moduleResult = validateModuleIds(groupObj, index);
-  errors.push(...moduleResult.errors);
-  warnings.push(...moduleResult.warnings);
-
-  return { valid: errors.length === 0, errors, warnings };
-}
-
-/**
- * Validates module IDs within a group
- */
-function validateModuleIds(
-  groupObj: Record<string, unknown>,
-  groupIndex: number
-): ValidationResult {
-  const errors: ValidationError[] = [];
-  const warnings: ValidationWarning[] = [];
-
-  if ('modules' in groupObj) {
-    if (!Array.isArray(groupObj.modules)) {
-      errors.push({
-        path: `moduleGroups[${groupIndex}].modules`,
-        message: SCHEMA_VALIDATION_ERRORS.wrongType(
-          'modules',
-          'array',
-          typeof groupObj.modules
-        ),
-        section: 'Section 5.2',
-      });
+    if (!Array.isArray(moduleIds) || moduleIds.length === 0) {
+      errors.push(
+        new ValidationErrorClass(
+          `Module group ${i} must have a non-empty 'ids' array`,
+          `modules[${i}].ids`,
+          'Section 4.2'
+        )
+      );
     } else {
-      const modules = groupObj.modules as unknown[];
-      const groupName =
-        typeof groupObj.groupName === 'string'
-          ? groupObj.groupName
-          : `group-${groupIndex}`;
-
-      if (modules.length === 0) {
-        warnings.push({
-          path: `moduleGroups[${groupIndex}].modules`,
-          message: `Module group '${groupName}' has no modules`,
-        });
+      // Check for duplicate module IDs
+      for (const id of moduleIds) {
+        if (typeof id !== 'string') {
+          errors.push(
+            new ValidationErrorClass(
+              `Module ID must be a string, found ${typeof id}`,
+              `modules[${i}].ids`,
+              'Section 4.2'
+            )
+          );
+        } else if (allModuleIds.has(id)) {
+          errors.push(
+            new ValidationErrorClass(
+              `Duplicate module ID found across groups: ${id}`,
+              `modules[${i}].ids`,
+              'Section 4.2'
+            )
+          );
+        }
+        allModuleIds.add(id);
       }
-
-      // Validate each module ID and check for duplicates within group
-      const moduleIds = new Set<string>();
-      modules.forEach((moduleId, moduleIndex) => {
-        if (typeof moduleId !== 'string') {
-          errors.push({
-            path: `moduleGroups[${groupIndex}].modules[${moduleIndex}]`,
-            message: `Module ID at index ${moduleIndex} must be a string`,
-            section: 'Section 5.2',
-          });
-          return;
-        }
-
-        // Validate module ID format
-        if (!MODULE_ID_REGEX.test(moduleId)) {
-          errors.push({
-            path: `moduleGroups[${groupIndex}].modules[${moduleIndex}]`,
-            message: ID_VALIDATION_ERRORS.invalidFormat(moduleId),
-            section: 'Section 5.2',
-          });
-        }
-
-        // Check for duplicate module IDs within group
-        if (moduleIds.has(moduleId)) {
-          errors.push({
-            path: `moduleGroups[${groupIndex}].modules[${moduleIndex}]`,
-            message: SCHEMA_VALIDATION_ERRORS.duplicateModuleId(
-              moduleId,
-              groupName
-            ),
-            section: 'Section 5.2',
-          });
-        }
-        moduleIds.add(moduleId);
-      });
     }
   }
 
-  return { valid: errors.length === 0, errors, warnings };
-}
-
-/**
- * Validates group name type and checks for duplicates
- */
-function validateGroupName(
-  groupObj: Record<string, unknown>,
-  index: number,
-  groupNames: Set<string>
-): ValidationResult {
-  const errors: ValidationError[] = [];
-  const warnings: ValidationWarning[] = [];
-
-  if ('groupName' in groupObj) {
-    if (typeof groupObj.groupName !== 'string') {
-      errors.push({
-        path: `moduleGroups[${index}].groupName`,
-        message: SCHEMA_VALIDATION_ERRORS.wrongType(
-          'groupName',
-          'string',
-          typeof groupObj.groupName
-        ),
-        section: 'Section 5.2',
-      });
-    } else {
-      const groupName = groupObj.groupName;
-
-      // Check for duplicate group names
-      if (groupNames.has(groupName)) {
-        errors.push({
-          path: `moduleGroups[${index}].groupName`,
-          message: `Duplicate group name '${groupName}'. Group names must be unique.`,
-          section: 'Section 5.2',
-        });
-      }
-      groupNames.add(groupName);
-    }
-  }
-
-  return { valid: errors.length === 0, errors, warnings };
+  return {
+    valid: errors.length === 0,
+    errors,
+    warnings,
+  };
 }

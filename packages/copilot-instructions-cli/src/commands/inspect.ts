@@ -9,6 +9,7 @@ import { handleError } from '../utils/error-handler.js';
 import type { ModuleRegistry } from 'ums-lib';
 import { createDiscoveryProgress } from '../utils/progress.js';
 import { discoverAllModules } from '../utils/module-discovery.js';
+import { getModuleMetadata, isCLIModule } from '../types/cli-extensions.js';
 
 export interface InspectOptions {
   verbose?: boolean;
@@ -101,14 +102,12 @@ function inspectSpecificModule(
     // Show the single module entry
     const resolvedModule = registry.resolve(moduleId);
     if (resolvedModule && verbose) {
+      const metadata = getModuleMetadata(resolvedModule);
       console.log(chalk.gray('\nModule Details:'));
-      console.log(chalk.gray(`  Name: ${resolvedModule.meta.name}`));
-      console.log(
-        chalk.gray(`  Description: ${resolvedModule.meta.description}`)
-      );
-      console.log(chalk.gray(`  Shape: ${resolvedModule.shape}`));
+      console.log(chalk.gray(`  Name: ${metadata.name}`));
+      console.log(chalk.gray(`  Description: ${metadata.description}`));
       console.log(chalk.gray(`  Version: ${resolvedModule.version}`));
-      if (resolvedModule.filePath) {
+      if (isCLIModule(resolvedModule) && resolvedModule.filePath) {
         console.log(chalk.gray(`  File: ${resolvedModule.filePath}`));
       }
     }
@@ -123,19 +122,25 @@ function inspectSpecificModule(
   );
 
   if (format === 'json') {
-    const conflictData = conflicts.map((entry, index) => ({
-      index: index + 1,
-      moduleId: entry.module.id,
-      version: entry.module.version,
-      source: `${entry.source.type}:${entry.source.path}`,
-      addedAt: new Date(entry.addedAt).toISOString(),
-      ...(verbose && {
-        name: entry.module.meta.name,
-        description: entry.module.meta.description,
-        shape: entry.module.shape,
-        filePath: entry.module.filePath,
-      }),
-    }));
+    const conflictData = conflicts.map((entry, index) => {
+      const metadata = getModuleMetadata(entry.module);
+      const filePath =
+        isCLIModule(entry.module) && entry.module.filePath
+          ? entry.module.filePath
+          : undefined;
+      return {
+        index: index + 1,
+        moduleId: entry.module.id,
+        version: entry.module.version,
+        source: `${entry.source.type}:${entry.source.path}`,
+        addedAt: new Date(entry.addedAt).toISOString(),
+        ...(verbose && {
+          name: metadata.name,
+          description: metadata.description,
+          filePath,
+        }),
+      };
+    });
 
     console.log(JSON.stringify(conflictData, null, 2));
   } else {
@@ -145,19 +150,20 @@ function inspectSpecificModule(
         chalk.cyan('Version'),
         chalk.cyan('Source'),
         chalk.cyan('Added At'),
-        ...(verbose ? [chalk.cyan('Name'), chalk.cyan('Shape')] : []),
+        ...(verbose ? [chalk.cyan('Name')] : []),
       ],
-      colWidths: [4, 10, 30, 25, ...(verbose ? [25, 12] : [])],
+      colWidths: [4, 10, 30, 25, ...(verbose ? [30] : [])],
     });
 
     conflicts.forEach((entry, index) => {
       const addedAt = new Date(entry.addedAt).toLocaleString();
+      const metadata = getModuleMetadata(entry.module);
       table.push([
         (index + 1).toString(),
         entry.module.version,
         `${entry.source.type}:${entry.source.path}`,
         addedAt,
-        ...(verbose ? [entry.module.meta.name, entry.module.shape] : []),
+        ...(verbose ? [metadata.name] : []),
       ]);
     });
 
@@ -210,12 +216,15 @@ function inspectConflicts(
         sources: conflicts?.map(e => `${e.source.type}:${e.source.path}`) ?? [],
         ...(verbose && {
           entries:
-            conflicts?.map(entry => ({
-              version: entry.module.version,
-              source: `${entry.source.type}:${entry.source.path}`,
-              name: entry.module.meta.name,
-              addedAt: new Date(entry.addedAt).toISOString(),
-            })) ?? [],
+            conflicts?.map(entry => {
+              const metadata = getModuleMetadata(entry.module);
+              return {
+                version: entry.module.version,
+                source: `${entry.source.type}:${entry.source.path}`,
+                name: metadata.name,
+                addedAt: new Date(entry.addedAt).toISOString(),
+              };
+            }) ?? [],
         }),
       };
     });

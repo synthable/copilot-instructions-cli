@@ -1,22 +1,28 @@
 import { describe, it, expect } from 'vitest';
 import { validatePersona } from '../validation/persona-validator.js';
-import { readFileSync } from 'fs';
-import { parse } from 'yaml';
-import { join } from 'path';
+import type { Persona } from '../../types/index.js';
 
-// Helper to load fixture files
-function loadPersonaFixture(filename: string): unknown {
-  const fixturePath = join(process.cwd(), '../../tests/fixtures', filename);
-  const content = readFileSync(fixturePath, 'utf-8');
-  return parse(content) as unknown;
-}
-
-describe('UMS Persona Loader', () => {
+describe('UMS v2.0 Persona Validation', () => {
   describe('validatePersona', () => {
     it('should validate a complete valid persona', () => {
-      const validPersona = loadPersonaFixture(
-        'valid-persona.persona.yml'
-      ) as Record<string, unknown>;
+      const validPersona: Persona = {
+        name: 'Software Engineer',
+        version: '1.0.0',
+        schemaVersion: '2.0',
+        description: 'A persona for software engineering tasks',
+        semantic:
+          'Software engineering assistant with focus on code quality and best practices',
+        identity:
+          'I am a software engineering assistant focused on helping you write clean, maintainable code.',
+        tags: ['engineering', 'code-quality'],
+        domains: ['software-development'],
+        attribution: false,
+        modules: [
+          'foundation/logic/deductive-reasoning',
+          'principle/architecture/separation-of-concerns',
+          'technology/typescript/best-practices',
+        ],
+      };
 
       const result = validatePersona(validPersona);
       expect(result.valid).toBe(true);
@@ -24,19 +30,60 @@ describe('UMS Persona Loader', () => {
     });
 
     it('should validate a minimal valid persona', () => {
-      const validPersona = loadPersonaFixture(
-        'valid-minimal.persona.yml'
-      ) as Record<string, unknown>;
+      const validPersona: Persona = {
+        name: 'Minimal Persona',
+        version: '1.0.0',
+        schemaVersion: '2.0',
+        description: 'A minimal persona',
+        semantic: 'Minimal persona for testing',
+        modules: ['foundation/logic/deductive-reasoning'],
+      };
 
       const result = validatePersona(validPersona);
       expect(result.valid).toBe(true);
       expect(result.errors).toHaveLength(0);
     });
 
-    it('should validate persona without optional fields', () => {
-      const validPersona = loadPersonaFixture(
-        'valid-basic.persona.yml'
-      ) as Record<string, unknown>;
+    it('should validate persona with grouped modules', () => {
+      const validPersona: Persona = {
+        name: 'Grouped Persona',
+        version: '1.0.0',
+        schemaVersion: '2.0',
+        description: 'A persona with grouped modules',
+        semantic: 'Grouped persona for testing',
+        modules: [
+          {
+            group: 'Foundation',
+            ids: ['foundation/logic/deductive-reasoning'],
+          },
+          {
+            group: 'Principles',
+            ids: ['principle/architecture/separation-of-concerns'],
+          },
+        ],
+      };
+
+      const result = validatePersona(validPersona);
+      expect(result.valid).toBe(true);
+      expect(result.errors).toHaveLength(0);
+    });
+
+    it('should validate persona with mixed module entries', () => {
+      const validPersona: Persona = {
+        name: 'Mixed Persona',
+        version: '1.0.0',
+        schemaVersion: '2.0',
+        description: 'A persona with mixed module entries',
+        semantic: 'Mixed persona for testing',
+        modules: [
+          'foundation/logic/deductive-reasoning',
+          {
+            group: 'Principles',
+            ids: ['principle/architecture/separation-of-concerns'],
+          },
+          'technology/typescript/best-practices',
+        ],
+      };
 
       const result = validatePersona(validPersona);
       expect(result.valid).toBe(true);
@@ -44,207 +91,182 @@ describe('UMS Persona Loader', () => {
     });
 
     it('should reject non-object persona', () => {
-      const invalidPersona = 'not an object';
+      const invalidPersona = 'not an object' as unknown as Persona;
 
       const result = validatePersona(invalidPersona);
       expect(result.valid).toBe(false);
-      expect(result.errors).toHaveLength(1);
-      expect(result.errors[0].message).toBe('Persona must be an object');
+      expect(result.errors.length).toBeGreaterThan(0);
     });
 
     it('should reject persona with missing required fields', () => {
       const invalidPersona = {
         name: 'Test Persona',
-        // missing description, semantic, moduleGroups
+        // missing version, schemaVersion, description, semantic, modules
+      } as unknown as Persona;
+
+      const result = validatePersona(invalidPersona);
+      expect(result.valid).toBe(false);
+      expect(result.errors.length).toBeGreaterThan(0);
+    });
+
+    it('should reject persona with wrong schema version', () => {
+      const invalidPersona: Persona = {
+        name: 'Test Persona',
+        version: '1.0.0',
+        schemaVersion: '1.0', // v1.0 not supported anymore
+        description: 'Test',
+        semantic: 'Test',
+        modules: ['foundation/logic/deductive-reasoning'],
       };
 
       const result = validatePersona(invalidPersona);
       expect(result.valid).toBe(false);
-      expect(result.errors.length).toBeGreaterThanOrEqual(3);
+      expect(result.errors.some(e => e.path === 'schemaVersion')).toBe(true);
+      expect(
+        result.errors.some(e => e.message.includes('Invalid schema version'))
+      ).toBe(true);
+    });
 
-      const missingFields = result.errors.filter(e =>
-        e.message.includes('Missing required field')
+    it('should reject persona with invalid version format', () => {
+      const invalidPersona = {
+        name: 'Test Persona',
+        version: 'not-semver',
+        schemaVersion: '2.0',
+        description: 'Test',
+        semantic: 'Test',
+        modules: ['foundation/logic/deductive-reasoning'],
+      } as Persona;
+
+      const result = validatePersona(invalidPersona);
+      expect(result.valid).toBe(false);
+      expect(result.errors.some(e => e.path === 'version')).toBe(true);
+      expect(result.errors.some(e => e.message.includes('SemVer'))).toBe(true);
+    });
+
+    it('should reject persona with empty modules array', () => {
+      const invalidPersona: Persona = {
+        name: 'Empty Modules',
+        version: '1.0.0',
+        schemaVersion: '2.0',
+        description: 'Persona with empty modules',
+        semantic: 'Test',
+        modules: [],
+      };
+
+      const result = validatePersona(invalidPersona);
+      expect(result.valid).toBe(false);
+      expect(result.errors.some(e => e.path === 'modules')).toBe(true);
+      expect(result.errors.some(e => e.message.includes('at least one'))).toBe(
+        true
       );
-      expect(missingFields.length).toBe(6); // version, schemaVersion, description, semantic, identity, moduleGroups
     });
 
-    it('should reject persona with wrong field types', () => {
+    it('should reject persona with non-array modules', () => {
       const invalidPersona = {
-        name: 123, // Should be string
-        description: true, // Should be string
-        semantic: [], // Should be string
-        role: 456, // Should be string
-        attribution: 'yes', // Should be boolean
-        moduleGroups: 'not an array', // Should be array
-      };
-
-      const result = validatePersona(invalidPersona);
-      expect(result.valid).toBe(false);
-      expect(result.errors.length).toBeGreaterThanOrEqual(6);
-
-      // Check that all wrong type errors are present
-      expect(
-        result.errors.some(
-          e => e.path === 'name' && e.message.includes('string')
-        )
-      ).toBe(true);
-      expect(
-        result.errors.some(
-          e => e.path === 'description' && e.message.includes('string')
-        )
-      ).toBe(true);
-      expect(
-        result.errors.some(
-          e => e.path === 'semantic' && e.message.includes('string')
-        )
-      ).toBe(true);
-      expect(
-        result.errors.some(
-          e => e.path === 'role' && e.message.includes('string')
-        )
-      ).toBe(true);
-      expect(
-        result.errors.some(
-          e => e.path === 'attribution' && e.message.includes('boolean')
-        )
-      ).toBe(true);
-      expect(
-        result.errors.some(
-          e => e.path === 'moduleGroups' && e.message.includes('array')
-        )
-      ).toBe(true);
-    });
-
-    it('should handle undefined optional fields correctly', () => {
-      const validPersona = loadPersonaFixture(
-        'valid-undefined-optional.persona.yml'
-      ) as Record<string, unknown>;
-
-      const result = validatePersona(validPersona);
-      expect(result.valid).toBe(true);
-      expect(result.errors).toHaveLength(0);
-    });
-
-    it('should reject empty moduleGroups array', () => {
-      const invalidPersona = loadPersonaFixture(
-        'valid-empty-modulegroups.persona.yml'
-      ) as Record<string, unknown>;
-
-      const result = validatePersona(invalidPersona);
-      expect(result.valid).toBe(true); // Valid but should have warning
-      expect(result.warnings).toHaveLength(1);
-      expect(result.warnings[0].message).toContain('empty');
-    });
-
-    it('should reject moduleGroups with non-object entries', () => {
-      const invalidPersona = loadPersonaFixture(
-        'invalid-non-object-modulegroups.persona.yml'
-      ) as Record<string, unknown>;
+        name: 'Invalid Modules Type',
+        version: '1.0.0',
+        schemaVersion: '2.0',
+        description: 'Test',
+        semantic: 'Test',
+        modules: 'not-an-array',
+      } as unknown as Persona;
 
       const result = validatePersona(invalidPersona);
       expect(result.valid).toBe(false);
       expect(result.errors.length).toBeGreaterThan(0);
-      expect(result.errors.some(e => e.path === 'moduleGroups[0]')).toBe(true);
-      expect(
-        result.errors.some(e => e.message.includes('must be an object'))
-      ).toBe(true);
     });
 
-    it('should reject moduleGroups with missing required fields', () => {
-      const invalidPersona = loadPersonaFixture(
-        'invalid-missing-modules.persona.yml'
-      ) as Record<string, unknown>;
-
-      const result = validatePersona(invalidPersona);
-      expect(result.valid).toBe(false);
-      expect(result.errors.length).toBeGreaterThan(0);
-      expect(
-        result.errors.some(e => e.path === 'moduleGroups[0].modules')
-      ).toBe(true);
-    });
-
-    it('should reject duplicate group names', () => {
-      const invalidPersona = loadPersonaFixture(
-        'invalid-duplicate-groups.persona.yml'
-      ) as Record<string, unknown>;
-
-      const result = validatePersona(invalidPersona);
-      expect(result.valid).toBe(false);
-      expect(result.errors.length).toBeGreaterThan(0);
-      expect(
-        result.errors.some(e => e.path === 'moduleGroups[1].groupName')
-      ).toBe(true);
-      expect(
-        result.errors.some(e => e.message.includes('Duplicate group name'))
-      ).toBe(true);
-    });
-
-    it('should reject invalid module IDs', () => {
+    it('should reject module entry with invalid structure', () => {
       const invalidPersona = {
-        name: 'Invalid Module IDs Persona',
-        description: 'Persona with invalid module IDs.',
-        semantic: 'Test semantic',
-        moduleGroups: [
-          {
-            groupName: 'Bad Modules',
-            modules: [
-              'invalid-format', // Invalid ID format
-              'foundation/ethics/do-no-harm', // Valid
-              'Uppercase/module/id', // Invalid uppercase
-            ],
-          },
+        name: 'Invalid Entry',
+        version: '1.0.0',
+        schemaVersion: '2.0',
+        description: 'Test',
+        semantic: 'Test',
+        modules: [
+          123, // Invalid: not string or object
+          'foundation/logic/deductive-reasoning', // Valid
+        ],
+      } as unknown as Persona;
+
+      const result = validatePersona(invalidPersona);
+      expect(result.valid).toBe(false);
+      expect(result.errors.some(e => e.path?.includes('modules[0]'))).toBe(
+        true
+      );
+    });
+
+    it('should reject grouped module with empty ids array', () => {
+      const invalidPersona: Persona = {
+        name: 'Empty IDs',
+        version: '1.0.0',
+        schemaVersion: '2.0',
+        description: 'Test',
+        semantic: 'Test',
+        modules: [
+          { group: 'Test Group', ids: [] }, // Empty ids array
         ],
       };
 
       const result = validatePersona(invalidPersona);
       expect(result.valid).toBe(false);
-      expect(result.errors.length).toBeGreaterThanOrEqual(2);
-      expect(
-        result.errors.some(e => e.path === 'moduleGroups[0].modules[0]')
-      ).toBe(true);
-      expect(
-        result.errors.some(e => e.path === 'moduleGroups[0].modules[2]')
-      ).toBe(true);
+      expect(result.errors.some(e => e.path?.includes('ids'))).toBe(true);
+      expect(result.errors.some(e => e.message.includes('non-empty'))).toBe(
+        true
+      );
     });
 
-    it('should reject duplicate module IDs within a group', () => {
-      const invalidPersona = loadPersonaFixture(
-        'invalid-duplicate-modules.persona.yml'
-      ) as Record<string, unknown>;
+    it('should reject grouped module without ids array', () => {
+      const invalidPersona = {
+        name: 'Missing IDs',
+        version: '1.0.0',
+        schemaVersion: '2.0',
+        description: 'Test',
+        semantic: 'Test',
+        modules: [
+          { group: 'Test Group' }, // Missing ids
+        ],
+      } as unknown as Persona;
 
       const result = validatePersona(invalidPersona);
       expect(result.valid).toBe(false);
-      expect(result.errors.length).toBeGreaterThan(0);
-      expect(
-        result.errors.some(e => e.path === 'moduleGroups[0].modules[1]')
-      ).toBe(true);
+      expect(result.errors.some(e => e.path?.includes('ids'))).toBe(true);
+    });
+
+    it('should reject duplicate module IDs', () => {
+      const invalidPersona: Persona = {
+        name: 'Duplicate Modules',
+        version: '1.0.0',
+        schemaVersion: '2.0',
+        description: 'Test',
+        semantic: 'Test',
+        modules: [
+          'foundation/logic/deductive-reasoning',
+          'principle/architecture/separation-of-concerns',
+          'foundation/logic/deductive-reasoning', // Duplicate!
+        ],
+      };
+
+      const result = validatePersona(invalidPersona);
+      expect(result.valid).toBe(false);
       expect(
         result.errors.some(e => e.message.includes('Duplicate module ID'))
       ).toBe(true);
     });
 
-    it('should allow same module ID in different groups', () => {
-      const validPersona = loadPersonaFixture(
-        'valid-same-module-different-groups.persona.yml'
-      ) as Record<string, unknown>;
-
-      const result = validatePersona(validPersona);
-      expect(result.valid).toBe(true);
-      expect(result.errors).toHaveLength(0);
-    });
-
-    it('should reject non-string module IDs', () => {
-      const invalidPersona = {
-        name: 'Non-String Module IDs',
-        description: 'Persona with non-string module IDs.',
-        semantic: 'Test semantic',
-        moduleGroups: [
+    it('should reject duplicate module IDs in grouped entries', () => {
+      const invalidPersona: Persona = {
+        name: 'Duplicate in Groups',
+        version: '1.0.0',
+        schemaVersion: '2.0',
+        description: 'Test',
+        semantic: 'Test',
+        modules: [
           {
-            groupName: 'Bad Module Types',
-            modules: [
-              'foundation/ethics/do-no-harm', // Valid string
-              123, // Invalid number
-              { id: 'not-a-string' }, // Invalid object
+            group: 'Test Group',
+            ids: [
+              'foundation/logic/deductive-reasoning',
+              'foundation/logic/deductive-reasoning', // Duplicate within group
             ],
           },
         ],
@@ -252,52 +274,168 @@ describe('UMS Persona Loader', () => {
 
       const result = validatePersona(invalidPersona);
       expect(result.valid).toBe(false);
-      expect(result.errors.length).toBeGreaterThanOrEqual(2);
       expect(
-        result.errors.some(e => e.path === 'moduleGroups[0].modules[1]')
-      ).toBe(true);
-      expect(
-        result.errors.some(e => e.path === 'moduleGroups[0].modules[2]')
+        result.errors.some(e => e.message.includes('Duplicate module ID'))
       ).toBe(true);
     });
 
-    it('should warn about empty modules array', () => {
-      const validPersona = loadPersonaFixture(
-        'valid-empty-modules.persona.yml'
-      ) as Record<string, unknown>;
+    it('should reject duplicate module IDs across different entries', () => {
+      const invalidPersona: Persona = {
+        name: 'Duplicate Across Entries',
+        version: '1.0.0',
+        schemaVersion: '2.0',
+        description: 'Test',
+        semantic: 'Test',
+        modules: [
+          'foundation/logic/deductive-reasoning',
+          {
+            group: 'Test Group',
+            ids: ['foundation/logic/deductive-reasoning'], // Duplicate from above
+          },
+        ],
+      };
+
+      const result = validatePersona(invalidPersona);
+      expect(result.valid).toBe(false);
+      expect(
+        result.errors.some(e => e.message.includes('Duplicate module ID'))
+      ).toBe(true);
+    });
+
+    it('should reject non-string module IDs', () => {
+      const invalidPersona = {
+        name: 'Non-String IDs',
+        version: '1.0.0',
+        schemaVersion: '2.0',
+        description: 'Test',
+        semantic: 'Test',
+        modules: [
+          {
+            group: 'Test Group',
+            ids: [
+              'foundation/logic/deductive-reasoning', // Valid
+              123, // Invalid: number
+              { id: 'not-a-string' }, // Invalid: object
+            ],
+          },
+        ],
+      } as unknown as Persona;
+
+      const result = validatePersona(invalidPersona);
+      expect(result.valid).toBe(false);
+      expect(result.errors.some(e => e.path?.includes('ids'))).toBe(true);
+      expect(result.errors.some(e => e.message.includes('string'))).toBe(true);
+    });
+
+    it('should allow optional identity field', () => {
+      const validPersona: Persona = {
+        name: 'No Identity',
+        version: '1.0.0',
+        schemaVersion: '2.0',
+        description: 'Persona without identity',
+        semantic: 'Test',
+        modules: ['foundation/logic/deductive-reasoning'],
+      };
 
       const result = validatePersona(validPersona);
       expect(result.valid).toBe(true);
-      expect(result.warnings).toHaveLength(1);
-      expect(result.warnings[0].message).toContain('has no modules');
+      expect(result.errors).toHaveLength(0);
     });
 
-    it('should handle wrong modules field type', () => {
-      const invalidPersona = loadPersonaFixture(
-        'invalid-wrong-modules-type.persona.yml'
-      ) as Record<string, unknown>;
+    it('should allow empty identity string', () => {
+      const validPersona: Persona = {
+        name: 'Empty Identity',
+        version: '1.0.0',
+        schemaVersion: '2.0',
+        description: 'Persona with empty identity',
+        semantic: 'Test',
+        identity: '',
+        modules: ['foundation/logic/deductive-reasoning'],
+      };
 
-      const result = validatePersona(invalidPersona);
-      expect(result.valid).toBe(false);
-      expect(result.errors.length).toBeGreaterThan(0);
-      expect(
-        result.errors.some(e => e.path === 'moduleGroups[0].modules')
-      ).toBe(true);
-      expect(result.errors.some(e => e.message.includes('array'))).toBe(true);
+      const result = validatePersona(validPersona);
+      expect(result.valid).toBe(true);
+      expect(result.errors).toHaveLength(0);
     });
 
-    it('should handle wrong groupName type', () => {
-      const invalidPersona = loadPersonaFixture(
-        'invalid-wrong-groupname-type.persona.yml'
-      ) as Record<string, unknown>;
+    it('should allow optional attribution field', () => {
+      const validPersona: Persona = {
+        name: 'No Attribution',
+        version: '1.0.0',
+        schemaVersion: '2.0',
+        description: 'Persona without attribution',
+        semantic: 'Test',
+        modules: ['foundation/logic/deductive-reasoning'],
+      };
 
-      const result = validatePersona(invalidPersona);
-      expect(result.valid).toBe(false);
-      expect(result.errors.length).toBeGreaterThan(0);
-      expect(
-        result.errors.some(e => e.path === 'moduleGroups[0].groupName')
-      ).toBe(true);
-      expect(result.errors.some(e => e.message.includes('string'))).toBe(true);
+      const result = validatePersona(validPersona);
+      expect(result.valid).toBe(true);
+      expect(result.errors).toHaveLength(0);
+    });
+
+    it('should validate attribution as boolean', () => {
+      const validWithAttribution: Persona = {
+        name: 'With Attribution',
+        version: '1.0.0',
+        schemaVersion: '2.0',
+        description: 'Persona with attribution',
+        semantic: 'Test',
+        attribution: true,
+        modules: ['foundation/logic/deductive-reasoning'],
+      };
+
+      const result = validatePersona(validWithAttribution);
+      expect(result.valid).toBe(true);
+      expect(result.errors).toHaveLength(0);
+    });
+
+    it('should allow optional tags array', () => {
+      const validPersona: Persona = {
+        name: 'With Tags',
+        version: '1.0.0',
+        schemaVersion: '2.0',
+        description: 'Persona with tags',
+        semantic: 'Test',
+        tags: ['engineering', 'code-quality'],
+        modules: ['foundation/logic/deductive-reasoning'],
+      };
+
+      const result = validatePersona(validPersona);
+      expect(result.valid).toBe(true);
+      expect(result.errors).toHaveLength(0);
+    });
+
+    it('should allow optional domains array', () => {
+      const validPersona: Persona = {
+        name: 'With Domains',
+        version: '1.0.0',
+        schemaVersion: '2.0',
+        description: 'Persona with domains',
+        semantic: 'Test',
+        domains: ['software-development', 'devops'],
+        modules: ['foundation/logic/deductive-reasoning'],
+      };
+
+      const result = validatePersona(validPersona);
+      expect(result.valid).toBe(true);
+      expect(result.errors).toHaveLength(0);
+    });
+
+    it('should validate grouped modules with optional group name', () => {
+      const validPersona: Persona = {
+        name: 'No Group Name',
+        version: '1.0.0',
+        schemaVersion: '2.0',
+        description: 'Grouped modules without group name',
+        semantic: 'Test',
+        modules: [
+          { ids: ['foundation/logic/deductive-reasoning'] }, // No group field
+        ],
+      };
+
+      const result = validatePersona(validPersona);
+      expect(result.valid).toBe(true);
+      expect(result.errors).toHaveLength(0);
     });
   });
 });

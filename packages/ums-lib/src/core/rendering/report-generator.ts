@@ -1,37 +1,40 @@
 /**
- * UMS v1.0 Build Report Generator - Pure Functions
- * Implements build report generation per UMS v1.0 specification Section 9.3
+ * UMS v2.0 Build Report Generator - Pure Functions
+ * Implements build report generation per UMS v2.0 specification Section 7.3
  */
 
 import { createHash } from 'node:crypto';
 import pkg from '#package.json' with { type: 'json' };
 import type {
-  UMSModule,
-  UMSPersona,
+  Module,
+  Persona,
   BuildReport,
   BuildReportGroup,
   BuildReportModule,
 } from '../../types/index.js';
 
 /**
- * Generates a build report with UMS v1.0 spec compliance (Section 9.3)
+ * Generates a build report with UMS v2.0 spec compliance (Section 7.3)
  * @param persona - The persona configuration
  * @param modules - Array of resolved modules in correct order
  * @param moduleFileContents - Map of module ID to file content for digest generation
  * @returns Complete build report
  */
 export function generateBuildReport(
-  persona: UMSPersona,
-  modules: UMSModule[],
+  persona: Persona,
+  modules: Module[],
   moduleFileContents = new Map<string, string>()
 ): BuildReport {
-  // Create build report groups following UMS v1.0 spec
+  // Create build report groups following UMS v2.0 spec
   const moduleGroups: BuildReportGroup[] = [];
 
-  for (const group of persona.moduleGroups) {
+  for (const entry of persona.modules) {
     const reportModules: BuildReportModule[] = [];
 
-    for (const moduleId of group.modules) {
+    // Handle both string IDs and grouped modules
+    const moduleIds = typeof entry === 'string' ? [entry] : entry.ids;
+
+    for (const moduleId of moduleIds) {
       const module = modules.find(m => m.id === moduleId);
       if (module) {
         // Generate module file digest (only if content is provided)
@@ -45,16 +48,15 @@ export function generateBuildReport(
 
         const reportModule: BuildReportModule = {
           id: module.id,
-          name: module.meta.name,
+          name: module.metadata.name,
           version: module.version,
           source: 'Local', // TODO: Distinguish between Standard Library and Local
           digest: moduleDigest ? `sha256:${moduleDigest}` : '',
-          shape: module.shape,
-          deprecated: module.meta.deprecated ?? false,
+          deprecated: module.metadata.deprecated ?? false,
         };
 
-        if (module.meta.replacedBy) {
-          reportModule.replacedBy = module.meta.replacedBy;
+        if (module.metadata.replacedBy) {
+          reportModule.replacedBy = module.metadata.replacedBy;
         }
 
         reportModules.push(reportModule);
@@ -62,7 +64,7 @@ export function generateBuildReport(
     }
 
     moduleGroups.push({
-      groupName: group.groupName ?? '',
+      groupName: typeof entry === 'string' ? '' : (entry.group ?? ''),
       modules: reportModules,
     });
   }
@@ -73,7 +75,7 @@ export function generateBuildReport(
     description: persona.description,
     semantic: persona.semantic,
     identity: persona.identity,
-    moduleGroups: persona.moduleGroups,
+    modules: persona.modules,
   });
 
   const personaDigest = createHash('sha256')
@@ -82,7 +84,7 @@ export function generateBuildReport(
 
   return {
     personaName: persona.name,
-    schemaVersion: '1.0',
+    schemaVersion: persona.schemaVersion,
     toolVersion: pkg.version,
     personaDigest,
     buildTimestamp: new Date().toISOString(),
@@ -95,13 +97,13 @@ export function generateBuildReport(
  * @param persona - The persona to generate digest for
  * @returns SHA-256 digest of persona content
  */
-export function generatePersonaDigest(persona: UMSPersona): string {
+export function generatePersonaDigest(persona: Persona): string {
   const personaContent = JSON.stringify({
     name: persona.name,
     description: persona.description,
     semantic: persona.semantic,
     identity: persona.identity,
-    moduleGroups: persona.moduleGroups,
+    modules: persona.modules,
   });
 
   return createHash('sha256').update(personaContent).digest('hex');

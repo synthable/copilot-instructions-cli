@@ -132,26 +132,26 @@ describe('file-operations', () => {
 
   describe('discoverModuleFiles', () => {
     it('should discover module files in multiple paths', async () => {
-      const mockFiles1 = [
-        '/path1/module1.module.yml',
-        '/path1/module2.module.yml',
+      const mockFiles1Ts = [
+        '/path1/module1.module.ts',
+        '/path1/module2.module.ts',
       ];
-      const mockFiles2 = ['/path2/module3.module.yml'];
+      const mockFiles2Ts = ['/path2/module3.module.ts'];
 
       vi.mocked(glob)
-        .mockResolvedValueOnce(mockFiles1)
-        .mockResolvedValueOnce(mockFiles2);
+        .mockResolvedValueOnce(mockFiles1Ts)
+        .mockResolvedValueOnce(mockFiles2Ts);
 
       const result = await discoverModuleFiles(['/path1', '/path2']);
 
-      expect(glob).toHaveBeenCalledTimes(2);
-      expect(glob).toHaveBeenCalledWith('/path1/**/*.module.yml', {
+      expect(glob).toHaveBeenCalledTimes(2); // 2 paths × 1 extension
+      expect(glob).toHaveBeenCalledWith('/path1/**/*.module.ts', {
         nodir: true,
       });
-      expect(glob).toHaveBeenCalledWith('/path2/**/*.module.yml', {
+      expect(glob).toHaveBeenCalledWith('/path2/**/*.module.ts', {
         nodir: true,
       });
-      expect(result).toEqual([...mockFiles1, ...mockFiles2]);
+      expect(result).toEqual([...mockFiles1Ts, ...mockFiles2Ts]);
     });
 
     it('should handle empty paths array', async () => {
@@ -287,33 +287,34 @@ describe('file-operations', () => {
 
   describe('isPersonaFile', () => {
     it('should return true for valid persona file extensions', () => {
-      expect(isPersonaFile('test.persona.yml')).toBe(true);
-      expect(isPersonaFile('/path/to/test.persona.yml')).toBe(true);
-      expect(isPersonaFile('complex-name-v1.persona.yml')).toBe(true);
+      expect(isPersonaFile('test.persona.ts')).toBe(true);
+      expect(isPersonaFile('/path/to/test.persona.ts')).toBe(true);
+      expect(isPersonaFile('complex-name-v1.persona.ts')).toBe(true);
     });
 
     it('should return false for invalid extensions', () => {
+      expect(isPersonaFile('test.ts')).toBe(false);
       expect(isPersonaFile('test.yml')).toBe(false);
-      expect(isPersonaFile('test.persona.yaml')).toBe(false);
-      expect(isPersonaFile('test.module.yml')).toBe(false);
+      expect(isPersonaFile('test.persona.yml')).toBe(false);
+      expect(isPersonaFile('test.module.ts')).toBe(false);
       expect(isPersonaFile('test.txt')).toBe(false);
       expect(isPersonaFile('test')).toBe(false);
     });
 
     it('should handle edge cases', () => {
       expect(isPersonaFile('')).toBe(false);
-      expect(isPersonaFile('.persona.yml')).toBe(true);
-      expect(isPersonaFile('persona.yml')).toBe(false);
+      expect(isPersonaFile('.persona.ts')).toBe(true);
+      expect(isPersonaFile('persona.ts')).toBe(false);
     });
   });
 
   describe('validatePersonaFile', () => {
     it('should not throw for valid persona files', () => {
       expect(() => {
-        validatePersonaFile('test.persona.yml');
+        validatePersonaFile('test.persona.ts');
       }).not.toThrow();
       expect(() => {
-        validatePersonaFile('/path/to/test.persona.yml');
+        validatePersonaFile('/path/to/test.persona.ts');
       }).not.toThrow();
     });
 
@@ -321,22 +322,22 @@ describe('file-operations', () => {
       expect(() => {
         validatePersonaFile('test.yml');
       }).toThrow(
-        'Persona file must have .persona.yml extension, got: test.yml\n' +
-          'UMS v1.0 requires persona files to use YAML format with .persona.yml extension.'
+        'Persona file must have .persona.ts extension, got: test.yml\n' +
+          'UMS v2.0 uses TypeScript format (.persona.ts) for personas.'
       );
 
       expect(() => {
         validatePersonaFile('test.persona.yaml');
       }).toThrow(
-        'Persona file must have .persona.yml extension, got: test.persona.yaml\n' +
-          'UMS v1.0 requires persona files to use YAML format with .persona.yml extension.'
+        'Persona file must have .persona.ts extension, got: test.persona.yaml\n' +
+          'UMS v2.0 uses TypeScript format (.persona.ts) for personas.'
       );
 
       expect(() => {
         validatePersonaFile('test.module.yml');
       }).toThrow(
-        'Persona file must have .persona.yml extension, got: test.module.yml\n' +
-          'UMS v1.0 requires persona files to use YAML format with .persona.yml extension.'
+        'Persona file must have .persona.ts extension, got: test.module.yml\n' +
+          'UMS v2.0 uses TypeScript format (.persona.ts) for personas.'
       );
     });
 
@@ -344,8 +345,8 @@ describe('file-operations', () => {
       expect(() => {
         validatePersonaFile('');
       }).toThrow(
-        'Persona file must have .persona.yml extension, got: \n' +
-          'UMS v1.0 requires persona files to use YAML format with .persona.yml extension.'
+        'Persona file must have .persona.ts extension, got: \n' +
+          'UMS v2.0 uses TypeScript format (.persona.ts) for personas.'
       );
     });
   });

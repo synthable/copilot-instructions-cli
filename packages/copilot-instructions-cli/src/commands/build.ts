@@ -1,30 +1,31 @@
 /**
  * @module commands/ums-build
- * @description UMS v1.0 build command implementation
+ * @description UMS build command implementation
+ * Supports UMS v2.0 (TypeScript) format only
  */
 
 import chalk from 'chalk';
 import { handleError } from '../utils/error-handler.js';
 import {
-  parsePersona,
   renderMarkdown,
   generateBuildReport,
   ConflictError,
-  type UMSPersona,
-  type UMSModule,
+  type Persona,
+  type Module,
   type BuildReport,
   type ModuleRegistry,
 } from 'ums-lib';
 import { createBuildProgress } from '../utils/progress.js';
-import { writeOutputFile, readFromStdin } from '../utils/file-operations.js';
+import { writeOutputFile } from '../utils/file-operations.js';
 import { discoverAllModules } from '../utils/module-discovery.js';
+import { loadTypeScriptPersona } from '../utils/typescript-loader.js';
 
 /**
  * Options for the build command
  */
 export interface BuildOptions {
-  /** Path to persona file, or undefined for stdin */
-  persona?: string;
+  /** Path to persona .ts file */
+  persona: string;
   /** Output file path, or undefined for stdout */
   output?: string;
   /** Enable verbose output */
@@ -39,7 +40,7 @@ export async function handleBuild(options: BuildOptions): Promise<void> {
   const progress = createBuildProgress('build', verbose);
 
   try {
-    progress.start('Starting UMS v1.0 build process...');
+    progress.start('Starting UMS build process...');
 
     // Setup build environment
     const buildEnvironment = await setupBuildEnvironment(options, progress);
@@ -59,11 +60,16 @@ export async function handleBuild(options: BuildOptions): Promise<void> {
           `[INFO] build: Successfully built persona '${result.persona.name}' with ${result.modules.length} modules`
         )
       );
-      if (result.persona.moduleGroups.length > 1) {
+
+      // Count module groups (v2.0 format)
+      const moduleGroups = result.persona.modules.filter(
+        entry => typeof entry !== 'string'
+      );
+      const groupCount = moduleGroups.length;
+
+      if (groupCount > 1) {
         console.log(
-          chalk.gray(
-            `[INFO] build: Organized into ${result.persona.moduleGroups.length} module groups`
-          )
+          chalk.gray(`[INFO] build: Organized into ${groupCount} module groups`)
         );
       }
     }
@@ -84,7 +90,7 @@ export async function handleBuild(options: BuildOptions): Promise<void> {
  */
 interface BuildEnvironment {
   registry: ModuleRegistry;
-  persona: UMSPersona;
+  persona: Persona;
   outputPath?: string | undefined;
   warnings: string[];
 }
@@ -126,50 +132,16 @@ async function setupBuildEnvironment(
     }
   }
 
-  // Load persona
+  // Load persona (v2.0 TypeScript format only)
   progress.update('Loading persona...');
-  let personaContent: string;
+  progress.update(`Reading persona file: ${personaPath}`);
 
-  if (personaPath) {
-    progress.update(`Reading persona file: ${personaPath}`);
-    const { readFile } = await import('fs/promises');
-    personaContent = await readFile(personaPath, 'utf-8');
-
-    if (verbose) {
-      console.log(
-        chalk.gray(`[INFO] build: Reading persona from ${personaPath}`)
-      );
-    }
-  } else {
-    progress.update('Reading persona from stdin...');
-
-    if (process.stdin.isTTY) {
-      progress.fail('No persona file specified and stdin is not available');
-      throw new Error(
-        'No persona file specified and stdin is not available. ' +
-          'Use --persona <file> to specify a persona file or pipe YAML content to stdin.'
-      );
-    }
-
-    personaContent = await readFromStdin();
-
-    if (!personaContent.trim()) {
-      progress.fail('No persona content provided via stdin');
-      throw new Error(
-        'No persona content received from stdin. ' +
-          'Ensure YAML content is piped to stdin or use --persona <file>.'
-      );
-    }
-
-    if (verbose) {
-      console.log(chalk.gray('[INFO] build: Reading persona from stdin'));
-    }
-  }
-
-  // Parse persona
-  const persona = parsePersona(personaContent);
+  const persona = await loadTypeScriptPersona(personaPath);
 
   if (verbose) {
+    console.log(
+      chalk.gray(`[INFO] build: Loaded TypeScript persona from ${personaPath}`)
+    );
     console.log(chalk.gray(`[INFO] build: Loaded persona '${persona.name}'`));
   }
 
@@ -188,14 +160,15 @@ async function setupBuildEnvironment(
  */
 interface BuildResult {
   markdown: string;
-  modules: UMSModule[];
-  persona: UMSPersona;
+  modules: Module[];
+  persona: Persona;
   warnings: string[];
   buildReport: BuildReport;
 }
 
 /**
  * Processes persona and modules to generate build result
+ * Handles v2.0 (modules) format only
  */
 function processPersonaAndModules(
   environment: BuildEnvironment,
@@ -203,12 +176,19 @@ function processPersonaAndModules(
 ): BuildResult {
   progress.update('Resolving modules from registry...');
 
-  // Resolve all required modules from registry using the registry's default strategy
-  const requiredModuleIds = environment.persona.moduleGroups.flatMap(
-    group => group.modules
+  // Extract module IDs from persona (v2.0 format only)
+  const requiredModuleIds: string[] = environment.persona.modules.flatMap(
+    entry => {
+      if (typeof entry === 'string') {
+        return [entry];
+      } else {
+        // ModuleGroup: extract IDs from group
+        return entry.ids;
+      }
+    }
   );
 
-  const resolvedModules: UMSModule[] = [];
+  const resolvedModules: Module[] = [];
   const resolutionWarnings: string[] = [];
   const missingModules: string[] = [];
 

@@ -6,9 +6,10 @@
 import chalk from 'chalk';
 import Table from 'cli-table3';
 import { handleError } from '../utils/error-handler.js';
-import type { UMSModule } from 'ums-lib';
+import type { Module } from 'ums-lib';
 import { createDiscoveryProgress } from '../utils/progress.js';
 import { discoverAllModules } from '../utils/module-discovery.js';
+import { getModuleMetadata } from '../types/cli-extensions.js';
 
 interface SearchOptions {
   tier?: string;
@@ -18,23 +19,25 @@ interface SearchOptions {
 /**
  * Searches modules by query across name, description, and tags
  */
-function searchModules(modules: UMSModule[], query: string): UMSModule[] {
+function searchModules(modules: Module[], query: string): Module[] {
   const lowerCaseQuery = query.toLowerCase();
 
   return modules.filter(module => {
-    // Search in meta.name
-    if (module.meta.name.toLowerCase().includes(lowerCaseQuery)) {
+    const metadata = getModuleMetadata(module);
+
+    // Search in metadata.name
+    if (metadata.name.toLowerCase().includes(lowerCaseQuery)) {
       return true;
     }
 
-    // Search in meta.description
-    if (module.meta.description.toLowerCase().includes(lowerCaseQuery)) {
+    // Search in metadata.description
+    if (metadata.description.toLowerCase().includes(lowerCaseQuery)) {
       return true;
     }
 
-    // Search in meta.tags if present
-    if (module.meta.tags && Array.isArray(module.meta.tags)) {
-      return module.meta.tags.some(tag =>
+    // Search in metadata.tags if present
+    if (metadata.tags && Array.isArray(metadata.tags)) {
+      return metadata.tags.some(tag =>
         tag.toLowerCase().includes(lowerCaseQuery)
       );
     }
@@ -47,9 +50,9 @@ function searchModules(modules: UMSModule[], query: string): UMSModule[] {
  * Filters and sorts modules according to M6 requirements (same as M5)
  */
 function filterAndSortModules(
-  modules: UMSModule[],
+  modules: Module[],
   tierFilter?: string
-): UMSModule[] {
+): Module[] {
   let filteredModules = modules;
 
   if (tierFilter) {
@@ -66,9 +69,11 @@ function filterAndSortModules(
     });
   }
 
-  // M6 sorting: same as M5 - meta.name then id
+  // M6 sorting: same as M5 - metadata.name then id
   filteredModules.sort((a, b) => {
-    const nameCompare = a.meta.name.localeCompare(b.meta.name);
+    const metaA = getModuleMetadata(a);
+    const metaB = getModuleMetadata(b);
+    const nameCompare = metaA.name.localeCompare(metaB.name);
     if (nameCompare !== 0) return nameCompare;
     return a.id.localeCompare(b.id);
   });
@@ -79,7 +84,7 @@ function filterAndSortModules(
 /**
  * Renders the search results table with consistent styling
  */
-function renderSearchResults(modules: UMSModule[], query: string): void {
+function renderSearchResults(modules: Module[], query: string): void {
   const table = new Table({
     head: ['ID', 'Tier/Subject', 'Name', 'Description'],
     style: {
@@ -96,12 +101,13 @@ function renderSearchResults(modules: UMSModule[], query: string): void {
     const tier = idParts[0];
     const subject = idParts.slice(1).join('/');
     const tierSubject = subject ? `${tier}/${subject}` : tier;
+    const metadata = getModuleMetadata(module);
 
     table.push([
       chalk.green(module.id),
       chalk.yellow(tierSubject),
-      chalk.white.bold(module.meta.name),
-      chalk.gray(module.meta.description),
+      chalk.white.bold(metadata.name),
+      chalk.gray(metadata.description),
     ]);
   });
 

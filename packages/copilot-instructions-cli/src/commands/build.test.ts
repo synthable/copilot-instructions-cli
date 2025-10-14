@@ -2,16 +2,16 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { writeOutputFile, readFromStdin } from '../utils/file-operations.js';
 import { handleBuild } from './build.js';
 import {
-  parsePersona,
   renderMarkdown,
   generateBuildReport,
   resolvePersonaModules,
-  type UMSPersona,
-  type UMSModule,
+  type Persona,
+  type Module,
   type BuildReport,
   ModuleRegistry,
 } from 'ums-lib';
 import { discoverAllModules } from '../utils/module-discovery.js';
+import { loadTypeScriptPersona } from '../utils/typescript-loader.js';
 
 // Mock dependencies
 vi.mock('fs/promises', () => ({
@@ -40,7 +40,6 @@ vi.mock('ora', () => {
 
 // Mock pure functions from UMS library
 vi.mock('ums-lib', () => ({
-  parsePersona: vi.fn(),
   renderMarkdown: vi.fn(),
   generateBuildReport: vi.fn(),
   resolvePersonaModules: vi.fn(),
@@ -73,6 +72,10 @@ vi.mock('../utils/module-discovery.js', () => ({
   discoverAllModules: vi.fn(),
 }));
 
+vi.mock('../utils/typescript-loader.js', () => ({
+  loadTypeScriptPersona: vi.fn(),
+}));
+
 vi.mock('../utils/error-handler.js', () => ({
   handleError: vi.fn(),
 }));
@@ -84,66 +87,70 @@ const mockExit = vi.spyOn(process, 'exit').mockImplementation(() => {
 
 describe('build command', () => {
   // Type-safe mocks
-  const mockParsePersona = vi.mocked(parsePersona);
   const mockRenderMarkdown = vi.mocked(renderMarkdown);
   const mockGenerateBuildReport = vi.mocked(generateBuildReport);
   const mockResolvePersonaModules = vi.mocked(resolvePersonaModules);
   const mockDiscoverAllModules = vi.mocked(discoverAllModules);
+  const mockLoadTypeScriptPersona = vi.mocked(loadTypeScriptPersona);
   const mockWriteOutputFile = vi.mocked(writeOutputFile);
   const mockReadFromStdin = vi.mocked(readFromStdin);
 
-  const mockPersona: UMSPersona = {
+  const mockPersona: Persona = {
     name: 'Test Persona',
     version: '1.0',
-    schemaVersion: '1.0',
+    schemaVersion: '2.0',
     description: 'A test persona',
     semantic: '',
     identity: 'You are a helpful test assistant',
-    moduleGroups: [
+    modules: [
       {
-        groupName: 'Test Group',
-        modules: ['test/module-1', 'test/module-2'],
+        group: 'Test Group',
+        ids: ['test/module-1', 'test/module-2'],
       },
     ],
   };
 
-  const mockModules: UMSModule[] = [
+  const mockModules: Module[] = [
     {
       id: 'test/module-1',
-      filePath: '/test/module-1.md',
-      version: '1.0',
-      schemaVersion: '1.0',
-      shape: 'procedure',
-      meta: {
+      version: '1.0.0',
+      schemaVersion: '2.0',
+      capabilities: ['testing'],
+      metadata: {
         name: 'Test Module 1',
         description: 'First test module',
         semantic: 'Test semantic content',
       },
-      body: {
-        goal: 'Test goal',
-        process: ['Step 1', 'Step 2'],
+      instruction: {
+        type: 'instruction',
+        instruction: {
+          purpose: 'Test goal',
+          process: ['Step 1', 'Step 2'],
+        },
       },
-    },
+    } as Module,
     {
       id: 'test/module-2',
-      filePath: '/test/module-2.md',
-      version: '1.0',
-      schemaVersion: '1.0',
-      shape: 'specification',
-      meta: {
+      version: '1.0.0',
+      schemaVersion: '2.0',
+      capabilities: ['testing'],
+      metadata: {
         name: 'Test Module 2',
         description: 'Second test module',
         semantic: 'Test semantic content',
       },
-      body: {
-        goal: 'Test specification',
+      instruction: {
+        type: 'instruction',
+        instruction: {
+          purpose: 'Test specification',
+        },
       },
-    },
+    } as Module,
   ];
 
   const mockBuildReport: BuildReport = {
     personaName: 'Test Persona',
-    schemaVersion: '1.0',
+    schemaVersion: '2.0',
     toolVersion: '1.0.0',
     personaDigest: 'abc123',
     buildTimestamp: '2023-01-01T00:00:00.000Z',
@@ -170,7 +177,7 @@ describe('build command', () => {
       warnings: [],
     });
 
-    mockParsePersona.mockReturnValue(mockPersona);
+    mockLoadTypeScriptPersona.mockResolvedValue(mockPersona);
     mockRenderMarkdown.mockReturnValue(
       '# Test Persona Instructions\\n\\nTest content'
     );
@@ -198,7 +205,7 @@ describe('build command', () => {
 
     // Assert
     expect(mockDiscoverAllModules).toHaveBeenCalled();
-    expect(mockParsePersona).toHaveBeenCalled();
+    expect(mockLoadTypeScriptPersona).toHaveBeenCalledWith('test.persona.yml');
     expect(mockRenderMarkdown).toHaveBeenCalledWith(mockPersona, mockModules);
     expect(mockGenerateBuildReport).toHaveBeenCalledWith(
       mockPersona,
@@ -214,24 +221,15 @@ describe('build command', () => {
     );
   });
 
-  it('should build persona from stdin with output to stdout', async () => {
+  it('should build persona from file with output to stdout', async () => {
     // Arrange
     const options = {
+      persona: 'test.persona.yml',
       verbose: false,
+      // No output specified - should write to stdout
     };
 
-    const mockStdinContent = `
-name: Test Persona
-description: A test persona
-semantic: ""
-identity: You are a helpful test assistant
-moduleGroups:
-  - groupName: Test Group
-    modules:
-      - test/module-1
-`;
-
-    mockReadFromStdin.mockResolvedValue(mockStdinContent);
+    mockReadFromStdin.mockResolvedValue('');
     const mockConsoleLog = vi
       .spyOn(console, 'log')
       .mockImplementation(() => {});
@@ -240,8 +238,7 @@ moduleGroups:
     await handleBuild(options);
 
     // Assert
-    expect(mockReadFromStdin).toHaveBeenCalled();
-    expect(mockParsePersona).toHaveBeenCalledWith(mockStdinContent);
+    expect(mockLoadTypeScriptPersona).toHaveBeenCalledWith('test.persona.yml');
     expect(mockConsoleLog).toHaveBeenCalledWith(
       '# Test Persona Instructions\\n\\nTest content'
     );

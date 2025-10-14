@@ -79,18 +79,16 @@ describe('error-handler', () => {
       handleError(error, options);
 
       expect(consoleMock.error).toHaveBeenCalledWith(
-        expect.stringContaining(
-          '[ERROR] validate: validation - Invalid field value'
-        )
+        expect.stringContaining('❌ Error: Invalid field value')
       );
       expect(consoleMock.error).toHaveBeenCalledWith(
         expect.stringContaining('File: /path/to/file.yml')
       );
       expect(consoleMock.error).toHaveBeenCalledWith(
-        expect.stringContaining('Section: meta.name')
+        expect.stringContaining('Field: meta.name')
       );
       expect(consoleMock.error).toHaveBeenCalledWith(
-        expect.stringContaining('Check YAML syntax and structure')
+        expect.stringContaining('Check YAML/TypeScript syntax and structure')
       );
     });
 
@@ -108,12 +106,10 @@ describe('error-handler', () => {
       handleError(error, options);
 
       expect(consoleMock.error).toHaveBeenCalledWith(
-        expect.stringContaining(
-          '[ERROR] build: module loading - Failed to load module'
-        )
+        expect.stringContaining('❌ Error: Failed to load module')
       );
       expect(consoleMock.error).toHaveBeenCalledWith(
-        expect.stringContaining('File: /path/to/module.yml')
+        expect.stringContaining('/path/to/module.yml')
       );
       expect(consoleMock.error).toHaveBeenCalledWith(
         expect.stringContaining('Check file exists and is readable')
@@ -134,12 +130,10 @@ describe('error-handler', () => {
       handleError(error, options);
 
       expect(consoleMock.error).toHaveBeenCalledWith(
-        expect.stringContaining(
-          '[ERROR] build: persona loading - Failed to load persona'
-        )
+        expect.stringContaining('❌ Error: Failed to load persona')
       );
       expect(consoleMock.error).toHaveBeenCalledWith(
-        expect.stringContaining('File: /path/to/persona.yml')
+        expect.stringContaining('/path/to/persona.yml')
       );
       expect(consoleMock.error).toHaveBeenCalledWith(
         expect.stringContaining('Check persona file exists and is readable')
@@ -181,9 +175,7 @@ describe('error-handler', () => {
       handleError(error, options);
 
       expect(consoleMock.error).toHaveBeenCalledWith(
-        expect.stringContaining(
-          '[ERROR] test: UMS operation - Generic UMS error'
-        )
+        expect.stringContaining('❌ Error: Generic UMS error')
       );
       expect(consoleMock.error).toHaveBeenCalledWith(
         expect.stringContaining('Context: test context')

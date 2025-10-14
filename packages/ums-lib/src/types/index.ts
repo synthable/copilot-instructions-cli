@@ -1,245 +1,478 @@
 /**
- * Type definitions for UMS v1.0 specification
+ * @file Type definitions for the Unified Module System (UMS) v2.0 specification.
+ * @see {@link file://./../../docs/spec/unified_module_system_v2_spec.md}
+ * @see {@link file://./../../docs/ums-v2-lib-implementation.md}
  */
 
-// Module configuration types (UMS v1.0 spec Section 6.1)
-export interface ModuleConfig {
-  /** Local module paths with conflict resolution */
-  localModulePaths: LocalModulePath[];
-}
+// #region Core Module Types (Implementation Guide Section 2.2)
 
-export interface LocalModulePath {
-  /** Relative path from project root to directory containing .module.yml files */
-  path: string;
-  /** Conflict resolution strategy when module IDs collide */
-  onConflict?: 'error' | 'replace' | 'warn';
-}
-
-// Top-level UMS v1.0 Module structure (Section 2.1)
-export interface UMSModule {
-  /** The Module Identifier (Section 3) */
+/**
+ * Represents a UMS v2.0 Module, the fundamental unit of instruction.
+ * This is a TypeScript-first format.
+ */
+export interface Module {
+  /** The unique identifier for the module (e.g., "foundation/ethics/do-no-harm"). */
   id: string;
-  /** Semantic version (present but ignored in v1.0) */
+  /** The semantic version of the module content (e.g., "1.0.0"). */
   version: string;
-  /** UMS specification version ("1.0") */
+  /** The UMS specification version this module adheres to. Must be "2.0". */
   schemaVersion: string;
-  /** Module structural type (Section 2.5) */
-  shape: string;
-  /** Human-readable and AI-discoverable metadata */
-  meta: ModuleMeta;
-  /** The instructional content */
-  body: ModuleBody;
-  /** Absolute path to the source file (present when loaded from filesystem, absent for parsed content) */
-  filePath?: string;
+  /** A list of capabilities this module provides. */
+  capabilities: string[];
+  /** Human-readable and AI-discoverable metadata. */
+  metadata: ModuleMetadata;
+  /** The module's cognitive level within its tier (0-4). */
+  cognitiveLevel?: number;
+  /** The application domain(s) for the module. */
+  domain?: string | string[];
+  /** The core instructional content of the module, composed of one or more components. */
+  components?: Component[];
+
+  /** Shorthand for a single instruction component. Mutually exclusive with `components`. */
+  instruction?: InstructionComponent;
+  /** Shorthand for a single knowledge component. Mutually exclusive with `components`. */
+  knowledge?: KnowledgeComponent;
+  /** Shorthand for a single data component. Mutually exclusive with `components`. */
+  data?: DataComponent;
 }
 
-// Module metadata block (Section 2.2)
-export interface ModuleMeta {
-  /** Human-readable, Title Case name */
+/**
+ * Metadata providing descriptive information about the module.
+ */
+export interface ModuleMetadata {
+  /** A concise, human-readable name in Title Case. */
   name: string;
-  /** Concise, human-readable summary */
+  /** A brief, one-sentence summary of the module's purpose. */
   description: string;
-  /** Dense, keyword-rich paragraph for AI semantic search */
+  /** A dense, keyword-rich paragraph for semantic search by AI agents. */
   semantic: string;
-  /** Foundation layer number (0-4, foundation tier only) */
-  layer?: number;
-  /** Optional lowercase keywords for filtering and search boosting */
+  /** Optional keywords for filtering and search boosting. */
   tags?: string[];
-  /** SPDX license identifier */
+  /** Describes problems this module is designed to solve. */
+  solves?: ProblemSolution[];
+  /** Defines relationships between this module and others. */
+  relationships?: ModuleRelationships;
+  /** Optional quality and maintenance metrics. */
+  quality?: QualityMetadata;
+  /** The SPDX license identifier for the module's content. */
   license?: string;
-  /** List of primary authors or maintainers */
+  /** A list of the primary authors or maintainers. */
   authors?: string[];
-  /** URL to source repository or documentation */
+  /** A URL to the module's source repository or documentation. */
   homepage?: string;
-  /** Flag indicating if module is deprecated */
+  /** Flag indicating if the module is deprecated. */
   deprecated?: boolean;
-  /** ID of successor module if deprecated */
+  /** The ID of a successor module, if this module is deprecated. */
   replacedBy?: string;
 }
 
-// Module body containing typed directives (Section 4)
-export interface ModuleBody {
-  /** Primary objective or core concept (string) */
-  goal?: string;
-  /** Sequential steps (array of strings) */
-  process?: string[];
-  /** Non-negotiable rules (array of strings) */
-  constraints?: string[];
-  /** High-level concepts and trade-offs (array of strings) */
-  principles?: string[];
-  /** Verification checklist (array of strings) */
-  criteria?: string[];
-  /** Structured data block */
-  data?: DataDirective;
-  /** Illustrative examples */
-  examples?: ExampleDirective[];
+/**
+ * Describes a problem that a module is designed to solve.
+ */
+export interface ProblemSolution {
+  /** A description of the problem. */
+  problem: string;
+  /** Keywords related to the problem. */
+  keywords: string[];
 }
 
-// Data directive object structure (Section 4.2)
-export interface DataDirective {
-  /** IANA media type of content */
-  mediaType: string;
-  /** Raw content as multi-line string */
-  value: string;
+/**
+ * Defines relationships between this module and others.
+ */
+export interface ModuleRelationships {
+  /** A list of module IDs that this module requires to function correctly. */
+  requires?: string[];
+  /** A list of module IDs that are recommended for use with this module. */
+  recommends?: string[];
+  /** A list of module IDs that this module conflicts with. */
+  conflictsWith?: string[];
+  /** The ID of a module that this module extends. */
+  extends?: string;
 }
 
-// Example directive object structure (Section 4.3)
-export interface ExampleDirective {
-  /** Short, descriptive title (unique within module) */
+/**
+ * Optional metadata for assessing the quality, maturity, and maintenance status of a module.
+ */
+export interface QualityMetadata {
+  /** The module's development status. */
+  maturity: 'alpha' | 'beta' | 'stable' | 'deprecated';
+  /** A score from 0.0 to 1.0 indicating the author's confidence in the module. */
+  confidence: number;
+  /** The date the module was last verified, in ISO 8601 format. */
+  lastVerified?: string;
+  /** Flag indicating if the module is experimental. */
+  experimental?: boolean;
+}
+
+// #endregion
+
+// #region Component Types (Implementation Guide Section 2.3)
+
+/**
+ * Enum for the different types of components.
+ */
+export enum ComponentType {
+  Instruction = 'instruction',
+  Knowledge = 'knowledge',
+  Data = 'data',
+}
+
+/**
+ * A component that provides actionable instructions.
+ */
+export interface InstructionComponent {
+  /** The type of the component. */
+  type: ComponentType.Instruction;
+  /** Optional metadata for the component. */
+  metadata?: ComponentMetadata;
+  /** The instructional content. */
+  instruction: {
+    /** A clear statement of the component's purpose. */
+    purpose: string;
+    /** An ordered list of steps to follow. */
+    process?: (string | ProcessStep)[];
+    /** A list of non-negotiable rules or boundaries. */
+    constraints?: (string | Constraint)[];
+    /** A list of guiding principles or heuristics. */
+    principles?: string[];
+    /** A checklist for verifying successful completion. */
+    criteria?: (string | Criterion)[];
+  };
+}
+
+/**
+ * A detailed, structured process step.
+ */
+export interface ProcessStep {
+  /** The title of the step. */
+  step: string;
+  /** A detailed description of the step. */
+  detail?: string;
+  /** A check to validate the step's completion. */
+  validate?: {
+    check: string;
+    severity?: 'error' | 'warning';
+  };
+  /** A condition for when the step should be performed. */
+  when?: string;
+  /** The action to be performed. */
+  do?: string;
+}
+
+/**
+ * A detailed, structured constraint.
+ */
+export interface Constraint {
+  /** The text of the constraint. */
+  rule: string;
+  /** The severity level of the constraint. */
+  severity?: 'error' | 'warning' | 'info';
+  /** A condition for when the constraint applies. */
+  when?: string;
+  /** Examples of valid and invalid cases. */
+  examples?: {
+    valid?: string[];
+    invalid?: string[];
+  };
+  /** The rationale for the constraint. */
+  rationale?: string;
+}
+
+/**
+ * A detailed, structured criterion for verification.
+ */
+export interface Criterion {
+  /** The text of the criterion. */
+  item: string;
+  /** The category of the criterion. */
+  category?: string;
+  /** The severity level of the criterion. */
+  severity?: 'critical' | 'important' | 'nice-to-have';
+  /** The weight or importance of the criterion. */
+  weight?: 'required' | 'recommended' | 'optional';
+}
+
+/**
+ * A component that provides knowledge, concepts, and context.
+ */
+export interface KnowledgeComponent {
+  /** The type of the component. */
+  type: ComponentType.Knowledge;
+  /** Optional metadata for the component. */
+  metadata?: ComponentMetadata;
+  /** The knowledge content. */
+  knowledge: {
+    /** A detailed explanation of the topic. */
+    explanation: string;
+    /** A list of key concepts with definitions and rationales. */
+    concepts?: Concept[];
+    /** A list of illustrative examples. */
+    examples?: Example[];
+    /** A list of common anti-patterns or pitfalls to avoid. */
+    patterns?: Pattern[];
+  };
+}
+
+/**
+ * A key concept with a definition and rationale.
+ */
+export interface Concept {
+  /** The name of the concept. */
+  name: string;
+  /** The definition of the concept. */
+  description: string;
+  /** The rationale for why this concept is important. */
+  rationale?: string;
+  /** Illustrative examples of the concept. */
+  examples?: string[];
+  /** Trade-offs associated with the concept. */
+  tradeoffs?: string[];
+}
+
+/**
+ * An illustrative example with code or text.
+ */
+export interface Example {
+  /** A short, descriptive title. */
   title: string;
-  /** Brief explanation of what the example demonstrates */
+  /** An explanation of what the example demonstrates. */
   rationale: string;
-  /** Primary code or text snippet */
+  /** The code or text snippet. */
   snippet: string;
-  /** Language for syntax highlighting */
+  /** The language of the snippet for syntax highlighting. */
   language?: string;
 }
 
-// Persona definition structure (Section 5)
-export interface UMSPersona {
-  /** Human-readable, Title Case name */
+/**
+ * A description of a common pattern or anti-pattern.
+ */
+export interface Pattern {
+  /** The name of the pattern or anti-pattern. */
   name: string;
-  /** Semantic version (required but ignored in v1.0) */
-  version: string;
-  /** UMS specification version ("1.0") */
-  schemaVersion: string;
-  /** Concise, single-sentence summary */
+  /** The use case for the pattern. */
+  useCase: string;
+  /** A description of the pattern. */
   description: string;
-  /** Dense, keyword-rich paragraph for semantic search */
-  semantic: string;
-  /** Prologue describing role, voice, traits (renamed from role) */
-  identity: string;
-  /** Whether to append attribution after each module */
-  attribution?: boolean;
-  /** Composition groups for modules */
-  moduleGroups: ModuleGroup[];
+  /** Advantages of using the pattern. */
+  advantages?: string[];
+  /** Disadvantages or trade-offs of the pattern. */
+  disadvantages?: string[];
+  /** An example illustrating the pattern. */
+  example?: Example;
 }
 
-// Module group within persona (Section 5.2)
-export interface ModuleGroup {
-  /** Name of the module group (optional) */
-  groupName?: string;
-  /** Array of module IDs in this group */
-  modules: string[];
+/**
+ * A component that provides structured data.
+ */
+export interface DataComponent {
+  /** The type of the component. */
+  type: ComponentType.Data;
+  /** Optional metadata for the component. */
+  metadata?: ComponentMetadata;
+  /** The data content. */
+  data: {
+    /** The format of the data (e.g., "json", "yaml", "xml"). */
+    format: string;
+    /** The structured data, as a string or a typed object. */
+    value: unknown;
+    /** A description of the data's purpose and format. */
+    description?: string;
+  };
 }
 
-// Validation result types
-export interface ValidationResult {
-  /** Whether validation passed */
-  valid: boolean;
-  /** List of validation errors */
-  errors: ValidationError[];
-  /** List of validation warnings */
-  warnings: ValidationWarning[];
+/**
+ * Optional metadata for a component.
+ */
+export interface ComponentMetadata {
+  /** The purpose of the component. */
+  purpose?: string;
+  /** The context in which the component is applicable. */
+  context?: string[];
 }
 
-export interface ValidationError {
-  /** Path to the problematic field */
-  path: string;
-  /** Error message */
-  message: string;
-  /** UMS specification section reference */
-  section?: string;
-}
+/**
+ * A union type for all possible components.
+ */
+export type Component =
+  | InstructionComponent
+  | KnowledgeComponent
+  | DataComponent;
 
-export interface ValidationWarning {
-  /** Path to the field that triggered warning */
-  path: string;
-  /** Warning message */
-  message: string;
-}
+// #endregion
 
-// Build Report structure (UMS v1.0 spec section 9.3 compliant)
-export interface BuildReport {
-  /** Persona name */
-  personaName: string;
-  /** UMS schema version ("1.0") */
-  schemaVersion: string;
-  /** Tool version */
-  toolVersion: string;
-  /** SHA-256 digest of persona content */
-  personaDigest: string;
-  /** Build timestamp in ISO 8601 UTC format */
-  buildTimestamp: string;
-  /** Module groups */
-  moduleGroups: BuildReportGroup[];
-}
+// #region Persona Types (Implementation Guide Section 2.4)
 
-export interface BuildReportGroup {
-  /** Group name */
-  groupName: string;
-  /** Modules in this group */
-  modules: BuildReportModule[];
-}
-
-export interface BuildReportModule {
-  /** Module ID */
-  id: string;
-  /** Module name from meta */
+/**
+ * Defines an AI persona by composing a set of UMS modules.
+ */
+export interface Persona {
+  /** The unique name of the persona. */
   name: string;
-  /** Module version */
+  /** The semantic version of the persona. */
   version: string;
-  /** Module source (e.g., "Standard Library", "Local") */
-  source: string;
-  /** SHA-256 digest of module file content */
-  digest: string;
-  /** Module shape */
-  shape: string;
-  /** Whether module is deprecated */
-  deprecated: boolean;
-  /** Replacement module ID if deprecated */
-  replacedBy?: string;
-  /** Modules this module was composed from (for replace operations) */
-  composedFrom?: string[];
+  /** The UMS specification version this persona adheres to. Must be "2.0". */
+  schemaVersion: string;
+  /** A brief, one-sentence summary of the persona's purpose. */
+  description: string;
+  /** A dense, keyword-rich paragraph for semantic search. */
+  semantic: string;
+  /** A detailed description of the persona's identity, role, and voice. */
+  identity?: string;
+  /** Optional keywords for filtering and search. */
+  tags?: string[];
+  /** The application domain(s) for the persona. */
+  domains?: string[];
+  /** If true, attribution will be added to the rendered output. */
+  attribution?: boolean;
+  /** The ordered list of module entries that compose the persona (spec-compliant). */
+  modules: ModuleEntry[];
 }
 
-// Conflict-aware registry types (Phase 2)
-export interface ModuleEntry {
-  /** The UMS module */
-  module: UMSModule;
-  /** Source information for the module */
+/**
+ * A group of modules within a persona, allowing for logical organization.
+ */
+export interface PersonaModuleGroup {
+  /** An optional name for the group. */
+  group?: string;
+  /** The list of module IDs in this group, in order of composition. */
+  ids: string[];
+}
+
+/**
+ * v2.0 spec-compliant alias for PersonaModuleGroup
+ */
+export type ModuleGroup = PersonaModuleGroup;
+
+// #endregion
+
+// #region Persona Composition Types (Spec Section 4.2)
+
+/**
+ * v2.0 spec-compliant: Module entry in a persona composition.
+ * Can be either a simple module ID string or a grouped set of modules.
+ */
+export type ModuleEntry = string | ModuleGroup;
+
+// #endregion
+
+// #region Registry & Loading Types (Implementation Guide Section 2.5)
+
+/**
+ * Internal registry entry, containing a module and its source information.
+ * Note: Named RegistryEntry to avoid conflict with spec's ModuleEntry (persona composition).
+ */
+export interface RegistryEntry {
+  /** The UMS module. */
+  module: Module;
+  /** Information about the source of the module. */
   source: ModuleSource;
-  /** Timestamp when the module was added to registry */
+  /** Timestamp when the module was added to the registry. */
   addedAt: number;
 }
 
+/**
+ * Information about the source of a module.
+ */
 export interface ModuleSource {
-  /** Type of module source */
+  /** The type of the module source. */
   type: 'standard' | 'local' | 'remote';
-  /** Path to the module source */
+  /** The URI or path to the module source. */
   path: string;
 }
 
+/**
+ * Defines the strategy for resolving module ID conflicts in the registry.
+ */
 export type ConflictStrategy = 'error' | 'warn' | 'replace';
 
-export interface IModuleRegistry {
-  /** Add a module to the registry */
-  add(module: UMSModule, source: ModuleSource): void;
+// #endregion
 
-  /** Resolve a module by ID, applying conflict resolution if needed */
-  resolve(id: string, strategy?: ConflictStrategy): UMSModule | null;
+// #region Validation Types (Implementation Guide Section 2.6)
 
-  /** Check if registry has a module by ID */
-  has(id: string): boolean;
-
-  /** Get total number of unique module IDs */
-  size(): number;
-
-  /** Get all conflicting entries for a module ID */
-  getConflicts(id: string): ModuleEntry[] | null;
-
-  /** Get all module IDs that have conflicts */
-  getConflictingIds(): string[];
-
-  /** Resolve all modules using a specific strategy */
-  resolveAll(strategy: ConflictStrategy): Map<string, UMSModule>;
-
-  /** Add multiple modules at once */
-  addAll(modules: UMSModule[], source: ModuleSource): void;
-
-  /** Get all entries in the registry */
-  getAllEntries(): Map<string, ModuleEntry[]>;
-
-  /** Get summary of sources in registry */
-  getSourceSummary(): Record<string, number>;
+/**
+ * The result of a validation operation on a module or persona.
+ */
+export interface ValidationResult {
+  /** True if the validation passed without errors. */
+  valid: boolean;
+  /** A list of validation errors. */
+  errors: ValidationError[];
+  /** A list of validation warnings. */
+  warnings: ValidationWarning[];
 }
+
+/**
+ * A validation error, indicating a violation of the UMS specification.
+ */
+export interface ValidationError {
+  /** The path to the problematic field (e.g., "metadata.tier"). */
+  path?: string;
+  /** A description of the error. */
+  message: string;
+  /** A reference to the relevant section of the UMS specification. */
+  section?: string;
+}
+
+/**
+ * A validation warning, indicating a potential issue that does not violate the spec.
+ */
+export interface ValidationWarning {
+  /** The path to the field that triggered the warning. */
+  path: string;
+  /** A description of the warning. */
+  message: string;
+}
+
+// #endregion
+
+// #region Build Report Types (Implementation Guide Section 7.3)
+
+/**
+ * A report generated by the build process, containing metadata about the build.
+ */
+export interface BuildReport {
+  /** The name of the persona that was built. */
+  personaName: string;
+  /** The UMS schema version used for the build. */
+  schemaVersion: string;
+  /** The version of the tool that generated the build. */
+  toolVersion: string;
+  /** A SHA-256 digest of the persona file content. */
+  personaDigest: string;
+  /** The timestamp of the build in ISO 8601 UTC format. */
+  buildTimestamp: string;
+  /** The list of module groups included in the build. */
+  moduleGroups: BuildReportGroup[];
+}
+
+/**
+ * A report for a single module group within the build.
+ */
+export interface BuildReportGroup {
+  /** The name of the module group. */
+  groupName: string;
+  /** A list of modules in this group. */
+  modules: BuildReportModule[];
+}
+
+/**
+ * A report for a single module within the build.
+ */
+export interface BuildReportModule {
+  /** The ID of the module. */
+  id: string;
+  /** The name of the module. */
+  name: string;
+  /** The version of the module. */
+  version: string;
+  /** A string representation of the module's source. */
+  source: string;
+  /** A SHA-256 digest of the module file content. */
+  digest: string;
+  /** Flag indicating if the module is deprecated. */
+  deprecated: boolean;
+  /** The ID of a successor module, if this module is deprecated. */
+  replacedBy?: string;
+}
+
+// #endregion

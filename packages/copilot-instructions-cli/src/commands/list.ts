@@ -6,9 +6,10 @@
 import chalk from 'chalk';
 import Table from 'cli-table3';
 import { handleError } from '../utils/error-handler.js';
-import type { UMSModule } from 'ums-lib';
+import type { Module } from 'ums-lib';
 import { createDiscoveryProgress } from '../utils/progress.js';
 import { discoverAllModules } from '../utils/module-discovery.js';
+import { getModuleMetadata } from '../types/cli-extensions.js';
 
 interface ListOptions {
   tier?: string;
@@ -19,9 +20,9 @@ interface ListOptions {
  * Filters and sorts modules according to M5 requirements
  */
 function filterAndSortModules(
-  modules: UMSModule[],
+  modules: Module[],
   tierFilter?: string
-): UMSModule[] {
+): Module[] {
   let filteredModules = modules;
 
   if (tierFilter) {
@@ -38,9 +39,11 @@ function filterAndSortModules(
     });
   }
 
-  // M5 sorting: meta.name (Title Case) then id
+  // M5 sorting: metadata.name (Title Case) then id
   filteredModules.sort((a, b) => {
-    const nameCompare = a.meta.name.localeCompare(b.meta.name);
+    const metaA = getModuleMetadata(a);
+    const metaB = getModuleMetadata(b);
+    const nameCompare = metaA.name.localeCompare(metaB.name);
     if (nameCompare !== 0) return nameCompare;
     return a.id.localeCompare(b.id);
   });
@@ -51,7 +54,7 @@ function filterAndSortModules(
 /**
  * Renders the modules table with consistent styling
  */
-function renderModulesTable(modules: UMSModule[]): void {
+function renderModulesTable(modules: Module[]): void {
   const table = new Table({
     head: ['ID', 'Tier/Subject', 'Name', 'Description'],
     style: {
@@ -68,12 +71,13 @@ function renderModulesTable(modules: UMSModule[]): void {
     const tier = idParts[0];
     const subject = idParts.slice(1).join('/');
     const tierSubject = subject ? `${tier}/${subject}` : tier;
+    const metadata = getModuleMetadata(module);
 
     table.push([
       chalk.green(module.id),
       chalk.yellow(tierSubject),
-      chalk.white.bold(module.meta.name),
-      chalk.gray(module.meta.description),
+      chalk.white.bold(metadata.name),
+      chalk.gray(metadata.description),
     ]);
   });
 

@@ -1,5 +1,5 @@
 /**
- * YAML parsing utilities for UMS v1.0
+ * YAML parsing utilities for UMS v2.0
  * Common utilities for handling YAML content
  */
 

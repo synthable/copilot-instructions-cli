@@ -1,5 +1,5 @@
 /**
- * Core domain exports for UMS v1.0
+ * Core domain exports for UMS v2.0
  * Organizes exports by functional domain
  */
 

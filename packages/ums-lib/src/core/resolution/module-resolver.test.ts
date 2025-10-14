@@ -1,5 +1,5 @@
 /**
- * Tests for UMS v1.0 Module Resolution - Pure Functions
+ * Tests for UMS v2.0 Module Resolution - Pure Functions
  */
 
 import { describe, it, expect } from 'vitest';
@@ -10,77 +10,59 @@ import {
   createModuleRegistry,
   resolvePersonaModules,
 } from './module-resolver.js';
-import type { UMSModule, UMSPersona } from '../../types/index.js';
+import type { Module, Persona } from '../../types/index.js';
 
 // Mock modules for testing
-const mockModule1: UMSModule = {
+const mockModule1: Module = {
   id: 'foundation/logic/deductive-reasoning',
   version: '1.0',
-  schemaVersion: '1.0',
-  shape: 'specification',
-  meta: {
+  schemaVersion: '2.0',
+  capabilities: ['reasoning', 'logic'],
+  metadata: {
     name: 'Deductive Reasoning',
     description: 'Logical deduction principles',
     semantic: 'Logic and reasoning framework',
   },
-  body: {
-    goal: 'Apply deductive reasoning principles',
-  },
 };
 
-const mockModule2: UMSModule = {
+const mockModule2: Module = {
   id: 'technology/react/hooks',
   version: '1.0',
-  schemaVersion: '1.0',
-  shape: 'procedure',
-  meta: {
+  schemaVersion: '2.0',
+  capabilities: ['react', 'hooks'],
+  metadata: {
     name: 'React Hooks',
     description: 'React hooks best practices',
     semantic: 'Frontend development patterns',
     deprecated: true,
     replacedBy: 'technology/react/modern-hooks',
   },
-  body: {
-    process: ['Use useState for state', 'Use useEffect for side effects'],
-  },
 };
 
-const mockModule3: UMSModule = {
+const mockModule3: Module = {
   id: 'principle/quality/testing',
   version: '1.0',
-  schemaVersion: '1.0',
-  shape: 'pattern',
-  meta: {
+  schemaVersion: '2.0',
+  capabilities: ['testing', 'quality'],
+  metadata: {
     name: 'Testing Principles',
     description: 'Software testing best practices',
     semantic: 'Quality assurance methodology',
   },
-  body: {
-    principles: [
-      'Write tests first',
-      'Test edge cases',
-      'Maintain test coverage',
-    ],
-  },
 };
 
-const mockPersona: UMSPersona = {
+const mockPersona: Persona = {
   name: 'Test Persona',
   version: '1.0',
-  schemaVersion: '1.0',
+  schemaVersion: '2.0',
   description: 'A test persona',
   semantic: 'Testing framework',
   identity: 'I am a test persona',
   attribution: false,
-  moduleGroups: [
-    {
-      groupName: 'Foundation',
-      modules: ['foundation/logic/deductive-reasoning'],
-    },
-    {
-      groupName: 'Technology',
-      modules: ['technology/react/hooks', 'principle/quality/testing'],
-    },
+  modules: [
+    'foundation/logic/deductive-reasoning',
+    'technology/react/hooks',
+    'principle/quality/testing',
   ],
 };
 
@@ -105,11 +87,11 @@ describe('resolver', () => {
   });
 
   describe('resolveModules', () => {
-    it('should resolve modules from persona module groups', () => {
+    it('should resolve modules from persona module entries', () => {
       const modules = [mockModule1, mockModule2, mockModule3];
       const registry = createModuleRegistry(modules);
 
-      const result = resolveModules(mockPersona.moduleGroups, registry);
+      const result = resolveModules(mockPersona.modules, registry);
 
       expect(result.modules).toHaveLength(3);
       expect(result.modules[0]).toEqual(mockModule1);
@@ -122,7 +104,7 @@ describe('resolver', () => {
       const modules = [mockModule1]; // Missing mockModule2 and mockModule3
       const registry = createModuleRegistry(modules);
 
-      const result = resolveModules(mockPersona.moduleGroups, registry);
+      const result = resolveModules(mockPersona.modules, registry);
 
       expect(result.modules).toHaveLength(1);
       expect(result.modules[0]).toEqual(mockModule1);
@@ -136,7 +118,7 @@ describe('resolver', () => {
       const modules = [mockModule1, mockModule2, mockModule3];
       const registry = createModuleRegistry(modules);
 
-      const result = resolveModules(mockPersona.moduleGroups, registry);
+      const result = resolveModules(mockPersona.modules, registry);
 
       expect(result.warnings).toHaveLength(1);
       expect(result.warnings[0]).toContain('deprecated');

@@ -1,12 +1,12 @@
 /**
- * UMS v1.0 Module Resolution - Pure Functions
+ * UMS v2.0 Module Resolution - Pure Functions
  * Handles module resolution, dependency management, and validation
  */
 
 import type {
-  UMSModule,
-  UMSPersona,
-  ModuleGroup,
+  Module,
+  Persona,
+  ModuleEntry,
   ValidationResult,
   ValidationError,
   ValidationWarning,
@@ -17,7 +17,7 @@ import type {
  */
 export interface ModuleResolutionResult {
   /** Successfully resolved modules in correct order */
-  modules: UMSModule[];
+  modules: Module[];
   /** Warnings generated during resolution */
   warnings: string[];
   /** Missing module IDs that couldn't be resolved */
@@ -25,21 +25,24 @@ export interface ModuleResolutionResult {
 }
 
 /**
- * Resolves modules from persona module groups using a registry map
- * @param moduleGroups - Module groups from persona
- * @param registry - Map of module ID to UMSModule
+ * Resolves modules from persona module entries using a registry map
+ * @param moduleEntries - Module entries from persona (strings or grouped modules)
+ * @param registry - Map of module ID to Module
  * @returns Resolution result with modules, warnings, and missing modules
  */
 export function resolveModules(
-  moduleGroups: ModuleGroup[],
-  registry: Map<string, UMSModule>
+  moduleEntries: ModuleEntry[],
+  registry: Map<string, Module>
 ): ModuleResolutionResult {
-  const modules: UMSModule[] = [];
+  const modules: Module[] = [];
   const warnings: string[] = [];
   const missingModules: string[] = [];
 
-  for (const group of moduleGroups) {
-    for (const moduleId of group.modules) {
+  for (const entry of moduleEntries) {
+    // Handle both string IDs and grouped modules
+    const moduleIds = typeof entry === 'string' ? [entry] : entry.ids;
+
+    for (const moduleId of moduleIds) {
       const module = registry.get(moduleId);
 
       if (!module) {
@@ -50,9 +53,9 @@ export function resolveModules(
       modules.push(module);
 
       // Check for deprecation warnings
-      if (module.meta.deprecated) {
-        const warning = module.meta.replacedBy
-          ? `Module '${moduleId}' is deprecated and has been replaced by '${module.meta.replacedBy}'. Please update your persona file.`
+      if (module.metadata.deprecated) {
+        const warning = module.metadata.replacedBy
+          ? `Module '${moduleId}' is deprecated and has been replaced by '${module.metadata.replacedBy}'. Please update your persona file.`
           : `Module '${moduleId}' is deprecated. This module may be removed in a future version.`;
         warnings.push(warning);
       }
@@ -71,13 +74,13 @@ export function resolveModules(
  * This is a placeholder for future implementation of the 'implement' field
  * Currently returns modules as-is since implement field is not in the type system
  * @param modules - Array of modules to process
- * @param registry - Map of module ID to UMSModule for looking up implementations
+ * @param registry - Map of module ID to Module for looking up implementations
  * @returns Modules in the same order (no implementation resolution yet)
  */
 export function resolveImplementations(
-  modules: UMSModule[],
-  _registry: Map<string, UMSModule>
-): UMSModule[] {
+  modules: Module[],
+  _registry: Map<string, Module>
+): Module[] {
   // TODO: Implement synergistic pairs pattern when 'implement' field is added to ModuleBody
   // For now, return modules as-is
   return modules;
@@ -86,23 +89,26 @@ export function resolveImplementations(
 /**
  * Validates that all module references in a persona exist in the registry
  * @param persona - The persona to validate
- * @param registry - Map of module ID to UMSModule
+ * @param registry - Map of module ID to Module
  * @returns Validation result with any missing module errors
  */
 export function validateModuleReferences(
-  persona: UMSPersona,
-  registry: Map<string, UMSModule>
+  persona: Persona,
+  registry: Map<string, Module>
 ): ValidationResult {
   const errors: ValidationError[] = [];
   const warnings: ValidationWarning[] = [];
 
-  for (const group of persona.moduleGroups) {
-    for (const moduleId of group.modules) {
+  for (const entry of persona.modules) {
+    // Handle both string IDs and grouped modules
+    const moduleIds = typeof entry === 'string' ? [entry] : entry.ids;
+
+    for (const moduleId of moduleIds) {
       if (!registry.has(moduleId)) {
         errors.push({
-          path: `moduleGroups[].modules`,
+          path: `modules[]`,
           message: `Module '${moduleId}' referenced in persona but not found in registry`,
-          section: '6.1', // UMS section for module references
+          section: '4.2', // UMS v2.0 section for module composition
         });
       }
     }
@@ -120,10 +126,8 @@ export function validateModuleReferences(
  * @param modules - Array of UMS modules
  * @returns Map with module ID as key and module as value
  */
-export function createModuleRegistry(
-  modules: UMSModule[]
-): Map<string, UMSModule> {
-  const registry = new Map<string, UMSModule>();
+export function createModuleRegistry(modules: Module[]): Map<string, Module> {
+  const registry = new Map<string, Module>();
 
   for (const module of modules) {
     registry.set(module.id, module);
@@ -135,18 +139,18 @@ export function createModuleRegistry(
 /**
  * Resolves all modules for a persona with full dependency resolution
  * This is a convenience function that combines module resolution and implementation resolution
- * @param persona - The persona containing module groups
+ * @param persona - The persona containing module entries
  * @param modules - Array of available modules
  * @returns Complete resolution result with properly ordered modules
  */
 export function resolvePersonaModules(
-  persona: UMSPersona,
-  modules: UMSModule[]
+  persona: Persona,
+  modules: Module[]
 ): ModuleResolutionResult {
   const registry = createModuleRegistry(modules);
 
   // First resolve the basic module references
-  const basicResolution = resolveModules(persona.moduleGroups, registry);
+  const basicResolution = resolveModules(persona.modules, registry);
 
   // Then resolve implementations for the found modules
   const resolvedModules = resolveImplementations(

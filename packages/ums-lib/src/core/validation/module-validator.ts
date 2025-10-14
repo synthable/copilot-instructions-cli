@@ -1,711 +1,224 @@
 /**
- * UMS v1.0 Module Validation
- * Implements module validation per UMS v1.0 specification
+ * UMS v2.0 Module Validation
+ * Implements module validation per UMS v2.0 specification
  */
 
 import {
-  VALID_TIERS,
-  MODULE_ID_REGEX,
-  UMS_SCHEMA_VERSION,
-  STANDARD_SHAPES,
-  STANDARD_SHAPE_SPECS,
-  type StandardShape,
-  type ValidTier,
-} from '../../constants.js';
-import {
-  ID_VALIDATION_ERRORS,
-  SCHEMA_VALIDATION_ERRORS,
-} from '../../utils/errors.js';
-import type {
-  ValidationResult,
-  ValidationWarning,
-  ValidationError,
-  ModuleMeta,
+  type ValidationResult,
+  type ValidationError,
+  type ValidationWarning,
+  type Module,
 } from '../../types/index.js';
+import { ValidationError as ValidationErrorClass } from '../../utils/errors.js';
+
+const MODULE_ID_REGEX = /^[a-z0-9][a-z0-9-]*(?:\/[a-z0-9][a-z0-9-]*)*$/;
+const SEMVER_REGEX =
+  /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/;
 
 /**
- * Validates a parsed UMS v1.0 module object
+ * Validates a parsed UMS v2.0 module object.
+ *
+ * @param module - The module object to validate.
+ * @returns A validation result object containing errors and warnings.
  */
-export function validateModule(obj: unknown): ValidationResult {
+// eslint-disable-next-line complexity, max-lines-per-function
+export function validateModule(module: Module): ValidationResult {
   const errors: ValidationError[] = [];
   const warnings: ValidationWarning[] = [];
 
-  if (!obj || typeof obj !== 'object') {
-    errors.push({
-      path: '',
-      message: 'Module must be an object',
-      section: 'Section 2.1',
-    });
+  // Validate ID format
+  if (!MODULE_ID_REGEX.test(module.id)) {
+    errors.push(
+      new ValidationErrorClass(
+        `Invalid module ID format: ${module.id}`,
+        'id',
+        'Section 2.1'
+      )
+    );
+  }
+
+  // Validate schema version
+  if (module.schemaVersion !== '2.0') {
+    errors.push(
+      new ValidationErrorClass(
+        `Invalid schema version: ${module.schemaVersion}, expected '2.0'`,
+        'schemaVersion',
+        'Section 2.1'
+      )
+    );
+  }
+
+  // Validate version format (semver)
+  if (!SEMVER_REGEX.test(module.version)) {
+    errors.push(
+      new ValidationErrorClass(
+        `Invalid version format: ${module.version}, expected SemVer (e.g., 1.0.0)`,
+        'version',
+        'Section 2.1'
+      )
+    );
+  }
+
+  // Validate capabilities
+  if (!Array.isArray(module.capabilities) || module.capabilities.length === 0) {
+    errors.push(
+      new ValidationErrorClass(
+        'Module must have at least one capability',
+        'capabilities',
+        'Section 2.1'
+      )
+    );
+  }
+
+  // Validate metadata exists (runtime check for malformed data)
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+  if (!module.metadata || typeof module.metadata !== 'object') {
+    errors.push(
+      new ValidationErrorClass(
+        'Missing required field: metadata',
+        'metadata',
+        'Section 2.3'
+      )
+    );
+    // Can't validate metadata fields if metadata doesn't exist
     return { valid: false, errors, warnings };
   }
 
-  const module = obj as Record<string, unknown>;
+  // Validate metadata required fields
+  if (!module.metadata.name) {
+    errors.push(
+      new ValidationErrorClass(
+        'Missing required field: metadata.name',
+        'metadata.name',
+        'Section 2.3'
+      )
+    );
+  }
+  if (!module.metadata.description) {
+    errors.push(
+      new ValidationErrorClass(
+        'Missing required field: metadata.description',
+        'metadata.description',
+        'Section 2.3'
+      )
+    );
+  }
+  if (!module.metadata.semantic) {
+    errors.push(
+      new ValidationErrorClass(
+        'Missing required field: metadata.semantic',
+        'metadata.semantic',
+        'Section 2.3'
+      )
+    );
+  }
 
-  // Validate top-level required keys (Section 2.1)
-  errors.push(...validateRequiredKeys(module));
-
-  // Validate id field (Section 3)
-  if ('id' in module) {
-    const idValidation = validateId(module.id as string);
-    if (!idValidation.valid) {
-      errors.push(...idValidation.errors);
+  // Validate tags are lowercase if present
+  if (module.metadata.tags && Array.isArray(module.metadata.tags)) {
+    const uppercaseTags = module.metadata.tags.filter(
+      tag => typeof tag === 'string' && tag !== tag.toLowerCase()
+    );
+    if (uppercaseTags.length > 0) {
+      errors.push(
+        new ValidationErrorClass(
+          `Tags must be lowercase: ${uppercaseTags.join(', ')}`,
+          'metadata.tags',
+          'Section 2.3'
+        )
+      );
     }
   }
 
-  // Validate version and schema version fields
-  errors.push(...validateVersionFields(module));
-
-  // Validate shape (Section 2.5)
-  if ('shape' in module) {
-    const shapeValidation = validateShape(module.shape);
-    errors.push(...shapeValidation.errors);
-    warnings.push(...shapeValidation.warnings);
-  }
-
-  // Validate meta block (Section 2.2)
-  if ('meta' in module) {
-    const moduleId = 'id' in module ? (module.id as string) : undefined;
-    const metaValidation = validateMeta(module.meta, moduleId);
-    errors.push(...metaValidation.errors);
-    warnings.push(...metaValidation.warnings);
-  }
-
-  // Check for deprecation warnings
-  warnings.push(...validateDeprecation(module));
-
-  // Validate body against shape requirements (Section 4)
-  if ('body' in module && 'shape' in module) {
-    const bodyValidation = validateBodyForShape(module.body, module.shape);
-    errors.push(...bodyValidation.errors);
-    warnings.push(...bodyValidation.warnings);
-  }
-
-  return { valid: errors.length === 0, errors, warnings };
-}
-
-/**
- * Validates required top-level keys
- */
-function validateRequiredKeys(
-  module: Record<string, unknown>
-): ValidationError[] {
-  const errors: ValidationError[] = [];
-  const requiredKeys = [
-    'id',
-    'version',
-    'schemaVersion',
-    'shape',
-    'meta',
-    'body',
-  ];
-
-  for (const key of requiredKeys) {
-    if (!(key in module)) {
-      errors.push({
-        path: key,
-        message: SCHEMA_VALIDATION_ERRORS.missingField(key),
-        section: 'Section 2.1',
-      });
+  // Validate replacedBy format if present
+  if (module.metadata.replacedBy) {
+    if (!MODULE_ID_REGEX.test(module.metadata.replacedBy)) {
+      errors.push(
+        new ValidationErrorClass(
+          `Invalid replacedBy ID format: ${module.metadata.replacedBy}`,
+          'metadata.replacedBy',
+          'Section 2.3'
+        )
+      );
     }
   }
 
-  return errors;
-}
-
-/**
- * Validates version and schemaVersion fields
- */
-function validateVersionFields(
-  module: Record<string, unknown>
-): ValidationError[] {
-  const errors: ValidationError[] = [];
-
-  // Validate version field
-  if ('version' in module) {
-    if (typeof module.version !== 'string') {
-      errors.push({
-        path: 'version',
-        message: SCHEMA_VALIDATION_ERRORS.wrongType(
-          'version',
-          'string',
-          typeof module.version
-        ),
-        section: 'Section 2.1',
-      });
-    }
-    // Note: Version is present but ignored for resolution in v1.0
-  }
-
-  // Validate schemaVersion field (Section 2.1)
-  if ('schemaVersion' in module) {
-    if (module.schemaVersion !== UMS_SCHEMA_VERSION) {
-      errors.push({
-        path: 'schemaVersion',
-        message: SCHEMA_VALIDATION_ERRORS.wrongSchemaVersion(
-          String(module.schemaVersion)
-        ),
-        section: 'Section 2.1',
-      });
-    }
-  }
-
-  return errors;
-}
-
-/**
- * Validates deprecation warnings
- */
-function validateDeprecation(
-  module: Record<string, unknown>
-): ValidationWarning[] {
-  const warnings: ValidationWarning[] = [];
-
-  if ('meta' in module) {
-    const meta = module.meta as ModuleMeta;
-    if (meta.deprecated) {
-      const replacedBy = meta.replacedBy;
-      const message = replacedBy
-        ? `Module is deprecated and replaced by '${replacedBy}'`
-        : 'Module is deprecated';
-      warnings.push({
-        path: 'meta.deprecated',
-        message,
-      });
-    }
-  }
-
-  return warnings;
-}
-
-/**
- * Validates module ID against UMS v1.0 regex and constraints (Section 3)
- */
-function validateId(id: unknown): ValidationResult {
-  const errors: ValidationError[] = [];
-
-  if (typeof id !== 'string') {
-    errors.push({
-      path: 'id',
-      message: SCHEMA_VALIDATION_ERRORS.wrongType('id', 'string', typeof id),
-      section: 'Section 3.1',
-    });
-    return { valid: false, errors, warnings: [] };
-  }
-
-  if (!MODULE_ID_REGEX.test(id)) {
-    // Provide specific error based on what's wrong
-    if (id.includes('/')) {
-      const parts = id.split('/');
-      const tier = parts[0];
-
-      // Check for uppercase first as it's the most specific issue
-      if (id !== id.toLowerCase()) {
-        errors.push({
-          path: 'id',
-          message: ID_VALIDATION_ERRORS.uppercaseCharacters(id),
-          section: 'Section 3.3',
-        });
-      } else if (!VALID_TIERS.includes(tier as ValidTier)) {
-        errors.push({
-          path: 'id',
-          message: ID_VALIDATION_ERRORS.invalidTier(tier),
-          section: 'Section 3.2',
-        });
-      } else if (id.includes('//') || id.startsWith('/') || id.endsWith('/')) {
-        errors.push({
-          path: 'id',
-          message: ID_VALIDATION_ERRORS.emptySegment(id),
-          section: 'Section 3.3',
-        });
-      } else {
-        errors.push({
-          path: 'id',
-          message: ID_VALIDATION_ERRORS.invalidCharacters(id),
-          section: 'Section 3.3',
-        });
-      }
-    } else {
-      errors.push({
-        path: 'id',
-        message: ID_VALIDATION_ERRORS.invalidFormat(id),
-        section: 'Section 3.2',
-      });
-    }
-  }
-
-  return { valid: errors.length === 0, errors, warnings: [] };
-}
-
-/**
- * Validates shape field (Section 2.5)
- */
-function validateShape(shape: unknown): ValidationResult {
-  const errors: ValidationError[] = [];
-  const warnings: ValidationWarning[] = [];
-
-  if (typeof shape !== 'string') {
-    errors.push({
-      path: 'shape',
-      message: SCHEMA_VALIDATION_ERRORS.wrongType(
-        'shape',
-        'string',
-        typeof shape
-      ),
-      section: 'Section 2.5',
-    });
-    return { valid: false, errors, warnings };
-  }
-
-  // Check if shape is a valid standard shape
-  if (!STANDARD_SHAPES.includes(shape as StandardShape)) {
-    errors.push({
-      path: 'shape',
-      message: SCHEMA_VALIDATION_ERRORS.invalidShape(shape, [
-        ...STANDARD_SHAPES,
-      ]),
-      section: 'Section 2.5',
+  // Add deprecation warning
+  if (module.metadata.deprecated) {
+    const message = module.metadata.replacedBy
+      ? `Module is deprecated and replaced by: ${module.metadata.replacedBy}`
+      : 'Module is deprecated';
+    warnings.push({
+      path: 'metadata.deprecated',
+      message,
     });
   }
 
-  return { valid: errors.length === 0, errors, warnings };
-}
-
-/**
- * Validates required meta fields
- */
-function validateRequiredMetaFields(
-  metaObj: Record<string, unknown>
-): ValidationError[] {
-  const errors: ValidationError[] = [];
-  const requiredMetaFields = ['name', 'description', 'semantic'];
-
-  for (const field of requiredMetaFields) {
-    if (!(field in metaObj)) {
-      errors.push({
-        path: `meta.${field}`,
-        message: SCHEMA_VALIDATION_ERRORS.missingField(field),
-        section: 'Section 2.2',
-      });
-    } else if (typeof metaObj[field] !== 'string') {
-      errors.push({
-        path: `meta.${field}`,
-        message: SCHEMA_VALIDATION_ERRORS.wrongType(
-          field,
-          'string',
-          typeof metaObj[field]
-        ),
-        section: 'Section 2.2',
-      });
+  // Validate cognitive level (if present)
+  if (module.cognitiveLevel !== undefined) {
+    if (![0, 1, 2, 3, 4].includes(module.cognitiveLevel)) {
+      errors.push(
+        new ValidationErrorClass(
+          `Invalid cognitiveLevel: ${module.cognitiveLevel}, must be 0-4`,
+          'cognitiveLevel',
+          'Section 2.1'
+        )
+      );
     }
   }
 
-  return errors;
-}
+  // Validate components exist
+  const hasComponents =
+    Array.isArray(module.components) && module.components.length > 0;
+  const shorthandCount = [
+    module.instruction,
+    module.knowledge,
+    module.data,
+  ].filter(Boolean).length;
 
-/**
- * Validates optional tags field
- */
-function validateMetaTags(metaObj: Record<string, unknown>): ValidationError[] {
-  const errors: ValidationError[] = [];
-
-  if ('tags' in metaObj && metaObj.tags !== undefined) {
-    if (!Array.isArray(metaObj.tags)) {
-      errors.push({
-        path: 'meta.tags',
-        message: SCHEMA_VALIDATION_ERRORS.wrongType(
-          'tags',
-          'array',
-          typeof metaObj.tags
-        ),
-        section: 'Section 2.2',
-      });
-    } else {
-      const tags = metaObj.tags as unknown[];
-      tags.forEach((tag, index) => {
-        if (typeof tag !== 'string') {
-          errors.push({
-            path: `meta.tags[${index}]`,
-            message: `Tag at index ${index} must be a string`,
-            section: 'Section 2.2',
-          });
-        } else if (tag !== tag.toLowerCase()) {
-          errors.push({
-            path: `meta.tags[${index}]`,
-            message: `Tag '${tag}' must be lowercase`,
-            section: 'Section 2.2',
-          });
-        }
-      });
-    }
+  // Check for multiple shorthand components (mutually exclusive)
+  if (shorthandCount > 1) {
+    errors.push(
+      new ValidationErrorClass(
+        'instruction, knowledge, and data are mutually exclusive - use components array for multiple components',
+        'components',
+        'Section 2.2'
+      )
+    );
   }
 
-  return errors;
-}
+  if (!hasComponents && shorthandCount === 0) {
+    errors.push(
+      new ValidationErrorClass(
+        'Module must have at least one component',
+        'components',
+        'Section 2.2'
+      )
+    );
+  }
 
-/**
- * Validates deprecated/replacedBy constraint
- */
-function validateDeprecatedReplacedBy(
-  metaObj: Record<string, unknown>
-): ValidationError[] {
-  const errors: ValidationError[] = [];
-
-  if ('deprecated' in metaObj && metaObj.deprecated === true) {
-    if ('replacedBy' in metaObj) {
-      if (typeof metaObj.replacedBy !== 'string') {
-        errors.push({
-          path: 'meta.replacedBy',
-          message: SCHEMA_VALIDATION_ERRORS.wrongType(
-            'replacedBy',
-            'string',
-            typeof metaObj.replacedBy
-          ),
-          section: 'Section 2.2',
-        });
-      } else {
-        // Validate replacedBy is a valid module ID
-        const replacedByValidation = validateId(metaObj.replacedBy);
-        if (!replacedByValidation.valid) {
-          errors.push({
-            path: 'meta.replacedBy',
-            message: `replacedBy must be a valid module ID: ${replacedByValidation.errors[0]?.message}`,
-            section: 'Section 2.2',
-          });
-        }
-      }
-    }
-  } else if ('replacedBy' in metaObj) {
-    errors.push({
-      path: 'meta.replacedBy',
-      message: 'replacedBy field must not be present unless deprecated is true',
-      section: 'Section 2.2',
+  // Warn if both components and shorthand exist
+  if (hasComponents && shorthandCount > 0) {
+    warnings.push({
+      path: 'components',
+      message:
+        'Module has both components array and shorthand properties, components array will take precedence',
     });
   }
 
-  return errors;
-}
-
-/**
- * Validates module metadata block (Section 2.2)
- */
-function validateMeta(meta: unknown, moduleId?: string): ValidationResult {
-  const errors: ValidationError[] = [];
-  const warnings: ValidationWarning[] = [];
-
-  if (!meta || typeof meta !== 'object') {
-    errors.push({
-      path: 'meta',
-      message: SCHEMA_VALIDATION_ERRORS.wrongType(
-        'meta',
-        'object',
-        typeof meta
-      ),
-      section: 'Section 2.2',
-    });
-    return { valid: false, errors, warnings };
+  // Validate replacedBy requires deprecated
+  if (module.metadata.replacedBy && !module.metadata.deprecated) {
+    errors.push(
+      new ValidationErrorClass(
+        'replacedBy requires deprecated: true',
+        'metadata.replacedBy',
+        'Section 2.3'
+      )
+    );
   }
 
-  const metaObj = meta as Record<string, unknown>;
-
-  // Validate required meta fields
-  errors.push(...validateRequiredMetaFields(metaObj));
-
-  // Validate optional tags field
-  errors.push(...validateMetaTags(metaObj));
-
-  // Validate deprecated/replacedBy constraint
-  errors.push(...validateDeprecatedReplacedBy(metaObj));
-
-  // Validate foundation layer field if moduleId is provided
-  if (moduleId) {
-    errors.push(...validateFoundationLayer(moduleId, metaObj));
-  }
-
-  return { valid: errors.length === 0, errors, warnings };
-}
-
-/**
- * Validates foundation layer field for foundation tier modules
- */
-function validateFoundationLayer(
-  moduleId: string,
-  metaObj: Record<string, unknown>
-): ValidationError[] {
-  const errors: ValidationError[] = [];
-  const isFoundationTier = moduleId.startsWith('foundation/');
-
-  if (isFoundationTier) {
-    // Foundation tier modules MUST have layer field
-    if (!('layer' in metaObj)) {
-      errors.push({
-        path: 'meta.layer',
-        message: 'Foundation tier modules must have a layer field',
-        section: 'Section 2.2',
-      });
-    } else {
-      const layer = metaObj.layer;
-      if (typeof layer !== 'number') {
-        errors.push({
-          path: 'meta.layer',
-          message: 'meta.layer must be a number',
-          section: 'Section 2.2',
-        });
-      } else if (!Number.isInteger(layer) || layer < 0 || layer > 4) {
-        errors.push({
-          path: 'meta.layer',
-          message: 'meta.layer must be an integer between 0 and 4',
-          section: 'Section 2.2',
-        });
-      }
-    }
-  } else {
-    // Non-foundation tiers MUST NOT have layer field
-    if ('layer' in metaObj) {
-      errors.push({
-        path: 'meta.layer',
-        message: 'Only foundation tier modules may have a layer field',
-        section: 'Section 2.2',
-      });
-    }
-  }
-
-  return errors;
-}
-
-/**
- * Validates module body against shape requirements (Section 4)
- */
-function validateBodyForShape(body: unknown, shape: unknown): ValidationResult {
-  const errors: ValidationError[] = [];
-  const warnings: ValidationWarning[] = [];
-
-  if (!body || typeof body !== 'object') {
-    errors.push({
-      path: 'body',
-      message: SCHEMA_VALIDATION_ERRORS.wrongType(
-        'body',
-        'object',
-        typeof body
-      ),
-      section: 'Section 4',
-    });
-    return { valid: false, errors, warnings };
-  }
-
-  if (typeof shape !== 'string') {
-    return { valid: false, errors, warnings };
-  }
-
-  // Get the shape specification (shape is already validated to be a standard shape)
-  const shapeSpec =
-    STANDARD_SHAPE_SPECS[shape as keyof typeof STANDARD_SHAPE_SPECS];
-
-  const bodyObj = body as Record<string, unknown>;
-  const allowedDirectives = new Set<string>([
-    ...shapeSpec.required,
-    ...shapeSpec.optional,
-  ]);
-  const presentDirectives = new Set(Object.keys(bodyObj));
-
-  // Check for undeclared directive keys
-  for (const directive of presentDirectives) {
-    if (!allowedDirectives.has(directive)) {
-      errors.push({
-        path: `body.${directive}`,
-        message: SCHEMA_VALIDATION_ERRORS.undeclaredDirective(directive, [
-          ...allowedDirectives,
-        ]),
-        section: 'Section 4',
-      });
-    }
-  }
-
-  // Check for missing required directives
-  for (const required of shapeSpec.required) {
-    if (!presentDirectives.has(required)) {
-      errors.push({
-        path: `body.${required}`,
-        message: SCHEMA_VALIDATION_ERRORS.missingRequiredDirective(required),
-        section: 'Section 4',
-      });
-    }
-  }
-
-  // Validate directive types (Section 4.1)
-  for (const [directive, value] of Object.entries(bodyObj)) {
-    const directiveValidation = validateDirectiveType(directive, value);
-    if (!directiveValidation.valid) {
-      directiveValidation.errors.forEach(error => {
-        errors.push({
-          ...error,
-          path: `body.${error.path}`,
-          section: 'Section 4.1',
-        });
-      });
-    }
-  }
-
-  return { valid: errors.length === 0, errors, warnings };
-}
-
-/**
- * Validates individual directive types (Section 4.1)
- */
-function validateDirectiveType(
-  directive: string,
-  value: unknown
-): ValidationResult {
-  const errors: ValidationError[] = [];
-
-  switch (directive) {
-    case 'goal':
-      if (typeof value !== 'string') {
-        errors.push({
-          path: directive,
-          message: SCHEMA_VALIDATION_ERRORS.invalidDirectiveType(
-            directive,
-            'string',
-            typeof value
-          ),
-        });
-      }
-      break;
-
-    case 'process':
-    case 'constraints':
-    case 'principles':
-    case 'criteria':
-      if (!Array.isArray(value)) {
-        errors.push({
-          path: directive,
-          message: SCHEMA_VALIDATION_ERRORS.invalidDirectiveType(
-            directive,
-            'array of strings',
-            Array.isArray(value) ? 'array' : typeof value
-          ),
-        });
-      } else {
-        value.forEach((item, index) => {
-          if (typeof item !== 'string') {
-            errors.push({
-              path: `${directive}[${index}]`,
-              message: `Item at index ${index} must be a string`,
-            });
-          }
-        });
-      }
-      break;
-
-    case 'data': {
-      const dataValidation = validateDataDirective(value);
-      errors.push(...dataValidation.errors);
-      break;
-    }
-
-    case 'examples': {
-      const examplesValidation = validateExamplesDirective(value);
-      errors.push(...examplesValidation.errors);
-      break;
-    }
-  }
-
-  return { valid: errors.length === 0, errors, warnings: [] };
-}
-
-/**
- * Validates data directive structure (Section 4.2)
- */
-function validateDataDirective(value: unknown): ValidationResult {
-  const errors: ValidationError[] = [];
-
-  if (!value || typeof value !== 'object') {
-    errors.push({
-      path: 'data',
-      message: 'data directive must be an object',
-    });
-    return { valid: false, errors, warnings: [] };
-  }
-
-  const data = value as Record<string, unknown>;
-
-  if (!('mediaType' in data) || typeof data.mediaType !== 'string') {
-    errors.push({
-      path: 'data.mediaType',
-      message: 'data.mediaType is required and must be a string',
-    });
-  }
-
-  if (!('value' in data) || typeof data.value !== 'string') {
-    errors.push({
-      path: 'data.value',
-      message: 'data.value is required and must be a string',
-    });
-  }
-
-  return { valid: errors.length === 0, errors, warnings: [] };
-}
-
-/**
- * Validates examples directive structure (Section 4.3)
- */
-function validateExamplesDirective(value: unknown): ValidationResult {
-  const errors: ValidationError[] = [];
-
-  if (!Array.isArray(value)) {
-    errors.push({
-      path: 'examples',
-      message: 'examples directive must be an array',
-    });
-    return { valid: false, errors, warnings: [] };
-  }
-
-  const titles = new Set<string>();
-
-  value.forEach((example, index) => {
-    if (!example || typeof example !== 'object') {
-      errors.push({
-        path: `examples[${index}]`,
-        message: `Example at index ${index} must be an object`,
-      });
-      return;
-    }
-
-    const ex = example as Record<string, unknown>;
-
-    // Validate required fields
-    const requiredFields = ['title', 'rationale', 'snippet'];
-    for (const field of requiredFields) {
-      if (!(field in ex) || typeof ex[field] !== 'string') {
-        errors.push({
-          path: `examples[${index}].${field}`,
-          message: `examples[${index}].${field} is required and must be a string`,
-        });
-      }
-    }
-
-    // Check for unique titles
-    if ('title' in ex && typeof ex.title === 'string') {
-      if (titles.has(ex.title)) {
-        errors.push({
-          path: `examples[${index}].title`,
-          message: `Duplicate title '${ex.title}'. Titles must be unique within a module`,
-        });
-      }
-      titles.add(ex.title);
-    }
-
-    // Validate optional language field
-    if (
-      'language' in ex &&
-      ex.language !== undefined &&
-      typeof ex.language !== 'string'
-    ) {
-      errors.push({
-        path: `examples[${index}].language`,
-        message: `examples[${index}].language must be a string if present`,
-      });
-    }
-  });
-
-  return { valid: errors.length === 0, errors, warnings: [] };
+  return {
+    valid: errors.length === 0,
+    errors,
+    warnings,
+  };
 }

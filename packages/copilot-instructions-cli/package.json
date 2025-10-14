@@ -41,13 +41,12 @@
     "quality-check": "npm run typecheck && npm run lint && npm run format:check && npm test"
   },
   "dependencies": {
-    "ums-lib": "^1.0.0",
     "chalk": "^5.5.0",
     "cli-table3": "^0.6.5",
     "commander": "^14.0.0",
-    "ora": "^8.2.0"
-  },
-  "devDependencies": {
+    "ora": "^8.2.0",
+    "tsx": "^4.20.6",
+    "ums-lib": "^1.0.0"
   },
   "files": [
     "dist",

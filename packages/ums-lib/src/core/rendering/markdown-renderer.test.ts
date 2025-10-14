@@ -1,284 +1,416 @@
 /**
- * Tests for UMS v1.0 Markdown Renderer - Pure Functions
+ * Tests for UMS v2.0 Markdown Renderer - Pure Functions
  */
 
 import { describe, it, expect } from 'vitest';
 import {
   renderMarkdown,
   renderModule,
-  renderGoal,
-  renderPrinciples,
-  renderConstraints,
-  renderProcess,
-  renderCriteria,
-  renderData,
-  renderExamples,
-  inferLanguageFromMediaType,
+  renderComponent,
+  renderInstructionComponent,
+  renderKnowledgeComponent,
+  renderDataComponent,
+  renderConcept,
+  renderExample,
+  renderPattern,
+  inferLanguageFromFormat,
 } from './markdown-renderer.js';
 import type {
-  UMSModule,
-  UMSPersona,
-  DataDirective,
-  ExampleDirective,
+  Module,
+  Persona,
+  InstructionComponent,
+  DataComponent,
+  Concept,
+  Example,
+  Pattern,
 } from '../../types/index.js';
+import { ComponentType } from '../../types/index.js';
 
 // Mock modules for testing
-const mockModule1: UMSModule = {
+const mockInstructionModule: Module = {
   id: 'foundation/logic/deductive-reasoning',
   version: '1.0',
-  schemaVersion: '1.0',
-  shape: 'specification',
-  meta: {
+  schemaVersion: '2.0',
+  capabilities: ['reasoning', 'logic'],
+  metadata: {
     name: 'Deductive Reasoning',
     description: 'Logical deduction principles',
     semantic: 'Logic and reasoning framework',
   },
-  body: {
-    goal: 'Apply deductive reasoning principles',
-    principles: [
-      'Start with general statements',
-      'Apply logical rules',
-      'Reach specific conclusions',
-    ],
+  instruction: {
+    type: ComponentType.Instruction,
+    instruction: {
+      purpose: 'Apply deductive reasoning principles',
+      process: [
+        'Start with general statements',
+        'Apply logical rules',
+        'Reach specific conclusions',
+      ],
+      principles: ['Always verify premises', 'Use sound logical inference'],
+      constraints: [
+        'Never assume unproven premises',
+        'Maintain logical consistency',
+      ],
+      criteria: [
+        'All steps are logically valid',
+        'Conclusions follow from premises',
+      ],
+    },
   },
 };
 
-const mockModule2: UMSModule = {
-  id: 'technology/react/hooks',
+const mockKnowledgeModule: Module = {
+  id: 'principle/patterns/observer',
   version: '1.0',
-  schemaVersion: '1.0',
-  shape: 'procedure',
-  meta: {
-    name: 'React Hooks',
-    description: 'React hooks best practices',
-    semantic: 'Frontend development patterns',
+  schemaVersion: '2.0',
+  capabilities: ['patterns', 'design'],
+  metadata: {
+    name: 'Observer Pattern',
+    description: 'Behavioral design pattern',
+    semantic: 'Design patterns knowledge',
   },
-  body: {
-    process: [
-      'Import necessary hooks',
-      'Initialize state with useState',
-      'Handle side effects with useEffect',
-    ],
-    constraints: [
-      'Always call hooks at top level',
-      'Never call hooks inside conditions',
-    ],
+  knowledge: {
+    type: ComponentType.Knowledge,
+    knowledge: {
+      explanation:
+        'The Observer pattern defines a one-to-many dependency between objects.',
+      concepts: [
+        {
+          name: 'Subject',
+          description: 'The object being observed',
+          rationale: 'Centralizes state management',
+          examples: ['Event emitters', 'Observables'],
+        },
+      ],
+      examples: [
+        {
+          title: 'Basic Observer',
+          rationale: 'Simple implementation',
+          snippet: 'subject.subscribe(observer);',
+          language: 'javascript',
+        },
+      ],
+      patterns: [
+        {
+          name: 'Push vs Pull',
+          useCase: 'Data notification strategy',
+          description: 'Choose between pushing data or pulling on notification',
+          advantages: ['Push: immediate updates', 'Pull: lazy evaluation'],
+          disadvantages: [
+            'Push: unnecessary updates',
+            'Pull: additional calls',
+          ],
+        },
+      ],
+    },
   },
 };
 
-const mockPersona: UMSPersona = {
+const mockDataModule: Module = {
+  id: 'data/config/defaults',
+  version: '1.0',
+  schemaVersion: '2.0',
+  capabilities: ['configuration'],
+  metadata: {
+    name: 'Default Configuration',
+    description: 'Default system configuration',
+    semantic: 'Configuration data',
+  },
+  data: {
+    type: ComponentType.Data,
+    data: {
+      format: 'json',
+      value: { timeout: 5000, retries: 3 },
+      description: 'Default system settings',
+    },
+  },
+};
+
+const mockPersona: Persona = {
   name: 'Test Persona',
   version: '1.0',
-  schemaVersion: '1.0',
+  schemaVersion: '2.0',
   description: 'A test persona',
   semantic: 'Testing framework',
   identity: 'I am a test persona focused on quality and logic.',
   attribution: false,
-  moduleGroups: [
+  modules: [
+    'foundation/logic/deductive-reasoning',
+    'principle/patterns/observer',
+    'data/config/defaults',
+  ],
+};
+
+const mockPersonaWithGroups: Persona = {
+  name: 'Grouped Persona',
+  version: '1.0',
+  schemaVersion: '2.0',
+  description: 'A persona with grouped modules',
+  semantic: 'Grouped testing framework',
+  identity: 'I organize modules into groups.',
+  attribution: true,
+  modules: [
+    { group: 'Foundation', ids: ['foundation/logic/deductive-reasoning'] },
     {
-      groupName: 'Foundation',
-      modules: ['foundation/logic/deductive-reasoning'],
-    },
-    {
-      groupName: 'Technology',
-      modules: ['technology/react/hooks'],
+      group: 'Patterns',
+      ids: ['principle/patterns/observer', 'data/config/defaults'],
     },
   ],
 };
 
 describe('renderer', () => {
-  describe('renderGoal', () => {
-    it('should render goal directive as paragraph', () => {
-      const result = renderGoal('Apply deductive reasoning principles');
-      expect(result).toBe('## Goal\n\nApply deductive reasoning principles\n');
-    });
-  });
-
-  describe('renderPrinciples', () => {
-    it('should render principles as bullet list', () => {
-      const principles = [
-        'Start with general statements',
-        'Apply logical rules',
-      ];
-      const result = renderPrinciples(principles);
-      expect(result).toBe(
-        '## Principles\n\n- Start with general statements\n- Apply logical rules\n'
+  describe('renderInstructionComponent', () => {
+    it('should render instruction with all fields', () => {
+      const result = renderInstructionComponent(
+        mockInstructionModule.instruction!
       );
-    });
-  });
 
-  describe('renderConstraints', () => {
-    it('should render constraints as bullet list', () => {
-      const constraints = [
-        'Always call hooks at top level',
-        'Never call hooks inside conditions',
-      ];
-      const result = renderConstraints(constraints);
-      expect(result).toBe(
-        '## Constraints\n\n- Always call hooks at top level\n- Never call hooks inside conditions\n'
+      expect(result).toContain(
+        '## Purpose\n\nApply deductive reasoning principles'
       );
-    });
-  });
-
-  describe('renderProcess', () => {
-    it('should render process as ordered list', () => {
-      const process = [
-        'Import necessary hooks',
-        'Initialize state',
-        'Handle side effects',
-      ];
-      const result = renderProcess(process);
-      expect(result).toBe(
-        '## Process\n\n1. Import necessary hooks\n2. Initialize state\n3. Handle side effects\n'
-      );
-    });
-  });
-
-  describe('renderCriteria', () => {
-    it('should render criteria as task list', () => {
-      const criteria = ['Hooks are imported correctly', 'State is initialized'];
-      const result = renderCriteria(criteria);
-      expect(result).toBe(
-        '## Criteria\n\n- [ ] Hooks are imported correctly\n- [ ] State is initialized\n'
-      );
-    });
-  });
-
-  describe('renderData', () => {
-    it('should render data directive with inferred language', () => {
-      const data: DataDirective = {
-        mediaType: 'application/json',
-        value: '{"key": "value"}',
-      };
-      const result = renderData(data);
-      expect(result).toBe('## Data\n\n```json\n{"key": "value"}\n```\n');
+      expect(result).toContain('## Process\n');
+      expect(result).toContain('1. Start with general statements');
+      expect(result).toContain('## Principles\n');
+      expect(result).toContain('- Always verify premises');
+      expect(result).toContain('## Constraints\n');
+      expect(result).toContain('- Never assume unproven premises');
+      expect(result).toContain('## Criteria\n');
+      expect(result).toContain('- [ ] All steps are logically valid');
     });
 
-    it('should render data directive without language when not recognized', () => {
-      const data: DataDirective = {
-        mediaType: 'text/unknown',
-        value: 'some content',
-      };
-      const result = renderData(data);
-      expect(result).toBe('## Data\n\n```\nsome content\n```\n');
-    });
-  });
-
-  describe('renderExamples', () => {
-    it('should render examples with subheadings', () => {
-      const examples: ExampleDirective[] = [
-        {
-          title: 'Basic useState',
-          rationale: 'Simple state management',
-          snippet: 'const [count, setCount] = useState(0);',
-          language: 'javascript',
+    it('should handle detailed process steps', () => {
+      const component: InstructionComponent = {
+        type: ComponentType.Instruction,
+        instruction: {
+          purpose: 'Test purpose',
+          process: [
+            { step: 'First step', detail: 'Additional details' },
+            'Simple step',
+          ],
         },
-      ];
-      const result = renderExamples(examples);
-      expect(result).toBe(
-        '## Examples\n\n### Basic useState\n\nSimple state management\n\n```javascript\nconst [count, setCount] = useState(0);\n```\n'
-      );
+      };
+      const result = renderInstructionComponent(component);
+
+      expect(result).toContain('1. First step\n   Additional details');
+      expect(result).toContain('2. Simple step');
     });
   });
 
-  describe('inferLanguageFromMediaType', () => {
-    it('should infer correct language from media types', () => {
-      expect(inferLanguageFromMediaType('application/json')).toBe('json');
-      expect(inferLanguageFromMediaType('text/javascript')).toBe('javascript');
-      expect(inferLanguageFromMediaType('text/x-python')).toBe('python');
-      expect(inferLanguageFromMediaType('text/x-typescript')).toBe(
-        'typescript'
-      );
-      expect(inferLanguageFromMediaType('application/xml')).toBe('xml');
+  describe('renderKnowledgeComponent', () => {
+    it('should render knowledge with all fields', () => {
+      const result = renderKnowledgeComponent(mockKnowledgeModule.knowledge!);
+
+      expect(result).toContain('## Explanation\n\nThe Observer pattern');
+      expect(result).toContain('## Concepts\n');
+      expect(result).toContain('### Subject\n');
+      expect(result).toContain('## Examples\n');
+      expect(result).toContain('### Basic Observer\n');
+      expect(result).toContain('## Patterns\n');
+      expect(result).toContain('### Push vs Pull\n');
+    });
+  });
+
+  describe('renderDataComponent', () => {
+    it('should render data with JSON format', () => {
+      const result = renderDataComponent(mockDataModule.data!);
+
+      expect(result).toContain('## Data\n\nDefault system settings');
+      expect(result).toContain('```json');
+      expect(result).toContain('"timeout"');
+      expect(result).toContain('"retries"');
     });
 
-    it('should return empty string for unknown media types', () => {
-      expect(inferLanguageFromMediaType('text/unknown')).toBe('');
-      expect(inferLanguageFromMediaType('application/custom')).toBe('');
+    it('should handle string values', () => {
+      const component: DataComponent = {
+        type: ComponentType.Data,
+        data: {
+          format: 'yaml',
+          value: 'key: value',
+        },
+      };
+      const result = renderDataComponent(component);
+
+      expect(result).toContain('```yaml\nkey: value\n```');
+    });
+  });
+
+  describe('renderConcept', () => {
+    it('should render concept with all fields', () => {
+      const concept: Concept = {
+        name: 'Test Concept',
+        description: 'A test description',
+        rationale: 'Why this matters',
+        examples: ['Example 1', 'Example 2'],
+      };
+      const result = renderConcept(concept);
+
+      expect(result).toContain('### Test Concept\n');
+      expect(result).toContain('A test description');
+      expect(result).toContain('**Rationale:** Why this matters');
+      expect(result).toContain('**Examples:**\n');
+      expect(result).toContain('- Example 1');
+    });
+  });
+
+  describe('renderExample', () => {
+    it('should render example with language', () => {
+      const example: Example = {
+        title: 'Test Example',
+        rationale: 'Shows a pattern',
+        snippet: 'const x = 1;',
+        language: 'javascript',
+      };
+      const result = renderExample(example);
+
+      expect(result).toContain('### Test Example\n');
+      expect(result).toContain('Shows a pattern');
+      expect(result).toContain('```javascript\nconst x = 1;\n```');
+    });
+  });
+
+  describe('renderPattern', () => {
+    it('should render pattern with advantages and disadvantages', () => {
+      const pattern: Pattern = {
+        name: 'Test Pattern',
+        useCase: 'When to use it',
+        description: 'Pattern description',
+        advantages: ['Pro 1', 'Pro 2'],
+        disadvantages: ['Con 1'],
+      };
+      const result = renderPattern(pattern);
+
+      expect(result).toContain('### Test Pattern\n');
+      expect(result).toContain('**Use Case:** When to use it');
+      expect(result).toContain('**Advantages:**\n');
+      expect(result).toContain('- Pro 1');
+      expect(result).toContain('**Disadvantages:**\n');
+      expect(result).toContain('- Con 1');
+    });
+  });
+
+  describe('inferLanguageFromFormat', () => {
+    it('should infer correct language from formats', () => {
+      expect(inferLanguageFromFormat('json')).toBe('json');
+      expect(inferLanguageFromFormat('yaml')).toBe('yaml');
+      expect(inferLanguageFromFormat('javascript')).toBe('javascript');
+      expect(inferLanguageFromFormat('ts')).toBe('typescript');
+      expect(inferLanguageFromFormat('py')).toBe('python');
+    });
+
+    it('should return empty string for unknown formats', () => {
+      expect(inferLanguageFromFormat('unknown')).toBe('');
+      expect(inferLanguageFromFormat('custom')).toBe('');
+    });
+
+    it('should be case-insensitive', () => {
+      expect(inferLanguageFromFormat('JSON')).toBe('json');
+      expect(inferLanguageFromFormat('TypeScript')).toBe('typescript');
     });
   });
 
   describe('renderModule', () => {
-    it('should render a complete module', () => {
-      const result = renderModule(mockModule1);
-      expect(result).toContain(
-        '## Goal\n\nApply deductive reasoning principles'
-      );
-      expect(result).toContain(
-        '## Principles\n\n- Start with general statements'
-      );
+    it('should render module with instruction shorthand', () => {
+      const result = renderModule(mockInstructionModule);
+      expect(result).toContain('## Purpose');
+      expect(result).toContain('Apply deductive reasoning principles');
+    });
+
+    it('should render module with knowledge shorthand', () => {
+      const result = renderModule(mockKnowledgeModule);
+      expect(result).toContain('## Explanation');
+      expect(result).toContain('Observer pattern');
+    });
+
+    it('should render module with data shorthand', () => {
+      const result = renderModule(mockDataModule);
+      expect(result).toContain('## Data');
+      expect(result).toContain('```json');
     });
   });
 
   describe('renderMarkdown', () => {
-    it('should render complete persona with modules', () => {
-      const modules = [mockModule1, mockModule2];
+    it('should render complete persona with identity', () => {
+      const modules = [
+        mockInstructionModule,
+        mockKnowledgeModule,
+        mockDataModule,
+      ];
       const result = renderMarkdown(mockPersona, modules);
 
+      expect(result).toContain('## Identity\n');
       expect(result).toContain(
-        '## Identity\n\nI am a test persona focused on quality and logic.'
+        'I am a test persona focused on quality and logic.'
       );
-      expect(result).toContain('# Foundation');
-      expect(result).toContain('# Technology');
       expect(result).toContain(
-        '## Goal\n\nApply deductive reasoning principles'
+        '## Purpose\n\nApply deductive reasoning principles'
       );
-      expect(result).toContain('## Process\n\n1. Import necessary hooks');
+      expect(result).toContain('## Explanation\n\nThe Observer pattern');
     });
 
     it('should handle persona without identity', () => {
-      const personaWithoutIdentity: UMSPersona = {
+      const personaWithoutIdentity: Persona = {
         ...mockPersona,
         identity: '',
-        moduleGroups: [
-          {
-            groupName: 'Foundation',
-            modules: ['foundation/logic/deductive-reasoning'],
-          },
-        ],
       };
-      const modules = [mockModule1];
+      const modules = [
+        mockInstructionModule,
+        mockKnowledgeModule,
+        mockDataModule,
+      ];
       const result = renderMarkdown(personaWithoutIdentity, modules);
 
       expect(result).not.toContain('## Identity');
-      expect(result).toContain('# Foundation');
+      expect(result).toContain('## Purpose');
     });
 
-    it('should handle modules without group names', () => {
-      const personaWithoutGroupNames: UMSPersona = {
-        ...mockPersona,
-        moduleGroups: [
-          {
-            modules: ['foundation/logic/deductive-reasoning'],
-          },
-        ],
-      };
-      const modules = [mockModule1];
-      const result = renderMarkdown(personaWithoutGroupNames, modules);
+    it('should render groups with headings', () => {
+      const modules = [
+        mockInstructionModule,
+        mockKnowledgeModule,
+        mockDataModule,
+      ];
+      const result = renderMarkdown(mockPersonaWithGroups, modules);
 
-      expect(result).not.toContain('# Foundation');
-      expect(result).toContain(
-        '## Goal\n\nApply deductive reasoning principles'
-      );
+      expect(result).toContain('# Foundation\n');
+      expect(result).toContain('# Patterns\n');
     });
 
     it('should add attribution when enabled', () => {
-      const personaWithAttribution: UMSPersona = {
-        ...mockPersona,
-        attribution: true,
-        moduleGroups: [
-          {
-            groupName: 'Foundation',
-            modules: ['foundation/logic/deductive-reasoning'],
-          },
-        ],
-      };
-      const modules = [mockModule1];
-      const result = renderMarkdown(personaWithAttribution, modules);
+      const modules = [
+        mockInstructionModule,
+        mockKnowledgeModule,
+        mockDataModule,
+      ];
+      const result = renderMarkdown(mockPersonaWithGroups, modules);
 
       expect(result).toContain(
         '[Attribution: foundation/logic/deductive-reasoning]'
       );
+    });
+
+    it('should handle string module entries', () => {
+      const modules = [
+        mockInstructionModule,
+        mockKnowledgeModule,
+        mockDataModule,
+      ];
+      const result = renderMarkdown(mockPersona, modules);
+
+      expect(result).toContain('## Purpose');
+      expect(result).not.toContain('[Attribution:'); // attribution is false
+    });
+  });
+
+  describe('renderComponent', () => {
+    it('should dispatch to correct renderer based on type', () => {
+      const instruction = renderComponent(mockInstructionModule.instruction!);
+      expect(instruction).toContain('## Purpose');
+
+      const knowledge = renderComponent(mockKnowledgeModule.knowledge!);
+      expect(knowledge).toContain('## Explanation');
+
+      const data = renderComponent(mockDataModule.data!);
+      expect(data).toContain('## Data');
     });
   });
 });

@@ -13,6 +13,7 @@ import {
   ConflictError,
   isUMSError,
   type UMSError,
+  type ErrorLocation,
 } from 'ums-lib';
 
 /**
@@ -26,6 +27,34 @@ export interface ErrorHandlerOptions {
   keyPath?: string;
   verbose?: boolean;
   timestamp?: boolean;
+}
+
+/**
+ * Format error location for display
+ */
+function formatLocation(location: ErrorLocation): string {
+  const parts: string[] = [];
+
+  if (location.filePath) {
+    parts.push(location.filePath);
+  }
+
+  if (location.line !== undefined) {
+    if (location.column !== undefined) {
+      parts.push(`line ${location.line}, column ${location.column}`);
+    } else {
+      parts.push(`line ${location.line}`);
+    }
+  }
+
+  return parts.join(':');
+}
+
+/**
+ * Format spec section reference for display
+ */
+function formatSpecSection(specSection: string): string {
+  return chalk.cyan(`  Specification: ${specSection}`);
 }
 
 /**
@@ -64,24 +93,39 @@ function handleConflictError(
  */
 function handleValidationError(
   error: UMSValidationError,
-  command: string,
-  context?: string
+  _command: string,
+  _context?: string
 ): void {
-  const contextPart = context ?? 'validation';
-  const formattedMessage = `[ERROR] ${command}: ${contextPart} - ${error.message}`;
+  // Error header
+  console.error(chalk.red(`❌ Error: ${error.message}`));
+  console.error();
 
-  console.error(chalk.red(formattedMessage));
-  if (error.path) {
-    console.error(chalk.yellow(`  File: ${error.path}`));
+  // Location information
+  if (error.location) {
+    console.error(
+      chalk.yellow(`   Location: ${formatLocation(error.location)}`)
+    );
+  } else if (error.path) {
+    console.error(chalk.yellow(`   File: ${error.path}`));
   }
+
+  // Field path (if available)
   if (error.section) {
-    console.error(chalk.yellow(`  Section: ${error.section}`));
+    console.error(chalk.yellow(`   Field: ${error.section}`));
   }
 
+  // Spec reference
+  if (error.specSection) {
+    console.error(formatSpecSection(error.specSection));
+  }
+
+  console.error();
+
+  // Suggestions
   const suggestions = [
-    'Check YAML syntax and structure',
+    'Check YAML/TypeScript syntax and structure',
     'Verify all required fields are present',
-    'Review UMS v1.0 specification for correct format',
+    'Review UMS specification for correct format',
   ];
 
   console.error(chalk.blue('  Suggestions:'));
@@ -95,29 +139,44 @@ function handleValidationError(
  */
 function handleLoadError(
   error: ModuleLoadError | PersonaLoadError,
-  command: string,
-  context?: string
+  _command: string,
+  _context?: string
 ): void {
   const isModule = error instanceof ModuleLoadError;
-  const defaultContext = isModule ? 'module loading' : 'persona loading';
-  const contextPart = context ?? defaultContext;
-  const formattedMessage = `[ERROR] ${command}: ${contextPart} - ${error.message}`;
 
-  console.error(chalk.red(formattedMessage));
-  if (error.filePath) {
-    console.error(chalk.yellow(`  File: ${error.filePath}`));
+  // Error header
+  console.error(chalk.red(`❌ Error: ${error.message}`));
+  console.error();
+
+  // Location information
+  if (error.location) {
+    console.error(
+      chalk.yellow(`   Location: ${formatLocation(error.location)}`)
+    );
+  } else if (error.filePath) {
+    console.error(chalk.yellow(`   File: ${error.filePath}`));
   }
 
+  // Spec reference
+  if (error.specSection) {
+    console.error(formatSpecSection(error.specSection));
+  }
+
+  console.error();
+
+  // Suggestions
   const suggestions = isModule
     ? [
         'Check file exists and is readable',
         'Verify file path is correct',
-        'Ensure file contains valid YAML content',
+        'Ensure file contains valid YAML or TypeScript content',
+        'Check module ID matches export name for TypeScript modules',
       ]
     : [
         'Check persona file exists and is readable',
-        'Verify persona YAML structure',
+        'Verify persona YAML/TypeScript structure',
         'Ensure all referenced modules exist',
+        'Check export format for TypeScript personas',
       ];
 
   console.error(chalk.blue('  Suggestions:'));
@@ -159,17 +218,32 @@ function handleUMSError(error: UMSError, options: ErrorHandlerOptions): void {
     });
   } else {
     // Generic UMS error
-    const contextPart = context ?? 'UMS operation';
-    const formattedMessage = `[ERROR] ${command}: ${contextPart} - ${error.message}`;
-    console.error(chalk.red(formattedMessage));
+    // Error header
+    console.error(chalk.red(`❌ Error: ${error.message}`));
+    console.error();
 
-    if (error.context) {
-      console.error(chalk.yellow(`  Context: ${error.context}`));
+    // Location information
+    if (error.location) {
+      console.error(
+        chalk.yellow(`   Location: ${formatLocation(error.location)}`)
+      );
     }
+
+    // Context
+    if (error.context) {
+      console.error(chalk.yellow(`   Context: ${error.context}`));
+    }
+
+    // Spec reference
+    if (error.specSection) {
+      console.error(formatSpecSection(error.specSection));
+    }
+
+    console.error();
 
     const suggestions = [
       'Review error details and try again',
-      'Check UMS v1.0 specification for guidance',
+      'Check UMS specification for guidance',
     ];
 
     console.error(chalk.blue('  Suggestions:'));
@@ -180,6 +254,7 @@ function handleUMSError(error: UMSError, options: ErrorHandlerOptions): void {
 
   // Add verbose output if requested
   if (verbose && timestamp) {
+    console.error();
     const ts = new Date().toISOString();
     console.error(chalk.gray(`[${ts}] [ERROR] Error code: ${error.code}`));
 

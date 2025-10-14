@@ -6,6 +6,12 @@ import { handleList } from './commands/list.js';
 import { handleSearch } from './commands/search.js';
 import { handleValidate } from './commands/validate.js';
 import { handleInspect } from './commands/inspect.js';
+import {
+  handleMcpStart,
+  handleMcpTest,
+  handleMcpValidateConfig,
+  handleMcpListTools,
+} from './commands/mcp.js';
 import pkg from '../package.json' with { type: 'json' };
 
 const program = new Command();
@@ -44,10 +50,15 @@ program
       output?: string;
       verbose?: boolean;
     }) => {
+      if (!options.persona) {
+        console.error('Error: --persona <file> is required');
+        process.exit(1);
+      }
+
       const verbose = options.verbose ?? false;
 
       await handleBuild({
-        ...(options.persona && { persona: options.persona }),
+        persona: options.persona,
         ...(options.output && { output: options.output }),
         verbose,
       });
@@ -138,9 +149,9 @@ program
     `
   )
   .showHelpAfterError()
-  .action(async (path: string, options: { verbose?: boolean }) => {
+  .action((path: string, options: { verbose?: boolean }) => {
     const verbose = options.verbose ?? false;
-    await handleValidate({ targetPath: path, verbose });
+    handleValidate({ targetPath: path, verbose });
   });
 
 program
@@ -181,5 +192,91 @@ program
       });
     }
   );
+
+// MCP command group
+const mcpCommand = program
+  .command('mcp')
+  .description('MCP server development and testing tools');
+
+mcpCommand
+  .command('start')
+  .description('Start the MCP server')
+  .addOption(
+    new Option('--transport <type>', 'Transport protocol to use').choices([
+      'stdio',
+      'http',
+      'sse',
+    ])
+  )
+  .option('--debug', 'Enable debug logging')
+  .option('-v, --verbose', 'Enable verbose output')
+  .addHelpText(
+    'after',
+    `  Examples:
+    $ copilot-instructions mcp start                # Start with stdio (default)
+    $ copilot-instructions mcp start --transport http
+    $ copilot-instructions mcp start --debug --verbose
+    `
+  )
+  .showHelpAfterError()
+  .action(
+    async (options: {
+      transport?: 'stdio' | 'http' | 'sse';
+      debug?: boolean;
+      verbose?: boolean;
+    }) => {
+      await handleMcpStart({
+        transport: options.transport ?? 'stdio',
+        debug: options.debug ?? false,
+        verbose: options.verbose ?? false,
+      });
+    }
+  );
+
+mcpCommand
+  .command('test')
+  .description('Test MCP server with sample requests')
+  .option('-v, --verbose', 'Enable verbose output')
+  .addHelpText(
+    'after',
+    `  Examples:
+    $ copilot-instructions mcp test
+    $ copilot-instructions mcp test --verbose
+    `
+  )
+  .showHelpAfterError()
+  .action(async (options: { verbose?: boolean }) => {
+    await handleMcpTest({ verbose: options.verbose ?? false });
+  });
+
+mcpCommand
+  .command('validate-config')
+  .description('Validate Claude Desktop MCP configuration')
+  .option('-v, --verbose', 'Enable verbose output')
+  .addHelpText(
+    'after',
+    `  Examples:
+    $ copilot-instructions mcp validate-config
+    `
+  )
+  .showHelpAfterError()
+  .action(async (options: { verbose?: boolean }) => {
+    await handleMcpValidateConfig({ verbose: options.verbose ?? false });
+  });
+
+mcpCommand
+  .command('list-tools')
+  .description('List available MCP tools')
+  .option('-v, --verbose', 'Enable verbose output')
+  .addHelpText(
+    'after',
+    `  Examples:
+    $ copilot-instructions mcp list-tools
+    `
+  )
+  .showHelpAfterError()
+  .action(async (options: { verbose?: boolean }) => {
+    await handleMcpListTools({ verbose: options.verbose ?? false });
+  });
 
 void program.parseAsync();

@@ -1,12 +1,15 @@
 /**
- * UMS Library - Unified Module System v1.0 Implementation
+ * UMS Library - Unified Module System v2.0 Implementation
  *
  * A reusable library for parsing, validating, and building modular AI instructions
- * using the UMS (Unified Module System) v1.0 specification.
+ * using the UMS (Unified Module System) v2.0 specification.
  */
 
-// Export all UMS v1.0 types
+// Export all UMS v2.0 types
 export * from './types/index.js';
+
+// Export adapter types (loader contracts for implementation layer)
+export * from './adapters/index.js';
 
 // Deprecated classes removed in Phase 4 - use pure functions instead
 
@@ -23,4 +26,16 @@ export {
   ConflictError,
   isUMSError,
   isValidationError,
+  // v2.0 spec-compliant aliases
+  ValidationError,
+  ModuleParseError,
+  PersonaParseError,
+  // Error location type
+  type ErrorLocation,
 } from './utils/errors.js';
+
+// Export utility functions
+export { moduleIdToExportName } from './utils/transforms.js';
+
+// Export configuration types (for CLI layer)
+export type { ModuleConfig } from './adapters/index.js';
