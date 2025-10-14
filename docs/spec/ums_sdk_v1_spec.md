@@ -220,6 +220,10 @@ interface ConfigManager {
 }
 
 interface ModuleConfig {
+  /** Optional global conflict resolution strategy (default: 'error') */
+  conflictStrategy?: "error" | "warn" | "replace";
+
+  /** Local module search paths */
   localModulePaths: LocalModulePath[];
 }
 
@@ -232,10 +236,19 @@ interface LocalModulePath {
 
 1. MUST parse YAML format
 2. MUST validate required fields (`localModulePaths`)
-3. MUST return empty config if file doesn't exist (not an error)
-4. MUST validate that configured paths exist
+3. MUST validate optional `conflictStrategy` field (if present)
+4. MUST return empty config if file doesn't exist (not an error)
+5. MUST validate that configured paths exist
 
-**Note**: Per-path conflict resolution (`onConflict`) is reserved for v2.x. Use global `conflictStrategy` in `BuildOptions`.
+**Conflict Resolution Priority**:
+
+The conflict resolution strategy is determined by the following priority order:
+
+1. `BuildOptions.conflictStrategy` (if provided at runtime)
+2. `ModuleConfig.conflictStrategy` (if specified in config file)
+3. Default: `'error'`
+
+This allows setting a project-wide default in the config file while allowing per-build overrides via `BuildOptions`.
 
 ### 3.4. ModuleDiscovery
 
@@ -547,12 +560,19 @@ export const myPersona: Persona = {
 **Format**:
 
 ```yaml
+# Optional: Global conflict resolution strategy (default: 'error')
+conflictStrategy: warn # 'error' | 'warn' | 'replace'
+
 localModulePaths:
   - path: "./company-modules"
   - path: "./project-modules"
 ```
 
-**Note**: Conflict resolution is controlled globally via `BuildOptions.conflictStrategy`, not per-path.
+**Conflict Resolution**:
+
+- The config file MAY specify a global `conflictStrategy` that applies to all module paths
+- This can be overridden at runtime via `BuildOptions.conflictStrategy`
+- If not specified in config or options, defaults to `'error'`
 
 ---
 

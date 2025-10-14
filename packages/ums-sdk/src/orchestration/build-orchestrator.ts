@@ -66,7 +66,9 @@ export class BuildOrchestrator {
     }
 
     // Step 4: Build module registry
-    const conflictStrategy = options.conflictStrategy ?? 'error';
+    // Priority: BuildOptions > config file > default 'error'
+    const conflictStrategy =
+      options.conflictStrategy ?? config.conflictStrategy ?? 'error';
     const registry = new ModuleRegistry(conflictStrategy);
 
     for (const module of modules) {

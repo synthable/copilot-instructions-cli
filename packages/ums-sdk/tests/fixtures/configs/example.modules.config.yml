@@ -1,2 +1,5 @@
+# Optional: Global conflict resolution strategy (default: 'error')
+# conflictStrategy: warn
+
 localModulePaths:
   - path: "./tests/fixtures/modules"

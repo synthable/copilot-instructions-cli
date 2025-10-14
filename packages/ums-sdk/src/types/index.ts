@@ -18,6 +18,10 @@ export interface ValidationError {
  * Module configuration from modules.config.yml
  */
 export interface ModuleConfig {
+  /** Global conflict resolution strategy (default: 'error') */
+  conflictStrategy?: 'error' | 'warn' | 'replace';
+
+  /** Local module search paths */
   localModulePaths: LocalModulePath[];
 }
 

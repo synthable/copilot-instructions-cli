@@ -84,6 +84,19 @@ export class ConfigManager {
 
     const configObj = config as Record<string, unknown>;
 
+    // Validate optional conflictStrategy
+    if ('conflictStrategy' in configObj) {
+      const strategy = configObj.conflictStrategy;
+      if (
+        typeof strategy !== 'string' ||
+        !['error', 'warn', 'replace'].includes(strategy)
+      ) {
+        errors.push(
+          "Field 'conflictStrategy' must be one of: 'error', 'warn', 'replace'"
+        );
+      }
+    }
+
     // Check required field: localModulePaths
     if (!('localModulePaths' in configObj)) {
       errors.push("Missing required field 'localModulePaths'");
