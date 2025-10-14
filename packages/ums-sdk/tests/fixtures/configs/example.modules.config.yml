@@ -1,3 +1,2 @@
 localModulePaths:
   - path: "./tests/fixtures/modules"
-    onConflict: "error"

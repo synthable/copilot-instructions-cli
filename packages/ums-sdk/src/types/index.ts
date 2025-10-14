@@ -26,7 +26,6 @@ export interface ModuleConfig {
  */
 export interface LocalModulePath {
   path: string;
-  onConflict?: 'error' | 'warn' | 'replace';
 }
 
 /**
