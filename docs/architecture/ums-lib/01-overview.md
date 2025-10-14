@@ -5,7 +5,7 @@
 
 ## 1. Introduction
 
-The `ums-lib` package is a reusable, platform-agnostic library that provides a pure functional implementation of the Unified Module System (UMS) v1.0 specification. It serves as the core engine for parsing, validating, resolving, and rendering modular AI instructions.
+The `ums-lib` package is a reusable, platform-agnostic library that provides a pure functional implementation of the Unified Module System (UMS) v2.0 specification. It serves as the core engine for parsing, validating, resolving, and rendering modular AI instructions.
 
 ## 2. Core Philosophy
 

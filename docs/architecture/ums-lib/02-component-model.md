@@ -11,7 +11,7 @@ The `ums-lib` package is designed with a clear, domain-driven structure. Its fun
 
 The library is organized into the following five core functional domains:
 
-1.  **Parsing**: Responsible for converting raw YAML strings into typed JavaScript objects.
+1.  **Parsing**: Responsible for converting raw TypeScript module content into typed JavaScript objects.
 2.  **Validation**: Ensures that the parsed objects comply with the UMS v2.0 specification.
 3.  **Resolution**: Handles module dependency resolution.
 4.  **Rendering**: Generates the final Markdown output from personas and modules.
