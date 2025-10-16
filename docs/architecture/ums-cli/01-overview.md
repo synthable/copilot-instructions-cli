@@ -5,7 +5,7 @@
 
 ## 1. Introduction
 
-The `ums-cli` is a command-line interface for composing, managing, and building modular AI assistant instructions using the Unified Module System (UMS) v1.0. It serves as the primary user-facing tool for interacting with the UMS ecosystem.
+The `ums-cli` is a command-line interface for composing, managing, and building modular AI assistant instructions using the Unified Module System (UMS) v2.0. It serves as the primary user-facing tool for interacting with the UMS ecosystem.
 
 ## 2. Architectural Role: The Imperative Shell
 

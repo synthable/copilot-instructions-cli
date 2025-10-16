@@ -832,7 +832,7 @@ GPL-3.0-or-later
 
 Copyright (c) 2025 synthable
 
-This package is part of the ums-cli project.
+This package is part of the Instructions Composer monorepo.
 
 ## Resources
 

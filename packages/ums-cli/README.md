@@ -24,9 +24,6 @@ copilot-instructions build --persona ./personas/my-persona.persona.ts
 
 # Build with custom output
 copilot-instructions build --persona ./personas/my-persona.persona.ts --output ./dist/instructions.md
-
-# Build from stdin
-cat persona.ts | copilot-instructions build --output ./dist/instructions.md
 ```
 
 ### List Modules

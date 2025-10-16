@@ -51,7 +51,7 @@ The following commands are used for building, running, and testing the project:
 - **Code Style:** The project uses [Prettier](https://prettier.io/) for code formatting and [ESLint](https://eslint.org/) for linting. The configuration files for these tools are `.prettierrc` and `eslint.config.js` respectively.
 - **Testing:** The project uses [Vitest](https://vitest.dev/) for testing. Test files are located alongside the source files with a `.test.ts` extension.
 - **Commits:** The project uses [Husky](https://typicode.github.io/husky/) for pre-commit and pre-push hooks, which run type checking, linting, and testing. This ensures code quality and consistency.
-- **Modularity:** The project is structured around modules and personas. Modules are small, single-purpose files (`.module.yml`) that represent one atomic concept. Personas are defined in `.persona.yml` files and are composed of a list of modules.
+- **Modularity:** The project is structured around modules and personas using a TypeScript-first approach. Modules are small, single-purpose files (`.module.ts`) that represent one atomic concept. Personas are defined in `.persona.ts` files and are composed of a list of modules. (Legacy `.module.yml` and `.persona.yml` formats are also supported for compatibility.)
 
 ---
 
