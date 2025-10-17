@@ -292,7 +292,7 @@ composition_checks:
   metadata_completeness:
     - [ ] Name present
     - [ ] Version present (semver)
-    - [ ] SchemaVersion is "2.0"
+    - [ ] schemaVersion is "2.0"
     - [ ] Description present (required)
     - [ ] Semantic present (required)
 ```

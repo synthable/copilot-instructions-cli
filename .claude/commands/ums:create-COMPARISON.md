@@ -5,7 +5,7 @@
 | File | Lines | Size | Purpose |
 |------|-------|------|---------|
 | `ums:create.md` (original) | 221 | 6.1K | Human-readable narrative command |
-| `ums:create-refactored.md` | 910 | 22K | Machine-first structured command |
+| `ums:create.md` (refactored) | 910 | 22K | Machine-first structured command |
 | `ums:create-REFACTORING-SUMMARY.md` | 425 | 11K | Transformation documentation |
 
 **Growth**: 221 → 910 lines (+312% increase)
@@ -134,7 +134,7 @@ DELIVERABLES:
 
 VALIDATION:
 - Export convention must match: export const {export_name}: Module
-- SchemaVersion must be "2.0"
+- schemaVersion must be "2.0"
 - All required fields present
 {if foundation: '- cognitiveLevel must be 0-4'}
 `

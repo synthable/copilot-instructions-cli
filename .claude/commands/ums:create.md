@@ -165,7 +165,7 @@ cognitive_level_assignment: {
 
 ```typescript
 Task(
-  subagent_type: "module-generator",
+  subagent_type: "ums-v2-module-generator",
   description: "Generate {tier} tier module: {module_id}",
   prompt: `Create UMS v2.0 module with following specifications:
 
@@ -192,7 +192,7 @@ DELIVERABLES:
 
 VALIDATION:
 - Export convention must match: export const {export_name}: Module
-- SchemaVersion must be "2.0"
+- schemaVersion must be "2.0"
 - All required fields present
 {if foundation: '- cognitiveLevel must be 0-4'}
 `
@@ -251,7 +251,7 @@ Selection: [validate|library|persona|done]
 **Template: Validation Agent Call**:
 ```typescript
 Task(
-  subagent_type: "module-validator",
+  subagent_type: "ums-v2-module-validator",
   description: "Validate {module_id}",
   prompt: `Validate module at: {file_path}
 
@@ -268,7 +268,7 @@ Format output using VALIDATION_RESULT_TEMPLATE.`
 **Template: Curation Agent Call**:
 ```typescript
 Task(
-  subagent_type: "library-curator",
+  subagent_type: "ums-v2-standard-library-curator",
   description: "Evaluate {module_id} for library inclusion",
   prompt: `Assess module at: {file_path}
 
@@ -425,7 +425,7 @@ persona_file_path: {
 **Automatic Validation**:
 ```typescript
 Task(
-  subagent_type: "persona-validator",
+  subagent_type: "ums-v2-persona-validator",
   description: "Validate {persona_name}",
   prompt: `Validate persona at: {persona_file_path}
 
