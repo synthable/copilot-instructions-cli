@@ -5,7 +5,7 @@
 
 ## 1. Introduction
 
-The `copilot-instructions-cli` uses the `commander` library to define and manage its command structure. Each command is implemented in its own module within the `src/commands` directory, promoting separation of concerns.
+The `ums-cli` uses the `commander` library to define and manage its command structure. Each command is implemented in its own module within the `src/commands` directory, promoting separation of concerns.
 
 ## 2. Command Architecture
 

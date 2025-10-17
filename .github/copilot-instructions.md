@@ -10,7 +10,7 @@ Instructions Composer is a monorepo workspace containing a CLI tool and supporti
 This project is a pre-1.0 release, and as such, does not guarantee backward compatibility. The API, CLI commands, and file formats may change without notice.
 
 ## Repository Structure
-- `packages/copilot-instructions-cli`: Main CLI application
+- `packages/ums-cli`: Main CLI application
 - `packages/ums-lib`: Core UMS v1.0 library for parsing, validation, and building
 - `instructions-modules/`: Directory containing modular instruction files
   - `foundation/`: Core cognitive frameworks, reasoning, ethics (layers 0-5)
@@ -45,7 +45,7 @@ npm run format
 npm run quality-check
 
 # Publishing
-npm run build -w packages/copilot-instructions-cli
+npm run build -w packages/ums-cli
 ```
 
 ## Module System Patterns

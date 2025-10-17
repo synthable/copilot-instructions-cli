@@ -543,7 +543,7 @@ You don't need to worry about this for contributions, but it's good to understan
 - **Loader implementations**: Module loading, persona loading
 - **Orchestration**: Build workflows
 
-### copilot-instructions-cli (CLI)
+### ums-cli (CLI)
 
 - **User-facing**: Focus on UX and error messages
 - **Depends on ums-sdk**: For all operations

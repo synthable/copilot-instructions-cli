@@ -80,6 +80,6 @@ This ADR was finalized during Phase 5.1 of the UMS v2.0 migration. The `typescri
 
 ## References
 
-- Implementation: `packages/copilot-instructions-cli/src/utils/typescript-loader.ts`
+- Implementation: `packages/ums-cli/src/utils/typescript-loader.ts`
 - Related: ADR 0001 (Standard Library Loading), ADR 0003 (Example Snippet Naming)
 - tsx documentation: https://github.com/privatenumber/tsx

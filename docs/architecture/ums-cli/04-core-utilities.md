@@ -5,7 +5,7 @@
 
 ## 1. Introduction
 
-The `copilot-instructions-cli` contains a set of core utilities in its `src/utils` directory. These modules provide shared functionality that supports the main CLI commands and helps to keep the command handlers clean and focused on their primary tasks.
+The `ums-cli` contains a set of core utilities in its `src/utils` directory. These modules provide shared functionality that supports the main CLI commands and helps to keep the command handlers clean and focused on their primary tasks.
 
 ## 2. Utility Modules
 
