@@ -189,7 +189,7 @@ severity_determination:
       - metadata incomplete
       - semantic too short
       - capabilities not kebab-case
-    action: PASS with warnings
+    action: WARN
 
   info:
     condition: improvement suggestions
@@ -377,7 +377,7 @@ pass_report:
 
 ```yaml
 warning_report:
-  status: "⚠️ PASS WITH WARNINGS"
+  status: "⚠️ WARN"
   summary:
     module_id: "{module-id}"
     file_path: "{file-path}"
@@ -588,7 +588,7 @@ validate_multiple_modules:
     calculate:
       total_modules: count(module_paths)
       passed: count(status == PASS)
-      warned: count(status == PASS WITH WARNINGS)
+      warned: count(status == WARN)
       failed: count(status == FAIL)
       avg_quality_score: mean(quality_scores)
 
@@ -681,7 +681,7 @@ import { ModuleValidator } from 'ums-sdk';
 
 // Validate single module
 const result = await ModuleValidator.validate('path/to/module.module.ts');
-console.log(result.status); // PASS | WARNINGS | FAIL
+console.log(result.status); // PASS | WARN | FAIL
 console.log(result.qualityScore); // 0-10
 
 // Validate multiple modules

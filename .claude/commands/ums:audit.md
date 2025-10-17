@@ -150,7 +150,7 @@ Summary output format:
   fail_count: number,
   issues: [{
     module_id: string,
-    status: "PASS|WARNINGS|FAIL",
+    status: "PASS|WARN|FAIL",
     problems: string[],
     quality_score: number
   }],
@@ -184,7 +184,7 @@ Summary output format:
   fail_count: number,
   issues: [{
     persona_name: string,
-    status: "PASS|WARNINGS|FAIL",
+    status: "PASS|WARN|FAIL",
     problems: string[],
     quality_score: number
   }],
@@ -352,7 +352,7 @@ ${endif}
 ### Status:
 
 ${persona_results.map(p => `
-- **${p.name}**: ${p.quality_score}/10 ${p.status === 'PASS' ? '✅' : p.status === 'WARNINGS' ? '⚠️' : '❌'}
+- **${p.name}**: ${p.quality_score}/10 ${p.status === 'PASS' ? '✅' : p.status === 'WARN' ? '⚠️' : '❌'}
   - Modules: ${p.module_count}
   - Tier Distribution: F:${p.tier_dist.foundation} P:${p.tier_dist.principle} T:${p.tier_dist.technology} E:${p.tier_dist.execution}
 `).join('')}

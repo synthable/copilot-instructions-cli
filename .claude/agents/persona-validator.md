@@ -96,7 +96,7 @@ step_6_report:
   action: Generate comprehensive validation report
   format: markdown
   sections:
-    - status: PASS | PASS_WITH_WARNINGS | FAIL
+    - status: PASS | WARN | FAIL
     - summary: stats and key metrics
     - validation_results: passed/warnings/errors
     - composition_analysis: tier distribution, grouping
@@ -236,39 +236,39 @@ critical_errors:
 
 warnings:
   missing_optional_recommended:
-    severity: WARNING
+    severity: WARN
     fields: [identity, tags, domains]
     action: suggest_addition
 
   export_name_mismatch:
-    severity: WARNING
+    severity: WARN
     expected: camelCase(filename without .persona.ts)
     action: follow_convention
 
   semantic_too_brief:
-    severity: WARNING
+    severity: WARN
     threshold: < 100 chars
     action: enhance_with_keywords
 
   no_module_groups:
-    severity: WARNING
+    severity: WARN
     action: consider_grouping_related_modules
 
   tier_imbalance:
-    severity: WARNING
+    severity: WARN
     conditions:
       - all_one_tier: true
       - missing_foundation: true
       - excessive_execution: > 50% of modules
 
   module_count_suboptimal:
-    severity: WARNING
+    severity: WARN
     too_few: < 5 modules
     too_many: > 25 modules
     optimal_range: 8-20 modules
 
   missing_foundation:
-    severity: WARNING
+    severity: WARN
     condition: foundation_count == 0
     action: add_at_least_2_foundation_modules
 ```
@@ -286,7 +286,7 @@ module_existence_check:
       - instruct-modules-v2/modules/
       - local persona directory
     if_found_locally:
-      status: WARNING
+      status: WARN
       message: "Module found locally but not in standard library"
     if_not_found:
       status: FAIL
@@ -294,7 +294,7 @@ module_existence_check:
       action: check_module_id_spelling
 
   module_deprecated:
-    status: WARNING
+    status: WARN
     check: module.metadata.quality.maturity == "deprecated"
     suggest: use replacedBy field value
 ```
@@ -632,7 +632,7 @@ invalid_group_structure:
 
 empty_group:
   detection: group.ids.length === 0
-  severity: WARNING
+  severity: WARN
   fix: add modules or remove group
 ```
 
@@ -652,7 +652,7 @@ dependency_check:
     check:
       for_each_required_module:
         if_in_persona: PASS
-        if_not_in_persona: WARNING
+        if_not_in_persona: WARN
     output: missing_dependencies[]
 
   step_4_extract_recommendations:
@@ -667,7 +667,7 @@ dependency_check:
     action: check relationships.conflictsWith
     check:
       for_each_conflict:
-        if_both_in_persona: WARNING
+        if_both_in_persona: WARN
     output: conflicts[]
 ```
 
@@ -679,7 +679,7 @@ report_structure:
     title: "UMS v2.0 Persona Validation Report"
     persona_name: string
     file_path: string
-    status: "✅ PASS" | "⚠️ PASS WITH WARNINGS" | "❌ FAIL"
+    status: "✅ PASS" | "⚠️ WARN" | "❌ FAIL"
     timestamp: ISO8601
 
   summary:
@@ -698,7 +698,7 @@ report_structure:
       count: number
       items:
         - message: string
-          severity: "WARNING"
+          severity: "WARN"
           fix: string
     errors:
       count: number
@@ -742,7 +742,7 @@ report_structure:
     missing_dependencies:
       - module: string
         required_by: string
-        severity: "WARNING"
+        severity: "WARN"
     recommended_additions:
       - module: string
         recommended_by: string[]
@@ -909,7 +909,7 @@ suggest_fixes_not_apply:
 ```yaml
 status_line:
   pass: "✅ PASS"
-  pass_with_warnings: "⚠️ PASS WITH WARNINGS"
+  warn: "⚠️ WARN"
   fail: "❌ FAIL"
 
 section_headers:
@@ -926,7 +926,7 @@ issue_categorization:
     action_required: true
   warnings:
     emoji: "⚠️"
-    severity: "WARNING"
+    severity: "WARN"
     action_suggested: true
   passed_checks:
     emoji: "✅"

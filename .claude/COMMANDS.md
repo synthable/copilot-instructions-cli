@@ -29,7 +29,7 @@ Commands are shortcuts that expand into detailed prompts for specific tasks. Typ
 
 **Output includes**:
 - Total modules/personas audited
-- Pass/Warning/Fail counts
+- Pass/Warn/Fail counts
 - Quality scores
 - List of issues with severity
 - Prioritized recommendations
@@ -196,9 +196,9 @@ Quality Score: 10/10
 This module is fully spec-compliant and ready to use.
 ```
 
-**WARNINGS**:
+**WARN**:
 ```markdown
-⚠️ **Module Validation: PASS WITH WARNINGS**
+⚠️ **Module Validation: WARN**
 
 Warnings (2):
 1. Missing recommended field: cognitiveLevel
@@ -275,9 +275,9 @@ No duplicates detected.
 Ready to build.
 ```
 
-**WARNINGS**:
+**WARN**:
 ```markdown
-⚠️ **Persona Validation: PASS WITH WARNINGS**
+⚠️ **Persona Validation: WARN**
 
 Warnings:
 - Module 'principle/testing/tdd' not found in standard library

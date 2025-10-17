@@ -454,7 +454,7 @@ Format output using PERSONA_VALIDATION_TEMPLATE.`
 }
 
 {if status === 'WARN':
-  '⚠️ **Persona Validation: PASS WITH WARNINGS**
+  '⚠️ **Persona Validation: WARN**
 
   Warnings:
   {warnings.map(w => `- ${w.message}`)}

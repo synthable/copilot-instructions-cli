@@ -99,7 +99,7 @@ Checks:
 
 Output format:
 {
-  status: "PASS|WARNINGS|FAIL",
+  status: "PASS|WARN|FAIL",
   module_id: string,
   quality_score: number,
   errors: [{field, issue, fix}],
@@ -147,10 +147,10 @@ Summary output:
 All validation checks passed. Module is spec-compliant and production-ready.
 ```
 
-### WARNINGS Template
+### WARN Template
 
 ```markdown
-⚠️ **Module Validation: PASS WITH WARNINGS**
+⚠️ **Module Validation: WARN**
 
 **Module**: ${module_id}
 **Status**: Spec-compliant with recommendations
@@ -192,12 +192,12 @@ C) Delete invalid module
 
 **Total**: ${total}
 - ✅ ${pass_count} PASS (${pass_percent}%)
-- ⚠️ ${warning_count} WARNINGS (${warning_percent}%)
+- ⚠️ ${warning_count} WARN (${warning_percent}%)
 - ❌ ${fail_count} FAIL (${fail_percent}%)
 
 **Modules with Issues**:
 
-${issues.filter(i => i.status === 'WARNINGS').map(i =>
+${issues.filter(i => i.status === 'WARN').map(i =>
   `⚠️ ${i.module_id}: ${i.problems.join(', ')}`
 ).join('\n')}
 

@@ -105,7 +105,7 @@ Checks:
 
 Output format:
 {
-  status: "PASS|WARNINGS|FAIL",
+  status: "PASS|WARN|FAIL",
   persona_name: string,
   version: string,
   module_count: number,
@@ -179,10 +179,10 @@ ${tier_distribution.map(tier =>
 This persona is ready for building.
 ```
 
-### WARNINGS Template
+### WARN Template
 
 ```markdown
-⚠️ **Persona Validation: PASS WITH WARNINGS**
+⚠️ **Persona Validation: WARN**
 
 **Persona**: ${name}
 **Status**: Spec-compliant with recommendations
@@ -233,12 +233,12 @@ D) Show missing modules
 
 **Total**: ${total}
 - ✅ ${pass_count} PASS (${pass_percent}%)
-- ⚠️ ${warning_count} WARNINGS (${warning_percent}%)
+- ⚠️ ${warning_count} WARN (${warning_percent}%)
 - ❌ ${fail_count} FAIL (${fail_percent}%)
 
 **Personas with Issues**:
 
-${issues.filter(i => i.status === 'WARNINGS').map(i =>
+${issues.filter(i => i.status === 'WARN').map(i =>
   `⚠️ ${i.persona_name}: ${i.problems.join(', ')}`
 ).join('\n')}
 
