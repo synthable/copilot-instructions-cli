@@ -9,6 +9,9 @@
     },
     {
       "path": "packages/ums-cli"
+    },
+    {
+      "path": "packages/ums-mcp"
     }
   ],
   "exclude": [

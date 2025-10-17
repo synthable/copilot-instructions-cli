@@ -1,7 +1,5 @@
 /* eslint-disable vitest/expect-expect */
-/* eslint-disable @typescript-eslint/no-unused-vars */
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { PersonaLoader } from './persona-loader.js';
+import { describe, it } from 'vitest';
 
 describe.skip('PersonaLoader', () => {
   describe('constructor', () => {

@@ -1,7 +1,5 @@
 /* eslint-disable vitest/expect-expect */
-/* eslint-disable @typescript-eslint/no-unused-vars */
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { ModuleLoader } from './module-loader.js';
+import { describe, it } from 'vitest';
 
 describe.skip('ModuleLoader', () => {
   describe('constructor', () => {
