@@ -20,11 +20,11 @@ step_2_validate:
   agent: ums-v2-module-validator
   input: file_list from step_1
   validation_checks:
-    - spec_compliance
-    - required_fields
-    - export_conventions
-    - component_structure
-    - metadata_quality
+    - spec_compliance_check
+    - required_fields_check
+    - export_convention_check
+    - component_structure_check
+    - metadata_quality_check
   output: validation_results
 
 step_3_format_output:

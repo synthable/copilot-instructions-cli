@@ -614,23 +614,81 @@ validate_multiple_modules:
       {aggregated common issues}
 ```
 
-## Validation Commands
+## Using This Agent
+
+This agent is invoked through Claude Code's Task tool, not as a CLI command. There are three ways to use module validation:
+
+### Via Slash Command (Recommended for Users)
 
 ```bash
 # Validate single module
-ums-v2-module-validator validate path/to/module.module.ts
-
-# Validate directory
-ums-v2-module-validator validate instruct-modules-v2/modules/foundation/
-
-# Validate by tier
-ums-v2-module-validator validate --tier foundation
+/ums:validate-module path/to/module.module.ts
 
 # Validate all modules
-ums-v2-module-validator validate --all
+/ums:validate-module all
 
-# Generate quality report
-ums-v2-module-validator audit --output report.md
+# Validate by tier
+/ums:validate-module foundation
+
+# Validate by category
+/ums:validate-module technology/typescript
+```
+
+### Via Task Tool (Direct Agent Invocation)
+
+```typescript
+// Validate single module
+Task(
+  subagent_type: "ums-v2-module-validator",
+  description: "Validate UMS v2.0 module",
+  prompt: `Validate the module at: path/to/module.module.ts
+
+Perform full spec compliance check including:
+- schemaVersion "2.0"
+- Required fields present
+- Export naming convention
+- Component structure
+- Metadata quality
+
+Provide detailed validation report with quality score.`
+)
+
+// Validate all foundation modules
+Task(
+  subagent_type: "ums-v2-module-validator",
+  description: "Validate foundation tier modules",
+  prompt: `Validate all modules in: instruct-modules-v2/modules/foundation/
+
+For each module:
+- Run full spec compliance check
+- Assess quality score
+- Check cognitive level assignment
+- Validate relationships
+
+Provide comprehensive summary report with:
+- Total modules validated
+- Pass/Warning/Fail counts
+- List of modules with issues
+- Common problems identified
+- Recommended fixes`
+)
+```
+
+### Via SDK (Programmatic)
+
+```typescript
+import { ModuleValidator } from 'ums-sdk';
+
+// Validate single module
+const result = await ModuleValidator.validate('path/to/module.module.ts');
+console.log(result.status); // PASS | WARNINGS | FAIL
+console.log(result.qualityScore); // 0-10
+
+// Validate multiple modules
+const results = await ModuleValidator.validateBatch([
+  'module1.module.ts',
+  'module2.module.ts'
+]);
 ```
 
 ## Spec Reference Lookup
