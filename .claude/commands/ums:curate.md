@@ -38,7 +38,7 @@ decision_tree: {
   add_module: {
     when: "User provides: /ums:curate add <path>",
     workflow: "add_module_workflow",
-    agent: "library-curator",
+    agent: "ums-v2-standard-library-curator",
     validation: "module-validator pre-check required",
     output: "inclusion_decision + rationale + location"
   },
@@ -46,7 +46,7 @@ decision_tree: {
   remove_module: {
     when: "User provides: /ums:curate remove <module-id>",
     workflow: "remove_module_workflow",
-    agent: "library-curator",
+    agent: "ums-v2-standard-library-curator",
     safety_check: "verify no personas reference module",
     output: "removal_confirmation + impact_report"
   },
@@ -54,14 +54,14 @@ decision_tree: {
   evaluate_module: {
     when: "User provides: /ums:curate evaluate <path>",
     workflow: "evaluate_module_workflow",
-    agent: "library-curator",
+    agent: "ums-v2-standard-library-curator",
     output: "quality_assessment + recommendation (approve/reject/revise)"
   },
 
   generate_metrics: {
     when: "User provides: /ums:curate metrics [tier]",
     workflow: "metrics_generation_workflow",
-    agent: "library-curator",
+    agent: "ums-v2-standard-library-curator",
     scope: "all_tiers or specified_tier",
     output: "comprehensive_metrics + gap_analysis + recommendations"
   },
@@ -69,7 +69,7 @@ decision_tree: {
   organize_tier: {
     when: "User provides: /ums:curate organize <tier>",
     workflow: "organization_workflow",
-    agent: "library-curator",
+    agent: "ums-v2-standard-library-curator",
     scope: "specified_tier",
     output: "reorganization_plan + misplaced_modules + quality_issues"
   },
@@ -77,7 +77,7 @@ decision_tree: {
   find_gaps: {
     when: "User provides: /ums:curate find-gaps [tier]",
     workflow: "gap_analysis_workflow",
-    agent: "library-curator",
+    agent: "ums-v2-standard-library-curator",
     analysis: "coverage_gaps + missing_capabilities + priority_suggestions",
     output: "gap_report + module_recommendations"
   },
@@ -85,7 +85,7 @@ decision_tree: {
   document_library: {
     when: "User provides: /ums:curate document [tier]",
     workflow: "documentation_workflow",
-    agent: "library-curator",
+    agent: "ums-v2-standard-library-curator",
     output: "library_overview + tier_summaries + usage_guide"
   }
 }
@@ -97,7 +97,7 @@ decision_tree: {
 
 ```typescript
 Task(
-  subagent_type: "library-curator",
+  subagent_type: "ums-v2-standard-library-curator",
   description: "Evaluate and add module to standard library",
   prompt: `OPERATION: Add module to standard library
 
@@ -130,7 +130,7 @@ DECISION_THRESHOLD: quality_score >= 7, no critical gaps`
 
 ```typescript
 Task(
-  subagent_type: "library-curator",
+  subagent_type: "ums-v2-standard-library-curator",
   description: "Remove module from standard library",
   prompt: `OPERATION: Remove module from standard library
 
@@ -162,7 +162,7 @@ OUTPUT: Use remove_module_report_template`
 
 ```typescript
 Task(
-  subagent_type: "library-curator",
+  subagent_type: "ums-v2-standard-library-curator",
   description: "Evaluate module for library quality",
   prompt: `OPERATION: Evaluate module quality
 
@@ -214,7 +214,7 @@ OUTPUT: Use evaluation_report_template`
 
 ```typescript
 Task(
-  subagent_type: "library-curator",
+  subagent_type: "ums-v2-standard-library-curator",
   description: "Generate comprehensive library metrics",
   prompt: `OPERATION: Generate library metrics
 
@@ -264,7 +264,7 @@ OUTPUT: Use metrics_report_template`
 
 ```typescript
 Task(
-  subagent_type: "library-curator",
+  subagent_type: "ums-v2-standard-library-curator",
   description: "Organize and assess tier structure",
   prompt: `OPERATION: Organize library tier
 
@@ -314,7 +314,7 @@ OUTPUT: Use organization_report_template`
 
 ```typescript
 Task(
-  subagent_type: "library-curator",
+  subagent_type: "ums-v2-standard-library-curator",
   description: "Identify coverage gaps in library",
   prompt: `OPERATION: Gap analysis
 
@@ -370,7 +370,7 @@ OUTPUT: Use gap_analysis_report_template`
 
 ```typescript
 Task(
-  subagent_type: "library-curator",
+  subagent_type: "ums-v2-standard-library-curator",
   description: "Generate library documentation",
   prompt: `OPERATION: Generate library documentation
 
@@ -1195,8 +1195,8 @@ debugging_checklist: [
 
 ## Agent Dependencies
 
-- **Primary**: library-curator (required for all operations)
-- **Supporting**: module-validator (for quality checks, pre-add validation)
+- **Primary**: ums-v2-standard-library-curator (required for all operations)
+- **Supporting**: ums-v2-module-validator (for quality checks, pre-add validation)
 - **SDK Components**: ModuleDiscovery, ModuleLoader, StandardLibrary
 
 ## Success Criteria

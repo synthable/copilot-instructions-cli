@@ -800,7 +800,7 @@ checklist:
 ## Agent Dependencies
 
 - **Primary**: ums-v2-module-validator, ums-v2-persona-validator (parallel execution)
-- **Optional**: ums-v2-library-curator (for metrics computation)
+- **Optional**: ums-v2-standard-library-curator (for metrics computation)
 
 ## Performance Considerations
 
