@@ -1,7 +1,5 @@
 /* eslint-disable vitest/expect-expect */
-/* eslint-disable @typescript-eslint/no-unused-vars */
-import { describe, it, expect } from 'vitest';
-import { SDKError, ModuleLoadError, DiscoveryError } from './index.js';
+import { describe, it } from 'vitest';
 
 describe.skip('SDK Error Classes', () => {
   describe('SDKError', () => {
