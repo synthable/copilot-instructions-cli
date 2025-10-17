@@ -666,6 +666,41 @@ export const myModule = defineModule({
 
 ---
 
+## Implementation Architecture
+
+### Package Responsibilities
+
+**ums-lib** (Pure domain logic):
+- **Public API**: `validateModule()`, `validateInstructionComponent()`, etc.
+- **Internal**: Validation guards (not exposed)
+- Platform-agnostic validation logic
+
+**ums-sdk** (Node.js runtime + authoring):
+- **Public API**: `defineModule()`, `definePersona()`, helper functions
+- **Implementation**: Uses ums-lib's public validators
+- Never imports or exposes validation guards
+
+### Clean Abstraction
+
+```typescript
+// ums-lib/src/validation/index.ts (Public API)
+export { validateModule } from './validators.js';
+export { validateInstructionComponent } from './validators.js';
+// guards.ts is NOT exported (internal only)
+
+// ums-sdk/src/authoring/define-module.ts
+import { validateModule } from 'ums-lib'; // Only public API
+
+export function defineModule(config) {
+  const module = applySmartDefaults(config);
+  return validateModule(module); // Validation happens here
+}
+```
+
+Users never see or interact with guards - validation is automatic and internal.
+
+---
+
 ## Implementation Status
 
 - ✅ Specified in `module-definition-tools-spec.md`
