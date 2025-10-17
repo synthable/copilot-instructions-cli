@@ -16,12 +16,10 @@ Node.js SDK for the Unified Module System (UMS) v2.0. Provides file system opera
   - [High-Level API](#high-level-api)
   - [Loaders](#loaders)
   - [Discovery](#discovery)
-  - [Orchestration](#orchestration)
 - [Usage Examples](#usage-examples)
   - [Building a Persona](#building-a-persona)
   - [Validating Modules](#validating-modules)
   - [Listing Modules](#listing-modules)
-  - [Using the Orchestrator](#using-the-orchestrator)
 - [TypeScript Support](#typescript-support)
 - [Configuration](#configuration)
 - [API Reference](#api-reference)
@@ -101,18 +99,38 @@ The UMS ecosystem follows a three-tier architecture:
 
 - **ums-lib**: Platform-agnostic domain logic, no I/O operations
 - **ums-sdk**: Node.js-specific I/O, file loading, and orchestration
+  - Re-exports **types** from ums-lib for convenience
+  - For domain functions, import from ums-lib or use SDK's high-level API
 - **CLI/UI**: User-facing interfaces consuming the SDK
 
 ## Quick Start
 
 ```typescript
-import { buildPersona } from 'ums-sdk';
+import { buildPersona, type Module } from 'ums-sdk';
 
 // Build a persona from a TypeScript configuration file
 const result = await buildPersona('./personas/my-persona.persona.ts');
 
 console.log(result.markdown); // Rendered Markdown content
 console.log(result.buildReport); // Build metadata and statistics
+```
+
+### Import Patterns
+
+The SDK re-exports **types** from ums-lib for convenience:
+
+```typescript
+// Import workflows from SDK
+import { buildPersona, validateAll, listModules } from 'ums-sdk';
+
+// Import types from SDK (re-exported from ums-lib)
+import type { Module, Persona, BuildReport } from 'ums-sdk';
+
+// For domain functions (validation, rendering), import from ums-lib:
+import { validateModule, renderMarkdown } from 'ums-lib';
+
+// Or use SDK's high-level API which handles everything:
+const result = await buildPersona('./persona.persona.ts'); // Already validated and rendered!
 ```
 
 ## Core Components
@@ -291,32 +309,6 @@ const isStandard = standardLib.isStandardModule('foundation/ethics/do-no-harm');
 const path = standardLib.getStandardLibraryPath();
 ```
 
-### Orchestration
-
-#### `BuildOrchestrator`
-
-Coordinates the complete build workflow:
-
-```typescript
-import { BuildOrchestrator } from 'ums-sdk';
-
-const orchestrator = new BuildOrchestrator();
-
-const result = await orchestrator.build('./personas/my-persona.persona.ts', {
-  configPath: './modules.config.yml',
-  conflictStrategy: 'warn',
-  includeStandard: true,
-});
-
-// Orchestrator handles:
-// 1. Loading persona file
-// 2. Loading configuration
-// 3. Discovering modules (standard + local)
-// 4. Building module registry
-// 5. Resolving persona modules
-// 6. Rendering to Markdown
-// 7. Generating build report
-```
 
 ## Usage Examples
 
@@ -443,44 +435,6 @@ listFoundationModules();
 listReasoningModules();
 ```
 
-### Using the Orchestrator
-
-Direct use of the orchestrator for custom workflows:
-
-```typescript
-import { BuildOrchestrator, ModuleRegistry } from 'ums-sdk';
-
-async function customBuild() {
-  const orchestrator = new BuildOrchestrator();
-
-  // Build with custom options
-  const result = await orchestrator.build('./personas/my-persona.persona.ts', {
-    conflictStrategy: 'replace', // Replace duplicate modules
-    includeStandard: true,
-  });
-
-  // Access detailed information
-  console.log('Persona Identity:');
-  console.log(`  Name: ${result.persona.name}`);
-  console.log(`  Description: ${result.persona.description}`);
-  console.log(`  Semantic: ${result.persona.semantic || 'N/A'}`);
-
-  console.log('\nModule Composition:');
-  result.modules.forEach((module, index) => {
-    console.log(`  ${index + 1}. ${module.id} (v${module.version})`);
-    console.log(`     ${module.metadata.name}`);
-  });
-
-  console.log('\nBuild Report:');
-  console.log(`  Build ID: ${result.buildReport.buildId}`);
-  console.log(`  Timestamp: ${result.buildReport.timestamp}`);
-  console.log(`  Module Count: ${result.buildReport.moduleList.length}`);
-
-  return result;
-}
-
-customBuild();
-```
 
 ## TypeScript Support
 
@@ -648,12 +602,6 @@ const result2 = await buildPersona('./personas/my-persona.persona.ts', {
 | ----------------- | ------------------------------------------ | ----------------------- |
 | `ModuleDiscovery` | `discover()`, `discoverInPaths()`          | Find and load modules   |
 | `StandardLibrary` | `discoverStandard()`, `isStandardModule()` | Manage standard library |
-
-### Orchestration
-
-| Class               | Methods   | Description             |
-| ------------------- | --------- | ----------------------- |
-| `BuildOrchestrator` | `build()` | Complete build workflow |
 
 ### Error Types
 

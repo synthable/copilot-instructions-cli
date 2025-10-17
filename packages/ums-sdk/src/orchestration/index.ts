@@ -1,6 +1,9 @@
 /**
  * Orchestration exports
- * Handles high-level workflow coordination
+ *
+ * NOTE: BuildOrchestrator is NOT exported (implementation detail).
+ * Use the high-level buildPersona() function instead.
  */
 
-export { BuildOrchestrator } from './build-orchestrator.js';
+// BuildOrchestrator is internal-only, not exported
+// export { BuildOrchestrator } from './build-orchestrator.js';
