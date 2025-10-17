@@ -22,7 +22,7 @@ step_1_structure:
       - extension: ".persona.ts"
       - naming: kebab-case
       - has_import: "import type { Persona } from 'ums-lib'"
-      - has_export: named export matching camelCase(filename)
+      - has_export: default export OR named export matching camelCase(filename)
     required_fields:
       - name: string
       - version: semver (x.y.z)

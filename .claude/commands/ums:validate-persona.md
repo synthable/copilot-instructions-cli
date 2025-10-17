@@ -293,8 +293,8 @@ composition_checks:
     - [ ] Name present
     - [ ] Version present (semver)
     - [ ] SchemaVersion is "2.0"
-    - [ ] Description present (optional but recommended)
-    - [ ] Semantic present (optional but recommended)
+    - [ ] Description present (required)
+    - [ ] Semantic present (required)
 ```
 
 ## Error Handling Templates
