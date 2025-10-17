@@ -1,0 +1,22 @@
+{
+  "name": "ums-mcp",
+  "version": "1.0.0",
+  "type": "module",
+  "private": true,
+  "main": "dist/index.js",
+  "bin": {
+    "ums-mcp": "dist/index.js"
+  },
+  "author": "synthable",
+  "license": "GPL-3.0-or-later",
+  "description": "MCP server for UMS v2.0 - AI assistant integration",
+  "scripts": {
+    "build": "tsc --build --pretty",
+    "clean": "rm -rf dist",
+    "prebuild": "npm run clean"
+  },
+  "dependencies": {
+    "ums-sdk": "^1.0.0"
+  },
+  "devDependencies": {}
+}
