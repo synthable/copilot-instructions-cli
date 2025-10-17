@@ -1063,13 +1063,18 @@ post_execution:
 ## Quality Rubric Reference
 
 ```typescript
+// NOTE: Required fields must match Module interface definition
+// Source of truth: packages/ums-lib/src/types/index.ts (Module interface)
+// Keep this list synchronized with the TypeScript interface
+const UMS_V2_REQUIRED_MODULE_FIELDS = ['id', 'version', 'schemaVersion', 'metadata', 'capabilities'];
+
 quality_rubric: {
   structure: {
     max_score: 10,
     criteria: {
       required_fields: {
         weight: 0.3,
-        checks: ['id', 'version', 'schemaVersion', 'metadata', 'capabilities']
+        checks: UMS_V2_REQUIRED_MODULE_FIELDS
       },
       export_convention: {
         weight: 0.3,
