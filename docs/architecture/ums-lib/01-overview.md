@@ -24,6 +24,6 @@ The primary architectural goals for `ums-lib` are:
 
 ## 4. High-Level Design
 
-The architecture follows the **"Functional Core, Imperative Shell"** pattern. The `ums-lib` itself is the functional core, providing pure functions for all its operations. The consuming application (in this case, `copilot-instructions-cli`) acts as the imperative shell, handling side effects like file I/O and console output.
+The architecture follows the **"Functional Core, Imperative Shell"** pattern. The `ums-lib` itself is the functional core, providing pure functions for all its operations. The consuming application (in this case, `ums-cli`) acts as the imperative shell, handling side effects like file I/O and console output.
 
 This separation of concerns is a key architectural strength, ensuring the library remains reusable and easy to test in isolation.

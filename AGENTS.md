@@ -3,7 +3,7 @@
 ## Build & Test Commands
 
 - **Build all**: `npm run build`
-- **Build CLI**: `npm run build -w packages/copilot-instructions-cli`
+- **Build CLI**: `npm run build -w packages/ums-cli`
 - **Build UMS lib**: `npm run build -w packages/ums-lib`
 - **Test all**: `npm test`
 - **Test CLI**: `npm run test:cli`

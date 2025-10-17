@@ -72,19 +72,19 @@ npm run quality-check
 
 ```bash
 # Build specific packages
-npm run build -w packages/copilot-instructions-cli
+npm run build -w packages/ums-cli
 npm run build -w packages/ums-lib
 npm run build -w packages/ums-sdk
 npm run build -w packages/ums-mcp
 
 # Run tests for specific packages with coverage
-npm run test:coverage -w packages/copilot-instructions-cli
+npm run test:coverage -w packages/ums-cli
 npm run test:coverage -w packages/ums-lib
 npm run test:coverage -w packages/ums-sdk
 npm run test:coverage -w packages/ums-mcp
 
 # Run a specific test file
-npx vitest run packages/copilot-instructions-cli/src/commands/build.test.ts
+npx vitest run packages/ums-cli/src/commands/build.test.ts
 
 # TypeScript build from root
 npm run build:tsc
@@ -132,7 +132,7 @@ npm run pre-push
 - **Root Package**: Workspace configuration and shared dev dependencies
 - **packages/ums-lib**: Reusable UMS v2.0 library for parsing, validation, and building (pure domain logic)
 - **packages/ums-sdk**: Node.js SDK for UMS v2.0 providing file system operations and TypeScript module loading
-- **packages/copilot-instructions-cli**: Main CLI application using the SDK
+- **packages/ums-cli**: Main CLI application using the SDK
 - **packages/ums-mcp**: MCP server for AI assistant integration
 
 ### UMS Library Package (`packages/ums-lib`)
@@ -152,7 +152,7 @@ npm run pre-push
   - `api/` - High-level convenience functions (buildPersona, validateAll, listModules)
 - **Dependencies**: ums-lib, yaml, glob, tsx (for TypeScript execution)
 
-### CLI Package (`packages/copilot-instructions-cli`)
+### CLI Package (`packages/ums-cli`)
 
 - **Entry Point**: `src/index.ts` - Commander.js setup with CLI commands (build, list, search, validate)
 - **Commands**: `src/commands/` - Individual command handlers using SDK
@@ -281,11 +281,11 @@ copilot-instructions mcp list-tools
 
 ```bash
 # Use the built CLI directly (after npm run build)
-node packages/copilot-instructions-cli/dist/index.js build --persona ./personas/my-persona.persona.ts
-node packages/copilot-instructions-cli/dist/index.js list
-node packages/copilot-instructions-cli/dist/index.js search "reasoning"
-node packages/copilot-instructions-cli/dist/index.js validate
-node packages/copilot-instructions-cli/dist/index.js mcp start --transport stdio
+node packages/ums-cli/dist/index.js build --persona ./personas/my-persona.persona.ts
+node packages/ums-cli/dist/index.js list
+node packages/ums-cli/dist/index.js search "reasoning"
+node packages/ums-cli/dist/index.js validate
+node packages/ums-cli/dist/index.js mcp start --transport stdio
 ```
 
 ## Development Notes
@@ -295,7 +295,7 @@ node packages/copilot-instructions-cli/dist/index.js mcp start --transport stdio
 - **TypeScript**: Compilation includes `.js` extensions for imports
 - **TypeScript Module Loading**: SDK uses `tsx` for on-the-fly TypeScript execution
 - **Git Hooks**: Configured with husky for pre-commit and pre-push checks
-- **CLI Binary**: Published as `copilot-instructions` with binary at `packages/copilot-instructions-cli/dist/index.js`
+- **CLI Binary**: Published as `copilot-instructions` with binary at `packages/ums-cli/dist/index.js`
 - **Node.js**: Requires version 22.0.0 or higher
 - **Lint-staged**: Pre-commit formatting and linting across all packages
 - **Architecture**: Three-tier architecture (ums-lib → ums-sdk → CLI)

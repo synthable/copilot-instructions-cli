@@ -3,7 +3,7 @@
 **Author:** Gemini
 **Date:** 2025-10-10
 
-This directory contains the architecture documentation for the `copilot-instructions-cli` package.
+This directory contains the architecture documentation for the `ums-cli` package.
 
 ## Table of Contents
 

@@ -27,7 +27,7 @@ instructions-composer/
 ├── packages/
 │   ├── ums-lib/                    # Core UMS v2.0 library
 │   ├── ums-sdk/                    # Node.js SDK for UMS v2.0
-│   ├── copilot-instructions-cli/   # CLI tool for developers
+│   ├── ums-cli/                    # CLI tool for developers
 │   └── ums-mcp/                    # MCP server for AI assistants
 ```
 
@@ -35,7 +35,7 @@ instructions-composer/
 
 **[ums-sdk](./packages/ums-sdk)**: Node.js SDK providing file system operations, TypeScript module loading, and high-level orchestration for UMS v2.0
 
-**[ums-cli](./packages/copilot-instructions-cli)**: Command-line interface for building and managing personas using the UMS SDK
+**[ums-cli](./packages/ums-cli)**: Command-line interface for building and managing personas using the UMS SDK
 
 **[ums-mcp](./packages/ums-mcp)**: MCP server providing AI assistants with module discovery capabilities
 
