@@ -64,6 +64,7 @@ Each platform MAY have its own SDK implementation following this specification.
 3. **Low-Level Access**: Expose building blocks for custom flows
 4. **Type Safety**: Leverage TypeScript for compile-time safety
 5. **Error Transparency**: Detailed error messages with context
+6. **Clean API Surface**: Re-export types from ums-lib; functions accessed directly from ums-lib or via SDK high-level API
 
 ---
 
@@ -93,6 +94,8 @@ The SDK delegates **pure data operations** to ums-lib:
 - ❌ Build report generation (use `ums-lib`)
 - ❌ Module registry logic (use `ums-lib`)
 - ❌ Module resolution logic (use `ums-lib`)
+
+**Note on API Surface**: The SDK re-exports **types** from ums-lib for convenience, but does NOT re-export functions. Users should import domain functions from ums-lib directly, or use the SDK's high-level API which orchestrates ums-lib functions internally.
 
 ### 2.3. Layer Boundaries
 
