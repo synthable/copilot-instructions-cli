@@ -29,7 +29,7 @@ Commands are shortcuts that expand into detailed prompts for specific tasks. Typ
 
 **Output includes**:
 - Total modules/personas audited
-- Pass/Warning/Fail counts
+- Pass/Warn/Fail counts
 - Quality scores
 - List of issues with severity
 - Prioritized recommendations
@@ -40,55 +40,6 @@ Commands are shortcuts that expand into detailed prompts for specific tasks. Typ
 - Monthly quality checks
 - Onboarding reviews
 - Pre-merge validation
-
----
-
-### 🏗️ /ums:build
-
-**Purpose**: Build personas and develop the build system
-
-**Usage**:
-```
-/ums:build implement [feature]
-/ums:build fix [bug-description]
-/ums:build optimize [aspect]
-/ums:build test [component]
-```
-
-**What it does**:
-- Implements new build system features
-- Fixes build pipeline bugs
-- Optimizes build performance
-- Tests build components
-- Maintains build infrastructure
-
-**Common tasks**:
-
-**Implement feature**:
-```
-/ums:build implement module caching
-```
-
-**Fix bug**:
-```
-/ums:build fix Data component rendering adds extra backticks
-```
-
-**Optimize**:
-```
-/ums:build optimize module loading performance
-```
-
-**Test**:
-```
-/ums:build test markdown renderer with complex personas
-```
-
-**When to use**:
-- Adding build system features
-- Debugging build issues
-- Improving build performance
-- Testing build components
 
 ---
 
@@ -245,9 +196,9 @@ Quality Score: 10/10
 This module is fully spec-compliant and ready to use.
 ```
 
-**WARNINGS**:
+**WARN**:
 ```markdown
-⚠️ **Module Validation: PASS WITH WARNINGS**
+⚠️ **Module Validation: WARN**
 
 Warnings (2):
 1. Missing recommended field: cognitiveLevel
@@ -324,9 +275,9 @@ No duplicates detected.
 Ready to build.
 ```
 
-**WARNINGS**:
+**WARN**:
 ```markdown
-⚠️ **Persona Validation: PASS WITH WARNINGS**
+⚠️ **Persona Validation: WARN**
 
 Warnings:
 - Module 'principle/testing/tdd' not found in standard library
@@ -444,15 +395,6 @@ Commands support batch operations:
 5. /ums:curate document
 ```
 
-### Build System Development
-
-```bash
-1. /ums:build implement [feature]
-2. /ums:build test [component]
-3. /ums:validate-module [test output]
-4. [Commit changes]
-```
-
 ---
 
 ## Command Chaining
@@ -465,11 +407,6 @@ Commands can be used sequentially for complex workflows:
 [...module created...]
 /ums:validate-module [new-module]
 /ums:audit modules
-
-# Build feature and test
-/ums:build implement caching
-/ums:build test module-loader
-/ums:validate-module [test output]
 ```
 
 ---
@@ -570,7 +507,6 @@ Commands typically delegate to specialized agents:
 | Command | Primary Agent | Supporting Agents |
 |---------|--------------|-------------------|
 | `/ums:audit` | module-validator | persona-validator, library-curator |
-| `/ums:build` | build-developer | module-validator |
 | `/ums:create` | module-generator | module-validator |
 | `/ums:curate` | library-curator | module-validator |
 | `/ums:validate-module` | module-validator | - |
@@ -587,7 +523,6 @@ Error: Command '/ums:my-command' not found
 
 Available commands:
 - /ums:audit
-- /ums:build
 - /ums:create
 - /ums:curate
 - /ums:validate-module
