@@ -286,7 +286,7 @@ const manager = new ConfigManager();
 const config = await manager.load('./modules.config.yml');
 
 // Validate configuration structure
-const validation = manager.validate(configObject);
+const validation = manager.validate(config);
 if (!validation.valid) {
   console.error('Config errors:', validation.errors);
 }
@@ -315,7 +315,10 @@ const modules = await discovery.discover(config);
 #### StandardLibrary
 
 ```typescript
-import { StandardLibrary } from 'ums-sdk';
+import { StandardLibrary, ConfigManager } from 'ums-sdk';
+
+const configManager = new ConfigManager();
+const config = await configManager.load('./modules.config.yml');
 
 const standardLib = new StandardLibrary();
 
@@ -467,7 +470,7 @@ async function buildAndSave() {
 
     return result;
   } catch (error) {
-    console.error('❌ Build failed:', error.message);
+    console.error('❌ Build failed:', error);
     process.exit(1);
   }
 }

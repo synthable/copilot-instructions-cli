@@ -518,6 +518,8 @@ export function defineModule(config: {
 **Location**: `packages/ums-sdk/src/authoring/path-helpers.ts`
 
 ```typescript
+import path from 'node:path';
+
 /**
  * Infer module ID from file path
  *
@@ -721,6 +723,11 @@ export const solidPrinciples = defineModule({
 
 ```typescript
 import { ModuleBuilder } from 'ums-sdk/authoring';
+import { fileURLToPath } from 'node:url';
+import { dirname } from 'node:path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 export const errorHandling = new ModuleBuilder(__filename, __dirname)
   // ID inferred from file path automatically

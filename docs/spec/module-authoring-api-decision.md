@@ -298,8 +298,8 @@ export const customPersona = definePersona({
 
 ```typescript
 // Conditional helpers
-export const when = <T>(condition: boolean, value: T): T | undefined =>
-  condition ? value : undefined;
+export const when = <T>(condition: boolean, value: T): T | {} =>
+  condition ? value : {};
 
 export const whenEnv = (env: string, value: any) =>
   when(process.env.NODE_ENV === env, value);
