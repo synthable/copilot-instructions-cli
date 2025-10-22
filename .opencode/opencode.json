@@ -27,7 +27,7 @@
           }
         },
         "gpt-5-mini-low-low": {
-          "id": "gpt-5-mini-low",
+          "id": "gpt-5-mini",
           "options": {
             "reasoningEffort": "low",
             "textVerbosity": "low",

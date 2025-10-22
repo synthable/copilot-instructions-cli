@@ -183,6 +183,7 @@ This object confirms that the provider has processed Agent A's decisions.
 
 ```json
 {
+  "protocol_version": "1.2",
   "iteration": 1,
   "artifact": {
     "media_type": "text/plain",
