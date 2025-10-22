@@ -364,7 +364,7 @@ export const requires = (...modules: string[]) => ({
   relationships: { requires: modules }
 });
 
-export const extends_ = (...modules: string[]) => ({
+export const withExtends = (...modules: string[]) => ({
   relationships: { extends: modules }
 });
 

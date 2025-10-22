@@ -235,9 +235,22 @@ export const guards = {
 
   /**
    * Validates semver format
+   *
+   * Note: For implementation, use the 'semver' npm package for full
+   * spec compliance including pre-release versions (e.g., 1.0.0-alpha.1)
+   * and build metadata (e.g., 1.0.0+build.123). A simple regex cannot
+   * correctly handle all semver edge cases.
+   *
+   * Example implementation:
+   *   import semver from 'semver';
+   *   if (!semver.valid(value)) {
+   *     throw new ValidationError(`Invalid semver: ${value}`);
+   *   }
    */
   semver(value: string): string {
-    const semverRegex = /^\d+\.\d+\.\d+(-[a-z0-9.]+)?$/i;
+    // Simplified regex for specification purposes
+    // Implementation should use 'semver' package for full compliance
+    const semverRegex = /^\d+\.\d+\.\d+(-[a-z0-9.]+)?(\+[a-z0-9.]+)?$/i;
     if (!semverRegex.test(value)) {
       throw new ValidationError(`Invalid semver: ${value}`);
     }
