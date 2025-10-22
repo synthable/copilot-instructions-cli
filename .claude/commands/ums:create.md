@@ -161,7 +161,7 @@ cognitive_level_assignment: {
 
 ### Phase 3: Agent Invocation
 
-**Template: module-generator Agent Call**:
+**Template: ums-v2-module-generator Agent Call**:
 
 ```typescript
 Task(
@@ -211,12 +211,12 @@ VALIDATION:
 ```typescript
 post_creation_options: {
   validate: {
-    action: 'Launch module-validator agent',
+    action: 'Launch ums-v2-module-validator agent',
     template: 'VALIDATION_AGENT_CALL',
     when: 'User wants spec compliance check'
   },
   add_to_library: {
-    action: 'Launch library-curator agent',
+    action: 'Launch ums-v2-standard-library-curator agent',
     template: 'CURATION_AGENT_CALL',
     when: 'User wants standard library inclusion'
   },
@@ -659,14 +659,14 @@ error_handling: {
   },
 
   agent_generation_failure: {
-    symptom: 'module-generator returns error',
+    symptom: 'ums-v2-module-generator returns error',
     diagnostic: 'Check agent output for specific error',
     fix: 'Report error, offer retry with corrections or manual creation',
     template: 'AGENT_FAILURE_RECOVERY'
   },
 
   validation_failure: {
-    symptom: 'module-validator returns FAIL',
+    symptom: 'ums-v2-module-validator returns FAIL',
     diagnostic: 'Parse validation errors',
     fix: 'Offer auto-fix or manual fix instructions',
     template: 'VALIDATION_FAILURE_RECOVERY'
@@ -699,7 +699,7 @@ Select: [1|2|3|4]
 Error: {error_message}
 
 Diagnostic:
-- Agent: module-generator
+- Agent: ums-v2-module-generator
 - Stage: {failed_stage}
 - Reason: {failure_reason}
 
@@ -727,7 +727,7 @@ Select: [retry|manual|debug]
 - [ ] Interactive requirements template for clarification
 - [ ] Module ID and export name calculation
 - [ ] Cognitive level assignment for foundation tier
-- [ ] module-generator agent invocation with template
+- [ ] ums-v2-module-generator agent invocation with template
 - [ ] Post-creation options menu
 - [ ] Validation agent integration
 - [ ] Curation agent integration
@@ -737,7 +737,7 @@ Select: [retry|manual|debug]
 - [ ] Module selection methods (search|browse|specify)
 - [ ] Grouping strategy decision
 - [ ] Persona file generation
-- [ ] persona-validator agent invocation
+- [ ] ums-v2-persona-validator agent invocation
 - [ ] Build test execution
 
 ### Output Formatting
@@ -748,10 +748,10 @@ Select: [retry|manual|debug]
 - [ ] Error templates for all scenarios
 
 ### Agent Integration
-- [ ] module-generator task invocation
-- [ ] module-validator task invocation
-- [ ] persona-validator task invocation
-- [ ] library-curator task invocation
+- [ ] ums-v2-module-generator task invocation
+- [ ] ums-v2-module-validator task invocation
+- [ ] ums-v2-persona-validator task invocation
+- [ ] ums-v2-standard-library-curator task invocation
 - [ ] Agent output parsing and formatting
 
 ### Validation
@@ -768,10 +768,10 @@ Select: [retry|manual|debug]
 
 | Agent | When Used | Purpose |
 |-------|-----------|---------|
-| module-generator | Module creation (required) | Generate spec-compliant .module.ts file |
-| module-validator | Post-creation validation (optional) | Check spec compliance, quality score |
-| persona-validator | Persona creation (automatic) | Validate persona structure, module refs |
-| library-curator | Library addition (optional) | Assess quality, recommend inclusion |
+| ums-v2-module-generator | Module creation (required) | Generate spec-compliant .module.ts file |
+| ums-v2-module-validator | Post-creation validation (optional) | Check spec compliance, quality score |
+| ums-v2-persona-validator | Persona creation (automatic) | Validate persona structure, module refs |
+| ums-v2-standard-library-curator | Library addition (optional) | Assess quality, recommend inclusion |
 
 ---
 
@@ -794,7 +794,7 @@ Detected:
 - Cognitive Level: N/A (not foundation)
 
 [Agent invocation]
-Launching module-generator...
+Launching ums-v2-module-generator...
 
 [Agent output]
 ✅ Module Created Successfully
@@ -841,7 +841,7 @@ User: TDD, principle tier, language-agnostic
 - Export Name: testDrivenDevelopment
 - Components: instruction + knowledge
 
-Launching module-generator...
+Launching ums-v2-module-generator...
 
 [Creation and validation flow continues]
 ```

@@ -114,7 +114,8 @@ Output format:
 Task(
   subagent_type: "ums-v2-module-validator",
   description: "Validate multiple UMS v2.0 modules",
-  prompt: `Validate all modules in: ${path}
+  prompt: `Validate all modules:
+${file_list.map(f => `  - ${f}`).join('\n')}
 
 For each module:
 - Run full spec compliance check

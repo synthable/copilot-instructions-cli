@@ -23,7 +23,7 @@ workflow:
       document: "execute_documentation_workflow"
 
   phase_3_execute:
-    action: "Execute selected workflow with library-curator agent"
+    action: "Execute selected workflow with ums-v2-standard-library-curator agent"
     output: "operation_result + recommendations"
 
   phase_4_report:

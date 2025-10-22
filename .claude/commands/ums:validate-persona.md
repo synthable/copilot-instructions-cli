@@ -123,7 +123,8 @@ Output format:
 Task(
   subagent_type: "ums-v2-persona-validator",
   description: "Validate multiple UMS v2.0 personas",
-  prompt: `Validate all personas in: ${path}
+  prompt: `Validate all personas:
+${file_list.map(f => \`  - \${f}\`).join('\\n')}
 
 For each persona:
 - Run full spec compliance check
