@@ -1,0 +1,47 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "provider": {
+    "opencode": {
+      "models": {
+        "gpt-5-mini-high-high": {
+          "id": "gpt-5-mini",
+          "options": {
+            "reasoningEffort": "high",
+            "textVerbosity": "high",
+            "reasoningSummary": "auto"
+          }
+        },
+        "gpt-5-mini-high": {
+          "id": "gpt-5-mini",
+          "options": {
+            "reasoningEffort": "high",
+            "reasoningSummary": "auto"
+          }
+        },
+        "gpt-5-mini-high-low": {
+          "id": "gpt-5-mini",
+          "options": {
+            "reasoningEffort": "high",
+            "textVerbosity": "low",
+            "reasoningSummary": "auto"
+          }
+        },
+        "gpt-5-mini-low-low": {
+          "id": "gpt-5-mini",
+          "options": {
+            "reasoningEffort": "low",
+            "textVerbosity": "low",
+            "reasoningSummary": "auto"
+          }
+        },
+        "gpt-5-mini-low": {
+          "id": "gpt-5-mini",
+          "options": {
+            "reasoningEffort": "low",
+            "reasoningSummary": "auto"
+          }
+        }
+      }
+    }
+  }
+}
