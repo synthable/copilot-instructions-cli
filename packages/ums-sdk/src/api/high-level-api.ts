@@ -158,8 +158,25 @@ export async function listModules(
     modules.push(...localModules);
   }
 
-  // Convert to ModuleInfo and apply filters
-  let moduleInfos: ModuleInfo[] = modules.map(module => {
+  // Apply capability filter
+  let filteredModules = modules;
+  if (options.capability) {
+    const capability = options.capability;
+    filteredModules = filteredModules.filter(module =>
+      module.capabilities.includes(capability)
+    );
+  }
+
+  // Apply tag filter
+  if (options.tag) {
+    const tag = options.tag;
+    filteredModules = filteredModules.filter(
+      module => module.metadata.tags && module.metadata.tags.includes(tag)
+    );
+  }
+
+  // Convert to ModuleInfo
+  const moduleInfos: ModuleInfo[] = filteredModules.map(module => {
     const isStandard = standardLibrary.isStandardModule(module.id);
     return {
       id: module.id,
@@ -171,21 +188,6 @@ export async function listModules(
       filePath: isStandard ? undefined : module.id, // Placeholder
     };
   });
-
-  // Apply tier filter
-  if (options.tier) {
-    moduleInfos = moduleInfos.filter(info =>
-      info.id.startsWith(`${options.tier}/`)
-    );
-  }
-
-  // Apply capability filter
-  if (options.capability) {
-    const capability = options.capability;
-    moduleInfos = moduleInfos.filter(info =>
-      info.capabilities.includes(capability)
-    );
-  }
 
   return moduleInfos;
 }
