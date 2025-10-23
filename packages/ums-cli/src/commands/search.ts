@@ -85,7 +85,7 @@ function renderSearchResults(modules: Module[], query: string): void {
       border: ['gray'],
       compact: false,
     },
-    colWidths: [25, 25, 20, 20],
+    colWidths: [28, 22, 20, 20, 30],
     wordWrap: true,
   });
 

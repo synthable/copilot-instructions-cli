@@ -19,7 +19,7 @@ const program = new Command();
 program
   .name('copilot-instructions')
   .description(
-    'A CLI for building and managing AI persona instructions from UMS v1.0 modules.'
+    'A CLI for building and managing AI persona instructions from UMS v2.0 modules.'
   )
   .version(pkg.version)
   .option('-v, --verbose', 'Enable verbose output');
@@ -27,20 +27,20 @@ program
 program
   .command('build')
   .description(
-    'Builds a persona instruction file from a .persona.yml configuration (UMS v1.0)'
+    'Builds a persona instruction file from a .persona.ts configuration (UMS v2.0)'
   )
   .option(
     '-p, --persona <file>',
-    'Path to the persona configuration file (.persona.yml)'
+    'Path to the persona configuration file (.persona.ts)'
   )
   .option('-o, --output <file>', 'Specify the output file for the build')
   .option('-v, --verbose', 'Enable verbose output')
   .addHelpText(
     'after',
     `  Examples:
-    $ copilot-instructions build --persona ./personas/my-persona.persona.yml
-    $ copilot-instructions build --persona ./personas/my-persona.persona.yml --output ./dist/my-persona.md
-    $ cat persona.yml | copilot-instructions build --output ./dist/my-persona.md
+    $ copilot-instructions build --persona ./personas/my-persona.persona.ts
+    $ copilot-instructions build --persona ./personas/my-persona.persona.ts --output ./dist/my-persona.md
+    $ cat persona.ts | copilot-instructions build --output ./dist/my-persona.md
     `
   )
   .showHelpAfterError()
@@ -114,7 +114,7 @@ program
 
 program
   .command('validate')
-  .description('Validates UMS v1.0 modules and persona files.')
+  .description('Validates UMS v2.0 modules and persona files.')
   .addArgument(
     new Argument(
       '[path]',
@@ -130,7 +130,7 @@ program
     `  Examples:
     $ copilot-instructions validate
     $ copilot-instructions validate ./instructions-modules
-    $ copilot-instructions validate ./personas/my-persona.persona.yml
+    $ copilot-instructions validate ./personas/my-persona.persona.ts
     $ copilot-instructions validate --verbose
     `
   )
