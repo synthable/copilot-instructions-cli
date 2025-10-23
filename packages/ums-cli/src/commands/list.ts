@@ -61,7 +61,7 @@ function renderModulesTable(modules: Module[]): void {
 
   modules.forEach(module => {
     const metadata = getModuleMetadata(module);
-    const tags = metadata.tags?.join(', ') || 'none';
+    const tags = metadata.tags?.join(', ') ?? 'none';
 
     table.push([
       chalk.green(module.id),
