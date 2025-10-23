@@ -185,7 +185,7 @@ describe('error-formatting', () => {
       );
 
       expect(result).toBe(
-        '[ERROR] validate: validation failed - invalid format (follow specification)\n  File: /modules/test.module.yml\n  Reference: UMS v1.0 Section 4.1'
+        '[ERROR] validate: validation failed - invalid format (follow specification)\n  File: /modules/test.module.yml\n  Reference: UMS v2.0 Section 4.1'
       );
     });
 
@@ -200,7 +200,7 @@ describe('error-formatting', () => {
       );
 
       expect(result).toBe(
-        '[ERROR] build: validation failed - schema violation (fix schema)\n  File: /modules/test.module.yml\n  Key path: metadata.description\n  Reference: UMS v1.0 Section 3.2'
+        '[ERROR] build: validation failed - schema violation (fix schema)\n  File: /modules/test.module.yml\n  Key path: metadata.description\n  Reference: UMS v2.0 Section 3.2'
       );
     });
   });
@@ -399,7 +399,7 @@ describe('error-formatting', () => {
       it('should return formatted wrong schema version message', () => {
         const result = SCHEMA_VALIDATION_ERRORS.wrongSchemaVersion('0.5');
 
-        expect(result).toBe("Schema version must be '1.0', got '0.5'");
+        expect(result).toBe("Schema version must be '2.0', got '0.5'");
       });
     });
 
