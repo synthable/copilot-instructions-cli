@@ -12,20 +12,62 @@ import { discoverAllModules } from '../utils/module-discovery.js';
 import { getModuleMetadata } from '../types/cli-extensions.js';
 
 interface ListOptions {
+  level?: string;
+  capability?: string;
+  domain?: string;
   tag?: string;
   verbose?: boolean;
 }
 
 /**
- * Filters and sorts modules by tag and metadata.name
+ * Filters and sorts modules by level, capability, domain, tag, and metadata.name
  */
-function filterAndSortModules(modules: Module[], tagFilter?: string): Module[] {
+function filterAndSortModules(
+  modules: Module[],
+  options: {
+    level?: string;
+    capability?: string;
+    domain?: string;
+    tag?: string;
+  }
+): Module[] {
   let filteredModules = modules;
 
-  if (tagFilter) {
-    filteredModules = modules.filter(m => {
+  // Filter by cognitive level
+  if (options.level) {
+    const levels = options.level
+      .split(',')
+      .map(s => parseInt(s.trim()))
+      .filter(n => !isNaN(n));
+    filteredModules = filteredModules.filter(m =>
+      levels.includes(m.cognitiveLevel)
+    );
+  }
+
+  // Filter by capabilities (comma-separated)
+  if (options.capability) {
+    const capabilities = options.capability.split(',').map(s => s.trim());
+    filteredModules = filteredModules.filter(m =>
+      capabilities.some(cap => m.capabilities.includes(cap))
+    );
+  }
+
+  // Filter by domain (comma-separated)
+  if (options.domain) {
+    const domains = options.domain.split(',').map(s => s.trim());
+    filteredModules = filteredModules.filter(m => {
+      if (!m.domain) return false;
+      const moduleDomains = Array.isArray(m.domain) ? m.domain : [m.domain];
+      return domains.some(d => moduleDomains.includes(d));
+    });
+  }
+
+  // Filter by tag (comma-separated)
+  if (options.tag) {
+    const tags = options.tag.split(',').map(s => s.trim());
+    filteredModules = filteredModules.filter(m => {
       const metadata = getModuleMetadata(m);
-      return metadata.tags?.includes(tagFilter);
+      return tags.some(tag => metadata.tags?.includes(tag));
     });
   }
 
@@ -80,7 +122,11 @@ function renderModulesTable(modules: Module[]): void {
 /**
  * Handles the 'list' command for UMS v2.0 modules.
  * @param options - The command options.
- * @param options.tag - The tag to filter by.
+ * @param options.level - The cognitive level(s) to filter by (comma-separated).
+ * @param options.capability - The capability(ies) to filter by (comma-separated).
+ * @param options.domain - The domain(s) to filter by (comma-separated).
+ * @param options.tag - The tag(s) to filter by (comma-separated).
+ * @param options.verbose - Enable verbose output.
  */
 export async function handleList(options: ListOptions): Promise<void> {
   const progress = createDiscoveryProgress('list', options.verbose);
@@ -112,13 +158,29 @@ export async function handleList(options: ListOptions): Promise<void> {
     progress.update('Filtering and sorting modules...');
 
     // Filter and sort modules
-    const filteredModules = filterAndSortModules(modules, options.tag);
+    const filterOptions: {
+      level?: string;
+      capability?: string;
+      domain?: string;
+      tag?: string;
+    } = {};
+    if (options.level) filterOptions.level = options.level;
+    if (options.capability) filterOptions.capability = options.capability;
+    if (options.domain) filterOptions.domain = options.domain;
+    if (options.tag) filterOptions.tag = options.tag;
+
+    const filteredModules = filterAndSortModules(modules, filterOptions);
 
     progress.succeed('Module listing complete.');
 
     // Empty state
     if (filteredModules.length === 0) {
-      const filterMsg = options.tag ? ` with tag '${options.tag}'` : '';
+      const filters: string[] = [];
+      if (options.level) filters.push(`level '${options.level}'`);
+      if (options.capability) filters.push(`capability '${options.capability}'`);
+      if (options.domain) filters.push(`domain '${options.domain}'`);
+      if (options.tag) filters.push(`tag '${options.tag}'`);
+      const filterMsg = filters.length > 0 ? ` with ${filters.join(', ')}` : '';
       console.log(chalk.yellow(`No UMS v2.0 modules found${filterMsg}.`));
       return;
     }

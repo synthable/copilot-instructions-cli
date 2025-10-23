@@ -73,6 +73,7 @@ describe('search command', () => {
     version: '1.0',
     schemaVersion: '1.0',
     capabilities: [],
+    cognitiveLevel: 2,
     metadata: {
       name: 'Deductive Reasoning',
       description: 'Logical reasoning from premises',
@@ -87,6 +88,7 @@ describe('search command', () => {
     version: '1.0',
     schemaVersion: '1.0',
     capabilities: [],
+    cognitiveLevel: 2,
     metadata: {
       name: 'Testing Principles',
       description: 'Quality assurance through testing',

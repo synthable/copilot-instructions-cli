@@ -46,6 +46,7 @@ const createMockModule = (id: string, version = '1.0.0'): Module => ({
   version,
   schemaVersion: '1.0',
   capabilities: [],
+  cognitiveLevel: 2,
   metadata: {
     name: `Module ${id}`,
     description: `Test module ${id}`,

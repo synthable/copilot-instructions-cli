@@ -68,44 +68,88 @@ program
 program
   .command('list')
   .description('Lists all available UMS v2.0 modules.')
-  .option('-t, --tag <name>', 'Filter by tag (e.g., foundational, reasoning)')
+  .option(
+    '-l, --level <levels>',
+    'Filter by cognitive level (0-6, comma-separated)'
+  )
+  .option(
+    '-c, --capability <capabilities>',
+    'Filter by capabilities (comma-separated)'
+  )
+  .option('-d, --domain <domains>', 'Filter by domains (comma-separated)')
+  .option('-t, --tag <tags>', 'Filter by tags (comma-separated)')
   .option('-v, --verbose', 'Enable verbose output')
   .addHelpText(
     'after',
     `  Examples:
     $ copilot-instructions list
-    $ copilot-instructions list --tag foundational
-    $ copilot-instructions list --tag reasoning
+    $ copilot-instructions list --level 0,1
+    $ copilot-instructions list --capability testing,debugging
+    $ copilot-instructions list --domain typescript --tag tdd
+    $ copilot-instructions list --level 2 --capability api-design
     `
   )
   .showHelpAfterError()
-  .action(async (options: { tag?: string; verbose?: boolean }) => {
-    const verbose = options.verbose ?? false;
-    await handleList({
-      ...(options.tag && { tag: options.tag }),
-      verbose,
-    });
-  });
+  .action(
+    async (options: {
+      level?: string;
+      capability?: string;
+      domain?: string;
+      tag?: string;
+      verbose?: boolean;
+    }) => {
+      const verbose = options.verbose ?? false;
+      await handleList({
+        ...(options.level && { level: options.level }),
+        ...(options.capability && { capability: options.capability }),
+        ...(options.domain && { domain: options.domain }),
+        ...(options.tag && { tag: options.tag }),
+        verbose,
+      });
+    }
+  );
 
 program
   .command('search')
   .description('Searches for UMS v2.0 modules by name, description, or tags.')
   .addArgument(new Argument('<query>', 'Search query'))
-  .option('-t, --tag <name>', 'Filter by tag (e.g., foundational, reasoning)')
+  .option(
+    '-l, --level <levels>',
+    'Filter by cognitive level (0-6, comma-separated)'
+  )
+  .option(
+    '-c, --capability <capabilities>',
+    'Filter by capabilities (comma-separated)'
+  )
+  .option('-d, --domain <domains>', 'Filter by domains (comma-separated)')
+  .option('-t, --tag <tags>', 'Filter by tags (comma-separated)')
   .option('-v, --verbose', 'Enable verbose output')
   .addHelpText(
     'after',
     `  Examples:
     $ copilot-instructions search "logic"
-    $ copilot-instructions search "reasoning" --tag foundational
-    $ copilot-instructions search "react" --tag typescript
+    $ copilot-instructions search "reasoning" --level 0,1
+    $ copilot-instructions search "react" --domain typescript
+    $ copilot-instructions search "testing" --capability quality-assurance --tag tdd
     `
   )
   .showHelpAfterError()
   .action(
-    async (query: string, options: { tag?: string; verbose?: boolean }) => {
+    async (
+      query: string,
+      options: {
+        level?: string;
+        capability?: string;
+        domain?: string;
+        tag?: string;
+        verbose?: boolean;
+      }
+    ) => {
       const verbose = options.verbose ?? false;
       await handleSearch(query, {
+        ...(options.level && { level: options.level }),
+        ...(options.capability && { capability: options.capability }),
+        ...(options.domain && { domain: options.domain }),
         ...(options.tag && { tag: options.tag }),
         verbose,
       });
