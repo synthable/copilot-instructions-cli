@@ -9,6 +9,7 @@ When developing the copilot-instructions CLI, follow these guidelines for tool c
 This project uses Commander.js for CLI implementation. When adding or modifying commands:
 
 1. **Command Structure**:
+
    ```typescript
    program
      .command('command-name')
@@ -33,6 +34,7 @@ This project uses Commander.js for CLI implementation. When adding or modifying 
 ### Handler Functions
 
 1. **Pattern**:
+
    ```typescript
    export async function handleCommandName(options: {
      param?: string;
@@ -59,12 +61,14 @@ This project uses Commander.js for CLI implementation. When adding or modifying 
 When working with the core library (`ums-lib`):
 
 1. **Module Loading**:
+
    ```typescript
    const loader = new ModuleLoader(config);
    const modules = await loader.loadModules();
    ```
 
 2. **Persona Building**:
+
    ```typescript
    const engine = new BuildEngine(loader);
    const result = await engine.buildPersona(personaConfig);
@@ -99,6 +103,7 @@ When working with the core library (`ums-lib`):
 ### Unit Tests with Vitest
 
 1. **Test Structure**:
+
    ```typescript
    describe('CommandName', () => {
      it('should handle basic case', async () => {

@@ -13,7 +13,7 @@ This is a TypeScript monorepo for building a CLI tool that helps developers crea
 
 ## Repository Structure
 
-```
+```text
 copilot-instructions-cli/
 ├── packages/
 │   ├── copilot-instructions-cli/  # Main CLI package
