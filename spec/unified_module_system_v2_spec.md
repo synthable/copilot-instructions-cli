@@ -60,7 +60,7 @@ A valid module for v2.0 MUST contain the following top-level keys:
   - `"foundation/reasoning/systems-thinking"`
   - `"principle/architecture/separation-of-concerns"`
 
-**Recommended Structure**: For standard library modules, use the tier structure (`foundation|principle|technology|execution`) for consistency. Custom modules MAY use any valid identifier structure.
+**Recommended Structure**: Module IDs can be flat (e.g., `be-concise`) or hierarchical (e.g., `ethics/do-no-harm`). Use tags in metadata for categorization and discovery rather than relying on ID structure.
 
 #### `version`
 
