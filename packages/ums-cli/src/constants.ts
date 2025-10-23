@@ -6,7 +6,7 @@
 // Supports flat IDs (e.g., 'be-concise') and hierarchical IDs (e.g., 'ethics/do-no-harm')
 export const ID_REGEX = /^[a-z0-9][a-z0-9-]*(?:\/[a-z0-9][a-z0-9-]*)*$/;
 
-// Standard directive keys as defined in UMS v1.0 Section 4.1
+// Standard directive keys as defined in UMS v2.0 Section 4.1
 export const DIRECTIVE_KEYS = [
   'goal',
   'process',

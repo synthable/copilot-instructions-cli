@@ -3,7 +3,7 @@
  * Part of the UMS SDK v1.0
  */
 
-import { resolve } from 'node:path';
+import { resolve, join } from 'node:path';
 import { existsSync } from 'node:fs';
 import type { Module } from 'ums-lib';
 import { ModuleDiscovery } from './module-discovery.js';
@@ -63,17 +63,19 @@ export class StandardLibrary {
 
   /**
    * Check if a module ID is from standard library
-   * @param _moduleId - Module ID to check (currently unused in placeholder implementation)
+   * @param moduleId - Module ID to check
    * @returns true if module is in standard library
    *
-   * Note: This is a placeholder implementation.
-   * In a real implementation, this would check against a known list
-   * of standard library modules or use a registry.
+   * Note: Uses file-based heuristic - checks if module file exists in standard library path.
+   * This is a simple implementation that works for most cases.
    */
-  isStandardModule(_moduleId: string): boolean {
-    // TODO: Implement proper standard library detection
-    // For now, always return false (no standard library modules loaded)
-    return false;
+  isStandardModule(moduleId: string): boolean {
+    // Check if module file exists in standard library path
+    const standardModulePath = join(
+      this.standardPath,
+      `${moduleId}.module.ts`
+    );
+    return existsSync(standardModulePath);
   }
 
   /**

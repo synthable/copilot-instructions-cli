@@ -30,7 +30,7 @@ Implemented a flexible tag-based system where:
 
 ```typescript
 // Updated MODULE_ID_REGEX - no tier prefix required
-export const MODULE_ID_REGEX = /^[a-z0-9][a-z0-9-]*(?:\/[a-z0-9][a-z0-9-]*)+$/;
+export const MODULE_ID_REGEX = /^[a-z0-9][a-z0-9-]*(?:\/[a-z0-9][a-z0-9-]*)*$/;
 
 // Added TAG_CATEGORIES
 export const TAG_CATEGORIES = {
