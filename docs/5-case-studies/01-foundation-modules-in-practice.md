@@ -2,11 +2,11 @@
 
 **Date**: July 17, 2025  
 **Context**: Real conversation during instructions-composer development  
-**Lesson**: How foundation tier modules prevent overconfidence and misinformation
+**Lesson**: How foundation-focused modules prevent overconfidence and misinformation
 
 ## 📝 Summary
 
-This document examines a real-world example where an AI assistant made confident but incorrect technical recommendations due to gaps in training data, and analyzes how foundation tier modules could have prevented these errors.
+This document examines a real-world example where an AI assistant made confident but incorrect technical recommendations due to gaps in training data, and analyzes how foundational cognitive modules could have prevented these errors.
 
 ## The Incident: Confident Misinformation 🤦‍♂️
 
@@ -194,7 +194,7 @@ This behavioral shift demonstrates that **even just thinking about foundation mo
 
 ## Conclusion 🎯
 
-This case study demonstrates that **technical knowledge without cognitive frameworks is dangerous**. The foundation tier modules provide essential guardrails against overconfidence, assumption-making, and intellectual dishonesty.
+This case study demonstrates that **technical knowledge without cognitive frameworks is dangerous**. Foundation-focused modules provide essential guardrails against overconfidence, assumption-making, and intellectual dishonesty.
 
 **Key Takeaway**: An AI system with strong technical knowledge but weak foundation module integration will confidently provide incorrect information. The foundation modules aren't just theoretical—they're practical tools for preventing real-world errors.
 
@@ -202,4 +202,4 @@ This case study demonstrates that **technical knowledge without cognitive framew
 
 **The Fix**: Integrating foundation modules like `understanding-levels-of-certainty` and `intellectual-honesty` would have transformed a confident error into an honest acknowledgment of uncertainty, leading to better outcomes for the user.
 
-This is why the four-tier system places **foundation modules first**—they provide the cognitive frameworks necessary to use all other knowledge responsibly and effectively. More importantly, this case study proves they **work immediately** when properly engaged.
+This is why **foundation-tagged modules are essential**—they provide the cognitive frameworks necessary to use all other knowledge responsibly and effectively. More importantly, this case study proves they **work immediately** when properly engaged.
