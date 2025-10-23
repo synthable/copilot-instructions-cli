@@ -68,28 +68,21 @@ program
 program
   .command('list')
   .description('Lists all available UMS v1.0 modules.')
-  .addOption(
-    new Option('-t, --tier <name>', 'Filter by tier').choices([
-      'foundation',
-      'principle',
-      'technology',
-      'execution',
-    ])
-  )
+  .option('-t, --tag <name>', 'Filter by tag (e.g., foundational, reasoning)')
   .option('-v, --verbose', 'Enable verbose output')
   .addHelpText(
     'after',
     `  Examples:
     $ copilot-instructions list
-    $ copilot-instructions list --tier foundation
-    $ copilot-instructions list --tier technology
+    $ copilot-instructions list --tag foundational
+    $ copilot-instructions list --tag reasoning
     `
   )
   .showHelpAfterError()
-  .action(async (options: { tier?: string; verbose?: boolean }) => {
+  .action(async (options: { tag?: string; verbose?: boolean }) => {
     const verbose = options.verbose ?? false;
     await handleList({
-      ...(options.tier && { tier: options.tier }),
+      ...(options.tag && { tag: options.tag }),
       verbose,
     });
   });
@@ -98,29 +91,22 @@ program
   .command('search')
   .description('Searches for UMS v1.0 modules by name, description, or tags.')
   .addArgument(new Argument('<query>', 'Search query'))
-  .addOption(
-    new Option('-t, --tier <name>', 'Filter by tier').choices([
-      'foundation',
-      'principle',
-      'technology',
-      'execution',
-    ])
-  )
+  .option('-t, --tag <name>', 'Filter by tag (e.g., foundational, reasoning)')
   .option('-v, --verbose', 'Enable verbose output')
   .addHelpText(
     'after',
     `  Examples:
     $ copilot-instructions search "logic"
-    $ copilot-instructions search "reasoning" --tier foundation
-    $ copilot-instructions search "react" --tier technology
+    $ copilot-instructions search "reasoning" --tag foundational
+    $ copilot-instructions search "react" --tag typescript
     `
   )
   .showHelpAfterError()
   .action(
-    async (query: string, options: { tier?: string; verbose?: boolean }) => {
+    async (query: string, options: { tag?: string; verbose?: boolean }) => {
       const verbose = options.verbose ?? false;
       await handleSearch(query, {
-        ...(options.tier && { tier: options.tier }),
+        ...(options.tag && { tag: options.tag }),
         verbose,
       });
     }

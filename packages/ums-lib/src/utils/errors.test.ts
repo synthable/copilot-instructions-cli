@@ -375,16 +375,6 @@ describe('errors', () => {
         });
       });
 
-      describe('invalidTier', () => {
-        it('should return formatted invalid tier message', () => {
-          const result = ID_VALIDATION_ERRORS.invalidTier('invalid');
-
-          expect(result).toBe(
-            "Invalid tier 'invalid'. Must be one of: foundation, principle, technology, execution"
-          );
-        });
-      });
-
       describe('emptySegment', () => {
         it('should return formatted empty segment message', () => {
           const result =

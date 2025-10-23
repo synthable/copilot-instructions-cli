@@ -12,7 +12,7 @@ import { discoverAllModules } from '../utils/module-discovery.js';
 import { getModuleMetadata } from '../types/cli-extensions.js';
 
 interface SearchOptions {
-  tier?: string;
+  tag?: string;
   verbose?: boolean;
 }
 
@@ -51,21 +51,14 @@ function searchModules(modules: Module[], query: string): Module[] {
  */
 function filterAndSortModules(
   modules: Module[],
-  tierFilter?: string
+  tagFilter?: string
 ): Module[] {
   let filteredModules = modules;
 
-  if (tierFilter) {
-    const validTiers = ['foundation', 'principle', 'technology', 'execution'];
-    if (!validTiers.includes(tierFilter)) {
-      throw new Error(
-        `Invalid tier '${tierFilter}'. Must be one of: ${validTiers.join(', ')}`
-      );
-    }
-
+  if (tagFilter) {
     filteredModules = modules.filter(m => {
-      const tier = m.id.split('/')[0];
-      return tier === tierFilter;
+      const metadata = getModuleMetadata(m);
+      return metadata.tags?.includes(tagFilter);
     });
   }
 
@@ -86,28 +79,25 @@ function filterAndSortModules(
  */
 function renderSearchResults(modules: Module[], query: string): void {
   const table = new Table({
-    head: ['ID', 'Tier/Subject', 'Name', 'Description'],
+    head: ['ID', 'Name', 'Description', 'Tags'],
     style: {
       head: ['cyan', 'bold'],
       border: ['gray'],
       compact: false,
     },
-    colWidths: [30, 25, 30],
+    colWidths: [30, 30, 40],
     wordWrap: true,
   });
 
   modules.forEach(module => {
-    const idParts = module.id.split('/');
-    const tier = idParts[0];
-    const subject = idParts.slice(1).join('/');
-    const tierSubject = subject ? `${tier}/${subject}` : tier;
     const metadata = getModuleMetadata(module);
+    const tags = metadata.tags?.join(', ') || 'none';
 
     table.push([
       chalk.green(module.id),
-      chalk.yellow(tierSubject),
       chalk.white.bold(metadata.name),
       chalk.gray(metadata.description),
+      chalk.yellow(tags),
     ]);
   });
 
@@ -124,7 +114,7 @@ function renderSearchResults(modules: Module[], query: string): void {
  * Handles the 'search' command for UMS v1.0 modules (M6).
  * @param query - The search query.
  * @param options - The command options.
- * @param options.tier - The tier to filter by (foundation|principle|technology|execution).
+ * @param options.tag - The tag to filter by.
  */
 export async function handleSearch(
   query: string,
@@ -163,14 +153,14 @@ export async function handleSearch(
 
     progress.update('Filtering and sorting results...');
 
-    // Filter by tier and sort (same as M5)
-    const filteredResults = filterAndSortModules(searchResults, options.tier);
+    // Filter by tag and sort (same as M5)
+    const filteredResults = filterAndSortModules(searchResults, options.tag);
 
     progress.succeed('Module search complete.');
 
     // M6: no-match case
     if (filteredResults.length === 0) {
-      const filterMsg = options.tier ? ` in tier '${options.tier}'` : '';
+      const filterMsg = options.tag ? ` with tag '${options.tag}'` : '';
       console.log(
         chalk.yellow(`No modules found matching "${query}"${filterMsg}.`)
       );

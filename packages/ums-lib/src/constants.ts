@@ -21,7 +21,8 @@ export type DirectiveKey = (typeof RENDER_ORDER)[number];
 // UMS v2.0 specification constants
 export const UMS_SCHEMA_VERSION = '2.0';
 
-// Valid tiers for modules
+// Valid tiers for modules (deprecated - use tags instead)
+// Kept for backward compatibility
 export const VALID_TIERS = [
   'foundation',
   'principle',
@@ -29,6 +30,44 @@ export const VALID_TIERS = [
   'execution',
 ] as const;
 export type ValidTier = (typeof VALID_TIERS)[number];
+
+// Predefined tag categories for module classification
+export const TAG_CATEGORIES = {
+  // Capability tags - what the module helps with
+  capabilities: [
+    'reasoning',
+    'communication',
+    'error-handling',
+    'testing',
+    'debugging',
+    'documentation',
+    'security',
+    'performance',
+  ],
+  // Domain tags - technology or field specific
+  domains: [
+    'typescript',
+    'javascript',
+    'python',
+    'web-development',
+    'backend',
+    'frontend',
+    'database',
+    'devops',
+  ],
+  // Pattern tags - design patterns and approaches
+  patterns: [
+    'solid',
+    'ddd',
+    'tdd',
+    'functional',
+    'oop',
+    'async',
+    'event-driven',
+  ],
+  // Level tags - complexity/abstraction level (replaces tier concept)
+  levels: ['foundational', 'intermediate', 'advanced', 'specialized'],
+} as const;
 
 // Standard shapes
 export const STANDARD_SHAPES = [
@@ -43,9 +82,9 @@ export const STANDARD_SHAPES = [
 ] as const;
 export type StandardShape = (typeof STANDARD_SHAPES)[number];
 
-// Module ID validation regex (UMS v2.0 compliant)
-export const MODULE_ID_REGEX =
-  /^(foundation|principle|technology|execution)\/(?:[a-z0-9-]+(?:\/[a-z0-9-]+)*\/[a-z0-9][a-z0-9-]*|[a-z0-9][a-z0-9-]*)$/;
+// Module ID validation regex (UMS v2.0 compliant - flexible, no tier requirement)
+// Format: category/name or domain/category/name (kebab-case)
+export const MODULE_ID_REGEX = /^[a-z0-9][a-z0-9-]*(?:\/[a-z0-9][a-z0-9-]*)+$/;
 
 // Standard shape directive specifications (UMS v2.0 compliant)
 export const STANDARD_SHAPE_SPECS = {

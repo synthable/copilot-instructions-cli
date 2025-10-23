@@ -12,7 +12,7 @@ import { discoverAllModules } from '../utils/module-discovery.js';
 import { getModuleMetadata } from '../types/cli-extensions.js';
 
 interface ListOptions {
-  tier?: string;
+  tag?: string;
   verbose?: boolean;
 }
 
@@ -21,21 +21,14 @@ interface ListOptions {
  */
 function filterAndSortModules(
   modules: Module[],
-  tierFilter?: string
+  tagFilter?: string
 ): Module[] {
   let filteredModules = modules;
 
-  if (tierFilter) {
-    const validTiers = ['foundation', 'principle', 'technology', 'execution'];
-    if (!validTiers.includes(tierFilter)) {
-      throw new Error(
-        `Invalid tier '${tierFilter}'. Must be one of: ${validTiers.join(', ')}`
-      );
-    }
-
+  if (tagFilter) {
     filteredModules = modules.filter(m => {
-      const tier = m.id.split('/')[0];
-      return tier === tierFilter;
+      const metadata = getModuleMetadata(m);
+      return metadata.tags?.includes(tagFilter);
     });
   }
 
@@ -56,28 +49,25 @@ function filterAndSortModules(
  */
 function renderModulesTable(modules: Module[]): void {
   const table = new Table({
-    head: ['ID', 'Tier/Subject', 'Name', 'Description'],
+    head: ['ID', 'Name', 'Description', 'Tags'],
     style: {
       head: ['cyan', 'bold'],
       border: ['gray'],
       compact: false,
     },
-    colWidths: [30, 25, 30],
+    colWidths: [30, 30, 40],
     wordWrap: true,
   });
 
   modules.forEach(module => {
-    const idParts = module.id.split('/');
-    const tier = idParts[0];
-    const subject = idParts.slice(1).join('/');
-    const tierSubject = subject ? `${tier}/${subject}` : tier;
     const metadata = getModuleMetadata(module);
+    const tags = metadata.tags?.join(', ') || 'none';
 
     table.push([
       chalk.green(module.id),
-      chalk.yellow(tierSubject),
       chalk.white.bold(metadata.name),
       chalk.gray(metadata.description),
+      chalk.yellow(tags),
     ]);
   });
 
@@ -91,7 +81,7 @@ function renderModulesTable(modules: Module[]): void {
 /**
  * Handles the 'list' command for UMS v1.0 modules (M5).
  * @param options - The command options.
- * @param options.tier - The tier to filter by (foundation|principle|technology|execution).
+ * @param options.tag - The tag to filter by.
  */
 export async function handleList(options: ListOptions): Promise<void> {
   const progress = createDiscoveryProgress('list', options.verbose);
@@ -123,13 +113,13 @@ export async function handleList(options: ListOptions): Promise<void> {
     progress.update('Filtering and sorting modules...');
 
     // Filter and sort modules
-    const filteredModules = filterAndSortModules(modules, options.tier);
+    const filteredModules = filterAndSortModules(modules, options.tag);
 
     progress.succeed('Module listing complete.');
 
     // M5 empty state
     if (filteredModules.length === 0) {
-      const filterMsg = options.tier ? ` in tier '${options.tier}'` : '';
+      const filterMsg = options.tag ? ` with tag '${options.tag}'` : '';
       console.log(chalk.yellow(`No UMS v1.0 modules found${filterMsg}.`));
       return;
     }
