@@ -68,38 +68,50 @@ program
 program
   .command('list')
   .description('Lists all available UMS v2.0 modules.')
+  .option('-t, --tag <name>', 'Filter by tag (e.g., foundational, reasoning)')
   .option('-v, --verbose', 'Enable verbose output')
   .addHelpText(
     'after',
     `  Examples:
     $ copilot-instructions list
-    $ copilot-instructions list --verbose
+    $ copilot-instructions list --tag foundational
+    $ copilot-instructions list --tag reasoning
     `
   )
   .showHelpAfterError()
-  .action(async (options: { verbose?: boolean }) => {
+  .action(async (options: { tag?: string; verbose?: boolean }) => {
     const verbose = options.verbose ?? false;
-    await handleList({ verbose });
+    await handleList({
+      ...(options.tag && { tag: options.tag }),
+      verbose,
+    });
   });
 
 program
   .command('search')
   .description('Searches for UMS v2.0 modules by name, description, or tags.')
   .addArgument(new Argument('<query>', 'Search query'))
+  .option('-t, --tag <name>', 'Filter by tag (e.g., foundational, reasoning)')
   .option('-v, --verbose', 'Enable verbose output')
   .addHelpText(
     'after',
     `  Examples:
     $ copilot-instructions search "logic"
-    $ copilot-instructions search "reasoning"
-    $ copilot-instructions search "react"
+    $ copilot-instructions search "reasoning" --tag foundational
+    $ copilot-instructions search "react" --tag typescript
     `
   )
   .showHelpAfterError()
-  .action(async (query: string, options: { verbose?: boolean }) => {
-    const verbose = options.verbose ?? false;
-    await handleSearch(query, { verbose });
-  });
+  .action(
+    async (query: string, options: { tag?: string; verbose?: boolean }) => {
+      const verbose = options.verbose ?? false;
+      await handleSearch(query, {
+        ...(options.tag && { tag: options.tag }),
+        verbose,
+      });
+    }
+  );
+>>>>>>> 5cb191b2f95c5c1495df02adbab46376a0cbb20e
 
 program
   .command('validate')

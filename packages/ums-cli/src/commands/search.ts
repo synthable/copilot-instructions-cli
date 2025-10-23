@@ -12,6 +12,7 @@ import { discoverAllModules } from '../utils/module-discovery.js';
 import { getModuleMetadata } from '../types/cli-extensions.js';
 
 interface SearchOptions {
+  tag?: string;
   verbose?: boolean;
 }
 
@@ -46,16 +47,31 @@ function searchModules(modules: Module[], query: string): Module[] {
 }
 
 /**
- * Sorts modules by metadata.name then id
+ * Filters and sorts modules by tag and metadata.name
  */
-function sortModules(modules: Module[]): Module[] {
-  return modules.sort((a, b) => {
+function filterAndSortModules(
+  modules: Module[],
+  tagFilter?: string
+): Module[] {
+  let filteredModules = modules;
+
+  if (tagFilter) {
+    filteredModules = modules.filter(m => {
+      const metadata = getModuleMetadata(m);
+      return metadata.tags?.includes(tagFilter);
+    });
+  }
+
+  // Sorting: metadata.name then id
+  filteredModules.sort((a, b) => {
     const metaA = getModuleMetadata(a);
     const metaB = getModuleMetadata(b);
     const nameCompare = metaA.name.localeCompare(metaB.name);
     if (nameCompare !== 0) return nameCompare;
     return a.id.localeCompare(b.id);
   });
+
+  return filteredModules;
 }
 
 /**
@@ -63,24 +79,26 @@ function sortModules(modules: Module[]): Module[] {
  */
 function renderSearchResults(modules: Module[], query: string): void {
   const table = new Table({
-    head: ['ID', 'Name', 'Capabilities', 'Description'],
+    head: ['ID', 'Name', 'Capabilities', 'Tags', 'Description'],
     style: {
       head: ['cyan', 'bold'],
       border: ['gray'],
       compact: false,
     },
-    colWidths: [30, 30, 25],
+    colWidths: [25, 25, 20, 20],
     wordWrap: true,
   });
 
   modules.forEach(module => {
     const metadata = getModuleMetadata(module);
     const capabilities = module.capabilities.join(', ');
+    const tags = metadata.tags?.join(', ') ?? 'none';
 
     table.push([
       chalk.green(module.id),
       chalk.white.bold(metadata.name),
-      chalk.yellow(capabilities),
+      chalk.cyan(capabilities),
+      chalk.yellow(tags),
       chalk.gray(metadata.description),
     ]);
   });
@@ -98,6 +116,7 @@ function renderSearchResults(modules: Module[], query: string): void {
  * Handles the 'search' command for UMS v2.0 modules.
  * @param query - The search query.
  * @param options - The command options.
+ * @param options.tag - The tag to filter by.
  */
 export async function handleSearch(
   query: string,
@@ -134,21 +153,24 @@ export async function handleSearch(
     // Query substring case-insensitive across meta.name, meta.description, meta.tags
     const searchResults = searchModules(modules, query);
 
-    progress.update('Sorting results...');
+    progress.update('Filtering and sorting results...');
 
-    // Sort results
-    const sortedResults = sortModules(searchResults);
+    // Filter by tag and sort results
+    const filteredResults = filterAndSortModules(searchResults, options.tag);
 
     progress.succeed('Module search complete.');
 
     // no-match case
-    if (sortedResults.length === 0) {
-      console.log(chalk.yellow(`No modules found matching "${query}".`));
+    if (filteredResults.length === 0) {
+      const filterMsg = options.tag ? ` with tag '${options.tag}'` : '';
+      console.log(
+        chalk.yellow(`No modules found matching "${query}"${filterMsg}.`)
+      );
       return;
     }
 
     // Render results
-    renderSearchResults(sortedResults, query);
+    renderSearchResults(filteredResults, query);
   } catch (error) {
     progress.fail('Failed to search modules.');
     handleError(error, {

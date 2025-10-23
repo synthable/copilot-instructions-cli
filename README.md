@@ -15,6 +15,7 @@ The Instructions Composer helps you move away from monolithic, hard-to-maintain 
 - **♻️ Reusable & Consistent**: Share modules across different personas to ensure consistency and save time.
 - **✅ Version-Controlled**: Instructions are defined in TypeScript files with full type safety, making them easy to track in Git.
 - **🔍 Discoverable**: Easily `list` and `search` your library of modules to find the building blocks you need.
+- **🏷️ Tag-Based Classification**: Flexible tag system for organizing modules by capability, domain, pattern, and complexity level.
 - **🔌 MCP Integration**: Built-in Model Context Protocol server for Claude Desktop and other AI assistants
 - **🎯 TypeScript-First**: UMS v2.0 uses TypeScript for modules and personas, providing compile-time type checking and better IDE support
 
@@ -68,11 +69,11 @@ Here’s how you create your own persona from scratch.
 A module is a small, atomic piece of instruction. Create a file named `be-concise.module.ts`:
 
 ```typescript
-// ./modules/be-concise.module.ts
+// ./modules/communication/be-concise.module.ts
 import type { Module } from 'ums-lib';
 
 export const beConcise: Module = {
-  id: 'be-concise',
+  id: 'communication/be-concise',
   version: '1.0.0',
   schemaVersion: '2.0',
   capabilities: ['communication', 'conciseness'],
@@ -81,6 +82,7 @@ export const beConcise: Module = {
     description: 'Instructs the AI to be concise and to the point.',
     semantic:
       'The AI should provide clear, concise answers without unnecessary verbosity.',
+    tags: ['foundational', 'communication', 'clarity'],
   },
   instruction: {
     purpose: 'Ensure responses are concise and direct',
@@ -107,7 +109,7 @@ export default {
   schemaVersion: '2.0',
   description: 'A persona that is always concise.',
   semantic: 'An AI assistant focused on providing clear, concise responses.',
-  modules: ['be-concise'], // Reference the module by its ID
+  modules: ['communication/be-concise'], // Reference the module by its ID
 } satisfies Persona;
 ```
 
@@ -126,7 +128,7 @@ That's it! You now have a custom-built instruction set in `concise-assistant.md`
 | Command    | Description                                                     | Example Usage                                |
 | :--------- | :-------------------------------------------------------------- | :------------------------------------------- |
 | `build`    | Compiles a `.persona.ts` into a single instruction document.    | `npm start build ./personas/my-persona.ts`   |
-| `list`     | Lists all discoverable modules.                                 | `npm start list --tier technology`           |
+| `list`     | Lists all discoverable modules.                                 | `npm start list --tag foundational`          |
 | `search`   | Searches for modules by keyword.                                | `npm start search "error handling"`          |
 | `validate` | Validates the syntax and integrity of module and persona files. | `npm start validate ./instructions-modules/` |
 | `inspect`  | Inspects module conflicts and registry state.                   | `npm start inspect --conflicts-only`         |
@@ -146,6 +148,47 @@ The CLI also provides commands for working with the MCP server:
 ## Documentation
 
 For a deep dive into the Unified Module System, advanced features, and configuration, please read our **[Comprehensive Guide](./docs/comprehensive_guide.md)**.
+
+## Tag-Based Classification System
+
+UMS v2.0 uses a flexible tag-based classification system instead of rigid tiers. This provides better flexibility and discoverability:
+
+### Tag Categories
+
+- **Level Tags**: `foundational`, `intermediate`, `advanced`, `specialized` - Indicate complexity/abstraction level
+- **Capability Tags**: `reasoning`, `communication`, `error-handling`, `testing`, `debugging` - What the module helps with
+- **Domain Tags**: `typescript`, `python`, `web-development`, `backend`, `frontend` - Technology or field specific
+- **Pattern Tags**: `solid`, `ddd`, `tdd`, `functional`, `oop` - Design patterns and approaches
+
+### Module ID Format
+
+Modules now use a flexible ID format without tier prefixes:
+
+- Format: `category/name` or `domain/category/name`
+- Examples: `communication/be-concise`, `typescript/error-handling/try-catch`
+- All segments use kebab-case (lowercase with hyphens)
+
+### Migration from Tier-Based System
+
+If you have existing modules using the old tier-based format (`foundation/category/name`), consider:
+
+1. **Update module IDs**: Remove tier prefix and use domain/category structure
+2. **Add tags**: Include appropriate level, capability, domain, and pattern tags
+3. **Use `cognitiveLevel`**: Set 0-4 to indicate complexity if needed
+
+Example migration:
+```typescript
+// Old format
+id: 'foundation/logic/deductive-reasoning'
+
+// New format
+id: 'logic/deductive-reasoning'
+metadata: {
+  tags: ['foundational', 'reasoning', 'logic']
+}
+```
+
+For a detailed migration guide with examples, see [Migration Guide: Tier to Tags](./docs/migration/tier-to-tags.md).
 
 ## Contributing
 

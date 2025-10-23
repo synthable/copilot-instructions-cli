@@ -155,7 +155,7 @@ describe('search command', () => {
     );
   });
 
-  it('should filter by tier', async () => {
+  it('should filter by tag', async () => {
     // Arrange
     mockDiscoverAllModules.mockResolvedValue({
       registry: createMockRegistry([mockModule1, mockModule2]),
@@ -163,11 +163,11 @@ describe('search command', () => {
     });
 
     // Act
-    await handleSearch('', { verbose: false });
+    await handleSearch('', { tag: 'logic', verbose: false });
 
-    // Assert - should show all matching modules
+    // Assert - should only show modules with 'logic' tag
     expect(mockConsoleLog).toHaveBeenCalledWith(
-      expect.stringContaining('Found 2 matching modules')
+      expect.stringContaining('Found 1 matching modules')
     );
   });
 

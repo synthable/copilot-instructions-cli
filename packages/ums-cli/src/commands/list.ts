@@ -12,20 +12,36 @@ import { discoverAllModules } from '../utils/module-discovery.js';
 import { getModuleMetadata } from '../types/cli-extensions.js';
 
 interface ListOptions {
+  tag?: string;
   verbose?: boolean;
 }
 
 /**
- * Sorts modules by metadata.name (Title Case) then id
+ * Filters and sorts modules by tag and metadata.name
  */
-function sortModules(modules: Module[]): Module[] {
-  return modules.sort((a, b) => {
+function filterAndSortModules(
+  modules: Module[],
+  tagFilter?: string
+): Module[] {
+  let filteredModules = modules;
+
+  if (tagFilter) {
+    filteredModules = modules.filter(m => {
+      const metadata = getModuleMetadata(m);
+      return metadata.tags?.includes(tagFilter);
+    });
+  }
+
+  // Sorting: metadata.name (Title Case) then id
+  filteredModules.sort((a, b) => {
     const metaA = getModuleMetadata(a);
     const metaB = getModuleMetadata(b);
     const nameCompare = metaA.name.localeCompare(metaB.name);
     if (nameCompare !== 0) return nameCompare;
     return a.id.localeCompare(b.id);
   });
+
+  return filteredModules;
 }
 
 /**
@@ -33,24 +49,26 @@ function sortModules(modules: Module[]): Module[] {
  */
 function renderModulesTable(modules: Module[]): void {
   const table = new Table({
-    head: ['ID', 'Name', 'Capabilities', 'Description'],
+    head: ['ID', 'Name', 'Capabilities', 'Tags', 'Description'],
     style: {
       head: ['cyan', 'bold'],
       border: ['gray'],
       compact: false,
     },
-    colWidths: [30, 30, 25],
+    colWidths: [25, 25, 20, 20],
     wordWrap: true,
   });
 
   modules.forEach(module => {
     const metadata = getModuleMetadata(module);
     const capabilities = module.capabilities.join(', ');
+    const tags = metadata.tags?.join(', ') ?? 'none';
 
     table.push([
       chalk.green(module.id),
       chalk.white.bold(metadata.name),
-      chalk.yellow(capabilities),
+      chalk.cyan(capabilities),
+      chalk.yellow(tags),
       chalk.gray(metadata.description),
     ]);
   });
@@ -65,6 +83,7 @@ function renderModulesTable(modules: Module[]): void {
 /**
  * Handles the 'list' command for UMS v2.0 modules.
  * @param options - The command options.
+ * @param options.tag - The tag to filter by.
  */
 export async function handleList(options: ListOptions): Promise<void> {
   const progress = createDiscoveryProgress('list', options.verbose);
@@ -93,15 +112,22 @@ export async function handleList(options: ListOptions): Promise<void> {
       }
     }
 
-    progress.update('Sorting modules...');
+    progress.update('Filtering and sorting modules...');
 
-    // Sort modules
-    const sortedModules = sortModules(modules);
+    // Filter and sort modules
+    const filteredModules = filterAndSortModules(modules, options.tag);
 
     progress.succeed('Module listing complete.');
 
+    // Empty state
+    if (filteredModules.length === 0) {
+      const filterMsg = options.tag ? ` with tag '${options.tag}'` : '';
+      console.log(chalk.yellow(`No UMS v2.0 modules found${filterMsg}.`));
+      return;
+    }
+
     // Render results
-    renderModulesTable(sortedModules);
+    renderModulesTable(filteredModules);
   } catch (error) {
     progress.fail('Failed to discover modules.');
     handleError(error, {

@@ -11,7 +11,7 @@
  * This is a TypeScript-first format.
  */
 export interface Module {
-  /** The unique identifier for the module (e.g., "be-concise", "ethics/do-no-harm"). */
+  /** The unique identifier for the module (e.g., "be-concise", "ethics/do-no-harm", "typescript/error-handling"). */
   id: string;
   /** The semantic version of the module content (e.g., "1.0.0"). */
   version: string;

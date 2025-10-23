@@ -460,7 +460,7 @@ interface ListOptions {
   /** Filter by capability */
   capability?: string;
 
-  /** Filter by tag */
+  /** Filter by tag (e.g., foundational, intermediate, advanced, specialized, or any capability/domain/pattern tag) */
   tag?: string;
 }
 
