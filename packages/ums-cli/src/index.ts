@@ -111,7 +111,6 @@ program
       });
     }
   );
->>>>>>> 5cb191b2f95c5c1495df02adbab46376a0cbb20e
 
 program
   .command('validate')
