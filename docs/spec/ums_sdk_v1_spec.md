@@ -681,8 +681,8 @@ Implementations MAY provide custom loaders by implementing the loader interfaces
 class CustomModuleLoader implements ModuleLoader {
   async loadModule(filePath: string, moduleId: string): Promise<Module> {
     // Custom loading logic (e.g., from database, S3, etc.)
-    const content = await this.customLoad(filePath);
-    const module = parseModule(content);
+    const moduleObject = await this.customLoad(filePath);
+    const module = parseModule(moduleObject);
     const validation = validateModule(module);
     if (!validation.valid) {
       throw new Error("Invalid module");
