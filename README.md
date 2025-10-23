@@ -188,6 +188,8 @@ metadata: {
 }
 ```
 
+For a detailed migration guide with examples, see [Migration Guide: Tier to Tags](./docs/migration/tier-to-tags.md).
+
 ## Contributing
 
 Contributions are welcome! We encourage you to open issues and submit pull requests. Please follow the existing code style and ensure all tests pass.
