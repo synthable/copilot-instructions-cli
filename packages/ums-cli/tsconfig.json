@@ -4,15 +4,16 @@
     // --- Monorepo Linking ---
     "composite": true,
     "tsBuildInfoFile": "dist/.tsbuildinfo",
+
     // --- Package-Specific Output ---
     "outDir": "dist",
     "rootDir": "src",
     "declaration": true,
-    // --- More Lenient App Rules ---
-    "noUnusedLocals": true,
-    "noUnusedParameters": true
+    "declarationMap": true,
+    "sourceMap": true
   },
   "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist"],
   "references": [
     {
       "path": "../ums-lib"
