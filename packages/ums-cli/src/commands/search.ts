@@ -49,10 +49,7 @@ function searchModules(modules: Module[], query: string): Module[] {
 /**
  * Filters and sorts modules by tag and metadata.name
  */
-function filterAndSortModules(
-  modules: Module[],
-  tagFilter?: string
-): Module[] {
+function filterAndSortModules(modules: Module[], tagFilter?: string): Module[] {
   let filteredModules = modules;
 
   if (tagFilter) {

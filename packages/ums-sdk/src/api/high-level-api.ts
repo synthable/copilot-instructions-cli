@@ -170,8 +170,8 @@ export async function listModules(
   // Apply tag filter
   if (options.tag) {
     const tag = options.tag;
-    filteredModules = filteredModules.filter(
-      module => module.metadata.tags && module.metadata.tags.includes(tag)
+    filteredModules = filteredModules.filter(module =>
+      module.metadata.tags?.includes(tag)
     );
   }
 

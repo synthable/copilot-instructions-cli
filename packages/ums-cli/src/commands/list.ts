@@ -19,10 +19,7 @@ interface ListOptions {
 /**
  * Filters and sorts modules by tag and metadata.name
  */
-function filterAndSortModules(
-  modules: Module[],
-  tagFilter?: string
-): Module[] {
+function filterAndSortModules(modules: Module[], tagFilter?: string): Module[] {
   let filteredModules = modules;
 
   if (tagFilter) {
