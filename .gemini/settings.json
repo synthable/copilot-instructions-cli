@@ -1,13 +1,23 @@
 {
   "mcpServers": {
-    "claude-code": {
-      "command": "claude",
-      "args": [
-        "mcp",
-        "serve"
-      ]
+    
+  },
+  "general": {
+    "preferredEditor": "vscode",
+    "sessionRetention": {
+      "enabled": true
     }
   },
-  "preferredEditor": "vscode",
-  "theme": "GitHub"
+  "ui": {
+    "theme": "GitHub"
+  },
+  "output": {
+    "format": "text"
+  },
+  "tools": {
+    "enableToolOutputTruncation": false
+  },
+  "experimental": {
+    "useModelRouter": true
+  }
 }
