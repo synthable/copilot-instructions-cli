@@ -153,12 +153,31 @@ export function validateModule(module: Module): ValidationResult {
     });
   }
 
-  // Validate cognitive level (if present)
-  if (module.cognitiveLevel !== undefined) {
-    if (![0, 1, 2, 3, 4].includes(module.cognitiveLevel)) {
+  // Validate cognitive level (required)
+  if (module.cognitiveLevel === undefined || module.cognitiveLevel === null) {
+    errors.push(
+      new ValidationErrorClass(
+        'Missing required field: cognitiveLevel',
+        'cognitiveLevel',
+        'Section 2.1'
+      )
+    );
+  } else {
+    // Validate it's an integer
+    if (!Number.isInteger(module.cognitiveLevel)) {
       errors.push(
         new ValidationErrorClass(
-          `Invalid cognitiveLevel: ${module.cognitiveLevel}, must be 0-4`,
+          `cognitiveLevel must be an integer, got: ${module.cognitiveLevel}`,
+          'cognitiveLevel',
+          'Section 2.1'
+        )
+      );
+    }
+    // Validate range 0-6
+    if (![0, 1, 2, 3, 4, 5, 6].includes(module.cognitiveLevel)) {
+      errors.push(
+        new ValidationErrorClass(
+          `Invalid cognitiveLevel: ${module.cognitiveLevel}, must be 0-6`,
           'cognitiveLevel',
           'Section 2.1'
         )

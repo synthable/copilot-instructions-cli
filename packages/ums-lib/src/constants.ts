@@ -21,44 +21,6 @@ export type DirectiveKey = (typeof RENDER_ORDER)[number];
 // UMS v2.0 specification constants
 export const UMS_SCHEMA_VERSION = '2.0';
 
-// Predefined tag categories for module classification
-export const TAG_CATEGORIES = {
-  // Capability tags - what the module helps with
-  capabilities: [
-    'reasoning',
-    'communication',
-    'error-handling',
-    'testing',
-    'debugging',
-    'documentation',
-    'security',
-    'performance',
-  ],
-  // Domain tags - technology or field specific
-  domains: [
-    'typescript',
-    'javascript',
-    'python',
-    'web-development',
-    'backend',
-    'frontend',
-    'database',
-    'devops',
-  ],
-  // Pattern tags - design patterns and approaches
-  patterns: [
-    'solid',
-    'ddd',
-    'tdd',
-    'functional',
-    'oop',
-    'async',
-    'event-driven',
-  ],
-  // Level tags - complexity/abstraction level (replaces tier concept)
-  levels: ['foundational', 'intermediate', 'advanced', 'specialized'],
-} as const;
-
 // Standard shapes
 export const STANDARD_SHAPES = [
   'procedure',

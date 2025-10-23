@@ -19,11 +19,14 @@ export interface Module {
   schemaVersion: string;
   /** A list of capabilities this module provides. */
   capabilities: string[];
+  /** The module's cognitive abstraction level (0-6):
+   * 0=Axioms & Ethics, 1=Reasoning Frameworks, 2=Universal Patterns,
+   * 3=Domain-Specific Guidance, 4=Procedures & Playbooks,
+   * 5=Specifications & Standards, 6=Meta-Cognition */
+  cognitiveLevel: number;
   /** Human-readable and AI-discoverable metadata. */
   metadata: ModuleMetadata;
-  /** The module's cognitive level (0-4). */
-  cognitiveLevel?: number;
-  /** The application domain(s) for the module. */
+  /** The application domain(s) for the module (technology or field). */
   domain?: string | string[];
   /** The core instructional content of the module, composed of one or more components. */
   components?: Component[];
