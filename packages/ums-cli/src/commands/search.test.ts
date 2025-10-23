@@ -163,11 +163,11 @@ describe('search command', () => {
     });
 
     // Act
-    await handleSearch('', { tier: 'foundation', verbose: false });
+    await handleSearch('', { verbose: false });
 
-    // Assert - should only show foundation modules
+    // Assert - should show all matching modules
     expect(mockConsoleLog).toHaveBeenCalledWith(
-      expect.stringContaining('Found 1 matching modules')
+      expect.stringContaining('Found 2 matching modules')
     );
   });
 

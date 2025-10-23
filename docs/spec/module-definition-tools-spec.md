@@ -364,12 +364,13 @@ export const defaults = {
   },
 
   /**
-   * Infer tier from module ID
+   * Extract category from hierarchical module ID
+   * @example extractCategory('ethics/do-no-harm') => 'ethics'
+   * @example extractCategory('be-concise') => undefined
    */
-  inferTier(moduleId: string): string | undefined {
-    const tiers = ['foundation', 'principle', 'technology', 'execution'];
-    const firstPart = moduleId.split('/')[0];
-    return tiers.includes(firstPart) ? firstPart : undefined;
+  extractCategory(moduleId: string): string | undefined {
+    const parts = moduleId.split('/');
+    return parts.length > 1 ? parts[0] : undefined;
   },
 
   /**
