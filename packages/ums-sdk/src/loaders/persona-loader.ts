@@ -14,7 +14,7 @@
 
 import { readFile } from 'node:fs/promises';
 import { pathToFileURL } from 'node:url';
-import { parsePersonaObject, validatePersona, type Persona } from 'ums-lib';
+import { parsePersona, validatePersona, type Persona } from 'ums-lib';
 import { ModuleLoadError, ModuleNotFoundError } from '../errors/index.js';
 
 /**
@@ -64,7 +64,7 @@ export class PersonaLoader {
       }
 
       // Delegate to ums-lib for parsing (structure validation, type checking)
-      const parsedPersona = parsePersonaObject(candidateExport);
+      const parsedPersona = parsePersona(candidateExport);
 
       // Delegate to ums-lib for full UMS v2.0 spec validation
       const validation = validatePersona(parsedPersona);

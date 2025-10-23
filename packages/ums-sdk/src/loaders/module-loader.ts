@@ -16,7 +16,7 @@ import { readFile } from 'node:fs/promises';
 import { pathToFileURL } from 'node:url';
 import {
   moduleIdToExportName,
-  parseModuleObject,
+  parseModule,
   validateModule,
   type Module,
 } from 'ums-lib';
@@ -64,7 +64,7 @@ export class ModuleLoader {
       }
 
       // Delegate to ums-lib for parsing (structure validation, type checking)
-      const parsedModule = parseModuleObject(moduleObject);
+      const parsedModule = parseModule(moduleObject);
 
       // SDK responsibility: Verify the module's ID matches expected ID from file path
       if (parsedModule.id !== moduleId) {

@@ -151,9 +151,8 @@ This exports all core functions, types, and error classes.
 
 ### Parsing (`ums-lib/core/parsing`)
 
-- `parseModule(content: string): UMSModule`: Parses and validates a YAML string into a UMS module object.
-- `parsePersona(content: string): UMSPersona`: Parses and validates a YAML string into a UMS persona object.
-- `parseYaml(content: string): unknown`: A lower-level utility to parse a YAML string.
+- `parseModule(obj: unknown): Module`: Parses and validates a raw object as a UMS v2.0 module.
+- `parsePersona(obj: unknown): Persona`: Parses and validates a raw object as a UMS v2.0 persona.
 
 ### Validation (`ums-lib/core/validation`)
 
