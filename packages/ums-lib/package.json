@@ -80,11 +80,6 @@
     "benchmark": "npm run build && node dist/test/benchmark.js",
     "quality-check": "npm run typecheck && npm run lint && npm run format:check && npm run test"
   },
-  "dependencies": {
-    "yaml": "^2.6.0"
-  },
-  "devDependencies": {
-  },
   "files": [
     "dist",
     "README.md"

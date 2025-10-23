@@ -17,7 +17,7 @@ import { PersonaParseError } from '../../utils/errors.js';
  * @returns The validated persona object.
  * @throws {PersonaParseError} If the object is not a valid persona structure.
  */
-export function parsePersonaObject(obj: unknown): Persona {
+export function parsePersona(obj: unknown): Persona {
   if (!obj || typeof obj !== 'object' || Array.isArray(obj)) {
     throw new PersonaParseError('Persona must be an object.');
   }

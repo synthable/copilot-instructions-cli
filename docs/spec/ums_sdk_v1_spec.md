@@ -160,7 +160,7 @@ interface ModuleLoader {
 
 1. MUST support `.module.ts` files
 2. MUST validate export name matches module ID (camelCase conversion)
-3. MUST use ums-lib's `parseModuleObject()` for parsing
+3. MUST use ums-lib's `parseModule()` for parsing
 4. MUST use ums-lib's `validateModule()` for validation
 5. MUST throw descriptive errors with file path and line numbers when possible
 6. MUST verify loaded module's `id` field matches expected `moduleId`
@@ -194,7 +194,7 @@ interface PersonaLoader {
 
 1. MUST support `.persona.ts` files
 2. MUST accept default export OR first Persona-like named export
-3. MUST use ums-lib's `parsePersonaObject()` for parsing
+3. MUST use ums-lib's `parsePersona()` for parsing
 4. MUST use ums-lib's `validatePersona()` for validation
 5. MUST throw descriptive errors with file path context
 
@@ -681,8 +681,8 @@ Implementations MAY provide custom loaders by implementing the loader interfaces
 class CustomModuleLoader implements ModuleLoader {
   async loadModule(filePath: string, moduleId: string): Promise<Module> {
     // Custom loading logic (e.g., from database, S3, etc.)
-    const content = await this.customLoad(filePath);
-    const module = parseModuleObject(content);
+    const moduleObject = await this.customLoad(filePath);
+    const module = parseModule(moduleObject);
     const validation = validateModule(module);
     if (!validation.valid) {
       throw new Error("Invalid module");
