@@ -364,6 +364,16 @@ export const defaults = {
   },
 
   /**
+   * Extract category from hierarchical module ID
+   * @example extractCategory('ethics/do-no-harm') => 'ethics'
+   * @example extractCategory('be-concise') => undefined
+   */
+  extractCategory(moduleId: string): string | undefined {
+    const parts = moduleId.split('/');
+    return parts.length > 1 ? parts[0] : undefined;
+  },
+
+  /**
    * Get primary tag from module metadata
    * Returns the first level tag (foundational, intermediate, advanced, specialized) if present
    */

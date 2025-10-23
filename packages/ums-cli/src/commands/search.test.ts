@@ -198,7 +198,7 @@ describe('search command', () => {
     await handleSearch('test', { verbose: false });
 
     // Assert
-    expect(chalk.yellow).toHaveBeenCalledWith('No UMS v1.0 modules found.');
+    expect(chalk.yellow).toHaveBeenCalledWith('No UMS v2.0 modules found.');
   });
 
   it('should handle case-insensitive search', async () => {

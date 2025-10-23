@@ -13,25 +13,9 @@ describe.skip('StandardLibrary', () => {
   describe('loadAll', () => {
     it('should load all modules from standard library');
 
-    it('should organize modules by tier');
-
     it('should return Module array');
 
     it('should handle missing standard library gracefully');
-  });
-
-  describe('getByTier', () => {
-    it('should return modules filtered by tier');
-
-    it('should support foundation tier');
-
-    it('should support principle tier');
-
-    it('should support technology tier');
-
-    it('should support execution tier');
-
-    it('should return empty array for unknown tier');
   });
 
   describe('getByCapability', () => {
@@ -60,8 +44,6 @@ describe.skip('StandardLibrary', () => {
 
   describe('getMetadata', () => {
     it('should return library statistics');
-
-    it('should count modules by tier');
 
     it('should list all capabilities');
 

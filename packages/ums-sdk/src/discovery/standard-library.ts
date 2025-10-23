@@ -63,25 +63,17 @@ export class StandardLibrary {
 
   /**
    * Check if a module ID is from standard library
-   * @param moduleId - Module ID to check
+   * @param _moduleId - Module ID to check (currently unused in placeholder implementation)
    * @returns true if module is in standard library
    *
-   * Note: This is a heuristic check based on naming conventions.
-   * Standard modules typically start with tier prefixes:
-   * - foundation/
-   * - principle/
-   * - technology/
-   * - execution/
+   * Note: This is a placeholder implementation.
+   * In a real implementation, this would check against a known list
+   * of standard library modules or use a registry.
    */
-  isStandardModule(moduleId: string): boolean {
-    const standardPrefixes = [
-      'foundation/',
-      'principle/',
-      'technology/',
-      'execution/',
-    ];
-
-    return standardPrefixes.some(prefix => moduleId.startsWith(prefix));
+  isStandardModule(_moduleId: string): boolean {
+    // TODO: Implement proper standard library detection
+    // For now, always return false (no standard library modules loaded)
+    return false;
   }
 
   /**

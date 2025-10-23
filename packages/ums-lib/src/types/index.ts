@@ -11,7 +11,7 @@
  * This is a TypeScript-first format.
  */
 export interface Module {
-  /** The unique identifier for the module (e.g., "ethics/do-no-harm" or "typescript/error-handling"). */
+  /** The unique identifier for the module (e.g., "be-concise", "ethics/do-no-harm", "typescript/error-handling"). */
   id: string;
   /** The semantic version of the module content (e.g., "1.0.0"). */
   version: string;
@@ -21,7 +21,7 @@ export interface Module {
   capabilities: string[];
   /** Human-readable and AI-discoverable metadata. */
   metadata: ModuleMetadata;
-  /** The module's cognitive level within its complexity range (0-4). */
+  /** The module's cognitive level (0-4). */
   cognitiveLevel?: number;
   /** The application domain(s) for the module. */
   domain?: string | string[];

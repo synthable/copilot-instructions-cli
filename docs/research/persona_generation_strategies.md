@@ -311,7 +311,7 @@ Compilation suits production environments where token costs are a primary concer
 
 ### Overview
 
-Building follows architectural principles to construct personas through careful assembly of modules according to dependency relationships and hierarchical rules. This strategy enforces the four-tier philosophy while respecting module interdependencies.
+Building follows architectural principles to construct personas through careful assembly of modules according to dependency relationships and hierarchical rules. This strategy uses capability-based organization while respecting module interdependencies.
 
 ### Implementation Pattern
 
@@ -414,9 +414,9 @@ build_options:
 
 ### Advantages and Disadvantages
 
-Building ensures architectural integrity through enforced layering and dependency management. The approach provides flexibility within structured constraints, allowing module substitution within tiers while maintaining overall coherence. The clear architectural patterns make the system understandable and maintainable.
+Building ensures architectural integrity through enforced layering and dependency management. The approach provides flexibility within structured constraints, allowing module substitution based on capabilities while maintaining overall coherence. The clear architectural patterns make the system understandable and maintainable.
 
-However, the complexity overhead of understanding and maintaining the architecture can be significant. The rigid hierarchy may not fit all use cases, particularly those requiring more fluid module relationships. Users must invest time in understanding the tier philosophy to use the system effectively.
+However, the complexity overhead of understanding and maintaining the architecture can be significant. The hierarchy based on dependencies and capabilities may not fit all use cases, particularly those requiring more fluid module relationships. Users must invest time in understanding the module organization philosophy to use the system effectively.
 
 ### Use Cases
 

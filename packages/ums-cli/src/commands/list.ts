@@ -1,6 +1,6 @@
 /**
  * @module commands/list
- * @description Command to list available UMS v1.0 modules (M5).
+ * @description Command to list available UMS v2.0 modules.
  */
 
 import chalk from 'chalk';
@@ -17,12 +17,9 @@ interface ListOptions {
 }
 
 /**
- * Filters and sorts modules according to M5 requirements
+ * Filters and sorts modules by tag and metadata.name
  */
-function filterAndSortModules(
-  modules: Module[],
-  tagFilter?: string
-): Module[] {
+function filterAndSortModules(modules: Module[], tagFilter?: string): Module[] {
   let filteredModules = modules;
 
   if (tagFilter) {
@@ -32,7 +29,7 @@ function filterAndSortModules(
     });
   }
 
-  // M5 sorting: metadata.name (Title Case) then id
+  // Sorting: metadata.name (Title Case) then id
   filteredModules.sort((a, b) => {
     const metaA = getModuleMetadata(a);
     const metaB = getModuleMetadata(b);
@@ -49,29 +46,31 @@ function filterAndSortModules(
  */
 function renderModulesTable(modules: Module[]): void {
   const table = new Table({
-    head: ['ID', 'Name', 'Description', 'Tags'],
+    head: ['ID', 'Name', 'Capabilities', 'Tags', 'Description'],
     style: {
       head: ['cyan', 'bold'],
       border: ['gray'],
       compact: false,
     },
-    colWidths: [30, 30, 40, 25],
+    colWidths: [28, 22, 20, 20, 30],
     wordWrap: true,
   });
 
   modules.forEach(module => {
     const metadata = getModuleMetadata(module);
+    const capabilities = module.capabilities.join(', ');
     const tags = metadata.tags?.join(', ') ?? 'none';
 
     table.push([
       chalk.green(module.id),
       chalk.white.bold(metadata.name),
-      chalk.gray(metadata.description),
+      chalk.cyan(capabilities),
       chalk.yellow(tags),
+      chalk.gray(metadata.description),
     ]);
   });
 
-  console.log(chalk.cyan.bold('\nAvailable UMS v1.0 modules:\n'));
+  console.log(chalk.cyan.bold('\nAvailable UMS v2.0 modules:\n'));
   console.log(table.toString());
   console.log(
     chalk.cyan(`\nTotal modules: ${chalk.bold(modules.length.toString())}`)
@@ -79,7 +78,7 @@ function renderModulesTable(modules: Module[]): void {
 }
 
 /**
- * Handles the 'list' command for UMS v1.0 modules (M5).
+ * Handles the 'list' command for UMS v2.0 modules.
  * @param options - The command options.
  * @param options.tag - The tag to filter by.
  */
@@ -87,16 +86,16 @@ export async function handleList(options: ListOptions): Promise<void> {
   const progress = createDiscoveryProgress('list', options.verbose);
 
   try {
-    progress.start('Discovering UMS v1.0 modules...');
+    progress.start('Discovering UMS v2.0 modules...');
 
-    // Use UMS v1.0 module discovery
+    // Use UMS v2.0 module discovery
     const moduleDiscoveryResult = await discoverAllModules();
     const modulesMap = moduleDiscoveryResult.registry.resolveAll('warn');
     const modules = Array.from(modulesMap.values());
 
     if (modules.length === 0) {
       progress.succeed('Module discovery complete.');
-      console.log(chalk.yellow('No UMS v1.0 modules found.'));
+      console.log(chalk.yellow('No UMS v2.0 modules found.'));
       return;
     }
 
@@ -117,10 +116,10 @@ export async function handleList(options: ListOptions): Promise<void> {
 
     progress.succeed('Module listing complete.');
 
-    // M5 empty state
+    // Empty state
     if (filteredModules.length === 0) {
       const filterMsg = options.tag ? ` with tag '${options.tag}'` : '';
-      console.log(chalk.yellow(`No UMS v1.0 modules found${filterMsg}.`));
+      console.log(chalk.yellow(`No UMS v2.0 modules found${filterMsg}.`));
       return;
     }
 

@@ -1,6 +1,6 @@
 /**
  * @module commands/search
- * @description Command to search for UMS v1.0 modules (M6).
+ * @description Command to search for UMS v2.0 modules.
  */
 
 import chalk from 'chalk';
@@ -47,12 +47,9 @@ function searchModules(modules: Module[], query: string): Module[] {
 }
 
 /**
- * Filters and sorts modules according to M6 requirements (same as M5)
+ * Filters and sorts modules by tag and metadata.name
  */
-function filterAndSortModules(
-  modules: Module[],
-  tagFilter?: string
-): Module[] {
+function filterAndSortModules(modules: Module[], tagFilter?: string): Module[] {
   let filteredModules = modules;
 
   if (tagFilter) {
@@ -62,7 +59,7 @@ function filterAndSortModules(
     });
   }
 
-  // M6 sorting: same as M5 - metadata.name then id
+  // Sorting: metadata.name then id
   filteredModules.sort((a, b) => {
     const metaA = getModuleMetadata(a);
     const metaB = getModuleMetadata(b);
@@ -79,25 +76,27 @@ function filterAndSortModules(
  */
 function renderSearchResults(modules: Module[], query: string): void {
   const table = new Table({
-    head: ['ID', 'Name', 'Description', 'Tags'],
+    head: ['ID', 'Name', 'Capabilities', 'Tags', 'Description'],
     style: {
       head: ['cyan', 'bold'],
       border: ['gray'],
       compact: false,
     },
-    colWidths: [30, 30, 40, 25],
+    colWidths: [28, 22, 20, 20, 30],
     wordWrap: true,
   });
 
   modules.forEach(module => {
     const metadata = getModuleMetadata(module);
+    const capabilities = module.capabilities.join(', ');
     const tags = metadata.tags?.join(', ') ?? 'none';
 
     table.push([
       chalk.green(module.id),
       chalk.white.bold(metadata.name),
-      chalk.gray(metadata.description),
+      chalk.cyan(capabilities),
       chalk.yellow(tags),
+      chalk.gray(metadata.description),
     ]);
   });
 
@@ -111,7 +110,7 @@ function renderSearchResults(modules: Module[], query: string): void {
 }
 
 /**
- * Handles the 'search' command for UMS v1.0 modules (M6).
+ * Handles the 'search' command for UMS v2.0 modules.
  * @param query - The search query.
  * @param options - The command options.
  * @param options.tag - The tag to filter by.
@@ -123,16 +122,16 @@ export async function handleSearch(
   const progress = createDiscoveryProgress('search', options.verbose);
 
   try {
-    progress.start('Discovering UMS v1.0 modules...');
+    progress.start('Discovering UMS v2.0 modules...');
 
-    // Use UMS v1.0 module discovery
+    // Use UMS v2.0 module discovery
     const moduleDiscoveryResult = await discoverAllModules();
     const modulesMap = moduleDiscoveryResult.registry.resolveAll('warn');
     const modules = Array.from(modulesMap.values());
 
     if (modules.length === 0) {
       progress.succeed('Module discovery complete.');
-      console.log(chalk.yellow('No UMS v1.0 modules found.'));
+      console.log(chalk.yellow('No UMS v2.0 modules found.'));
       return;
     }
 
@@ -148,17 +147,17 @@ export async function handleSearch(
 
     progress.update(`Searching for "${query}"...`);
 
-    // M6: Query substring case-insensitive across meta.name, meta.description, meta.tags
+    // Query substring case-insensitive across meta.name, meta.description, meta.tags
     const searchResults = searchModules(modules, query);
 
     progress.update('Filtering and sorting results...');
 
-    // Filter by tag and sort (same as M5)
+    // Filter by tag and sort results
     const filteredResults = filterAndSortModules(searchResults, options.tag);
 
     progress.succeed('Module search complete.');
 
-    // M6: no-match case
+    // no-match case
     if (filteredResults.length === 0) {
       const filterMsg = options.tag ? ` with tag '${options.tag}'` : '';
       console.log(
