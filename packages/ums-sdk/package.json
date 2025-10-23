@@ -46,9 +46,9 @@
     "quality-check": "npm run typecheck && npm run lint && npm run format:check && npm run test"
   },
   "dependencies": {
+    "glob": "^10.0.0",
     "ums-lib": "^1.0.0",
-    "yaml": "^2.6.0",
-    "glob": "^10.0.0"
+    "yaml": "^2.6.0"
   },
   "peerDependencies": {
     "typescript": ">=5.0.0"
@@ -59,9 +59,8 @@
     }
   },
   "optionalDependencies": {
-    "tsx": "^4.0.0"
+    "tsx": "^4.20.6"
   },
-  "devDependencies": {},
   "files": [
     "dist",
     "README.md"

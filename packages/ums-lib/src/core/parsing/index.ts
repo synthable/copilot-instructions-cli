@@ -3,6 +3,5 @@
  * Handles parsing and basic structure validation
  */
 
-export { parseModuleObject } from './module-parser.js';
-export { parsePersonaObject } from './persona-parser.js';
-export { parseYaml, isValidObject } from './yaml-utils.js';
+export { parseModule } from './module-parser.js';
+export { parsePersona } from './persona-parser.js';

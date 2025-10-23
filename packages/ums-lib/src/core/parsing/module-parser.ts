@@ -17,7 +17,7 @@ import { ModuleParseError } from '../../utils/errors.js';
  * @returns The validated module object.
  * @throws {ModuleParseError} If the object is not a valid module structure.
  */
-export function parseModuleObject(obj: unknown): Module {
+export function parseModule(obj: unknown): Module {
   if (!obj || typeof obj !== 'object' || Array.isArray(obj)) {
     throw new ModuleParseError('Module must be an object.');
   }
