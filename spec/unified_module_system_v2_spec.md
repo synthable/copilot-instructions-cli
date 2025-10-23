@@ -38,10 +38,10 @@ A valid module for v2.0 MUST contain the following top-level keys:
 | `id` | String | Yes | Unique module identifier |
 | `version` | String | Yes | Semantic version (SemVer 2.0.0) |
 | `schemaVersion` | String | Yes | Must be `"2.0"` |
-| `capabilities` | Array[String] | Yes | What this module provides |
+| `capabilities` | Array[String] | Yes | What functional capabilities this module provides |
+| `cognitiveLevel` | Integer | Yes | Cognitive abstraction level (0-6) |
 | `metadata` | Object | Yes | Human-readable and AI-discoverable metadata |
-| `cognitiveLevel` | Integer | No | Cognitive hierarchy (0-4) for foundation modules |
-| `domain` | String/Array | No | Domain applicability |
+| `domain` | String/Array | No | Technology or field this module applies to |
 | `components` | Array[Component] | No* | Component blocks (see 2.2) |
 | `instruction` | InstructionComponent | No* | Shorthand for single instruction component |
 | `knowledge` | KnowledgeComponent | No* | Shorthand for single knowledge component |
@@ -60,7 +60,7 @@ A valid module for v2.0 MUST contain the following top-level keys:
   - `"foundation/reasoning/systems-thinking"`
   - `"principle/architecture/separation-of-concerns"`
 
-**Recommended Structure**: Module IDs can be flat (e.g., `be-concise`) or hierarchical (e.g., `ethics/do-no-harm`). Use tags in metadata for categorization and discovery rather than relying on ID structure.
+**Recommended Structure**: Module IDs can be flat (e.g., `be-concise`) or hierarchical (e.g., `ethics/do-no-harm`). Use the classification fields (`capabilities`, `domain`, `cognitiveLevel`, and `metadata.tags`) for categorization and discovery rather than encoding classification in the ID structure.
 
 #### `version`
 
@@ -82,16 +82,18 @@ A valid module for v2.0 MUST contain the following top-level keys:
 
 - **Type**: `Array<string>`
 - **Required**: Yes
-- **Purpose**: Declare what functional capabilities this module provides
+- **Purpose**: Declare what functional capabilities this module provides (what it helps you do)
 - **Constraints**:
   - MUST be a non-empty array
   - Each capability SHOULD be lowercase kebab-case
-  - Capabilities SHOULD be concrete and searchable (e.g., `"error-handling"`, `"api-design"`)
-  - Capabilities enable semantic search and module discovery
+  - Capabilities SHOULD be concrete, functional, and searchable
+  - Focus on **what** the module helps accomplish (not the domain or pattern)
 - **Examples**:
-  - `["testing", "quality"]`
-  - `["api-design", "rest", "http"]`
-  - `["error-handling", "best-practices"]`
+  - `["testing", "quality-assurance"]` - helps with testing and quality
+  - `["api-design", "rest-api"]` - helps design REST APIs
+  - `["error-handling", "logging", "debugging"]` - helps handle errors and debug
+  - `["performance-optimization", "caching"]` - helps optimize performance
+- **Distinction**: Use `capabilities` for **what the module helps accomplish**, `domain` for **where it applies**, and `metadata.tags` for **patterns/keywords**
 
 #### `metadata`
 
@@ -102,27 +104,49 @@ A valid module for v2.0 MUST contain the following top-level keys:
 
 #### `cognitiveLevel`
 
-- **Type**: `Integer` (0-4)
-- **Required**: No (but RECOMMENDED for foundation modules)
-- **Purpose**: Position in cognitive hierarchy
-- **Allowed Values**: `0`, `1`, `2`, `3`, `4`
+- **Type**: `Integer` (0-6)
+- **Required**: Yes
+- **Purpose**: Classify the module's position in the cognitive abstraction hierarchy
+- **Allowed Values**: `0`, `1`, `2`, `3`, `4`, `5`, `6`
 - **Semantics**:
-  - **0**: Bedrock / Axioms - Core principles and ethical guardrails
-  - **1**: Core Processes - Fundamental reasoning frameworks
-  - **2**: Evaluation & Synthesis - Analysis, judgment, creativity
-  - **3**: Action / Decision - Making decisions and formulating plans
-  - **4**: Meta-Cognition - Self-awareness and reflection
+  - **0**: Axioms & Ethics - Universal truths, ethical bedrock, non-negotiable principles
+  - **1**: Reasoning Frameworks - How to think, analyze, and form judgments
+  - **2**: Universal Patterns - Cross-domain patterns and principles that apply broadly
+  - **3**: Domain-Specific Guidance - Field-specific but technology-agnostic best practices
+  - **4**: Procedures & Playbooks - Step-by-step instructions and actionable guides
+  - **5**: Specifications & Standards - Precise requirements, validation criteria, compliance rules
+  - **6**: Meta-Cognition - Self-reflection, process improvement, learning from experience
+- **Classification Guidance**:
+  - More abstract/universal → lower numbers (0-2)
+  - More concrete/specific → higher numbers (4-5)
+  - Domain principles → middle range (3)
+  - Self-reflective processes → highest level (6)
+- **Examples**:
+  - Level 0: "Do No Harm", "Respect Privacy"
+  - Level 1: "Systems Thinking", "Critical Analysis"
+  - Level 2: "Separation of Concerns", "SOLID Principles"
+  - Level 3: "REST API Design", "Database Normalization"
+  - Level 4: "Git Workflow Guide", "Code Review Process"
+  - Level 5: "OpenAPI Schema Validation", "Security Compliance Checklist"
+  - Level 6: "Retrospective Practice", "Continuous Improvement"
 
 #### `domain`
 
 - **Type**: `String` or `Array<string>`
 - **Required**: No
-- **Purpose**: Declare target domain(s) for the module
+- **Purpose**: Declare the technology, language, or field this module applies to (where it's used)
+- **Constraints**:
+  - Use for technology/language specificity (e.g., `"typescript"`, `"python"`)
+  - Use for technical domains (e.g., `"backend"`, `"frontend"`, `"database"`)
+  - Use `"language-agnostic"` for universal applicability
+  - Can be a single string or array of strings
 - **Examples**:
-  - `"python"`
-  - `"language-agnostic"`
-  - `["backend", "api"]`
-  - `["frontend", "react", "typescript"]`
+  - `"python"` - Python-specific module
+  - `"language-agnostic"` - Applies to all languages
+  - `["backend", "api"]` - Backend API development
+  - `["frontend", "react", "typescript"]` - React + TypeScript frontend
+  - `["database", "postgresql"]` - PostgreSQL database specific
+- **Distinction**: Use `domain` for **where the module applies** (technology/field), `capabilities` for **what it helps accomplish**, and `metadata.tags` for **additional keywords/patterns**
 
 ### 2.1.1. TypeScript Module Export Requirements
 
@@ -309,9 +333,25 @@ interface DataComponent {
 
 - **Type**: `Array<string>`
 - **Required**: No
-- **Purpose**: Explicit keywords for faceted search and filtering
-- **Constraints**: All tags MUST be lowercase, SHOULD be kebab-case
-- **Example**: `["testing", "tdd", "quality", "best-practices"]`
+- **Purpose**: Additional keywords, patterns, and descriptive labels for search and filtering
+- **Constraints**:
+  - All tags MUST be lowercase, SHOULD be kebab-case
+  - Use for patterns, methodologies, and keywords not captured by `capabilities` or `domain`
+- **Common Tag Types**:
+  - **Patterns**: `"solid"`, `"ddd"`, `"tdd"`, `"mvc"`, `"factory-pattern"`
+  - **Methodologies**: `"agile"`, `"devops"`, `"ci-cd"`
+  - **Characteristics**: `"async"`, `"reactive"`, `"functional"`, `"imperative"`
+  - **Keywords**: `"best-practices"`, `"anti-patterns"`, `"refactoring"`
+- **Examples**:
+  - `["tdd", "red-green-refactor"]` - TDD pattern keywords
+  - `["solid", "single-responsibility"]` - SOLID principle tags
+  - `["async", "promises", "event-loop"]` - Async programming keywords
+  - `["best-practices", "clean-code"]` - General quality tags
+- **Distinction**:
+  - Use `capabilities` for **what** the module helps accomplish (functional capabilities)
+  - Use `domain` for **where** it applies (technology/field)
+  - Use `cognitiveLevel` for **abstraction level** (0-6 hierarchy)
+  - Use `tags` for **patterns, keywords, and additional descriptors**
 
 #### `solves`
 
@@ -637,7 +677,7 @@ Implementations construct the Module Registry by:
 
 ### 5.1.1. Standard Library
 
-The **Standard Library** is a curated collection of foundation modules that provide core AI instruction patterns, reasoning frameworks, and best practices.
+The **Standard Library** is a curated collection of reusable modules that provide core AI instruction patterns, reasoning frameworks, and best practices across all cognitive levels.
 
 **Discovery and Location**:
 - Standard Library location and structure is **implementation-defined**
@@ -891,12 +931,15 @@ export const errorHandling: Module = {
   id: "error-handling",
   version: "1.0.0",
   schemaVersion: "2.0",
-  capabilities: ["error-handling", "best-practices"],
+  capabilities: ["error-handling", "resilience"],
+  cognitiveLevel: 2,
+  domain: "language-agnostic",
 
   metadata: {
     name: "Error Handling Best Practices",
     description: "Handle errors gracefully with proper patterns",
-    semantic: "Error handling, exception management, fault tolerance, resilience, try-catch, error propagation, logging"
+    semantic: "Error handling, exception management, fault tolerance, resilience, try-catch, error propagation, logging",
+    tags: ["best-practices", "fault-tolerance"]
   },
 
   instruction: {
@@ -932,14 +975,15 @@ export const tddModule: Module = {
   id: "test-driven-development",
   version: "2.0.0",
   schemaVersion: "2.0",
-  capabilities: ["testing", "quality", "tdd"],
+  capabilities: ["testing", "quality-assurance"],
+  cognitiveLevel: 2,
   domain: "language-agnostic",
 
   metadata: {
     name: "Test-Driven Development",
     description: "Apply TDD methodology for higher quality code",
-    semantic: "TDD, test-driven development, red-green-refactor, unit testing, test-first development, quality assurance, regression prevention",
-    tags: ["testing", "tdd", "quality"],
+    semantic: "TDD, test-driven-development, red-green-refactor, unit testing, test-first development, quality assurance, regression prevention",
+    tags: ["tdd", "red-green-refactor", "test-first"],
     quality: {
       maturity: "stable",
       confidence: 0.9
@@ -995,8 +1039,8 @@ export const apiDesign: Module = {
   id: "rest-api-design",
   version: "1.0.0",
   schemaVersion: "2.0",
-  capabilities: ["api-design", "rest", "http"],
-  cognitiveLevel: 2,
+  capabilities: ["api-design", "rest-api"],
+  cognitiveLevel: 3,
   domain: "language-agnostic",
 
   metadata: {
@@ -1007,7 +1051,7 @@ export const apiDesign: Module = {
       API versioning, status codes, error handling, HATEOAS, Richardson
       Maturity Model, API documentation, OpenAPI, Swagger
     `,
-    tags: ["api", "rest", "http", "web-services"],
+    tags: ["rest", "restful", "resource-based", "http-methods"],
 
     solves: [
       {
