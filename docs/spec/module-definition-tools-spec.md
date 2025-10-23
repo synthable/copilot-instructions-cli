@@ -364,12 +364,12 @@ export const defaults = {
   },
 
   /**
-   * Infer tier from module ID
+   * Get primary tag from module metadata
+   * Returns the first level tag (foundational, intermediate, advanced, specialized) if present
    */
-  inferTier(moduleId: string): string | undefined {
-    const tiers = ['foundation', 'principle', 'technology', 'execution'];
-    const firstPart = moduleId.split('/')[0];
-    return tiers.includes(firstPart) ? firstPart : undefined;
+  getPrimaryTag(module: Module): string | undefined {
+    const levelTags = ['foundational', 'intermediate', 'advanced', 'specialized'];
+    return module.metadata.tags?.find(tag => levelTags.includes(tag));
   },
 
   /**
@@ -821,7 +821,7 @@ export const advancedErrorHandling = defineModule({
 |----------|------------|---------|-------------|
 | `generateSemantic` | `{ name, description?, capabilities?, keywords? }` | `string` | Auto-generates semantic metadata |
 | `exportName` | `moduleId: string` | `string` | Calculates export name from ID |
-| `inferTier` | `moduleId: string` | `string \| undefined` | Infers tier from ID |
+| `getPrimaryTag` | `module: Module` | `string \| undefined` | Gets primary level tag from module metadata |
 | `defaultVersion` | - | `'1.0.0'` | Returns default version |
 | `schemaVersion` | - | `'2.0'` | Returns schema version |
 
