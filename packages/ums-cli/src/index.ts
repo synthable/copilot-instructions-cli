@@ -67,64 +67,39 @@ program
 
 program
   .command('list')
-  .description('Lists all available UMS v1.0 modules.')
-  .addOption(
-    new Option('-t, --tier <name>', 'Filter by tier').choices([
-      'foundation',
-      'principle',
-      'technology',
-      'execution',
-    ])
-  )
+  .description('Lists all available UMS v2.0 modules.')
   .option('-v, --verbose', 'Enable verbose output')
   .addHelpText(
     'after',
     `  Examples:
     $ copilot-instructions list
-    $ copilot-instructions list --tier foundation
-    $ copilot-instructions list --tier technology
+    $ copilot-instructions list --verbose
     `
   )
   .showHelpAfterError()
-  .action(async (options: { tier?: string; verbose?: boolean }) => {
+  .action(async (options: { verbose?: boolean }) => {
     const verbose = options.verbose ?? false;
-    await handleList({
-      ...(options.tier && { tier: options.tier }),
-      verbose,
-    });
+    await handleList({ verbose });
   });
 
 program
   .command('search')
-  .description('Searches for UMS v1.0 modules by name, description, or tags.')
+  .description('Searches for UMS v2.0 modules by name, description, or tags.')
   .addArgument(new Argument('<query>', 'Search query'))
-  .addOption(
-    new Option('-t, --tier <name>', 'Filter by tier').choices([
-      'foundation',
-      'principle',
-      'technology',
-      'execution',
-    ])
-  )
   .option('-v, --verbose', 'Enable verbose output')
   .addHelpText(
     'after',
     `  Examples:
     $ copilot-instructions search "logic"
-    $ copilot-instructions search "reasoning" --tier foundation
-    $ copilot-instructions search "react" --tier technology
+    $ copilot-instructions search "reasoning"
+    $ copilot-instructions search "react"
     `
   )
   .showHelpAfterError()
-  .action(
-    async (query: string, options: { tier?: string; verbose?: boolean }) => {
-      const verbose = options.verbose ?? false;
-      await handleSearch(query, {
-        ...(options.tier && { tier: options.tier }),
-        verbose,
-      });
-    }
-  );
+  .action(async (query: string, options: { verbose?: boolean }) => {
+    const verbose = options.verbose ?? false;
+    await handleSearch(query, { verbose });
+  });
 
 program
   .command('validate')

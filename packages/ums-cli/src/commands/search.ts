@@ -1,6 +1,6 @@
 /**
  * @module commands/search
- * @description Command to search for UMS v1.0 modules (M6).
+ * @description Command to search for UMS v2.0 modules.
  */
 
 import chalk from 'chalk';
@@ -12,7 +12,6 @@ import { discoverAllModules } from '../utils/module-discovery.js';
 import { getModuleMetadata } from '../types/cli-extensions.js';
 
 interface SearchOptions {
-  tier?: string;
   verbose?: boolean;
 }
 
@@ -47,38 +46,16 @@ function searchModules(modules: Module[], query: string): Module[] {
 }
 
 /**
- * Filters and sorts modules according to M6 requirements (same as M5)
+ * Sorts modules by metadata.name then id
  */
-function filterAndSortModules(
-  modules: Module[],
-  tierFilter?: string
-): Module[] {
-  let filteredModules = modules;
-
-  if (tierFilter) {
-    const validTiers = ['foundation', 'principle', 'technology', 'execution'];
-    if (!validTiers.includes(tierFilter)) {
-      throw new Error(
-        `Invalid tier '${tierFilter}'. Must be one of: ${validTiers.join(', ')}`
-      );
-    }
-
-    filteredModules = modules.filter(m => {
-      const tier = m.id.split('/')[0];
-      return tier === tierFilter;
-    });
-  }
-
-  // M6 sorting: same as M5 - metadata.name then id
-  filteredModules.sort((a, b) => {
+function sortModules(modules: Module[]): Module[] {
+  return modules.sort((a, b) => {
     const metaA = getModuleMetadata(a);
     const metaB = getModuleMetadata(b);
     const nameCompare = metaA.name.localeCompare(metaB.name);
     if (nameCompare !== 0) return nameCompare;
     return a.id.localeCompare(b.id);
   });
-
-  return filteredModules;
 }
 
 /**
@@ -86,27 +63,24 @@ function filterAndSortModules(
  */
 function renderSearchResults(modules: Module[], query: string): void {
   const table = new Table({
-    head: ['ID', 'Tier/Subject', 'Name', 'Description'],
+    head: ['ID', 'Name', 'Capabilities', 'Description'],
     style: {
       head: ['cyan', 'bold'],
       border: ['gray'],
       compact: false,
     },
-    colWidths: [30, 25, 30],
+    colWidths: [30, 30, 25],
     wordWrap: true,
   });
 
   modules.forEach(module => {
-    const idParts = module.id.split('/');
-    const tier = idParts[0];
-    const subject = idParts.slice(1).join('/');
-    const tierSubject = subject ? `${tier}/${subject}` : tier;
     const metadata = getModuleMetadata(module);
+    const capabilities = module.capabilities.join(', ');
 
     table.push([
       chalk.green(module.id),
-      chalk.yellow(tierSubject),
       chalk.white.bold(metadata.name),
+      chalk.yellow(capabilities),
       chalk.gray(metadata.description),
     ]);
   });
@@ -121,10 +95,9 @@ function renderSearchResults(modules: Module[], query: string): void {
 }
 
 /**
- * Handles the 'search' command for UMS v1.0 modules (M6).
+ * Handles the 'search' command for UMS v2.0 modules.
  * @param query - The search query.
  * @param options - The command options.
- * @param options.tier - The tier to filter by (foundation|principle|technology|execution).
  */
 export async function handleSearch(
   query: string,
@@ -133,16 +106,16 @@ export async function handleSearch(
   const progress = createDiscoveryProgress('search', options.verbose);
 
   try {
-    progress.start('Discovering UMS v1.0 modules...');
+    progress.start('Discovering UMS v2.0 modules...');
 
-    // Use UMS v1.0 module discovery
+    // Use UMS v2.0 module discovery
     const moduleDiscoveryResult = await discoverAllModules();
     const modulesMap = moduleDiscoveryResult.registry.resolveAll('warn');
     const modules = Array.from(modulesMap.values());
 
     if (modules.length === 0) {
       progress.succeed('Module discovery complete.');
-      console.log(chalk.yellow('No UMS v1.0 modules found.'));
+      console.log(chalk.yellow('No UMS v2.0 modules found.'));
       return;
     }
 
@@ -158,27 +131,24 @@ export async function handleSearch(
 
     progress.update(`Searching for "${query}"...`);
 
-    // M6: Query substring case-insensitive across meta.name, meta.description, meta.tags
+    // Query substring case-insensitive across meta.name, meta.description, meta.tags
     const searchResults = searchModules(modules, query);
 
-    progress.update('Filtering and sorting results...');
+    progress.update('Sorting results...');
 
-    // Filter by tier and sort (same as M5)
-    const filteredResults = filterAndSortModules(searchResults, options.tier);
+    // Sort results
+    const sortedResults = sortModules(searchResults);
 
     progress.succeed('Module search complete.');
 
-    // M6: no-match case
-    if (filteredResults.length === 0) {
-      const filterMsg = options.tier ? ` in tier '${options.tier}'` : '';
-      console.log(
-        chalk.yellow(`No modules found matching "${query}"${filterMsg}.`)
-      );
+    // no-match case
+    if (sortedResults.length === 0) {
+      console.log(chalk.yellow(`No modules found matching "${query}".`));
       return;
     }
 
     // Render results
-    renderSearchResults(filteredResults, query);
+    renderSearchResults(sortedResults, query);
   } catch (error) {
     progress.fail('Failed to search modules.');
     handleError(error, {

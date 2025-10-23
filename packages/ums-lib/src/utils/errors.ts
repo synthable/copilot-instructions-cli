@@ -185,8 +185,6 @@ export const ID_VALIDATION_ERRORS = {
     `Module ID contains uppercase characters: ${id}`,
   specialCharacters: (id: string) =>
     `Module ID contains special characters: ${id}`,
-  invalidTier: (tier: string) =>
-    `Invalid tier '${tier}'. Must be one of: foundation, principle, technology, execution`,
   emptySegment: (id: string) => `Module ID '${id}' contains empty path segment`,
   invalidCharacters: (id: string) =>
     `Module ID '${id}' contains invalid characters`,
