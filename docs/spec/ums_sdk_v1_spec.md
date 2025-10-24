@@ -457,11 +457,11 @@ interface ListOptions {
   /** Include standard library modules (default: true) */
   includeStandard?: boolean;
 
-  /** Filter by tier (foundation, principle, technology, execution) */
-  tier?: string;
-
   /** Filter by capability */
   capability?: string;
+
+  /** Filter by tag (e.g., foundational, intermediate, advanced, specialized, or any capability/domain/pattern tag) */
+  tag?: string;
 }
 
 interface ModuleInfo {

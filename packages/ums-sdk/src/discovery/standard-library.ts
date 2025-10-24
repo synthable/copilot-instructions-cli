@@ -3,7 +3,7 @@
  * Part of the UMS SDK v1.0
  */
 
-import { resolve } from 'node:path';
+import { resolve, join } from 'node:path';
 import { existsSync } from 'node:fs';
 import type { Module } from 'ums-lib';
 import { ModuleDiscovery } from './module-discovery.js';
@@ -66,22 +66,16 @@ export class StandardLibrary {
    * @param moduleId - Module ID to check
    * @returns true if module is in standard library
    *
-   * Note: This is a heuristic check based on naming conventions.
-   * Standard modules typically start with tier prefixes:
-   * - foundation/
-   * - principle/
-   * - technology/
-   * - execution/
+   * Note: Uses file-based heuristic - checks if module file exists in standard library path.
+   * This is a simple implementation that works for most cases.
    */
   isStandardModule(moduleId: string): boolean {
-    const standardPrefixes = [
-      'foundation/',
-      'principle/',
-      'technology/',
-      'execution/',
-    ];
-
-    return standardPrefixes.some(prefix => moduleId.startsWith(prefix));
+    // Check if module file exists in standard library path
+    const standardModulePath = join(
+      this.standardPath,
+      `${moduleId}.module.ts`
+    );
+    return existsSync(standardModulePath);
   }
 
   /**

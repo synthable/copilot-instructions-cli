@@ -66,6 +66,7 @@ describe('module-discovery', () => {
         version: '2.0',
         schemaVersion: '2.0',
         capabilities: [],
+        cognitiveLevel: 2,
         metadata: {
           name: 'Logic',
           description: 'Basic logic',
@@ -77,6 +78,7 @@ describe('module-discovery', () => {
         version: '2.0',
         schemaVersion: '2.0',
         capabilities: [],
+        cognitiveLevel: 2,
         metadata: {
           name: 'SOLID',
           description: 'SOLID principles',
@@ -138,6 +140,7 @@ describe('module-discovery', () => {
         version: '2.0',
         schemaVersion: '2.0',
         capabilities: [],
+        cognitiveLevel: 2,
         metadata: {
           name: 'Custom',
           description: 'Custom module',
@@ -181,6 +184,7 @@ describe('module-discovery', () => {
         version: '2.0',
         schemaVersion: '2.0',
         capabilities: [],
+        cognitiveLevel: 2,
         metadata: {
           name: 'Local',
           description: 'Local module',

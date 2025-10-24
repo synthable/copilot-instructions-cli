@@ -19,7 +19,7 @@ const program = new Command();
 program
   .name('copilot-instructions')
   .description(
-    'A CLI for building and managing AI persona instructions from UMS v1.0 modules.'
+    'A CLI for building and managing AI persona instructions from UMS v2.0 modules.'
   )
   .version(pkg.version)
   .option('-v, --verbose', 'Enable verbose output');
@@ -27,20 +27,20 @@ program
 program
   .command('build')
   .description(
-    'Builds a persona instruction file from a .persona.yml configuration (UMS v1.0)'
+    'Builds a persona instruction file from a .persona.ts configuration (UMS v2.0)'
   )
   .option(
     '-p, --persona <file>',
-    'Path to the persona configuration file (.persona.yml)'
+    'Path to the persona configuration file (.persona.ts)'
   )
   .option('-o, --output <file>', 'Specify the output file for the build')
   .option('-v, --verbose', 'Enable verbose output')
   .addHelpText(
     'after',
     `  Examples:
-    $ copilot-instructions build --persona ./personas/my-persona.persona.yml
-    $ copilot-instructions build --persona ./personas/my-persona.persona.yml --output ./dist/my-persona.md
-    $ cat persona.yml | copilot-instructions build --output ./dist/my-persona.md
+    $ copilot-instructions build --persona ./personas/my-persona.persona.ts
+    $ copilot-instructions build --persona ./personas/my-persona.persona.ts --output ./dist/my-persona.md
+    $ cat persona.ts | copilot-instructions build --output ./dist/my-persona.md
     `
   )
   .showHelpAfterError()
@@ -67,60 +67,92 @@ program
 
 program
   .command('list')
-  .description('Lists all available UMS v1.0 modules.')
-  .addOption(
-    new Option('-t, --tier <name>', 'Filter by tier').choices([
-      'foundation',
-      'principle',
-      'technology',
-      'execution',
-    ])
+  .description('Lists all available UMS v2.0 modules.')
+  .option(
+    '-l, --level <levels>',
+    'Filter by cognitive level (0-6 or enum name, comma-separated)'
   )
+  .option(
+    '-c, --capability <capabilities>',
+    'Filter by capabilities (comma-separated)'
+  )
+  .option('-d, --domain <domains>', 'Filter by domains (comma-separated)')
+  .option('-t, --tag <tags>', 'Filter by tags (comma-separated)')
   .option('-v, --verbose', 'Enable verbose output')
   .addHelpText(
     'after',
     `  Examples:
     $ copilot-instructions list
-    $ copilot-instructions list --tier foundation
-    $ copilot-instructions list --tier technology
+    $ copilot-instructions list --level 0,1
+    $ copilot-instructions list --level UNIVERSAL_PATTERNS
+    $ copilot-instructions list --capability testing,debugging
+    $ copilot-instructions list --domain typescript --tag tdd
+    $ copilot-instructions list --level 2 --capability api-design
     `
   )
   .showHelpAfterError()
-  .action(async (options: { tier?: string; verbose?: boolean }) => {
-    const verbose = options.verbose ?? false;
-    await handleList({
-      ...(options.tier && { tier: options.tier }),
-      verbose,
-    });
-  });
+  .action(
+    async (options: {
+      level?: string;
+      capability?: string;
+      domain?: string;
+      tag?: string;
+      verbose?: boolean;
+    }) => {
+      const verbose = options.verbose ?? false;
+      await handleList({
+        ...(options.level && { level: options.level }),
+        ...(options.capability && { capability: options.capability }),
+        ...(options.domain && { domain: options.domain }),
+        ...(options.tag && { tag: options.tag }),
+        verbose,
+      });
+    }
+  );
 
 program
   .command('search')
-  .description('Searches for UMS v1.0 modules by name, description, or tags.')
+  .description('Searches for UMS v2.0 modules by name, description, or tags.')
   .addArgument(new Argument('<query>', 'Search query'))
-  .addOption(
-    new Option('-t, --tier <name>', 'Filter by tier').choices([
-      'foundation',
-      'principle',
-      'technology',
-      'execution',
-    ])
+  .option(
+    '-l, --level <levels>',
+    'Filter by cognitive level (0-6 or enum name, comma-separated)'
   )
+  .option(
+    '-c, --capability <capabilities>',
+    'Filter by capabilities (comma-separated)'
+  )
+  .option('-d, --domain <domains>', 'Filter by domains (comma-separated)')
+  .option('-t, --tag <tags>', 'Filter by tags (comma-separated)')
   .option('-v, --verbose', 'Enable verbose output')
   .addHelpText(
     'after',
     `  Examples:
     $ copilot-instructions search "logic"
-    $ copilot-instructions search "reasoning" --tier foundation
-    $ copilot-instructions search "react" --tier technology
+    $ copilot-instructions search "reasoning" --level 0,1
+    $ copilot-instructions search "patterns" --level UNIVERSAL_PATTERNS
+    $ copilot-instructions search "react" --domain typescript
+    $ copilot-instructions search "testing" --capability quality-assurance --tag tdd
     `
   )
   .showHelpAfterError()
   .action(
-    async (query: string, options: { tier?: string; verbose?: boolean }) => {
+    async (
+      query: string,
+      options: {
+        level?: string;
+        capability?: string;
+        domain?: string;
+        tag?: string;
+        verbose?: boolean;
+      }
+    ) => {
       const verbose = options.verbose ?? false;
       await handleSearch(query, {
-        ...(options.tier && { tier: options.tier }),
+        ...(options.level && { level: options.level }),
+        ...(options.capability && { capability: options.capability }),
+        ...(options.domain && { domain: options.domain }),
+        ...(options.tag && { tag: options.tag }),
         verbose,
       });
     }
@@ -128,7 +160,7 @@ program
 
 program
   .command('validate')
-  .description('Validates UMS v1.0 modules and persona files.')
+  .description('Validates UMS v2.0 modules and persona files.')
   .addArgument(
     new Argument(
       '[path]',
@@ -144,7 +176,7 @@ program
     `  Examples:
     $ copilot-instructions validate
     $ copilot-instructions validate ./instructions-modules
-    $ copilot-instructions validate ./personas/my-persona.persona.yml
+    $ copilot-instructions validate ./personas/my-persona.persona.ts
     $ copilot-instructions validate --verbose
     `
   )

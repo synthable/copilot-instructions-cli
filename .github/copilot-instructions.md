@@ -4,29 +4,28 @@ applyTo: '**'
 # Instructions Composer
 
 ## Project Overview
-Instructions Composer is a monorepo workspace containing a CLI tool and supporting libraries for building and managing AI persona instructions using the Unified Module System (UMS v1.0). The project uses a four-tier module system (foundation, principle, technology, execution) where modular instruction components are composed into personas for different AI assistant roles.
+Instructions Composer is a monorepo workspace containing a CLI tool and supporting libraries for building and managing AI persona instructions using the Unified Module System (UMS v2.0). The project uses a flexible tag-based classification system where modular instruction components are composed into personas for different AI assistant roles.
 
 ## Important Notice
 This project is a pre-1.0 release, and as such, does not guarantee backward compatibility. The API, CLI commands, and file formats may change without notice.
 
 ## Repository Structure
 - `packages/ums-cli`: Main CLI application
-- `packages/ums-lib`: Core UMS v1.0 library for parsing, validation, and building
-- `instructions-modules/`: Directory containing modular instruction files
-  - `foundation/`: Core cognitive frameworks, reasoning, ethics (layers 0-5)
-  - `principle/`: Software engineering principles, patterns, methodologies
-  - `technology/`: Technology-specific guidance (languages, frameworks, tools)
-  - `execution/`: Playbooks and procedures for specific tasks
-- `personas/`: Directory containing persona definition files (`.persona.yml`)
+- `packages/ums-lib`: Core UMS v2.0 library for parsing, validation, and building
+- `packages/ums-sdk`: Node.js SDK for UMS v2.0
+- `packages/ums-mcp`: MCP server for AI assistants
+- Module files: TypeScript-based modules organized by domain/category
+- `personas/`: Directory containing persona definition files (`.persona.ts`)
 
 ## Core Architecture
 The project follows a modular approach where:
-1. Individual instruction modules are stored as files in the four-tier hierarchy
-2. Modules are validated against schema structures based on their type
-3. A build engine combines modules according to persona definitions
-4. The compiled output is a markdown document for use with AI assistants
+1. Individual instruction modules are TypeScript files with flexible IDs (e.g., `category/name`)
+2. Modules use tags for classification (foundational, intermediate, advanced, etc.)
+3. Modules are validated against UMS v2.0 schema structures
+4. A build engine combines modules according to persona definitions
+5. The compiled output is a markdown document for use with AI assistants
 
-The `BuildEngine` and `ModuleRegistry` classes in `packages/ums-lib/src/core/build-engine.ts` are the central components that orchestrate the build process.
+The core components are in `packages/ums-lib/src/core/` and include registry, validation, parsing, and rendering.
 
 ## Development Workflow
 ```bash
@@ -50,18 +49,18 @@ npm run build -w packages/ums-cli
 
 ## Module System Patterns
 - **Atomicity**: Each module represents a single, self-contained concept
-- **Four-Tier Waterfall**: Modules flow from abstract (foundation) to concrete (execution)
-- **Layered Foundation**: Foundation modules have optional layer property (0-5)
-- **Schema Validation**: Modules follow specific schema structures (procedure, specification, etc.)
+- **Tag-Based Classification**: Modules use tags for flexible categorization (foundational, intermediate, advanced, domain-specific)
+- **Cognitive Level**: Modules have optional cognitive level property (0-4) indicating complexity
+- **Schema Validation**: Modules follow UMS v2.0 specification with TypeScript-first format
 
 ## CLI Usage Examples
 ```bash
 # Build a persona from configuration
-copilot-instructions build --persona ./personas/my-persona.persona.yml
+copilot-instructions build --persona ./personas/my-persona.persona.ts
 
-# List all modules or filter by tier
+# List all modules or filter by tag
 copilot-instructions list
-copilot-instructions list --tier foundation
+copilot-instructions list --tag foundational
 
 # Search for modules
 copilot-instructions search "reasoning"
@@ -73,8 +72,9 @@ copilot-instructions validate
 ## Important Conventions
 - All imports must include `.js` extensions for proper ESM compatibility
 - Testing uses Vitest with `.test.ts` files alongside source files
-- Module IDs follow the `tier/category/name-v1-0` pattern
-- Persona files use YAML with specific structure (name, description, moduleGroups)
+- Module IDs follow the `category/name` or `domain/category/name` pattern (flexible, no tier prefix)
+- Modules use tags in metadata for classification (e.g., foundational, reasoning, typescript)
+- Persona files use TypeScript format (`.persona.ts`) with type-safe definitions
 - Git hooks are used for pre-commit (typecheck, lint-staged) and pre-push (tests, build)
 
 ## Cognitive Instructions

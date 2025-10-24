@@ -26,18 +26,6 @@ describe.skip('ModuleDiscovery', () => {
     it('should handle non-existent paths gracefully');
   });
 
-  describe('discoverByTier', () => {
-    it(
-      'should filter modules by tier (foundation, principle, technology, execution)'
-    );
-
-    it('should parse tier from file path structure');
-
-    it('should return only modules matching specified tier');
-
-    it('should throw error for invalid tier');
-  });
-
   describe('discoverByPattern', () => {
     it('should filter modules by glob pattern');
 

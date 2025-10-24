@@ -42,12 +42,25 @@ Requirements:
 # List all modules
 copilot-instructions list
 
-# List modules by tier
-copilot-instructions list --tier foundation
-copilot-instructions list --tier technology
+# Filter by cognitive level
+copilot-instructions list --level 0
+copilot-instructions list --level 2,3
+
+# Filter by capability
+copilot-instructions list --capability testing
+copilot-instructions list --capability testing,debugging
+
+# Filter by domain
+copilot-instructions list --domain typescript
+
+# Filter by tags
+copilot-instructions list --tag best-practices
+
+# Combine multiple filters
+copilot-instructions list --level 2 --capability testing --domain typescript
 ```
 
-Lists modules resolved through `modules.config.yml`, applying tier filtering client-side.
+Lists modules resolved through `modules.config.yml` with optional filtering by cognitive level (0-6), capabilities, domain, or tags.
 
 ### Search Modules
 
@@ -55,11 +68,16 @@ Lists modules resolved through `modules.config.yml`, applying tier filtering cli
 # Search by keyword
 copilot-instructions search "react"
 
-# Combine with tier filter
-copilot-instructions search "logic" --tier foundation
+# Search with filters
+copilot-instructions search "error" --level 2
+copilot-instructions search "testing" --capability debugging
+copilot-instructions search "async" --domain typescript
+
+# Combine multiple filters
+copilot-instructions search "pattern" --level 2,3 --capability architecture
 ```
 
-Performs a case-insensitive substring search across module metadata (name, description, tags) for all modules discovered via `modules.config.yml`.
+Performs a case-insensitive substring search across module metadata (name, description, semantic, tags) for all modules discovered via `modules.config.yml`. Supports filtering by cognitive level, capabilities, domain, and tags.
 
 ### Validate
 
@@ -142,14 +160,17 @@ The CLI expects this directory structure:
 ```
 your-project/
 ├── modules.config.yml             # Discovery configuration (required)
-├── instructions-modules-v2/       # One or more module directories listed in config
-│   ├── foundation/
-│   ├── principle/
-│   ├── technology/
-│   └── execution/
+├── instruct-modules-v2/           # One or more module directories listed in config
+│   ├── modules/                   # Organized by domain/category
+│   │   ├── communication/
+│   │   ├── testing/
+│   │   ├── typescript/
+│   │   └── ...
 └── personas/                      # Persona TypeScript files
     └── my-persona.persona.ts
 ```
+
+Modules are organized by domain and category rather than rigid tiers. Use the `cognitiveLevel` field (0-6) to indicate abstraction level.
 
 ## Dependencies
 

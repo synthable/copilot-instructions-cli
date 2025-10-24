@@ -8,10 +8,11 @@ import {
   type ValidationError,
   type ValidationWarning,
   type Module,
+  CognitiveLevel,
 } from '../../types/index.js';
 import { ValidationError as ValidationErrorClass } from '../../utils/errors.js';
+import { MODULE_ID_REGEX } from '../../constants.js';
 
-const MODULE_ID_REGEX = /^[a-z0-9][a-z0-9-]*(?:\/[a-z0-9][a-z0-9-]*)*$/;
 const SEMVER_REGEX =
   /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/;
 
@@ -153,12 +154,40 @@ export function validateModule(module: Module): ValidationResult {
     });
   }
 
-  // Validate cognitive level (if present)
-  if (module.cognitiveLevel !== undefined) {
-    if (![0, 1, 2, 3, 4].includes(module.cognitiveLevel)) {
+  // Validate cognitive level (required)
+  if (module.cognitiveLevel === undefined || module.cognitiveLevel === null) {
+    errors.push(
+      new ValidationErrorClass(
+        'Missing required field: cognitiveLevel',
+        'cognitiveLevel',
+        'Section 2.1'
+      )
+    );
+  } else {
+    // Validate it's an integer
+    if (!Number.isInteger(module.cognitiveLevel)) {
       errors.push(
         new ValidationErrorClass(
-          `Invalid cognitiveLevel: ${module.cognitiveLevel}, must be 0-4`,
+          `cognitiveLevel must be an integer, got: ${module.cognitiveLevel}`,
+          'cognitiveLevel',
+          'Section 2.1'
+        )
+      );
+    }
+    // Validate it's a valid CognitiveLevel enum value (0-6)
+    const validLevels = [
+      CognitiveLevel.AXIOMS_AND_ETHICS,
+      CognitiveLevel.REASONING_FRAMEWORKS,
+      CognitiveLevel.UNIVERSAL_PATTERNS,
+      CognitiveLevel.DOMAIN_SPECIFIC_GUIDANCE,
+      CognitiveLevel.PROCEDURES_AND_PLAYBOOKS,
+      CognitiveLevel.SPECIFICATIONS_AND_STANDARDS,
+      CognitiveLevel.META_COGNITION,
+    ];
+    if (!validLevels.includes(module.cognitiveLevel)) {
+      errors.push(
+        new ValidationErrorClass(
+          `Invalid cognitiveLevel: ${module.cognitiveLevel}. Must be a valid CognitiveLevel (0-6). See CognitiveLevel enum for valid values.`,
           'cognitiveLevel',
           'Section 2.1'
         )

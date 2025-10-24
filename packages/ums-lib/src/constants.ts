@@ -21,15 +21,6 @@ export type DirectiveKey = (typeof RENDER_ORDER)[number];
 // UMS v2.0 specification constants
 export const UMS_SCHEMA_VERSION = '2.0';
 
-// Valid tiers for modules
-export const VALID_TIERS = [
-  'foundation',
-  'principle',
-  'technology',
-  'execution',
-] as const;
-export type ValidTier = (typeof VALID_TIERS)[number];
-
 // Standard shapes
 export const STANDARD_SHAPES = [
   'procedure',
@@ -44,8 +35,8 @@ export const STANDARD_SHAPES = [
 export type StandardShape = (typeof STANDARD_SHAPES)[number];
 
 // Module ID validation regex (UMS v2.0 compliant)
-export const MODULE_ID_REGEX =
-  /^(foundation|principle|technology|execution)\/(?:[a-z0-9-]+(?:\/[a-z0-9-]+)*\/[a-z0-9][a-z0-9-]*|[a-z0-9][a-z0-9-]*)$/;
+// Allows zero or more path segments: supports flat IDs (e.g., 'be-concise') and hierarchical IDs (e.g., 'ethics/do-no-harm')
+export const MODULE_ID_REGEX = /^[a-z0-9][a-z0-9-]*(?:\/[a-z0-9][a-z0-9-]*)*$/;
 
 // Standard shape directive specifications (UMS v2.0 compliant)
 export const STANDARD_SHAPE_SPECS = {
