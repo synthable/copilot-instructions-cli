@@ -5,24 +5,23 @@ import { discoverAllModules } from '../utils/module-discovery.js';
 import { ModuleRegistry, type Module } from 'ums-lib';
 import type { CLIModule } from '../types/cli-extensions.js';
 
+// Helper to create chainable chalk mocks
+function createChainableMock(): any {
+  const fn = vi.fn((text: string) => text) as any;
+  // Only add the bold property to avoid infinite recursion
+  // This allows chalk.cyan.bold() to work
+  fn.bold = vi.fn((text: string) => text);
+  return fn;
+}
+
 // Mock dependencies
 vi.mock('chalk', () => ({
   default: {
-    yellow: vi.fn((text: string) => text),
-    cyan: Object.assign(
-      vi.fn((text: string) => text),
-      {
-        bold: vi.fn((text: string) => text),
-      }
-    ),
-    green: vi.fn((text: string) => text),
-    white: Object.assign(
-      vi.fn((text: string) => text),
-      {
-        bold: vi.fn((text: string) => text),
-      }
-    ),
-    gray: vi.fn((text: string) => text),
+    yellow: createChainableMock(),
+    cyan: createChainableMock(),
+    green: createChainableMock(),
+    white: createChainableMock(),
+    gray: createChainableMock(),
     bold: vi.fn((text: string) => text),
   },
 }));
