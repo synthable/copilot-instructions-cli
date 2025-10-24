@@ -374,12 +374,44 @@ export const defaults = {
   },
 
   /**
-   * Get primary tag from module metadata
-   * Returns the first level tag (foundational, intermediate, advanced, specialized) if present
+   * Get cognitive level name from enum value
+   * Converts CognitiveLevel enum (0-6) to human-readable name
+   * @example getCognitiveLevelName(0) => 'Axioms & Ethics'
+   * @example getCognitiveLevelName(CognitiveLevel.REASONING_FRAMEWORKS) => 'Reasoning Frameworks'
    */
-  getPrimaryTag(module: Module): string | undefined {
-    const levelTags = ['foundational', 'intermediate', 'advanced', 'specialized'];
-    return module.metadata.tags?.find(tag => levelTags.includes(tag));
+  getCognitiveLevelName(level: CognitiveLevel): string {
+    const names = {
+      [CognitiveLevel.AXIOMS_AND_ETHICS]: 'Axioms & Ethics',
+      [CognitiveLevel.REASONING_FRAMEWORKS]: 'Reasoning Frameworks',
+      [CognitiveLevel.UNIVERSAL_PATTERNS]: 'Universal Patterns',
+      [CognitiveLevel.DOMAIN_SPECIFIC_GUIDANCE]: 'Domain-Specific Guidance',
+      [CognitiveLevel.PROCEDURES_AND_PLAYBOOKS]: 'Procedures & Playbooks',
+      [CognitiveLevel.SPECIFICATIONS_AND_STANDARDS]: 'Specifications & Standards',
+      [CognitiveLevel.META_COGNITION]: 'Meta-Cognition',
+    };
+    return names[level] ?? 'Unknown';
+  },
+
+  /**
+   * Parse cognitive level from string or number
+   * Accepts enum names (e.g., 'REASONING_FRAMEWORKS') or numeric values (e.g., '1')
+   * @example parseCognitiveLevel('REASONING_FRAMEWORKS') => 1
+   * @example parseCognitiveLevel('1') => 1
+   */
+  parseCognitiveLevel(value: string): CognitiveLevel | undefined {
+    // Try parsing as enum name
+    const enumKey = value.toUpperCase().replace(/-/g, '_');
+    if (enumKey in CognitiveLevel && isNaN(Number(enumKey))) {
+      return CognitiveLevel[enumKey as keyof typeof CognitiveLevel];
+    }
+
+    // Try parsing as number
+    const numValue = parseInt(value, 10);
+    if (!isNaN(numValue) && numValue >= 0 && numValue <= 6) {
+      return numValue as CognitiveLevel;
+    }
+
+    return undefined;
   },
 
   /**

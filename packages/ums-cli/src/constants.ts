@@ -2,9 +2,11 @@
  * Constants for the UMS v2.0 CLI implementation
  */
 
-// ID validation regex for UMS v2.0
-// Supports flat IDs (e.g., 'be-concise') and hierarchical IDs (e.g., 'ethics/do-no-harm')
-export const ID_REGEX = /^[a-z0-9][a-z0-9-]*(?:\/[a-z0-9][a-z0-9-]*)*$/;
+// Import MODULE_ID_REGEX from ums-lib to maintain single source of truth
+import { MODULE_ID_REGEX } from 'ums-lib';
+
+// Re-export as ID_REGEX for CLI convenience
+export const ID_REGEX = MODULE_ID_REGEX;
 
 // Standard directive keys as defined in UMS v2.0 Section 4.1
 export const DIRECTIVE_KEYS = [

@@ -150,7 +150,7 @@ const reasoningModules = await listModules({ capability: 'reasoning' });
 const ethicsModules = await listModules({ tag: 'ethics' });
 
 // Display results
-reasoningModules.forEach(module => {
+ethicsModules.forEach(module => {
   console.log(`${module.id}`);
   console.log(`  Name: ${module.name}`);
   console.log(`  Description: ${module.description}`);

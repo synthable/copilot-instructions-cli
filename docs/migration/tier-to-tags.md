@@ -1,18 +1,19 @@
-# Migration Guide: From Tier-Based to Tag-Based Classification
+# Migration Guide: From 4-Tier to Cognitive Level Classification
 
-This guide helps you migrate existing modules from the old 4-tier system (foundation/principle/technology/execution) to the new flexible tag-based classification system in UMS v2.0.
+This guide helps you migrate existing modules from the old 4-tier system (foundation/principle/technology/execution) to the new cognitive level classification system in UMS v2.0.
 
 ## Overview
 
-The tag-based system provides:
-- **More flexibility**: No rigid hierarchy constraints
-- **Better discoverability**: Multiple tags for different aspects
-- **Clearer semantics**: Tags directly describe what the module does
-- **Future-proof**: Easy to add new classification dimensions
+The cognitive level system provides:
+- **Type safety**: TypeScript enum with compile-time validation
+- **Semantic clarity**: 7-level hierarchy from axioms (0) to meta-cognition (6)
+- **Multi-dimensional filtering**: Separate filters for level, capability, domain, and tags
+- **Better discoverability**: Rich metadata for powerful search
+- **Future-proof**: Easy to extend with new capabilities and domains
 
 ## What Changed
 
-### Module ID Format
+### 1. Module ID Format
 
 **Old Format (Tier-Based):**
 ```typescript
@@ -30,53 +31,69 @@ id: 'typescript/error-handling'
 id: 'release/cut-minor-release'
 ```
 
-### Classification Method
+### 2. Classification Method
 
 **Old Method (Tier Prefix):**
-Classification was implicit in the ID structure. The first segment determined the tier.
+- Classification was implicit in the ID structure
+- The first segment determined the tier (foundation/principle/technology/execution)
+- No explicit abstraction level field
 
-**New Method (Tags):**
-Classification is explicit through tags in metadata:
+**New Method (Cognitive Level Enum):**
 ```typescript
-metadata: {
-  name: 'Deductive Reasoning',
-  description: '...',
-  semantic: '...',
-  tags: ['foundational', 'reasoning', 'logic', 'critical-thinking']
-}
+import { Module, CognitiveLevel } from 'ums-lib';
+
+export const deductiveReasoning: Module = {
+  id: 'logic/deductive-reasoning',
+  version: '1.0.0',
+  schemaVersion: '2.0',
+  capabilities: ['reasoning', 'logic'],
+  cognitiveLevel: CognitiveLevel.REASONING_FRAMEWORKS, // Required!
+  metadata: {
+    name: 'Deductive Reasoning',
+    description: '...',
+    semantic: '...',
+    tags: ['reasoning', 'logic', 'critical-thinking'] // Optional
+  }
+};
 ```
 
-## Tag Categories
+## Cognitive Level Hierarchy (0-6)
 
-### Level Tags (Replaces Tier Concept)
+The `cognitiveLevel` field is **required** and uses a TypeScript enum:
 
-Use these to indicate complexity and abstraction level:
+| Level | Enum Value | Description | Examples |
+|-------|-----------|-------------|----------|
+| **0** | `AXIOMS_AND_ETHICS` | Universal truths, ethical bedrock | "Do No Harm", "Respect Privacy" |
+| **1** | `REASONING_FRAMEWORKS` | How to think and analyze | "Systems Thinking", "Critical Analysis" |
+| **2** | `UNIVERSAL_PATTERNS` | Cross-domain patterns | "SOLID", "Separation of Concerns" |
+| **3** | `DOMAIN_SPECIFIC_GUIDANCE` | Field-specific best practices | "REST API Design", "DB Normalization" |
+| **4** | `PROCEDURES_AND_PLAYBOOKS` | Step-by-step instructions | "Git Workflow", "Code Review Process" |
+| **5** | `SPECIFICATIONS_AND_STANDARDS` | Precise requirements | "OpenAPI Schema", "Security Checklist" |
+| **6** | `META_COGNITION` | Self-reflection, improvement | "Retrospective", "Continuous Improvement" |
 
-- `foundational`: Core concepts, universal principles (was: foundation tier)
-- `intermediate`: Applied knowledge, common patterns (was: principle tier)
-- `advanced`: Specialized techniques, complex systems (was: technology tier)
-- `specialized`: Specific procedures, detailed playbooks (was: execution tier)
+## Classification Dimensions
 
-### Capability Tags
+UMS v2.0 supports multiple independent classification dimensions:
 
-Describe what the module helps with:
-- `reasoning`, `communication`, `error-handling`
-- `testing`, `debugging`, `documentation`
-- `security`, `performance`, `scalability`
+### Cognitive Level (Required)
+- **Field**: `cognitiveLevel: CognitiveLevel`
+- **Purpose**: Abstraction level in cognitive hierarchy
+- **Usage**: `cognitiveLevel: CognitiveLevel.UNIVERSAL_PATTERNS`
 
-### Domain Tags
+### Capabilities (Required)
+- **Field**: `capabilities: string[]`
+- **Purpose**: What the module helps accomplish
+- **Examples**: `['reasoning', 'logic']`, `['testing', 'quality']`, `['error-handling']`
 
-Technology or field-specific tags:
-- `typescript`, `javascript`, `python`, `rust`
-- `web-development`, `backend`, `frontend`
-- `database`, `devops`, `ai`
+### Domain (Optional)
+- **Field**: `domain?: string | string[]`
+- **Purpose**: Technology/field where module applies
+- **Examples**: `'typescript'`, `'language-agnostic'`, `['backend', 'api']`
 
-### Pattern Tags
-
-Design patterns and approaches:
-- `solid`, `ddd`, `tdd`, `bdd`
-- `functional`, `oop`, `reactive`
-- `async`, `event-driven`, `microservices`
+### Tags (Optional)
+- **Field**: `metadata.tags?: string[]`
+- **Purpose**: Additional keywords for search and discovery
+- **Examples**: `['logic', 'critical-thinking']`, `['async', 'performance']`
 
 ## Migration Steps
 
@@ -130,16 +147,32 @@ export const myModule: Module = {
 }
 ```
 
-### Step 3: Update Cognitive Level (Optional)
+### Step 3: Add Required Cognitive Level Field
 
-If your module had a layer property in the old system, convert it to cognitiveLevel:
+⚠️ **REQUIRED** - All UMS v2.0 modules must specify a cognitive level:
 
 ```typescript
+import { Module, CognitiveLevel } from 'ums-lib';
+
 export const myModule: Module = {
   id: 'reasoning/deductive-logic',
-  cognitiveLevel: 2, // 0-4, where 0 is most fundamental
+  cognitiveLevel: CognitiveLevel.REASONING_FRAMEWORKS, // Required! 0-6 range
   // ...
 }
+```
+
+**Cognitive Level Values** (use enum for type safety):
+- `CognitiveLevel.AXIOMS_AND_ETHICS` (0) - Universal truths, ethical bedrock
+- `CognitiveLevel.REASONING_FRAMEWORKS` (1) - How to think and analyze
+- `CognitiveLevel.UNIVERSAL_PATTERNS` (2) - Cross-domain patterns
+- `CognitiveLevel.DOMAIN_SPECIFIC_GUIDANCE` (3) - Field-specific best practices
+- `CognitiveLevel.PROCEDURES_AND_PLAYBOOKS` (4) - Step-by-step instructions
+- `CognitiveLevel.SPECIFICATIONS_AND_STANDARDS` (5) - Precise requirements
+- `CognitiveLevel.META_COGNITION` (6) - Self-reflection, improvement
+
+**Or use numeric values** (0-6):
+```typescript
+cognitiveLevel: 2, // Acceptable, but enum is preferred for type safety
 ```
 
 ### Step 4: Update File Location (Optional)
