@@ -25,8 +25,9 @@ interface SearchOptions {
 
 /**
  * Searches modules by query across name, description, and tags
+ * @internal Exported for testing
  */
-function searchModules(modules: Module[], query: string): Module[] {
+export function searchModules(modules: Module[], query: string): Module[] {
   const lowerCaseQuery = query.toLowerCase();
 
   return modules.filter(module => {
@@ -55,8 +56,9 @@ function searchModules(modules: Module[], query: string): Module[] {
 
 /**
  * Filters and sorts modules by level, capability, domain, tag, and metadata.name
+ * @internal Exported for testing
  */
-function filterAndSortModules(
+export function filterAndSortModules(
   modules: Module[],
   options: {
     level?: string;

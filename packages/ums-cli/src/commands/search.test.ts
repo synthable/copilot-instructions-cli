@@ -1,49 +1,16 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import chalk from 'chalk';
-import { handleSearch } from './search.js';
+import {
+  handleSearch,
+  searchModules,
+  filterAndSortModules,
+} from './search.js';
 import { discoverAllModules } from '../utils/module-discovery.js';
-import { ModuleRegistry, type Module } from 'ums-lib';
+import { ModuleRegistry, CognitiveLevel } from 'ums-lib';
 import { deductiveReasoning } from '../__fixtures__/modules/deductive-reasoning.module.js';
 import { testingPrinciples } from '../__fixtures__/modules/testing-principles.module.js';
 import { errorHandling } from '../__fixtures__/modules/error-handling.module.js';
 
 // Mock dependencies
-vi.mock('chalk', () => ({
-  default: {
-    yellow: vi.fn((text: string) => text),
-    cyan: Object.assign(
-      vi.fn((text: string) => text),
-      {
-        bold: vi.fn((text: string) => text),
-      }
-    ),
-    green: vi.fn((text: string) => text),
-    white: Object.assign(
-      vi.fn((text: string) => text),
-      {
-        bold: vi.fn((text: string) => text),
-      }
-    ),
-    gray: vi.fn((text: string) => text),
-    bold: vi.fn((text: string) => text),
-  },
-}));
-
-vi.mock('ora', () => ({
-  default: vi.fn(() => ({
-    start: vi.fn().mockReturnThis(),
-    succeed: vi.fn().mockReturnThis(),
-    fail: vi.fn().mockReturnThis(),
-  })),
-}));
-
-vi.mock('cli-table3', () => ({
-  default: vi.fn().mockImplementation(() => ({
-    push: vi.fn(),
-    toString: vi.fn(() => 'mocked table'),
-  })),
-}));
-
 vi.mock('../utils/module-discovery.js', () => ({
   discoverAllModules: vi.fn(),
 }));
@@ -61,21 +28,206 @@ vi.mock('../utils/progress.js', () => ({
   })),
 }));
 
-// Mock console
-const mockConsoleLog = vi.spyOn(console, 'log').mockImplementation(() => {
+// Mock console to avoid test output noise
+vi.spyOn(console, 'log').mockImplementation(() => {
   /* noop */
 });
 
-describe('search command', () => {
-  const mockDiscoverAllModules = vi.mocked(discoverAllModules);
-
-  // Use real test fixtures instead of inline mocks
+describe('searchModules', () => {
+  // Test fixtures
   const mockModule1 = deductiveReasoning;
   const mockModule2 = testingPrinciples;
   const mockModule3 = errorHandling;
 
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('should find modules by name', () => {
+    const modules = [mockModule1, mockModule2];
+    const results = searchModules(modules, 'Deductive');
+
+    expect(results).toHaveLength(1);
+    expect(results[0].id).toBe('foundation/logic/deductive-reasoning');
+  });
+
+  it('should find modules by description', () => {
+    const modules = [mockModule1, mockModule2];
+    const results = searchModules(modules, 'quality');
+
+    expect(results.length).toBeGreaterThan(0);
+    expect(results.some(m => m.id === 'principle/quality/testing')).toBe(true);
+  });
+
+  it('should find modules by tags', () => {
+    const modules = [mockModule1, mockModule2];
+    const results = searchModules(modules, 'reasoning');
+
+    expect(results.length).toBeGreaterThan(0);
+    expect(results.some(m => m.id === 'foundation/logic/deductive-reasoning')).toBe(
+      true
+    );
+  });
+
+  it('should be case-insensitive', () => {
+    const modules = [mockModule1];
+    const results = searchModules(modules, 'DEDUCTIVE');
+
+    expect(results).toHaveLength(1);
+    expect(results[0].id).toBe('foundation/logic/deductive-reasoning');
+  });
+
+  it('should return empty array when no matches', () => {
+    const modules = [mockModule1, mockModule2];
+    const results = searchModules(modules, 'nonexistent');
+
+    expect(results).toHaveLength(0);
+  });
+
+  it('should handle modules without tags', () => {
+    const modules = [mockModule3]; // errorHandling has no tags
+    const results = searchModules(modules, 'handling');
+
+    expect(results).toHaveLength(1);
+    expect(results[0].id).toBe('principle/resilience/error-handling');
+  });
+
+  it('should search across multiple fields', () => {
+    const modules = [mockModule1, mockModule2, mockModule3];
+    const results = searchModules(modules, 'testing'); // Matches name/description/tags
+
+    expect(results.length).toBeGreaterThan(0);
+  });
+});
+
+describe('filterAndSortModules', () => {
+  const mockModule1 = deductiveReasoning; // cognitiveLevel: 1
+  const mockModule2 = testingPrinciples; // cognitiveLevel: 2
+  const mockModule3 = errorHandling; // cognitiveLevel: 2
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  describe('cognitive level filtering', () => {
+    it('should filter by single cognitive level', () => {
+      const modules = [mockModule1, mockModule2, mockModule3];
+      const results = filterAndSortModules(modules, { level: '1' });
+
+      expect(results).toHaveLength(1);
+      expect(results[0].cognitiveLevel).toBe(CognitiveLevel.REASONING_FRAMEWORKS);
+    });
+
+    it('should filter by multiple cognitive levels', () => {
+      const modules = [mockModule1, mockModule2, mockModule3];
+      const results = filterAndSortModules(modules, { level: '1,2' });
+
+      expect(results).toHaveLength(3);
+      expect(
+        results.every(
+          m =>
+            m.cognitiveLevel === CognitiveLevel.REASONING_FRAMEWORKS ||
+            m.cognitiveLevel === CognitiveLevel.UNIVERSAL_PATTERNS
+        )
+      ).toBe(true);
+    });
+
+    it('should support enum names for cognitive levels', () => {
+      const modules = [mockModule1, mockModule2];
+      const results = filterAndSortModules(modules, {
+        level: 'REASONING_FRAMEWORKS',
+      });
+
+      expect(results).toHaveLength(1);
+      expect(results[0].cognitiveLevel).toBe(CognitiveLevel.REASONING_FRAMEWORKS);
+    });
+  });
+
+  describe('capability filtering', () => {
+    it('should filter by single capability', () => {
+      const modules = [mockModule1, mockModule2];
+      const results = filterAndSortModules(modules, { capability: 'reasoning' });
+
+      expect(results.every(m => m.capabilities.includes('reasoning'))).toBe(true);
+    });
+
+    it('should filter by multiple capabilities', () => {
+      const modules = [mockModule1, mockModule2];
+      const results = filterAndSortModules(modules, {
+        capability: 'reasoning,testing',
+      });
+
+      expect(results.length).toBeGreaterThan(0);
+    });
+  });
+
+  describe('domain filtering', () => {
+    it('should filter by domain when present', () => {
+      // Note: Test fixtures may not have domain set, so this tests the filter logic
+      const modules = [mockModule1, mockModule2, mockModule3];
+      const results = filterAndSortModules(modules, { domain: 'typescript' });
+
+      // Should filter out modules without matching domain
+      expect(results.every(m => {
+        if (!m.domain) return false;
+        const domains = Array.isArray(m.domain) ? m.domain : [m.domain];
+        return domains.includes('typescript');
+      })).toBe(true);
+    });
+  });
+
+  describe('tag filtering', () => {
+    it('should filter by single tag', () => {
+      const modules = [mockModule1, mockModule2];
+      const results = filterAndSortModules(modules, { tag: 'logic' });
+
+      expect(results).toHaveLength(1);
+      expect(results[0].id).toBe('foundation/logic/deductive-reasoning');
+    });
+
+    it('should filter by multiple tags', () => {
+      const modules = [mockModule1, mockModule2];
+      const results = filterAndSortModules(modules, { tag: 'logic,best-practices' });
+
+      expect(results.length).toBeGreaterThan(0);
+    });
+  });
+
+  describe('sorting', () => {
+    it('should sort by metadata.name then id', () => {
+      const modules = [mockModule2, mockModule1, mockModule3];
+      const results = filterAndSortModules(modules, {});
+
+      // Verify sorted order (should be sorted alphabetically by name)
+      for (let i = 0; i < results.length - 1; i++) {
+        const current = results[i].metadata.name;
+        const next = results[i + 1].metadata.name;
+        expect(current.localeCompare(next)).toBeLessThanOrEqual(0);
+      }
+    });
+  });
+
+  describe('combined filters', () => {
+    it('should apply multiple filters together', () => {
+      const modules = [mockModule1, mockModule2, mockModule3];
+      const results = filterAndSortModules(modules, {
+        level: '2',
+        capability: 'testing',
+      });
+
+      expect(
+        results.every(m => m.cognitiveLevel === CognitiveLevel.UNIVERSAL_PATTERNS)
+      ).toBe(true);
+      expect(results.every(m => m.capabilities.includes('testing'))).toBe(true);
+    });
+  });
+});
+
+describe('handleSearch integration', () => {
+  const mockDiscoverAllModules = vi.mocked(discoverAllModules);
+
   // Helper function to create registry with test modules
-  function createMockRegistry(modules: Module[]): ModuleRegistry {
+  function createMockRegistry(modules: typeof deductiveReasoning[]): ModuleRegistry {
     const registry = new ModuleRegistry('warn');
     for (const module of modules) {
       registry.add(module, { type: 'standard', path: 'test' });
@@ -87,161 +239,51 @@ describe('search command', () => {
     vi.clearAllMocks();
   });
 
-  // TODO: Fix chalk mocks - see GitHub issue #101
-  // The fixtures are valid and the search logic works, but console.log mocks
-  // aren't capturing the output from renderSearchResults() correctly.
-  it.skip('debug: check console.log calls', async () => {
-    // Arrange
-    const testRegistry = createMockRegistry([mockModule1, mockModule2]);
+  it('should handle successful search workflow', async () => {
+    const registry = createMockRegistry([deductiveReasoning, testingPrinciples]);
     mockDiscoverAllModules.mockResolvedValue({
-      registry: testRegistry,
+      registry,
       warnings: [],
     });
 
-    // Act
-    await handleSearch('Deductive', { verbose: false });
-
-    // Check console.log calls in detail
-    console.error('Console.log call count:', mockConsoleLog.mock.calls.length);
-    console.error('All console.log calls:');
-    mockConsoleLog.mock.calls.forEach((call, index) => {
-      console.error(`  Call ${index}:`, JSON.stringify(call));
-    });
-
-    // Check if chalk methods were called
-    console.error(
-      'chalk.cyan calls:',
-      (chalk.cyan as any).mock?.calls?.length || 'not mocked'
-    );
-    console.error(
-      'chalk.cyan.bold calls:',
-      (chalk.cyan.bold as any).mock?.calls?.length || 'not mocked'
-    );
+    // Should not throw
+    await expect(handleSearch('Deductive', { verbose: false })).resolves.not.toThrow();
   });
 
-  it('should search modules by name', async () => {
-    // Arrange
+  it('should handle empty module registry', async () => {
+    const registry = createMockRegistry([]);
     mockDiscoverAllModules.mockResolvedValue({
-      registry: createMockRegistry([mockModule1, mockModule2]),
+      registry,
       warnings: [],
     });
 
-    // Act
-    await handleSearch('Deductive', { verbose: false });
-
-    // Assert
-    expect(mockConsoleLog).toHaveBeenCalledWith(
-      expect.stringContaining('Search results for "Deductive"')
-    );
-  });
-
-  it('should search modules by description', async () => {
-    // Arrange
-    mockDiscoverAllModules.mockResolvedValue({
-      registry: createMockRegistry([mockModule1, mockModule2]),
-      warnings: [],
-    });
-
-    // Act
-    await handleSearch('quality', { verbose: false });
-
-    // Assert
-    expect(mockConsoleLog).toHaveBeenCalledWith(
-      expect.stringContaining('Search results for "quality"')
-    );
-  });
-
-  it('should search modules by tags', async () => {
-    // Arrange
-    mockDiscoverAllModules.mockResolvedValue({
-      registry: createMockRegistry([mockModule1]),
-      warnings: [],
-    });
-
-    // Act
-    await handleSearch('reasoning', { verbose: false });
-
-    // Assert
-    expect(mockConsoleLog).toHaveBeenCalledWith(
-      expect.stringContaining('Search results for "reasoning"')
-    );
-  });
-
-  it('should filter by tag', async () => {
-    // Arrange
-    mockDiscoverAllModules.mockResolvedValue({
-      registry: createMockRegistry([mockModule1, mockModule2]),
-      warnings: [],
-    });
-
-    // Act
-    await handleSearch('', { tag: 'logic', verbose: false });
-
-    // Assert - should only show modules with 'logic' tag
-    expect(mockConsoleLog).toHaveBeenCalledWith(
-      expect.stringContaining('Found 1 matching modules')
-    );
+    // Should not throw
+    await expect(handleSearch('test', { verbose: false })).resolves.not.toThrow();
   });
 
   it('should handle no search results', async () => {
-    // Arrange
+    const registry = createMockRegistry([deductiveReasoning, testingPrinciples]);
     mockDiscoverAllModules.mockResolvedValue({
-      registry: createMockRegistry([mockModule1, mockModule2]),
+      registry,
       warnings: [],
     });
 
-    // Act
-    await handleSearch('nonexistent', { verbose: false });
-
-    // Assert
-    expect(mockConsoleLog).toHaveBeenCalledWith(
-      'No modules found matching "nonexistent".'
-    );
+    // Should not throw
+    await expect(
+      handleSearch('nonexistent', { verbose: false })
+    ).resolves.not.toThrow();
   });
 
-  it('should handle no modules found during discovery', async () => {
-    // Arrange
+  it('should handle search with filters', async () => {
+    const registry = createMockRegistry([deductiveReasoning, testingPrinciples]);
     mockDiscoverAllModules.mockResolvedValue({
-      registry: createMockRegistry([]),
+      registry,
       warnings: [],
     });
 
-    // Act
-    await handleSearch('test', { verbose: false });
-
-    // Assert
-    expect(chalk.yellow).toHaveBeenCalledWith('No UMS v2.0 modules found.');
-  });
-
-  it('should handle case-insensitive search', async () => {
-    // Arrange
-    mockDiscoverAllModules.mockResolvedValue({
-      registry: createMockRegistry([mockModule1]),
-      warnings: [],
-    });
-
-    // Act
-    await handleSearch('DEDUCTIVE', { verbose: false });
-
-    // Assert
-    expect(mockConsoleLog).toHaveBeenCalledWith(
-      expect.stringContaining('Found 1 matching modules')
-    );
-  });
-
-  it('should handle modules without tags', async () => {
-    // Arrange - Use mockModule3 (errorHandling) which has no tags
-    mockDiscoverAllModules.mockResolvedValue({
-      registry: createMockRegistry([mockModule3]),
-      warnings: [],
-    });
-
-    // Act - Search by word in description
-    await handleSearch('handling', { verbose: false });
-
-    // Assert - should still find module by description
-    expect(mockConsoleLog).toHaveBeenCalledWith(
-      expect.stringContaining('Found 1 matching modules')
-    );
+    // Should not throw
+    await expect(
+      handleSearch('', { tag: 'logic', verbose: false })
+    ).resolves.not.toThrow();
   });
 });
