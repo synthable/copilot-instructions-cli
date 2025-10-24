@@ -87,7 +87,7 @@ describe('search command', () => {
     vi.clearAllMocks();
   });
 
-  // TODO: Fix chalk mocks - see GitHub issue #XXX
+  // TODO: Fix chalk mocks - see GitHub issue #101
   // The fixtures are valid and the search logic works, but console.log mocks
   // aren't capturing the output from renderSearchResults() correctly.
   it.skip('debug: check console.log calls', async () => {
