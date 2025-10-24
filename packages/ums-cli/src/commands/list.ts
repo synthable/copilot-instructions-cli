@@ -6,7 +6,11 @@
 import chalk from 'chalk';
 import Table from 'cli-table3';
 import { handleError } from '../utils/error-handler.js';
-import type { Module } from 'ums-lib';
+import {
+  type Module,
+  parseCognitiveLevel,
+  getCognitiveLevelName,
+} from 'ums-lib';
 import { createDiscoveryProgress } from '../utils/progress.js';
 import { discoverAllModules } from '../utils/module-discovery.js';
 import { getModuleMetadata } from '../types/cli-extensions.js';
@@ -33,15 +37,17 @@ function filterAndSortModules(
 ): Module[] {
   let filteredModules = modules;
 
-  // Filter by cognitive level
+  // Filter by cognitive level (accepts numbers or enum names like "UNIVERSAL_PATTERNS")
   if (options.level) {
     const levels = options.level
       .split(',')
-      .map(s => parseInt(s.trim()))
-      .filter(n => !isNaN(n));
-    filteredModules = filteredModules.filter(m =>
-      levels.includes(m.cognitiveLevel)
-    );
+      .map(s => parseCognitiveLevel(s.trim()))
+      .filter((n): n is number => n !== undefined);
+    if (levels.length > 0) {
+      filteredModules = filteredModules.filter(m =>
+        levels.includes(m.cognitiveLevel)
+      );
+    }
   }
 
   // Filter by capabilities (comma-separated)
@@ -88,13 +94,13 @@ function filterAndSortModules(
  */
 function renderModulesTable(modules: Module[]): void {
   const table = new Table({
-    head: ['ID', 'Name', 'Capabilities', 'Tags', 'Description'],
+    head: ['ID', 'Name', 'Level', 'Capabilities', 'Tags', 'Description'],
     style: {
       head: ['cyan', 'bold'],
       border: ['gray'],
       compact: false,
     },
-    colWidths: [28, 22, 20, 20, 30],
+    colWidths: [28, 22, 16, 18, 18, 28],
     wordWrap: true,
   });
 
@@ -102,10 +108,12 @@ function renderModulesTable(modules: Module[]): void {
     const metadata = getModuleMetadata(module);
     const capabilities = module.capabilities.join(', ');
     const tags = metadata.tags?.join(', ') ?? 'none';
+    const levelName = getCognitiveLevelName(module.cognitiveLevel) ?? 'Unknown';
 
     table.push([
       chalk.green(module.id),
       chalk.white.bold(metadata.name),
+      chalk.magenta(`${module.cognitiveLevel}: ${levelName}`),
       chalk.cyan(capabilities),
       chalk.yellow(tags),
       chalk.gray(metadata.description),

@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import chalk from 'chalk';
 import { handleSearch } from './search.js';
 import { discoverAllModules } from '../utils/module-discovery.js';
-import { ModuleRegistry, type Module } from 'ums-lib';
+import { ModuleRegistry, type Module, ComponentType, CognitiveLevel } from 'ums-lib';
 import type { CLIModule } from '../types/cli-extensions.js';
 
 // Mock dependencies
@@ -70,29 +70,43 @@ describe('search command', () => {
   const mockModule1: CLIModule = {
     id: 'foundation/logic/deductive-reasoning',
     filePath: '/test/foundation/logic/deductive-reasoning.md',
-    version: '1.0',
-    schemaVersion: '1.0',
-    capabilities: [],
-    cognitiveLevel: 2,
+    version: '1.0.0',
+    schemaVersion: '2.0',
+    capabilities: ['reasoning', 'logic'],
+    cognitiveLevel: CognitiveLevel.UNIVERSAL_PATTERNS,
     metadata: {
       name: 'Deductive Reasoning',
       description: 'Logical reasoning from premises',
       semantic: 'Logical reasoning from premises',
       tags: ['logic', 'reasoning'],
     },
+    instruction: {
+      type: ComponentType.Instruction,
+      instruction: {
+        purpose: 'Apply deductive reasoning',
+        principles: ['Reason from premises to conclusions'],
+      },
+    },
   };
 
   const mockModule2: CLIModule = {
     id: 'principle/quality/testing',
     filePath: '/test/principle/quality/testing.md',
-    version: '1.0',
-    schemaVersion: '1.0',
-    capabilities: [],
-    cognitiveLevel: 2,
+    version: '1.0.0',
+    schemaVersion: '2.0',
+    capabilities: ['testing', 'quality-assurance'],
+    cognitiveLevel: CognitiveLevel.UNIVERSAL_PATTERNS,
     metadata: {
       name: 'Testing Principles',
       description: 'Quality assurance through testing',
       semantic: 'Quality assurance through testing',
+    },
+    instruction: {
+      type: ComponentType.Instruction,
+      instruction: {
+        purpose: 'Apply testing principles',
+        principles: ['Test thoroughly'],
+      },
     },
   };
 

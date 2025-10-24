@@ -104,31 +104,31 @@ A valid module for v2.0 MUST contain the following top-level keys:
 
 #### `cognitiveLevel`
 
-- **Type**: `Integer` (0-6)
+- **Type**: `CognitiveLevel` enum (0-6)
 - **Required**: Yes
 - **Purpose**: Classify the module's position in the cognitive abstraction hierarchy
-- **Allowed Values**: `0`, `1`, `2`, `3`, `4`, `5`, `6`
-- **Semantics**:
-  - **0**: Axioms & Ethics - Universal truths, ethical bedrock, non-negotiable principles
-  - **1**: Reasoning Frameworks - How to think, analyze, and form judgments
-  - **2**: Universal Patterns - Cross-domain patterns and principles that apply broadly
-  - **3**: Domain-Specific Guidance - Field-specific but technology-agnostic best practices
-  - **4**: Procedures & Playbooks - Step-by-step instructions and actionable guides
-  - **5**: Specifications & Standards - Precise requirements, validation criteria, compliance rules
-  - **6**: Meta-Cognition - Self-reflection, process improvement, learning from experience
+- **Import**: `import { CognitiveLevel } from 'ums-lib';`
+- **Enum Values**:
+  - **0 / `CognitiveLevel.AXIOMS_AND_ETHICS`**: Universal truths, ethical bedrock, non-negotiable principles
+  - **1 / `CognitiveLevel.REASONING_FRAMEWORKS`**: How to think, analyze, and form judgments
+  - **2 / `CognitiveLevel.UNIVERSAL_PATTERNS`**: Cross-domain patterns and principles that apply broadly
+  - **3 / `CognitiveLevel.DOMAIN_SPECIFIC_GUIDANCE`**: Field-specific but technology-agnostic best practices
+  - **4 / `CognitiveLevel.PROCEDURES_AND_PLAYBOOKS`**: Step-by-step instructions and actionable guides
+  - **5 / `CognitiveLevel.SPECIFICATIONS_AND_STANDARDS`**: Precise requirements, validation criteria, compliance rules
+  - **6 / `CognitiveLevel.META_COGNITION`**: Self-reflection, process improvement, learning from experience
 - **Classification Guidance**:
   - More abstract/universal → lower numbers (0-2)
   - More concrete/specific → higher numbers (4-5)
   - Domain principles → middle range (3)
   - Self-reflective processes → highest level (6)
-- **Examples**:
-  - Level 0: "Do No Harm", "Respect Privacy"
-  - Level 1: "Systems Thinking", "Critical Analysis"
-  - Level 2: "Separation of Concerns", "SOLID Principles"
-  - Level 3: "REST API Design", "Database Normalization"
-  - Level 4: "Git Workflow Guide", "Code Review Process"
-  - Level 5: "OpenAPI Schema Validation", "Security Compliance Checklist"
-  - Level 6: "Retrospective Practice", "Continuous Improvement"
+- **Usage Examples**:
+  - `cognitiveLevel: CognitiveLevel.AXIOMS_AND_ETHICS` - "Do No Harm", "Respect Privacy"
+  - `cognitiveLevel: CognitiveLevel.REASONING_FRAMEWORKS` - "Systems Thinking", "Critical Analysis"
+  - `cognitiveLevel: CognitiveLevel.UNIVERSAL_PATTERNS` - "Separation of Concerns", "SOLID Principles"
+  - `cognitiveLevel: CognitiveLevel.DOMAIN_SPECIFIC_GUIDANCE` - "REST API Design", "Database Normalization"
+  - `cognitiveLevel: CognitiveLevel.PROCEDURES_AND_PLAYBOOKS` - "Git Workflow Guide", "Code Review Process"
+  - `cognitiveLevel: CognitiveLevel.SPECIFICATIONS_AND_STANDARDS` - "OpenAPI Schema Validation", "Security Compliance Checklist"
+  - `cognitiveLevel: CognitiveLevel.META_COGNITION` - "Retrospective Practice", "Continuous Improvement"
 
 #### `domain`
 
@@ -925,14 +925,14 @@ interface CompositionEvent {
 
 ```typescript
 // error-handling.module.ts
-import { Module, ComponentType } from './types/index.js';
+import { Module, ComponentType, CognitiveLevel } from './types/index.js';
 
 export const errorHandling: Module = {
   id: "error-handling",
   version: "1.0.0",
   schemaVersion: "2.0",
   capabilities: ["error-handling", "resilience"],
-  cognitiveLevel: 2,
+  cognitiveLevel: CognitiveLevel.UNIVERSAL_PATTERNS,
   domain: "language-agnostic",
 
   metadata: {
@@ -969,14 +969,14 @@ export const errorHandling: Module = {
 
 ```typescript
 // test-driven-development.module.ts
-import { Module, ComponentType } from './types/index.js';
+import { Module, ComponentType, CognitiveLevel } from './types/index.js';
 
 export const tddModule: Module = {
   id: "test-driven-development",
   version: "2.0.0",
   schemaVersion: "2.0",
   capabilities: ["testing", "quality-assurance"],
-  cognitiveLevel: 2,
+  cognitiveLevel: CognitiveLevel.UNIVERSAL_PATTERNS,
   domain: "language-agnostic",
 
   metadata: {
@@ -1033,14 +1033,14 @@ export const tddModule: Module = {
 
 ```typescript
 // rest-api-design.module.ts
-import { Module, ComponentType } from './types/index.js';
+import { Module, ComponentType, CognitiveLevel } from './types/index.js';
 
 export const apiDesign: Module = {
   id: "rest-api-design",
   version: "1.0.0",
   schemaVersion: "2.0",
   capabilities: ["api-design", "rest-api"],
-  cognitiveLevel: 3,
+  cognitiveLevel: CognitiveLevel.DOMAIN_SPECIFIC_GUIDANCE,
   domain: "language-agnostic",
 
   metadata: {

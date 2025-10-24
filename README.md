@@ -70,19 +70,20 @@ A module is a small, atomic piece of instruction. Create a file named `be-concis
 
 ```typescript
 // ./modules/communication/be-concise.module.ts
-import type { Module } from 'ums-lib';
+import { type Module, CognitiveLevel } from 'ums-lib';
 
 export const beConcise: Module = {
   id: 'communication/be-concise',
   version: '1.0.0',
   schemaVersion: '2.0',
   capabilities: ['communication', 'conciseness'],
+  cognitiveLevel: CognitiveLevel.UNIVERSAL_PATTERNS,
   metadata: {
     name: 'Be Concise',
     description: 'Instructs the AI to be concise and to the point.',
     semantic:
       'The AI should provide clear, concise answers without unnecessary verbosity.',
-    tags: ['foundational', 'communication', 'clarity'],
+    tags: ['communication', 'clarity'],
   },
   instruction: {
     purpose: 'Ensure responses are concise and direct',
@@ -125,14 +126,14 @@ That's it! You now have a custom-built instruction set in `concise-assistant.md`
 
 ## CLI Command Reference
 
-| Command    | Description                                                     | Example Usage                                |
-| :--------- | :-------------------------------------------------------------- | :------------------------------------------- |
-| `build`    | Compiles a `.persona.ts` into a single instruction document.    | `npm start build ./personas/my-persona.ts`   |
-| `list`     | Lists all discoverable modules.                                 | `npm start list --tag foundational`          |
-| `search`   | Searches for modules by keyword.                                | `npm start search "error handling"`          |
-| `validate` | Validates the syntax and integrity of module and persona files. | `npm start validate ./instructions-modules/` |
-| `inspect`  | Inspects module conflicts and registry state.                   | `npm start inspect --conflicts-only`         |
-| `mcp`      | MCP server development and testing tools.                       | `npm start mcp start --stdio`                |
+| Command    | Description                                                     | Example Usage                                      |
+| :--------- | :-------------------------------------------------------------- | :------------------------------------------------- |
+| `build`    | Compiles a `.persona.ts` into a single instruction document.    | `npm start build ./personas/my-persona.ts`         |
+| `list`     | Lists all discoverable modules with filtering options.          | `npm start list --level 2 --capability testing`    |
+| `search`   | Searches for modules by keyword with filtering options.         | `npm start search "error" --domain typescript`     |
+| `validate` | Validates the syntax and integrity of module and persona files. | `npm start validate ./instructions-modules/`       |
+| `inspect`  | Inspects module conflicts and registry state.                   | `npm start inspect --conflicts-only`               |
+| `mcp`      | MCP server development and testing tools.                       | `npm start mcp start --stdio`                      |
 
 ### MCP Server Commands
 
@@ -149,46 +150,66 @@ The CLI also provides commands for working with the MCP server:
 
 For a deep dive into the Unified Module System, advanced features, and configuration, please read our **[Comprehensive Guide](./docs/comprehensive_guide.md)**.
 
-## Tag-Based Classification System
+## Module Classification System
 
-UMS v2.0 uses a flexible tag-based classification system instead of rigid tiers. This provides better flexibility and discoverability:
+UMS v2.0 uses a multi-dimensional classification system for organizing and discovering modules:
 
-### Tag Categories
+### Classification Fields
 
-- **Level Tags**: `foundational`, `intermediate`, `advanced`, `specialized` - Indicate complexity/abstraction level
-- **Capability Tags**: `reasoning`, `communication`, `error-handling`, `testing`, `debugging` - What the module helps with
-- **Domain Tags**: `typescript`, `python`, `web-development`, `backend`, `frontend` - Technology or field specific
-- **Pattern Tags**: `solid`, `ddd`, `tdd`, `functional`, `oop` - Design patterns and approaches
+Every module has these classification fields:
+
+- **`capabilities`** (required): Array of functional capabilities the module provides
+  - Examples: `['communication', 'conciseness']`, `['error-handling', 'debugging']`
+  - Describes **what** the module helps you accomplish
+
+- **`cognitiveLevel`** (required): `CognitiveLevel` enum value indicating cognitive abstraction level
+  - Use `CognitiveLevel` enum from `ums-lib` for type-safe level specification
+  - **0 / `AXIOMS_AND_ETHICS`**: Universal truths, ethical bedrock
+  - **1 / `REASONING_FRAMEWORKS`**: How to think and analyze
+  - **2 / `UNIVERSAL_PATTERNS`**: Cross-domain patterns and principles
+  - **3 / `DOMAIN_SPECIFIC_GUIDANCE`**: Field-specific but technology-agnostic
+  - **4 / `PROCEDURES_AND_PLAYBOOKS`**: Step-by-step instructions
+  - **5 / `SPECIFICATIONS_AND_STANDARDS`**: Precise requirements and criteria
+  - **6 / `META_COGNITION`**: Self-reflection and process improvement
+
+- **`domain`** (optional): Technology or field the module applies to
+  - Examples: `'typescript'`, `'python'`, `['web-development', 'frontend']`
+  - Can be a string or array of strings
+
+- **`metadata.tags`** (optional): Additional keywords, patterns, or classifications
+  - Examples: `['tdd', 'best-practices']`, `['solid', 'architecture']`
+  - Flexible array for any additional categorization
+
+### CLI Filtering
+
+Use these fields to filter modules with the CLI:
+
+```bash
+# Filter by cognitive level (numeric or enum name)
+npm start list --level 2
+npm start list --level UNIVERSAL_PATTERNS
+npm start list --level AXIOMS_AND_ETHICS,REASONING_FRAMEWORKS
+
+# Filter by capabilities
+npm start search "error" --capability debugging
+
+# Filter by domain
+npm start list --domain typescript
+
+# Combine filters (comma-separated values supported)
+npm start list --level 2,3 --capability testing,debugging --domain typescript
+npm start list --level DOMAIN_SPECIFIC_GUIDANCE --capability architecture
+```
 
 ### Module ID Format
 
-Modules now use a flexible ID format without tier prefixes:
+Module IDs use a flexible hierarchical format:
 
 - Format: `category/name` or `domain/category/name`
 - Examples: `communication/be-concise`, `typescript/error-handling/try-catch`
 - All segments use kebab-case (lowercase with hyphens)
 
-### Migration from Tier-Based System
-
-If you have existing modules using the old tier-based format (`foundation/category/name`), consider:
-
-1. **Update module IDs**: Remove tier prefix and use domain/category structure
-2. **Add tags**: Include appropriate level, capability, domain, and pattern tags
-3. **Use `cognitiveLevel`**: Set 0-4 to indicate complexity if needed
-
-Example migration:
-```typescript
-// Old format
-id: 'foundation/logic/deductive-reasoning'
-
-// New format
-id: 'logic/deductive-reasoning'
-metadata: {
-  tags: ['foundational', 'reasoning', 'logic']
-}
-```
-
-For a detailed migration guide with examples, see [Migration Guide: Tier to Tags](./docs/migration/tier-to-tags.md).
+For complete specification details, see [UMS v2.0 Specification](./spec/unified_module_system_v2_spec.md).
 
 ## Contributing
 

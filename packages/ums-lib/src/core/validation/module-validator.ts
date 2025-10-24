@@ -8,6 +8,7 @@ import {
   type ValidationError,
   type ValidationWarning,
   type Module,
+  CognitiveLevel,
 } from '../../types/index.js';
 import { ValidationError as ValidationErrorClass } from '../../utils/errors.js';
 import { MODULE_ID_REGEX } from '../../constants.js';
@@ -173,11 +174,20 @@ export function validateModule(module: Module): ValidationResult {
         )
       );
     }
-    // Validate range 0-6
-    if (![0, 1, 2, 3, 4, 5, 6].includes(module.cognitiveLevel)) {
+    // Validate it's a valid CognitiveLevel enum value (0-6)
+    const validLevels = [
+      CognitiveLevel.AXIOMS_AND_ETHICS,
+      CognitiveLevel.REASONING_FRAMEWORKS,
+      CognitiveLevel.UNIVERSAL_PATTERNS,
+      CognitiveLevel.DOMAIN_SPECIFIC_GUIDANCE,
+      CognitiveLevel.PROCEDURES_AND_PLAYBOOKS,
+      CognitiveLevel.SPECIFICATIONS_AND_STANDARDS,
+      CognitiveLevel.META_COGNITION,
+    ];
+    if (!validLevels.includes(module.cognitiveLevel)) {
       errors.push(
         new ValidationErrorClass(
-          `Invalid cognitiveLevel: ${module.cognitiveLevel}, must be 0-6`,
+          `Invalid cognitiveLevel: ${module.cognitiveLevel}. Must be a valid CognitiveLevel (0-6). See CognitiveLevel enum for valid values.`,
           'cognitiveLevel',
           'Section 2.1'
         )

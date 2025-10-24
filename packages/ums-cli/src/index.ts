@@ -70,7 +70,7 @@ program
   .description('Lists all available UMS v2.0 modules.')
   .option(
     '-l, --level <levels>',
-    'Filter by cognitive level (0-6, comma-separated)'
+    'Filter by cognitive level (0-6 or enum name, comma-separated)'
   )
   .option(
     '-c, --capability <capabilities>',
@@ -84,6 +84,7 @@ program
     `  Examples:
     $ copilot-instructions list
     $ copilot-instructions list --level 0,1
+    $ copilot-instructions list --level UNIVERSAL_PATTERNS
     $ copilot-instructions list --capability testing,debugging
     $ copilot-instructions list --domain typescript --tag tdd
     $ copilot-instructions list --level 2 --capability api-design
@@ -115,7 +116,7 @@ program
   .addArgument(new Argument('<query>', 'Search query'))
   .option(
     '-l, --level <levels>',
-    'Filter by cognitive level (0-6, comma-separated)'
+    'Filter by cognitive level (0-6 or enum name, comma-separated)'
   )
   .option(
     '-c, --capability <capabilities>',
@@ -129,6 +130,7 @@ program
     `  Examples:
     $ copilot-instructions search "logic"
     $ copilot-instructions search "reasoning" --level 0,1
+    $ copilot-instructions search "patterns" --level UNIVERSAL_PATTERNS
     $ copilot-instructions search "react" --domain typescript
     $ copilot-instructions search "testing" --capability quality-assurance --tag tdd
     `

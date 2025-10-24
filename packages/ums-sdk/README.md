@@ -192,13 +192,16 @@ List all available modules with metadata:
 import { listModules } from 'ums-sdk';
 
 const modules = await listModules({
-  tier: 'foundation', // Optional: filter by tier
+  level: 0, // Optional: filter by cognitive level (0-6)
   capability: 'reasoning', // Optional: filter by capability
+  domain: 'typescript', // Optional: filter by domain
+  tag: 'best-practices', // Optional: filter by tag
 });
 
 modules.forEach(module => {
   console.log(`${module.id}: ${module.name}`);
   console.log(`  Description: ${module.description}`);
+  console.log(`  Cognitive Level: ${module.cognitiveLevel}`);
   console.log(`  Source: ${module.source}`);
   console.log(`  Capabilities: ${module.capabilities.join(', ')}`);
 });
@@ -402,19 +405,22 @@ Query available modules with filtering:
 ```typescript
 import { listModules } from 'ums-sdk';
 
-async function listFoundationModules() {
-  // List all foundation tier modules
+async function listAxiomModules() {
+  // List all axiom-level modules (cognitive level 0)
+  import { CognitiveLevel } from 'ums-sdk';
+
   const modules = await listModules({
-    tier: 'foundation',
+    level: CognitiveLevel.AXIOMS_AND_ETHICS,
   });
 
-  console.log(`Found ${modules.length} foundation modules:\n`);
+  console.log(`Found ${modules.length} axiom-level modules:\n`);
 
   modules.forEach(module => {
     console.log(`${module.id}`);
     console.log(`  Name: ${module.name}`);
     console.log(`  Description: ${module.description}`);
     console.log(`  Version: ${module.version}`);
+    console.log(`  Cognitive Level: ${module.cognitiveLevel}`);
     console.log(`  Capabilities: ${module.capabilities.join(', ')}`);
     console.log(`  Source: ${module.source}`);
     console.log();
@@ -428,11 +434,23 @@ async function listReasoningModules() {
   });
 
   console.log(`Modules with reasoning capability: ${modules.length}`);
+  modules.forEach(m => console.log(`  - ${m.id} (Level ${m.cognitiveLevel})`));
+}
+
+// List TypeScript modules at levels 3-4
+async function listTypescriptProcedures() {
+  const modules = await listModules({
+    domain: 'typescript',
+    level: [3, 4], // Domain-specific guidance and procedures
+  });
+
+  console.log(`TypeScript procedural modules: ${modules.length}`);
   modules.forEach(m => console.log(`  - ${m.id}`));
 }
 
-listFoundationModules();
+listAxiomModules();
 listReasoningModules();
+listTypescriptProcedures();
 ```
 
 
@@ -466,16 +484,18 @@ The SDK delegates module structure validation to `ums-lib`, which validates:
 
 ```typescript
 import type { Module } from 'ums-lib';
+import { CognitiveLevel } from 'ums-lib';
 
 export const errorHandling: Module = {
   id: 'error-handling',
   version: '1.0.0',
   schemaVersion: '2.0',
   capabilities: ['error-handling', 'debugging'],
+  cognitiveLevel: CognitiveLevel.DOMAIN_SPECIFIC_GUIDANCE,
   metadata: {
     name: 'Error Handling',
     description: 'Best practices for error handling',
-    semantic: 'exception error handling debugging recovery',
+    semantic: 'exception error handling debugging recovery best-practices patterns',
   },
   instruction: {
     purpose: 'Guide error handling implementation',
@@ -650,8 +670,10 @@ interface ValidationReport {
 interface ListOptions {
   configPath?: string;
   includeStandard?: boolean;
-  tier?: string;
+  level?: number | number[] | CognitiveLevel | CognitiveLevel[];  // Accepts enum or number
   capability?: string;
+  domain?: string;
+  tag?: string;
 }
 
 interface ModuleInfo {
