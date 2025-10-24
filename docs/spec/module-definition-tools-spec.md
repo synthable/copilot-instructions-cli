@@ -12,6 +12,7 @@
 Provide a comprehensive set of tools and helpers to make UMS v2.0 module authoring easier, safer, and more consistent. Focus on reducing boilerplate, providing validation guardrails, and ensuring module quality.
 
 **Goals**:
+
 1. **Reduce cognitive load** for module authors
 2. **Prevent common errors** through validation and type safety
 3. **Ensure consistency** across the module library
@@ -24,7 +25,7 @@ Provide a comprehensive set of tools and helpers to make UMS v2.0 module authori
 ### Current Module Authoring Experience
 
 ```typescript
-import type { Module } from 'ums-sdk';
+import type { Module } from "ums-sdk";
 
 // Authors must:
 // 1. Remember all required fields
@@ -35,27 +36,29 @@ import type { Module } from 'ums-sdk';
 // 6. Structure component correctly
 
 export const errorHandling: Module = {
-  id: 'error-handling',                    // Must match file path
-  version: '1.0.0',                        // Semver
-  schemaVersion: '2.0',                    // Always '2.0' (boilerplate)
-  capabilities: ['error-handling', 'debugging'],
+  id: "error-handling", // Must match file path
+  version: "1.0.0", // Semver
+  schemaVersion: "2.0", // Always '2.0' (boilerplate)
+  capabilities: ["error-handling", "debugging"],
   metadata: {
-    name: 'Error Handling',
-    description: 'Best practices for error handling',
-    semantic: 'exception error handling debugging recovery', // Manual optimization
+    name: "Error Handling",
+    description: "Best practices for error handling",
+    semantic: "exception error handling debugging recovery", // Manual optimization
   },
-  instruction: {                           // Must use correct component type
-    purpose: 'Guide error handling',
+  instruction: {
+    // Must use correct component type
+    purpose: "Guide error handling",
     process: [
-      'Identify error boundaries',
-      'Implement error handlers',
-      'Log errors appropriately',
+      "Identify error boundaries",
+      "Implement error handlers",
+      "Log errors appropriately",
     ],
   },
 };
 ```
 
 **Pain Points**:
+
 - 25+ lines of structure for simple modules
 - Easy to forget required fields
 - Export name calculation is manual and error-prone
@@ -104,6 +107,7 @@ export const errorHandling: Module = {
 ```
 
 **Key Principle**:
+
 - **ums-lib** exposes validation functions publicly, uses guards internally
 - **ums-sdk** uses ums-lib's public validation API only
 - **Guards are implementation details** - not part of public API
@@ -132,6 +136,7 @@ export const myModule = defineModule({
 ```
 
 **Benefits**:
+
 - ✅ Clean API: validation happens automatically
 - ✅ Implementation details hidden (guards are internal)
 - ✅ ums-lib validators reusable across platforms
@@ -155,7 +160,7 @@ export const guards = {
    */
   required<T>(value: T | null | undefined, message?: string): T {
     if (value === null || value === undefined) {
-      throw new ValidationError(message || 'Value is required');
+      throw new ValidationError(message || "Value is required");
     }
     return value;
   },
@@ -190,7 +195,9 @@ export const guards = {
   pattern(regex: RegExp, message?: string) {
     return (value: string): string => {
       if (!regex.test(value)) {
-        throw new ValidationError(message || `Value must match pattern ${regex}`);
+        throw new ValidationError(
+          message || `Value must match pattern ${regex}`
+        );
       }
       return value;
     };
@@ -214,7 +221,9 @@ export const guards = {
   oneOf<T>(allowed: T[]) {
     return (value: T): T => {
       if (!allowed.includes(value)) {
-        throw new ValidationError(`Value must be one of: ${allowed.join(', ')}`);
+        throw new ValidationError(
+          `Value must be one of: ${allowed.join(", ")}`
+        );
       }
       return value;
     };
@@ -225,9 +234,13 @@ export const guards = {
    */
   keywords(required: string[]) {
     return (value: string): string => {
-      const missing = required.filter(kw => !value.toLowerCase().includes(kw.toLowerCase()));
+      const missing = required.filter(
+        kw => !value.toLowerCase().includes(kw.toLowerCase())
+      );
       if (missing.length > 0) {
-        throw new ValidationError(`Semantic metadata must include: ${missing.join(', ')}`);
+        throw new ValidationError(
+          `Semantic metadata must include: ${missing.join(", ")}`
+        );
       }
       return value;
     };
@@ -276,10 +289,10 @@ export const guards = {
 // These guards are used INTERNALLY by ums-lib validators
 // NOT exported in public API
 
-import { guards } from './guards.js'; // Internal import
+import { guards } from "./guards.js"; // Internal import
 
 // Used inside validateModule() implementation
-const id = guards.required(config.id, 'Module ID is required');
+const id = guards.required(config.id, "Module ID is required");
 const name = guards.minLength(3)(config.metadata.name);
 const version = guards.semver(config.version);
 const capabilities = guards.minItems(1)(config.capabilities);
@@ -336,7 +349,7 @@ export const defaults = {
     }
 
     // Deduplicate and join
-    return [...new Set(parts)].join(' ');
+    return [...new Set(parts)].join(" ");
   },
 
   /**
@@ -345,10 +358,10 @@ export const defaults = {
    */
   exportName(moduleId: string): string {
     return moduleId
-      .split('/')
+      .split("/")
       .map((part, index) => {
         const camelCase = part
-          .split('-')
+          .split("-")
           .map((word, wordIndex) => {
             if (index === 0 && wordIndex === 0) {
               // First word of first part stays lowercase
@@ -357,10 +370,10 @@ export const defaults = {
             // Capitalize first letter
             return word.charAt(0).toUpperCase() + word.slice(1);
           })
-          .join('');
+          .join("");
         return camelCase;
       })
-      .join('');
+      .join("");
   },
 
   /**
@@ -369,7 +382,7 @@ export const defaults = {
    * @example extractCategory('be-concise') => undefined
    */
   extractCategory(moduleId: string): string | undefined {
-    const parts = moduleId.split('/');
+    const parts = moduleId.split("/");
     return parts.length > 1 ? parts[0] : undefined;
   },
 
@@ -381,15 +394,16 @@ export const defaults = {
    */
   getCognitiveLevelName(level: CognitiveLevel): string {
     const names = {
-      [CognitiveLevel.AXIOMS_AND_ETHICS]: 'Axioms & Ethics',
-      [CognitiveLevel.REASONING_FRAMEWORKS]: 'Reasoning Frameworks',
-      [CognitiveLevel.UNIVERSAL_PATTERNS]: 'Universal Patterns',
-      [CognitiveLevel.DOMAIN_SPECIFIC_GUIDANCE]: 'Domain-Specific Guidance',
-      [CognitiveLevel.PROCEDURES_AND_PLAYBOOKS]: 'Procedures & Playbooks',
-      [CognitiveLevel.SPECIFICATIONS_AND_STANDARDS]: 'Specifications & Standards',
-      [CognitiveLevel.META_COGNITION]: 'Meta-Cognition',
+      [CognitiveLevel.AXIOMS_AND_ETHICS]: "Axioms & Ethics",
+      [CognitiveLevel.REASONING_FRAMEWORKS]: "Reasoning Frameworks",
+      [CognitiveLevel.UNIVERSAL_PATTERNS]: "Universal Patterns",
+      [CognitiveLevel.DOMAIN_SPECIFIC_GUIDANCE]: "Domain-Specific Guidance",
+      [CognitiveLevel.PROCEDURES_AND_PLAYBOOKS]: "Procedures & Playbooks",
+      [CognitiveLevel.SPECIFICATIONS_AND_STANDARDS]:
+        "Specifications & Standards",
+      [CognitiveLevel.META_COGNITION]: "Meta-Cognition",
     };
-    return names[level] ?? 'Unknown';
+    return names[level] ?? "Unknown";
   },
 
   /**
@@ -400,7 +414,7 @@ export const defaults = {
    */
   parseCognitiveLevel(value: string): CognitiveLevel | undefined {
     // Try parsing as enum name
-    const enumKey = value.toUpperCase().replace(/-/g, '_');
+    const enumKey = value.toUpperCase().replace(/-/g, "_");
     if (enumKey in CognitiveLevel && isNaN(Number(enumKey))) {
       return CognitiveLevel[enumKey as keyof typeof CognitiveLevel];
     }
@@ -418,14 +432,14 @@ export const defaults = {
    * Generate default version
    */
   defaultVersion(): string {
-    return '1.0.0';
+    return "1.0.0";
   },
 
   /**
    * Get schema version (always 2.0 for UMS v2.0)
    */
   schemaVersion(): string {
-    return '2.0';
+    return "2.0";
   },
 };
 ```
@@ -440,7 +454,7 @@ export const defaults = {
 Component validators are the public interface for validation. They use guards internally:
 
 ```typescript
-import { guards } from './guards.js';
+import { guards } from "./guards.js";
 
 /**
  * Validate instruction component structure
@@ -451,7 +465,7 @@ export function validateInstructionComponent(
   const comp = component as Partial<InstructionComponent>;
 
   return {
-    purpose: guards.required(comp.purpose, 'Instruction must have a purpose'),
+    purpose: guards.required(comp.purpose, "Instruction must have a purpose"),
     process: comp.process,
     constraints: comp.constraints,
     principles: comp.principles,
@@ -468,7 +482,10 @@ export function validateKnowledgeComponent(
   const comp = component as Partial<KnowledgeComponent>;
 
   return {
-    explanation: guards.required(comp.explanation, 'Knowledge must have an explanation'),
+    explanation: guards.required(
+      comp.explanation,
+      "Knowledge must have an explanation"
+    ),
     concepts: comp.concepts,
     examples: comp.examples,
     patterns: comp.patterns,
@@ -483,9 +500,12 @@ export function validateDataComponent(component: unknown): DataComponent {
   const comp = component as Partial<DataComponent>;
 
   return {
-    description: guards.required(comp.description, 'Data must have a description'),
-    format: guards.required(comp.format, 'Data must have a format'),
-    value: guards.required(comp.value, 'Data must have a value'),
+    description: guards.required(
+      comp.description,
+      "Data must have a description"
+    ),
+    format: guards.required(comp.format, "Data must have a format"),
+    value: guards.required(comp.value, "Data must have a value"),
   };
 }
 ```
@@ -499,8 +519,13 @@ export function validateDataComponent(component: unknown): DataComponent {
 The main authoring helper that uses ums-lib's public validation API:
 
 ```typescript
-import { validateModule, validateInstructionComponent, validateKnowledgeComponent, validateDataComponent } from 'ums-lib';
-import { defaults } from './defaults.js';
+import {
+  validateModule,
+  validateInstructionComponent,
+  validateKnowledgeComponent,
+  validateDataComponent,
+} from "ums-lib";
+import { defaults } from "./defaults.js";
 
 /**
  * Create a module with smart defaults and validation
@@ -558,7 +583,9 @@ export function defineModule(config: {
   } else if (config.data) {
     module.data = validateDataComponent(config.data);
   } else {
-    throw new Error('Module must have instruction, knowledge, or data component');
+    throw new Error(
+      "Module must have instruction, knowledge, or data component"
+    );
   }
 
   // Validate complete module using ums-lib's public validateModule()
@@ -573,7 +600,7 @@ export function defineModule(config: {
 **Location**: `packages/ums-sdk/src/authoring/path-helpers.ts`
 
 ```typescript
-import path from 'node:path';
+import path from "node:path";
 
 /**
  * Infer module ID from file path
@@ -585,7 +612,7 @@ import path from 'node:path';
  */
 export function inferModuleId(filePath: string, basePath: string): string {
   const relativePath = path.relative(basePath, filePath);
-  const withoutExtension = relativePath.replace(/\.module\.ts$/, '');
+  const withoutExtension = relativePath.replace(/\.module\.ts$/, "");
   return withoutExtension;
 }
 
@@ -633,7 +660,10 @@ export class ModuleBuilder {
     data?: any;
   }> = {};
 
-  constructor(private filePath?: string, private basePath?: string) {
+  constructor(
+    private filePath?: string,
+    private basePath?: string
+  ) {
     if (filePath && basePath) {
       // Auto-infer ID from path
       this.config.id = inferModuleId(filePath, basePath);
@@ -681,10 +711,10 @@ export class ModuleBuilder {
   }
 
   build(): Module {
-    if (!this.config.id) throw new Error('Module ID required');
-    if (!this.config.capabilities) throw new Error('Capabilities required');
-    if (!this.config.name) throw new Error('Name required');
-    if (!this.config.description) throw new Error('Description required');
+    if (!this.config.id) throw new Error("Module ID required");
+    if (!this.config.capabilities) throw new Error("Capabilities required");
+    if (!this.config.name) throw new Error("Name required");
+    if (!this.config.description) throw new Error("Description required");
 
     // defineModule() handles all validation via ums-lib
     return defineModule({
@@ -708,16 +738,16 @@ export class ModuleBuilder {
 ### Example 1: Minimal Module with Helpers
 
 ```typescript
-import { defineModule } from 'ums-sdk/authoring';
+import { defineModule } from "ums-sdk/authoring";
 
 // Validation happens automatically via ums-lib's public validators
 // No need to import or use validation guards directly
 
 export const errorHandling = defineModule({
-  id: 'error-handling',
-  capabilities: ['error-handling', 'debugging'],
-  name: 'Error Handling',
-  description: 'Best practices for error handling in software development',
+  id: "error-handling",
+  capabilities: ["error-handling", "debugging"],
+  name: "Error Handling",
+  description: "Best practices for error handling in software development",
 
   // Optional: auto-generated if not provided
   // version: '1.0.0',
@@ -725,11 +755,11 @@ export const errorHandling = defineModule({
   // semantic: 'error handling best practices debugging...'
 
   instruction: {
-    purpose: 'Guide developers in implementing robust error handling',
+    purpose: "Guide developers in implementing robust error handling",
     process: [
-      'Identify potential error sources',
-      'Implement appropriate error boundaries',
-      'Log errors with sufficient context',
+      "Identify potential error sources",
+      "Implement appropriate error boundaries",
+      "Log errors with sufficient context",
     ],
   },
 });
@@ -738,6 +768,7 @@ export const errorHandling = defineModule({
 ```
 
 **Saved**:
+
 - 5+ lines of boilerplate (version, schemaVersion, semantic)
 - Export name calculation (automatic from ID)
 - Semantic metadata optimization (auto-generated)
@@ -746,25 +777,27 @@ export const errorHandling = defineModule({
 ### Example 2: Knowledge Module
 
 ```typescript
-import { defineModule } from 'ums-sdk/authoring';
+import { defineModule } from "ums-sdk/authoring";
 
 export const solidPrinciples = defineModule({
-  id: 'concepts/solid-principles',
-  capabilities: ['solid', 'oop', 'design-patterns'],
-  name: 'SOLID Principles',
-  description: 'Explanation of SOLID object-oriented design principles',
+  id: "concepts/solid-principles",
+  capabilities: ["solid", "oop", "design-patterns"],
+  name: "SOLID Principles",
+  description: "Explanation of SOLID object-oriented design principles",
 
   // Knowledge component instead of instruction
   knowledge: {
-    explanation: 'SOLID is an acronym for five design principles that make software designs more maintainable and flexible.',
+    explanation:
+      "SOLID is an acronym for five design principles that make software designs more maintainable and flexible.",
     concepts: [
       {
-        term: 'Single Responsibility',
-        definition: 'A class should have only one reason to change',
+        term: "Single Responsibility",
+        definition: "A class should have only one reason to change",
       },
       {
-        term: 'Open/Closed',
-        definition: 'Software entities should be open for extension but closed for modification',
+        term: "Open/Closed",
+        definition:
+          "Software entities should be open for extension but closed for modification",
       },
       // ... more concepts
     ],
@@ -777,24 +810,24 @@ export const solidPrinciples = defineModule({
 ### Example 3: Builder API
 
 ```typescript
-import { ModuleBuilder } from 'ums-sdk/authoring';
-import { fileURLToPath } from 'node:url';
-import { dirname } from 'node:path';
+import { ModuleBuilder } from "ums-sdk/authoring";
+import { fileURLToPath } from "node:url";
+import { dirname } from "node:path";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 export const errorHandling = new ModuleBuilder(__filename, __dirname)
   // ID inferred from file path automatically
-  .capabilities('error-handling', 'debugging')
-  .name('Error Handling')
-  .description('Best practices for error handling in software development')
+  .capabilities("error-handling", "debugging")
+  .name("Error Handling")
+  .description("Best practices for error handling in software development")
   .instruction({
-    purpose: 'Guide developers in implementing robust error handling',
+    purpose: "Guide developers in implementing robust error handling",
     process: [
-      'Identify potential error sources',
-      'Implement appropriate error boundaries',
-      'Log errors with sufficient context',
+      "Identify potential error sources",
+      "Implement appropriate error boundaries",
+      "Log errors with sufficient context",
     ],
   })
   .build();
@@ -805,33 +838,34 @@ export const errorHandling = new ModuleBuilder(__filename, __dirname)
 ### Example 4: Module with Relationships
 
 ```typescript
-import { defineModule } from 'ums-sdk/authoring';
+import { defineModule } from "ums-sdk/authoring";
 
 // Module that depends on other modules
 export const advancedErrorHandling = defineModule({
-  id: 'advanced-error-handling',
-  capabilities: ['error-handling', 'resilience', 'monitoring'],
-  name: 'Advanced Error Handling',
-  description: 'Advanced patterns for error handling including retry logic, circuit breakers, and monitoring',
+  id: "advanced-error-handling",
+  capabilities: ["error-handling", "resilience", "monitoring"],
+  name: "Advanced Error Handling",
+  description:
+    "Advanced patterns for error handling including retry logic, circuit breakers, and monitoring",
 
   // Module relationships
   relationships: {
-    requires: ['error-handling'], // Must have basic error handling first
-    extends: ['foundation/logic/reasoning'], // Builds on reasoning principles
-    recommends: ['monitoring/observability'], // Works well with observability
+    requires: ["error-handling"], // Must have basic error handling first
+    extends: ["foundation/logic/reasoning"], // Builds on reasoning principles
+    recommends: ["monitoring/observability"], // Works well with observability
   },
 
   instruction: {
-    purpose: 'Guide implementation of advanced error handling patterns',
+    purpose: "Guide implementation of advanced error handling patterns",
     process: [
-      'Implement retry logic with exponential backoff',
-      'Add circuit breakers for failing dependencies',
-      'Set up error monitoring and alerting',
-      'Create graceful degradation strategies',
+      "Implement retry logic with exponential backoff",
+      "Add circuit breakers for failing dependencies",
+      "Set up error monitoring and alerting",
+      "Create graceful degradation strategies",
     ],
     principles: [
-      'Fail fast, recover gracefully',
-      'Design for failure from the start',
+      "Fail fast, recover gracefully",
+      "Design for failure from the start",
     ],
   },
 });
@@ -847,39 +881,39 @@ export const advancedErrorHandling = defineModule({
 
 **Validation Functions** (exported from `ums-lib`):
 
-| Function | Parameters | Returns | Description |
-|----------|------------|---------|-------------|
-| `validateModule` | `module: unknown` | `Module` | Validates complete module structure |
-| `validatePersona` | `persona: unknown` | `Persona` | Validates complete persona structure |
-| `validateInstructionComponent` | `component: unknown` | `InstructionComponent` | Validates instruction component |
-| `validateKnowledgeComponent` | `component: unknown` | `KnowledgeComponent` | Validates knowledge component |
-| `validateDataComponent` | `component: unknown` | `DataComponent` | Validates data component |
+| Function                       | Parameters           | Returns                | Description                          |
+| ------------------------------ | -------------------- | ---------------------- | ------------------------------------ |
+| `validateModule`               | `module: unknown`    | `Module`               | Validates complete module structure  |
+| `validatePersona`              | `persona: unknown`   | `Persona`              | Validates complete persona structure |
+| `validateInstructionComponent` | `component: unknown` | `InstructionComponent` | Validates instruction component      |
+| `validateKnowledgeComponent`   | `component: unknown` | `KnowledgeComponent`   | Validates knowledge component        |
+| `validateDataComponent`        | `component: unknown` | `DataComponent`        | Validates data component             |
 
 **Note**: Validation guards are internal implementation details and not exposed in the public API.
 
 ### ums-sdk/authoring/defaults
 
-| Function | Parameters | Returns | Description |
-|----------|------------|---------|-------------|
-| `generateSemantic` | `{ name, description?, capabilities?, keywords? }` | `string` | Auto-generates semantic metadata |
-| `exportName` | `moduleId: string` | `string` | Calculates export name from ID |
-| `getPrimaryTag` | `module: Module` | `string \| undefined` | Gets primary level tag from module metadata |
-| `defaultVersion` | - | `'1.0.0'` | Returns default version |
-| `schemaVersion` | - | `'2.0'` | Returns schema version |
+| Function           | Parameters                                         | Returns               | Description                                 |
+| ------------------ | -------------------------------------------------- | --------------------- | ------------------------------------------- |
+| `generateSemantic` | `{ name, description?, capabilities?, keywords? }` | `string`              | Auto-generates semantic metadata            |
+| `exportName`       | `moduleId: string`                                 | `string`              | Calculates export name from ID              |
+| `getPrimaryTag`    | `module: Module`                                   | `string \| undefined` | Gets primary level tag from module metadata |
+| `defaultVersion`   | -                                                  | `'1.0.0'`             | Returns default version                     |
+| `schemaVersion`    | -                                                  | `'2.0'`               | Returns schema version                      |
 
 ### ums-sdk/authoring/define-module
 
-| Function | Parameters | Returns | Description |
-|----------|------------|---------|-------------|
+| Function       | Parameters     | Returns  | Description                                       |
+| -------------- | -------------- | -------- | ------------------------------------------------- |
 | `defineModule` | `ModuleConfig` | `Module` | Creates module with smart defaults and validation |
 
 ### ums-sdk/authoring/path-helpers
 
-| Class/Function | Description |
-|----------------|-------------|
-| `ModuleBuilder` | Fluent API for module creation |
-| `inferModuleId` | Infer module ID from file path |
-| `expectedExportName` | Get expected export name for path |
+| Class/Function                | Description                       |
+| ----------------------------- | --------------------------------- |
+| `ModuleBuilder`               | Fluent API for module creation    |
+| `inferModuleId`               | Infer module ID from file path    |
+| `expectedExportName`          | Get expected export name for path |
 | `validateModuleIdMatchesPath` | Validate ID matches file location |
 
 ---
@@ -891,6 +925,7 @@ export const advancedErrorHandling = defineModule({
 **Package**: `ums-lib v1.1.0`
 
 1. Add validation guards:
+
    ```
    packages/ums-lib/src/validation/
    ├── guards.ts              # All validation guards
@@ -905,6 +940,7 @@ export const advancedErrorHandling = defineModule({
    - Integration with existing validateModule()
 
 **Deliverables**:
+
 - ums-lib v1.1.0 with validation guards
 - 100% test coverage
 - Type definitions
@@ -914,6 +950,7 @@ export const advancedErrorHandling = defineModule({
 **Package**: `ums-sdk v1.1.0`
 
 1. Create authoring tools that USE ums-lib:
+
    ```
    packages/ums-sdk/src/authoring/
    ├── defaults.ts           # Smart defaults
@@ -930,6 +967,7 @@ export const advancedErrorHandling = defineModule({
    - Comprehensive tests
 
 **Deliverables**:
+
 - ums-sdk v1.1.0 with authoring helpers
 - Integration tests with ums-lib
 - Usage examples
@@ -946,6 +984,7 @@ export const advancedErrorHandling = defineModule({
    - Automated refactoring assistance
 
 **Deliverables**:
+
 - Seamless integration with existing SDK
 - Migration tooling for existing modules
 - Performance benchmarks
@@ -964,6 +1003,7 @@ export const advancedErrorHandling = defineModule({
    - Upgrade guide
 
 **Deliverables**:
+
 - Complete documentation suite
 - ums-sdk v1.1.0 release
 - Community announcement
@@ -994,21 +1034,21 @@ export const advancedErrorHandling = defineModule({
 
 ```typescript
 // Old way still works
-import type { Module } from 'ums-sdk';
+import type { Module } from "ums-sdk";
 
 export const oldModule: Module = {
-  id: 'old-module',
-  version: '1.0.0',
-  schemaVersion: '2.0',
+  id: "old-module",
+  version: "1.0.0",
+  schemaVersion: "2.0",
   // ... rest of module
 };
 
 // New way is optional
-import { defineModule } from 'ums-sdk/authoring';
+import { defineModule } from "ums-sdk/authoring";
 // Uses ums-lib validation internally
 
 export const newModule = defineModule({
-  id: 'new-module',
+  id: "new-module",
   // ... simplified config
 });
 ```
@@ -1039,9 +1079,9 @@ $ copilot-instructions migrate-module ./error-handling.module.ts
 
 ```typescript
 defineModule({
-  id: 'my-module',
-  version: '2.0.0',           // Override default
-  semantic: 'custom keywords', // Override generated
+  id: "my-module",
+  version: "2.0.0", // Override default
+  semantic: "custom keywords", // Override generated
   // ... full control
 });
 ```

@@ -84,25 +84,25 @@ Provide type-safe factories for creating modules and personas with compile-time 
 #### Module Factories
 
 ```typescript
-import { createModule } from 'ums-authoring-sdk';
+import { createModule } from "ums-authoring-sdk";
 
 // Factory with intelligent defaults and validation
 export const errorHandling = createModule({
-  id: 'error-handling',
-  capabilities: ['error-handling', 'debugging'],
+  id: "error-handling",
+  capabilities: ["error-handling", "debugging"],
 
   metadata: {
-    name: 'Error Handling',
-    description: 'Best practices for error handling',
+    name: "Error Handling",
+    description: "Best practices for error handling",
     // semantic auto-generated from name + description + capabilities
   },
 
   instruction: {
-    purpose: 'Guide error handling implementation',
+    purpose: "Guide error handling implementation",
     process: [
-      'Identify error boundaries',
-      'Implement error handlers',
-      'Log errors appropriately',
+      "Identify error boundaries",
+      "Implement error handlers",
+      "Log errors appropriately",
     ],
   },
 });
@@ -163,36 +163,36 @@ export const examples = createDataModule({
 #### Persona Factories
 
 ```typescript
-import { createPersona, withModules } from 'ums-authoring-sdk';
+import { createPersona, withModules } from "ums-authoring-sdk";
 
 // Simple persona
 export const developer = createPersona({
-  name: 'Software Developer',
-  description: 'Full-stack development persona',
+  name: "Software Developer",
+  description: "Full-stack development persona",
   modules: [
-    'foundation/reasoning/systems-thinking',
-    'principle/architecture/separation-of-concerns',
-    'technology/typescript/best-practices',
+    "foundation/reasoning/systems-thinking",
+    "principle/architecture/separation-of-concerns",
+    "technology/typescript/best-practices",
   ],
 });
 
 // Grouped persona with validation
 export const architect = createPersona({
-  name: 'Systems Architect',
-  description: 'Enterprise architecture persona',
+  name: "Systems Architect",
+  description: "Enterprise architecture persona",
   modules: withModules([
     {
-      group: 'Foundation',
+      group: "Foundation",
       ids: [
-        'foundation/reasoning/systems-thinking',
-        'foundation/reasoning/first-principles',
+        "foundation/reasoning/systems-thinking",
+        "foundation/reasoning/first-principles",
       ],
     },
     {
-      group: 'Architecture',
+      group: "Architecture",
       ids: [
-        'principle/architecture/separation-of-concerns',
-        'principle/architecture/modularity',
+        "principle/architecture/separation-of-concerns",
+        "principle/architecture/modularity",
       ],
     },
   ]),
@@ -208,67 +208,67 @@ export const architect = createPersona({
 **1. Create a New Module**
 
 ```typescript
-import { workflows } from 'ums-authoring-sdk';
+import { workflows } from "ums-authoring-sdk";
 
 // Interactive CLI workflow
 await workflows.createModule({
-  interactive: true,  // Ask questions
-  tier: 'technology', // Or prompt user
-  outputPath: './modules',
+  interactive: true, // Ask questions
+  tier: "technology", // Or prompt user
+  outputPath: "./modules",
 });
 
 // Programmatic workflow
 const module = await workflows.createModule({
-  id: 'error-handling',
-  tier: 'technology',
-  type: 'instruction',
+  id: "error-handling",
+  tier: "technology",
+  type: "instruction",
   metadata: {
-    name: 'Error Handling',
-    description: 'Best practices...',
+    name: "Error Handling",
+    description: "Best practices...",
   },
-  outputPath: './modules/technology/error-handling.module.ts',
+  outputPath: "./modules/technology/error-handling.module.ts",
 });
 ```
 
 **2. Create a New Persona**
 
 ```typescript
-import { workflows } from 'ums-authoring-sdk';
+import { workflows } from "ums-authoring-sdk";
 
 // Interactive persona creation
 await workflows.createPersona({
   interactive: true,
-  suggestModules: true,  // AI-powered suggestions based on description
+  suggestModules: true, // AI-powered suggestions based on description
 });
 
 // Programmatic persona creation
 const persona = await workflows.createPersona({
-  name: 'Backend Developer',
-  description: 'API and database development',
+  name: "Backend Developer",
+  description: "API and database development",
   modules: [
-    'foundation/reasoning/systems-thinking',
-    'technology/typescript/best-practices',
-    'technology/databases/sql',
+    "foundation/reasoning/systems-thinking",
+    "technology/typescript/best-practices",
+    "technology/databases/sql",
   ],
-  outputPath: './personas/backend-developer.persona.ts',
+  outputPath: "./personas/backend-developer.persona.ts",
 });
 ```
 
 **3. Validate Modules/Personas**
 
 ```typescript
-import { workflows } from 'ums-authoring-sdk';
+import { workflows } from "ums-authoring-sdk";
 
 // Validate with detailed feedback
 const result = await workflows.validate({
-  paths: ['./modules', './personas'],
-  fix: true,  // Auto-fix common issues
-  report: 'detailed',
+  paths: ["./modules", "./personas"],
+  fix: true, // Auto-fix common issues
+  report: "detailed",
 });
 
 if (!result.valid) {
-  console.error('Validation errors:', result.errors);
-  console.log('Suggestions:', result.suggestions);
+  console.error("Validation errors:", result.errors);
+  console.log("Suggestions:", result.suggestions);
 }
 ```
 
@@ -277,43 +277,45 @@ if (!result.valid) {
 **4. Add Module to Persona**
 
 ```typescript
-import { workflows } from 'ums-authoring-sdk';
+import { workflows } from "ums-authoring-sdk";
 
 // Add modules to existing persona
 await workflows.addModulesToPersona({
-  personaPath: './personas/developer.persona.ts',
-  modules: ['technology/testing/unit-testing'],
-  group: 'Testing',  // Optional grouping
-  validate: true,    // Ensure no conflicts
+  personaPath: "./personas/developer.persona.ts",
+  modules: ["technology/testing/unit-testing"],
+  group: "Testing", // Optional grouping
+  validate: true, // Ensure no conflicts
 });
 ```
 
 **5. Clone and Customize Module**
 
 ```typescript
-import { workflows } from 'ums-authoring-sdk';
+import { workflows } from "ums-authoring-sdk";
 
 // Clone existing module as starting point
 await workflows.cloneModule({
-  sourceId: 'error-handling',
-  newId: 'advanced-error-handling',
+  sourceId: "error-handling",
+  newId: "advanced-error-handling",
   customize: {
-    metadata: { name: 'Advanced Error Handling' },
-    instruction: { /* modifications */ },
+    metadata: { name: "Advanced Error Handling" },
+    instruction: {
+      /* modifications */
+    },
   },
-  outputPath: './modules/advanced-error-handling.module.ts',
+  outputPath: "./modules/advanced-error-handling.module.ts",
 });
 ```
 
 **6. Preview Persona Build**
 
 ```typescript
-import { workflows } from 'ums-authoring-sdk';
+import { workflows } from "ums-authoring-sdk";
 
 // Preview what persona will look like
 const preview = await workflows.previewPersona({
-  personaPath: './personas/developer.persona.ts',
-  format: 'markdown',  // or 'json', 'summary'
+  personaPath: "./personas/developer.persona.ts",
+  format: "markdown", // or 'json', 'summary'
 });
 
 console.log(preview.markdown);
@@ -326,40 +328,40 @@ console.log(`Missing modules: ${preview.missingModules}`);
 **7. Analyze Module Dependencies**
 
 ```typescript
-import { workflows } from 'ums-authoring-sdk';
+import { workflows } from "ums-authoring-sdk";
 
 // Analyze module relationships
 const analysis = await workflows.analyzeDependencies({
-  moduleId: 'advanced-error-handling',
-  depth: 'full',  // or 'direct', 'transitive'
+  moduleId: "advanced-error-handling",
+  depth: "full", // or 'direct', 'transitive'
 });
 
-console.log('Dependencies:', analysis.dependencies);
-console.log('Dependents:', analysis.dependents);
-console.log('Conflicts:', analysis.conflicts);
-console.log('Suggestions:', analysis.suggestions);
+console.log("Dependencies:", analysis.dependencies);
+console.log("Dependents:", analysis.dependents);
+console.log("Conflicts:", analysis.conflicts);
+console.log("Suggestions:", analysis.suggestions);
 ```
 
 **8. Refactor Module Boundaries**
 
 ```typescript
-import { workflows } from 'ums-authoring-sdk';
+import { workflows } from "ums-authoring-sdk";
 
 // Split module into multiple modules
 await workflows.splitModule({
-  sourceId: 'large-module',
+  sourceId: "large-module",
   split: [
-    { newId: 'module-part-1', components: ['instruction'] },
-    { newId: 'module-part-2', components: ['knowledge'] },
+    { newId: "module-part-1", components: ["instruction"] },
+    { newId: "module-part-2", components: ["knowledge"] },
   ],
-  updateDependents: true,  // Update personas that use this
+  updateDependents: true, // Update personas that use this
 });
 
 // Merge modules
 await workflows.mergeModules({
-  sourceIds: ['module-a', 'module-b'],
-  targetId: 'combined-module',
-  strategy: 'combine',  // or 'replace', 'extend'
+  sourceIds: ["module-a", "module-b"],
+  targetId: "combined-module",
+  strategy: "combine", // or 'replace', 'extend'
   updateDependents: true,
 });
 ```
@@ -367,33 +369,31 @@ await workflows.mergeModules({
 **9. Version Module**
 
 ```typescript
-import { workflows } from 'ums-authoring-sdk';
+import { workflows } from "ums-authoring-sdk";
 
 // Create new version of module
 await workflows.versionModule({
-  moduleId: 'error-handling',
-  newVersion: '2.0.0',
-  changes: 'Breaking changes to instruction format',
-  updateDependents: 'prompt',  // or 'auto', 'manual'
+  moduleId: "error-handling",
+  newVersion: "2.0.0",
+  changes: "Breaking changes to instruction format",
+  updateDependents: "prompt", // or 'auto', 'manual'
 });
 ```
 
 **10. Generate Module from Template**
 
 ```typescript
-import { workflows, templates } from 'ums-authoring-sdk';
+import { workflows, templates } from "ums-authoring-sdk";
 
 // Use pre-built templates
 const module = await workflows.fromTemplate({
   template: templates.instruction.bestPractices,
   config: {
-    id: 'api-design-best-practices',
-    domain: 'api-design',
-    practices: [
-      { title: '...', rationale: '...', example: '...' },
-    ],
+    id: "api-design-best-practices",
+    domain: "api-design",
+    practices: [{ title: "...", rationale: "...", example: "..." }],
   },
-  outputPath: './modules/api-design-best-practices.module.ts',
+  outputPath: "./modules/api-design-best-practices.module.ts",
 });
 ```
 
@@ -406,29 +406,29 @@ Ensure modules can evolve independently without breaking dependents.
 #### Boundary Definition
 
 ```typescript
-import { boundaries } from 'ums-authoring-sdk';
+import { boundaries } from "ums-authoring-sdk";
 
 // Define what a module exposes vs. what's internal
 const moduleBoundary = boundaries.define({
-  moduleId: 'error-handling',
+  moduleId: "error-handling",
 
   // Public interface (what other modules/personas can depend on)
   public: {
-    capabilities: ['error-handling', 'debugging'],
-    exports: ['instruction'],  // Which components are public
-    stability: 'stable',       // 'stable', 'experimental', 'deprecated'
+    capabilities: ["error-handling", "debugging"],
+    exports: ["instruction"], // Which components are public
+    stability: "stable", // 'stable', 'experimental', 'deprecated'
   },
 
   // Private implementation (can change without breaking)
   private: {
-    implementation: ['knowledge'],  // Internal-only components
-    dependencies: ['foundation/reasoning/logic'],
+    implementation: ["knowledge"], // Internal-only components
+    dependencies: ["foundation/reasoning/logic"],
   },
 
   // Version compatibility
   compatibility: {
-    breaking: ['2.0.0'],  // Versions with breaking changes
-    deprecated: ['1.0.0'], // Deprecated versions
+    breaking: ["2.0.0"], // Versions with breaking changes
+    deprecated: ["1.0.0"], // Deprecated versions
   },
 });
 ```
@@ -436,16 +436,16 @@ const moduleBoundary = boundaries.define({
 #### Dependency Validation
 
 ```typescript
-import { boundaries } from 'ums-authoring-sdk';
+import { boundaries } from "ums-authoring-sdk";
 
 // Validate that dependencies respect boundaries
 const validation = await boundaries.validateDependencies({
-  moduleId: 'advanced-error-handling',
-  dependencies: ['error-handling'],
+  moduleId: "advanced-error-handling",
+  dependencies: ["error-handling"],
 });
 
 if (!validation.valid) {
-  console.error('Boundary violations:', validation.violations);
+  console.error("Boundary violations:", validation.violations);
   // Example: "Depends on private component 'knowledge' of 'error-handling'"
 }
 ```
@@ -453,36 +453,36 @@ if (!validation.valid) {
 #### Change Impact Analysis
 
 ```typescript
-import { boundaries } from 'ums-authoring-sdk';
+import { boundaries } from "ums-authoring-sdk";
 
 // Analyze impact of changing a module
 const impact = await boundaries.analyzeImpact({
-  moduleId: 'error-handling',
+  moduleId: "error-handling",
   changes: {
-    type: 'breaking',  // or 'compatible', 'internal'
-    description: 'Changed instruction structure',
+    type: "breaking", // or 'compatible', 'internal'
+    description: "Changed instruction structure",
   },
 });
 
-console.log('Affected personas:', impact.affectedPersonas);
-console.log('Affected modules:', impact.affectedModules);
-console.log('Required updates:', impact.requiredUpdates);
-console.log('Recommended actions:', impact.recommendations);
+console.log("Affected personas:", impact.affectedPersonas);
+console.log("Affected modules:", impact.affectedModules);
+console.log("Required updates:", impact.requiredUpdates);
+console.log("Recommended actions:", impact.recommendations);
 ```
 
 #### Semantic Versioning Support
 
 ```typescript
-import { boundaries } from 'ums-authoring-sdk';
+import { boundaries } from "ums-authoring-sdk";
 
 // Determine version bump based on changes
 const versionBump = boundaries.determineVersionBump({
-  moduleId: 'error-handling',
-  currentVersion: '1.2.3',
+  moduleId: "error-handling",
+  currentVersion: "1.2.3",
   changes: [
-    { type: 'breaking', description: 'Changed field names' },
-    { type: 'feature', description: 'Added new constraint' },
-    { type: 'fix', description: 'Fixed typo' },
+    { type: "breaking", description: "Changed field names" },
+    { type: "feature", description: "Added new constraint" },
+    { type: "fix", description: "Fixed typo" },
   ],
 });
 
@@ -499,18 +499,18 @@ Facilitate collaboration between modules and personas.
 #### Module Composition Analysis
 
 ```typescript
-import { collaboration } from 'ums-authoring-sdk';
+import { collaboration } from "ums-authoring-sdk";
 
 // Analyze how modules work together in a persona
 const composition = await collaboration.analyzeComposition({
-  personaPath: './personas/developer.persona.ts',
+  personaPath: "./personas/developer.persona.ts",
 });
 
-console.log('Module coverage:', composition.coverage);
-console.log('Redundancies:', composition.redundancies);
-console.log('Gaps:', composition.gaps);
-console.log('Conflicts:', composition.conflicts);
-console.log('Suggestions:', composition.suggestions);
+console.log("Module coverage:", composition.coverage);
+console.log("Redundancies:", composition.redundancies);
+console.log("Gaps:", composition.gaps);
+console.log("Conflicts:", composition.conflicts);
+console.log("Suggestions:", composition.suggestions);
 
 // Example output:
 // {
@@ -536,88 +536,88 @@ console.log('Suggestions:', composition.suggestions);
 #### Dependency Graph
 
 ```typescript
-import { collaboration } from 'ums-authoring-sdk';
+import { collaboration } from "ums-authoring-sdk";
 
 // Generate visual dependency graph
 const graph = await collaboration.generateDependencyGraph({
-  scope: 'all',  // or specific tier, persona
-  format: 'mermaid',  // or 'dot', 'json'
+  scope: "all", // or specific tier, persona
+  format: "mermaid", // or 'dot', 'json'
   includePersonas: true,
 });
 
 console.log(graph.diagram);
 // Output: Mermaid diagram showing module relationships
 
-await graph.saveTo('./docs/module-dependencies.md');
+await graph.saveTo("./docs/module-dependencies.md");
 ```
 
 #### Module Recommendations
 
 ```typescript
-import { collaboration } from 'ums-authoring-sdk';
+import { collaboration } from "ums-authoring-sdk";
 
 // Get module recommendations for a persona
 const recommendations = await collaboration.recommendModules({
-  personaPath: './personas/developer.persona.ts',
+  personaPath: "./personas/developer.persona.ts",
   criteria: {
-    fillGaps: true,          // Recommend modules for missing areas
-    removeRedundancy: true,  // Suggest removing overlapping modules
-    upgradePath: true,       // Suggest newer versions
+    fillGaps: true, // Recommend modules for missing areas
+    removeRedundancy: true, // Suggest removing overlapping modules
+    upgradePath: true, // Suggest newer versions
   },
 });
 
-console.log('Recommended additions:', recommendations.additions);
-console.log('Recommended removals:', recommendations.removals);
-console.log('Recommended upgrades:', recommendations.upgrades);
+console.log("Recommended additions:", recommendations.additions);
+console.log("Recommended removals:", recommendations.removals);
+console.log("Recommended upgrades:", recommendations.upgrades);
 ```
 
 #### Conflict Resolution
 
 ```typescript
-import { collaboration } from 'ums-authoring-sdk';
+import { collaboration } from "ums-authoring-sdk";
 
 // Detect and resolve conflicts between modules
 const conflicts = await collaboration.detectConflicts({
-  modules: ['module-a', 'module-b', 'module-c'],
-  personaContext: './personas/developer.persona.ts',
+  modules: ["module-a", "module-b", "module-c"],
+  personaContext: "./personas/developer.persona.ts",
 });
 
 if (conflicts.found) {
-  console.log('Conflicts:', conflicts.details);
+  console.log("Conflicts:", conflicts.details);
 
   // Get resolution suggestions
   const resolution = await collaboration.suggestResolution({
     conflicts: conflicts.details,
-    strategy: 'prioritize-latest',  // or 'prioritize-stable', 'manual'
+    strategy: "prioritize-latest", // or 'prioritize-stable', 'manual'
   });
 
-  console.log('Suggested resolution:', resolution);
+  console.log("Suggested resolution:", resolution);
 }
 ```
 
 #### Persona Composition Helpers
 
 ```typescript
-import { collaboration } from 'ums-authoring-sdk';
+import { collaboration } from "ums-authoring-sdk";
 
 // Build persona incrementally with validation
 const composer = collaboration.createComposer({
-  name: 'Full-Stack Developer',
-  description: 'Complete full-stack development',
+  name: "Full-Stack Developer",
+  description: "Complete full-stack development",
 });
 
 // Add modules with automatic validation
-await composer.addModule('foundation/reasoning/systems-thinking');
-await composer.addModule('technology/typescript/best-practices');
+await composer.addModule("foundation/reasoning/systems-thinking");
+await composer.addModule("technology/typescript/best-practices");
 
 // Get composition insights at any point
 const insights = composer.getInsights();
-console.log('Current coverage:', insights.coverage);
-console.log('Recommended next modules:', insights.recommendations);
+console.log("Current coverage:", insights.coverage);
+console.log("Recommended next modules:", insights.recommendations);
 
 // Finalize and save
 const persona = await composer.finalize({
-  outputPath: './personas/fullstack-developer.persona.ts',
+  outputPath: "./personas/fullstack-developer.persona.ts",
 });
 ```
 
@@ -717,20 +717,17 @@ import {
   workflows,
   createInstructionModule,
   createPersona,
-  collaboration
-} from 'ums-authoring-sdk';
+  collaboration,
+} from "ums-authoring-sdk";
 
 // 1. Create a new module with guardrails
 const errorHandling = createInstructionModule({
-  id: 'error-handling',
-  capabilities: ['error-handling', 'debugging'],
-  name: 'Error Handling',
-  description: 'Best practices for error handling',
-  purpose: 'Guide error handling implementation',
-  process: [
-    'Identify error boundaries',
-    'Implement error handlers',
-  ],
+  id: "error-handling",
+  capabilities: ["error-handling", "debugging"],
+  name: "Error Handling",
+  description: "Best practices for error handling",
+  purpose: "Guide error handling implementation",
+  process: ["Identify error boundaries", "Implement error handlers"],
 });
 
 // 2. Validate before saving
@@ -743,15 +740,15 @@ if (validation.valid) {
   // 3. Save to file system
   await workflows.saveModule({
     module: errorHandling,
-    outputPath: './modules/error-handling.module.ts',
+    outputPath: "./modules/error-handling.module.ts",
   });
 }
 
 // 4. Create persona using the module
 const developer = createPersona({
-  name: 'Backend Developer',
-  description: 'API development specialist',
-  modules: ['error-handling', 'technology/typescript/best-practices'],
+  name: "Backend Developer",
+  description: "API development specialist",
+  modules: ["error-handling", "technology/typescript/best-practices"],
 });
 
 // 5. Analyze composition
@@ -759,68 +756,68 @@ const analysis = await collaboration.analyzeComposition({
   persona: developer,
 });
 
-console.log('Coverage:', analysis.coverage);
-console.log('Suggestions:', analysis.suggestions);
+console.log("Coverage:", analysis.coverage);
+console.log("Suggestions:", analysis.suggestions);
 ```
 
 ### 5.2 Module Boundary Management
 
 ```typescript
-import { boundaries } from 'ums-authoring-sdk';
+import { boundaries } from "ums-authoring-sdk";
 
 // Define module boundary
 const boundary = boundaries.define({
-  moduleId: 'error-handling',
+  moduleId: "error-handling",
   public: {
-    capabilities: ['error-handling'],
-    exports: ['instruction'],
-    stability: 'stable',
+    capabilities: ["error-handling"],
+    exports: ["instruction"],
+    stability: "stable",
   },
   private: {
-    implementation: ['knowledge'],
-    dependencies: ['foundation/reasoning/logic'],
+    implementation: ["knowledge"],
+    dependencies: ["foundation/reasoning/logic"],
   },
 });
 
 // Before making changes, analyze impact
 const impact = await boundaries.analyzeImpact({
-  moduleId: 'error-handling',
+  moduleId: "error-handling",
   changes: {
-    type: 'breaking',
-    description: 'Restructured instruction format',
+    type: "breaking",
+    description: "Restructured instruction format",
   },
 });
 
-console.log('Affected personas:', impact.affectedPersonas);
-console.log('Migration required:', impact.requiredUpdates);
+console.log("Affected personas:", impact.affectedPersonas);
+console.log("Migration required:", impact.requiredUpdates);
 
 // Determine new version
 const versionBump = boundaries.determineVersionBump({
-  moduleId: 'error-handling',
-  currentVersion: '1.0.0',
-  changes: [{ type: 'breaking', description: 'Changed structure' }],
+  moduleId: "error-handling",
+  currentVersion: "1.0.0",
+  changes: [{ type: "breaking", description: "Changed structure" }],
 });
 
-console.log('New version:', versionBump.suggestedVersion); // 2.0.0
+console.log("New version:", versionBump.suggestedVersion); // 2.0.0
 ```
 
 ### 5.3 Collaborative Persona Development
 
 ```typescript
-import { collaboration } from 'ums-authoring-sdk';
+import { collaboration } from "ums-authoring-sdk";
 
 // Start with a composer
 const composer = collaboration.createComposer({
-  name: 'Full-Stack Developer',
-  description: 'Complete web development',
+  name: "Full-Stack Developer",
+  description: "Complete web development",
 });
 
 // Add modules iteratively with feedback
-await composer.addModule('foundation/reasoning/systems-thinking');
+await composer.addModule("foundation/reasoning/systems-thinking");
 
 let insights = composer.getInsights();
-console.log('Coverage:', insights.coverage);
-console.log('Next recommendations:', insights.recommendations);
+console.log("Coverage:", insights.coverage);
+console.log("Next recommendations:", insights.recommendations);
 
 // Add recommended modules
 for (const rec of insights.recommendations.slice(0, 3)) {
@@ -835,25 +832,25 @@ const conflicts = await collaboration.detectConflicts({
 if (conflicts.found) {
   const resolution = await collaboration.suggestResolution({
     conflicts: conflicts.details,
-    strategy: 'prioritize-latest',
+    strategy: "prioritize-latest",
   });
 
-  console.log('Applying resolution:', resolution);
+  console.log("Applying resolution:", resolution);
   await composer.applyResolution(resolution);
 }
 
 // Finalize
 const persona = await composer.finalize({
-  outputPath: './personas/fullstack-developer.persona.ts',
+  outputPath: "./personas/fullstack-developer.persona.ts",
 });
 
 // Generate dependency graph for documentation
 const graph = await collaboration.generateDependencyGraph({
   persona: persona,
-  format: 'mermaid',
+  format: "mermaid",
 });
 
-await graph.saveTo('./docs/fullstack-dependencies.md');
+await graph.saveTo("./docs/fullstack-dependencies.md");
 ```
 
 ---
@@ -861,28 +858,33 @@ await graph.saveTo('./docs/fullstack-dependencies.md');
 ## 6. Implementation Phases
 
 ### Phase 1: Guardrails & Essential Workflows (v0.1.0)
+
 - Module/Persona factories with type safety
 - Basic validation workflows
 - createModule, createPersona, validate workflows
 
 ### Phase 2: Common Workflows (v0.2.0)
+
 - addModulesToPersona, cloneModule, previewPersona
 - Templates for common module patterns
 - Enhanced validation with auto-fix
 
 ### Phase 3: Boundaries & Encapsulation (v0.3.0)
+
 - Module boundary definition
 - Dependency validation
 - Change impact analysis
 - Semantic versioning support
 
 ### Phase 4: Collaboration (v0.4.0)
+
 - Composition analysis
 - Dependency graphs
 - Module recommendations
 - Conflict detection and resolution
 
 ### Phase 5: Advanced Workflows (v1.0.0)
+
 - splitModule, mergeModules, versionModule
 - PersonaComposer for interactive development
 - Complete template library
@@ -901,9 +903,9 @@ await graph.saveTo('./docs/fullstack-dependencies.md');
 ---
 
 **Next Steps**:
+
 1. Review and approve specification
 2. Create `ums-authoring-sdk` package scaffold
 3. Implement Phase 1 features
 4. User testing and feedback
 5. Iterate based on real usage
-

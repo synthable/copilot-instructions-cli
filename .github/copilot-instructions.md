@@ -1,13 +1,20 @@
----
-applyTo: '**'
----
-# Instructions Composer
+# Copilot Instructions
+## Architecture Map
+- `packages/ums-lib` holds pure UMS v2.0 domain logic (rendering, validation, `ModuleRegistry`) and must stay free of I/O.
+- `packages/ums-sdk` wraps file access plus orchestration; see `orchestration/build-orchestrator.ts` and `discovery/module-discovery.ts` for the high-level build/validate workflows.
+- `packages/ums-cli/src/index.ts` wires Commander commands to handlers in `src/commands/*`, all of which delegate to ums-lib/sdk and avoid direct filesystem assumptions.
+- `packages/ums-mcp` currently contains a placeholder `startMCPServer`; treat it as TODO unless you intend to finish the integration.
+- UMS content lives in `instruct-modules-v2/` with shared types in `instruct-modules-v2/types/index.ts`; personas compose these modules into grouped workflows.
 
 ## Project Overview
 Instructions Composer is a monorepo workspace containing a CLI tool and supporting libraries for building and managing AI persona instructions using the Unified Module System (UMS v2.0). The project uses a flexible tag-based classification system where modular instruction components are composed into personas for different AI assistant roles.
 
-## Important Notice
-This project is a pre-1.0 release, and as such, does not guarantee backward compatibility. The API, CLI commands, and file formats may change without notice.
+## UMS Content Conventions
+- Modules such as `instruct-modules-v2/modules/foundation/analysis/from-ambiguity-to-specification.module.ts` export `Module` objects with `schemaVersion: '2.0'` and rich `metadata.capabilities/solves/quality`.
+- Export names must match `moduleIdToExportName` (`foundation/analysis/...` → `fromAmbiguityToSpecification`), enforced by `packages/ums-lib/src/utils/transforms.ts`.
+- Use `ComponentType.Instruction|Knowledge|Data` to structure `components`; long processes belong in `instruction.process[]` with optional validation hooks.
+- Personas (see `instruct-modules-v2/personas/ums-persona-composer.persona.ts`) default-export `Persona` objects, often grouping modules for staged reasoning.
+- Keep TypeScript-only helpers in `instruct-modules-v2/types/index.ts`; external consumers should import official types from `ums-lib`.
 
 ## Repository Structure
 - `packages/ums-cli`: Main CLI application

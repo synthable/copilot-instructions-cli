@@ -11,6 +11,7 @@
 We will implement **`defineModule()` and `definePersona()`** as the primary authoring API, supplemented by **convenience helper functions** for common patterns.
 
 This approach provides the best balance of:
+
 - ✅ Type safety (full TypeScript inference)
 - ✅ Composability (object spreading + helpers)
 - ✅ Simplicity (familiar pattern)
@@ -24,13 +25,13 @@ This approach provides the best balance of:
 ### Module Definition
 
 ```typescript
-import { defineModule } from 'ums-sdk/authoring';
+import { defineModule } from "ums-sdk/authoring";
 
 export const errorHandling = defineModule({
-  id: 'error-handling',
-  capabilities: ['error-handling', 'debugging'],
-  name: 'Error Handling',
-  description: 'Best practices for error handling in software development',
+  id: "error-handling",
+  capabilities: ["error-handling", "debugging"],
+  name: "Error Handling",
+  description: "Best practices for error handling in software development",
 
   // Smart defaults applied automatically:
   // - version: '1.0.0'
@@ -38,64 +39,58 @@ export const errorHandling = defineModule({
   // - semantic: (auto-generated from name, description, capabilities)
 
   instruction: {
-    purpose: 'Guide developers in implementing robust error handling',
+    purpose: "Guide developers in implementing robust error handling",
     process: [
-      'Identify potential error sources',
-      'Implement appropriate error boundaries',
-      'Log errors with sufficient context'
+      "Identify potential error sources",
+      "Implement appropriate error boundaries",
+      "Log errors with sufficient context",
     ],
     constraints: [
-      'Never swallow errors silently',
-      'Always clean up resources in error paths'
+      "Never swallow errors silently",
+      "Always clean up resources in error paths",
     ],
-    principles: [
-      'Fail fast and loud',
-      'Provide actionable error messages'
-    ]
-  }
+    principles: ["Fail fast and loud", "Provide actionable error messages"],
+  },
 });
 ```
 
 ### Persona Definition
 
 ```typescript
-import { definePersona } from 'ums-sdk/authoring';
+import { definePersona } from "ums-sdk/authoring";
 
 export const developer = definePersona({
-  name: 'Full-Stack Developer',
-  version: '1.0.0',
-  description: 'Expert in full-stack web development',
+  name: "Full-Stack Developer",
+  version: "1.0.0",
+  description: "Expert in full-stack web development",
 
   modules: [
-    'foundation/ethics/do-no-harm',
-    'foundation/reasoning/critical-thinking',
-    'technology/typescript/best-practices',
-    'technology/react/hooks'
-  ]
+    "foundation/ethics/do-no-harm",
+    "foundation/reasoning/critical-thinking",
+    "technology/typescript/best-practices",
+    "technology/react/hooks",
+  ],
 });
 
 // Or with groups
 export const developerGrouped = definePersona({
-  name: 'Full-Stack Developer',
-  version: '1.0.0',
-  description: 'Expert in full-stack web development',
+  name: "Full-Stack Developer",
+  version: "1.0.0",
+  description: "Expert in full-stack web development",
 
   modules: [
     {
-      group: 'Foundation',
+      group: "Foundation",
       ids: [
-        'foundation/ethics/do-no-harm',
-        'foundation/reasoning/critical-thinking'
-      ]
+        "foundation/ethics/do-no-harm",
+        "foundation/reasoning/critical-thinking",
+      ],
     },
     {
-      group: 'Technology',
-      ids: [
-        'technology/typescript/best-practices',
-        'technology/react/hooks'
-      ]
-    }
-  ]
+      group: "Technology",
+      ids: ["technology/typescript/best-practices", "technology/react/hooks"],
+    },
+  ],
 });
 ```
 
@@ -106,48 +101,48 @@ export const developerGrouped = definePersona({
 ### Pattern 1: Reusable Configuration Fragments
 
 ```typescript
-import { defineModule } from 'ums-sdk/authoring';
+import { defineModule } from "ums-sdk/authoring";
 
 // Define reusable fragments
 const errorHandlingCapabilities = {
-  capabilities: ['error-handling', 'debugging']
+  capabilities: ["error-handling", "debugging"],
 };
 
 const errorHandlingMeta = {
-  name: 'Error Handling',
-  description: 'Best practices for error handling'
+  name: "Error Handling",
+  description: "Best practices for error handling",
 };
 
 const commonErrorSteps = [
-  'Identify error boundaries',
-  'Implement error handlers',
-  'Log errors with context'
+  "Identify error boundaries",
+  "Implement error handlers",
+  "Log errors with context",
 ];
 
 // Use with spreading
 export const basicErrorHandling = defineModule({
-  id: 'error-handling',
+  id: "error-handling",
   ...errorHandlingCapabilities,
   ...errorHandlingMeta,
   instruction: {
-    purpose: 'Guide basic error handling',
-    process: commonErrorSteps
-  }
+    purpose: "Guide basic error handling",
+    process: commonErrorSteps,
+  },
 });
 
 export const advancedErrorHandling = defineModule({
-  id: 'advanced-error-handling',
+  id: "advanced-error-handling",
   ...errorHandlingCapabilities, // Reuse!
-  name: 'Advanced Error Handling',
-  description: 'Advanced patterns for error handling',
+  name: "Advanced Error Handling",
+  description: "Advanced patterns for error handling",
   instruction: {
-    purpose: 'Guide advanced error handling',
+    purpose: "Guide advanced error handling",
     process: [
       ...commonErrorSteps, // Reuse and extend!
-      'Implement retry logic',
-      'Add circuit breakers'
-    ]
-  }
+      "Implement retry logic",
+      "Add circuit breakers",
+    ],
+  },
 });
 ```
 
@@ -156,13 +151,17 @@ export const advancedErrorHandling = defineModule({
 ```typescript
 // Helper functions in ums-sdk/authoring/helpers.ts
 export const withCapabilities = (...caps: string[]) => ({
-  capabilities: caps
+  capabilities: caps,
 });
 
-export const withMeta = (name: string, description: string, keywords?: string[]) => ({
+export const withMeta = (
+  name: string,
+  description: string,
+  keywords?: string[]
+) => ({
   name,
   description,
-  keywords
+  keywords,
 });
 
 export const withRelationships = (config: {
@@ -170,24 +169,29 @@ export const withRelationships = (config: {
   extends?: string[];
   recommends?: string[];
 }) => ({
-  relationships: config
+  relationships: config,
 });
 
 // Usage
-import { defineModule, withCapabilities, withMeta, withRelationships } from 'ums-sdk/authoring';
+import {
+  defineModule,
+  withCapabilities,
+  withMeta,
+  withRelationships,
+} from "ums-sdk/authoring";
 
 export const myModule = defineModule({
-  id: 'my-module',
-  ...withCapabilities('capability1', 'capability2'),
-  ...withMeta('My Module', 'Description of my module'),
+  id: "my-module",
+  ...withCapabilities("capability1", "capability2"),
+  ...withMeta("My Module", "Description of my module"),
   ...withRelationships({
-    requires: ['foundation/logic/reasoning'],
-    extends: ['base-module']
+    requires: ["foundation/logic/reasoning"],
+    extends: ["base-module"],
   }),
   instruction: {
-    purpose: 'Guide users...',
-    process: ['Step 1', 'Step 2']
-  }
+    purpose: "Guide users...",
+    process: ["Step 1", "Step 2"],
+  },
 });
 ```
 
@@ -195,14 +199,11 @@ export const myModule = defineModule({
 
 ```typescript
 // Component template helpers
-export const instructionTemplate = (
-  purpose: string,
-  steps: string[]
-) => ({
+export const instructionTemplate = (purpose: string, steps: string[]) => ({
   instruction: {
     purpose,
-    process: steps
-  }
+    process: steps,
+  },
 });
 
 export const knowledgeTemplate = (
@@ -211,23 +212,20 @@ export const knowledgeTemplate = (
 ) => ({
   knowledge: {
     explanation,
-    concepts
-  }
+    concepts,
+  },
 });
 
 // Usage
 export const myModule = defineModule({
-  id: 'my-module',
-  capabilities: ['teaching'],
-  name: 'My Module',
-  description: 'Teaching module',
-  ...knowledgeTemplate(
-    'This module explains...',
-    [
-      { term: 'Concept 1', definition: 'Definition 1' },
-      { term: 'Concept 2', definition: 'Definition 2' }
-    ]
-  )
+  id: "my-module",
+  capabilities: ["teaching"],
+  name: "My Module",
+  description: "Teaching module",
+  ...knowledgeTemplate("This module explains...", [
+    { term: "Concept 1", definition: "Definition 1" },
+    { term: "Concept 2", definition: "Definition 2" },
+  ]),
 });
 ```
 
@@ -236,61 +234,61 @@ export const myModule = defineModule({
 ```typescript
 // Reusable persona module groups
 export const foundationGroup = {
-  group: 'Foundation',
+  group: "Foundation",
   ids: [
-    'foundation/ethics/do-no-harm',
-    'foundation/reasoning/critical-thinking',
-    'foundation/reasoning/systems-thinking'
-  ]
+    "foundation/ethics/do-no-harm",
+    "foundation/reasoning/critical-thinking",
+    "foundation/reasoning/systems-thinking",
+  ],
 };
 
 export const typescriptGroup = {
-  group: 'TypeScript',
+  group: "TypeScript",
   ids: [
-    'technology/typescript/best-practices',
-    'technology/typescript/advanced-types'
-  ]
+    "technology/typescript/best-practices",
+    "technology/typescript/advanced-types",
+  ],
 };
 
 export const reactGroup = {
-  group: 'React',
-  ids: [
-    'technology/react/hooks',
-    'technology/react/patterns'
-  ]
+  group: "React",
+  ids: ["technology/react/hooks", "technology/react/patterns"],
 };
 
 // Helper function to create groups
 export const group = (name: string, ...moduleIds: string[]) => ({
   group: name,
-  ids: moduleIds
+  ids: moduleIds,
 });
 
 // Usage
-import { definePersona, foundationGroup, typescriptGroup, reactGroup, group } from 'ums-sdk/authoring';
+import {
+  definePersona,
+  foundationGroup,
+  typescriptGroup,
+  reactGroup,
+  group,
+} from "ums-sdk/authoring";
 
 export const frontendDev = definePersona({
-  name: 'Frontend Developer',
-  version: '1.0.0',
-  description: 'Frontend specialist',
-  modules: [
-    foundationGroup,
-    typescriptGroup,
-    reactGroup
-  ]
+  name: "Frontend Developer",
+  version: "1.0.0",
+  description: "Frontend specialist",
+  modules: [foundationGroup, typescriptGroup, reactGroup],
 });
 
 export const customPersona = definePersona({
-  name: 'Custom Developer',
-  version: '1.0.0',
-  description: 'Custom specialist',
+  name: "Custom Developer",
+  version: "1.0.0",
+  description: "Custom specialist",
   modules: [
     foundationGroup, // Reuse standard group
-    group('Custom Tech', // Or create inline group
-      'technology/custom/module1',
-      'technology/custom/module2'
-    )
-  ]
+    group(
+      "Custom Tech", // Or create inline group
+      "technology/custom/module1",
+      "technology/custom/module2"
+    ),
+  ],
 });
 ```
 
@@ -306,29 +304,29 @@ export const whenEnv = (env: string, value: any) =>
 
 // Usage
 export const myModule = defineModule({
-  id: 'my-module',
-  capabilities: ['feature'],
-  name: 'My Module',
-  description: 'My module description',
+  id: "my-module",
+  capabilities: ["feature"],
+  name: "My Module",
+  description: "My module description",
 
   // Conditional spreading
-  ...when(process.env.INCLUDE_ADVANCED === 'true', {
+  ...when(process.env.INCLUDE_ADVANCED === "true", {
     relationships: {
-      extends: ['advanced-base']
-    }
+      extends: ["advanced-base"],
+    },
   }),
 
-  ...whenEnv('production', {
+  ...whenEnv("production", {
     quality: {
       reviewed: true,
-      reviewedBy: 'team-lead'
-    }
+      reviewedBy: "team-lead",
+    },
   }),
 
   instruction: {
-    purpose: 'Guide users...',
-    process: ['Step 1', 'Step 2']
-  }
+    purpose: "Guide users...",
+    process: ["Step 1", "Step 2"],
+  },
 });
 ```
 
@@ -341,14 +339,18 @@ export const myModule = defineModule({
 
 // Capability helpers
 export const withCapabilities = (...caps: string[]) => ({
-  capabilities: caps
+  capabilities: caps,
 });
 
 // Metadata helpers
-export const withMeta = (name: string, description: string, keywords?: string[]) => ({
+export const withMeta = (
+  name: string,
+  description: string,
+  keywords?: string[]
+) => ({
   name,
   description,
-  ...(keywords && { keywords })
+  ...(keywords && { keywords }),
 });
 
 // Relationship helpers
@@ -357,19 +359,19 @@ export const withRelationships = (config: {
   extends?: string[];
   recommends?: string[];
 }) => ({
-  relationships: config
+  relationships: config,
 });
 
 export const requires = (...modules: string[]) => ({
-  relationships: { requires: modules }
+  relationships: { requires: modules },
 });
 
 export const withExtends = (...modules: string[]) => ({
-  relationships: { extends: modules }
+  relationships: { extends: modules },
 });
 
 export const recommends = (...modules: string[]) => ({
-  relationships: { recommends: modules }
+  relationships: { recommends: modules },
 });
 
 // Quality helpers
@@ -378,7 +380,7 @@ export const withQuality = (config: {
   reviewedBy?: string;
   reviewedAt?: Date;
 }) => ({
-  quality: config
+  quality: config,
 });
 
 export const reviewed = (by: string, at: Date = new Date()) =>
@@ -396,8 +398,8 @@ export const instructionComponent = (
   instruction: {
     purpose,
     process: steps,
-    ...options
-  }
+    ...options,
+  },
 });
 
 export const knowledgeComponent = (
@@ -408,8 +410,8 @@ export const knowledgeComponent = (
   knowledge: {
     explanation,
     ...(concepts && { concepts }),
-    ...(examples && { examples })
-  }
+    ...(examples && { examples }),
+  },
 });
 
 export const dataComponent = (
@@ -420,14 +422,14 @@ export const dataComponent = (
   data: {
     format,
     description,
-    value
-  }
+    value,
+  },
 });
 
 // Persona helpers
 export const group = (name: string, ...moduleIds: string[]) => ({
   group: name,
-  ids: moduleIds
+  ids: moduleIds,
 });
 
 export const modules = (...moduleIds: string[]) => moduleIds;
@@ -441,16 +443,16 @@ export const whenEnv = (env: string, value: any) =>
 
 // Common module groups (for personas)
 export const foundationGroup = group(
-  'Foundation',
-  'foundation/ethics/do-no-harm',
-  'foundation/reasoning/critical-thinking',
-  'foundation/reasoning/systems-thinking'
+  "Foundation",
+  "foundation/ethics/do-no-harm",
+  "foundation/reasoning/critical-thinking",
+  "foundation/reasoning/systems-thinking"
 );
 
 export const typescriptGroup = group(
-  'TypeScript',
-  'technology/typescript/best-practices',
-  'technology/typescript/advanced-types'
+  "TypeScript",
+  "technology/typescript/best-practices",
+  "technology/typescript/advanced-types"
 );
 ```
 
@@ -461,26 +463,26 @@ export const typescriptGroup = group(
 ### Example 1: Simple Module
 
 ```typescript
-import { defineModule } from 'ums-sdk/authoring';
+import { defineModule } from "ums-sdk/authoring";
 
 export const codeReview = defineModule({
-  id: 'process/code-review',
-  capabilities: ['code-review', 'quality'],
-  name: 'Code Review Process',
-  description: 'Step-by-step guide for effective code reviews',
+  id: "process/code-review",
+  capabilities: ["code-review", "quality"],
+  name: "Code Review Process",
+  description: "Step-by-step guide for effective code reviews",
   instruction: {
-    purpose: 'Guide developers through code review process',
+    purpose: "Guide developers through code review process",
     process: [
-      'Review code for logic errors',
-      'Check code style and conventions',
-      'Verify test coverage',
-      'Provide constructive feedback'
+      "Review code for logic errors",
+      "Check code style and conventions",
+      "Verify test coverage",
+      "Provide constructive feedback",
     ],
     principles: [
-      'Focus on the code, not the person',
-      'Ask questions rather than make demands'
-    ]
-  }
+      "Focus on the code, not the person",
+      "Ask questions rather than make demands",
+    ],
+  },
 });
 ```
 
@@ -493,30 +495,30 @@ import {
   withMeta,
   requires,
   reviewed,
-  instructionComponent
-} from 'ums-sdk/authoring';
+  instructionComponent,
+} from "ums-sdk/authoring";
 
 export const advancedErrorHandling = defineModule({
-  id: 'advanced-error-handling',
-  ...withCapabilities('error-handling', 'advanced', 'resilience'),
-  ...withMeta('Advanced Error Handling', 'Advanced patterns for resilient error handling'),
-  ...requires('foundation/logic/reasoning', 'error-handling'),
-  ...reviewed('tech-lead', new Date('2025-01-15')),
+  id: "advanced-error-handling",
+  ...withCapabilities("error-handling", "advanced", "resilience"),
+  ...withMeta(
+    "Advanced Error Handling",
+    "Advanced patterns for resilient error handling"
+  ),
+  ...requires("foundation/logic/reasoning", "error-handling"),
+  ...reviewed("tech-lead", new Date("2025-01-15")),
   ...instructionComponent(
-    'Guide advanced error handling patterns',
+    "Guide advanced error handling patterns",
     [
-      'Implement retry logic with exponential backoff',
-      'Add circuit breakers for failing services',
-      'Use bulkheads for resource isolation',
-      'Implement graceful degradation'
+      "Implement retry logic with exponential backoff",
+      "Add circuit breakers for failing services",
+      "Use bulkheads for resource isolation",
+      "Implement graceful degradation",
     ],
     {
-      principles: [
-        'Design for failure',
-        'Fail fast, recover gracefully'
-      ]
+      principles: ["Design for failure", "Fail fast, recover gracefully"],
     }
-  )
+  ),
 });
 ```
 
@@ -527,35 +529,50 @@ import {
   defineModule,
   withCapabilities,
   withMeta,
-  knowledgeComponent
-} from 'ums-sdk/authoring';
+  knowledgeComponent,
+} from "ums-sdk/authoring";
 
 export const solidPrinciples = defineModule({
-  id: 'concepts/solid-principles',
-  ...withCapabilities('solid', 'oop', 'design'),
-  ...withMeta('SOLID Principles', 'Core object-oriented design principles'),
+  id: "concepts/solid-principles",
+  ...withCapabilities("solid", "oop", "design"),
+  ...withMeta("SOLID Principles", "Core object-oriented design principles"),
   ...knowledgeComponent(
-    'SOLID is an acronym for five design principles that make software more maintainable',
+    "SOLID is an acronym for five design principles that make software more maintainable",
     [
-      { term: 'Single Responsibility', definition: 'A class should have one reason to change' },
-      { term: 'Open/Closed', definition: 'Open for extension, closed for modification' },
-      { term: 'Liskov Substitution', definition: 'Subtypes must be substitutable for base types' },
-      { term: 'Interface Segregation', definition: 'Many specific interfaces over one general' },
-      { term: 'Dependency Inversion', definition: 'Depend on abstractions, not concretions' }
+      {
+        term: "Single Responsibility",
+        definition: "A class should have one reason to change",
+      },
+      {
+        term: "Open/Closed",
+        definition: "Open for extension, closed for modification",
+      },
+      {
+        term: "Liskov Substitution",
+        definition: "Subtypes must be substitutable for base types",
+      },
+      {
+        term: "Interface Segregation",
+        definition: "Many specific interfaces over one general",
+      },
+      {
+        term: "Dependency Inversion",
+        definition: "Depend on abstractions, not concretions",
+      },
     ],
     [
       {
-        title: 'SRP Violation',
-        code: 'class UserManager { save() {} sendEmail() {} }',
-        explanation: 'This class has two responsibilities'
+        title: "SRP Violation",
+        code: "class UserManager { save() {} sendEmail() {} }",
+        explanation: "This class has two responsibilities",
       },
       {
-        title: 'SRP Fixed',
-        code: 'class UserRepository { save() {} }\nclass EmailService { send() {} }',
-        explanation: 'Each class now has a single responsibility'
-      }
+        title: "SRP Fixed",
+        code: "class UserRepository { save() {} }\nclass EmailService { send() {} }",
+        explanation: "Each class now has a single responsibility",
+      },
     ]
-  )
+  ),
 });
 ```
 
@@ -566,27 +583,29 @@ import {
   definePersona,
   foundationGroup,
   typescriptGroup,
-  group
-} from 'ums-sdk/authoring';
+  group,
+} from "ums-sdk/authoring";
 
 export const fullStackDev = definePersona({
-  name: 'Full-Stack Developer',
-  version: '1.0.0',
-  description: 'Expert full-stack web developer',
+  name: "Full-Stack Developer",
+  version: "1.0.0",
+  description: "Expert full-stack web developer",
   modules: [
     foundationGroup,
     typescriptGroup,
-    group('Backend',
-      'technology/node/apis',
-      'technology/databases/sql',
-      'principle/architecture/rest'
+    group(
+      "Backend",
+      "technology/node/apis",
+      "technology/databases/sql",
+      "principle/architecture/rest"
     ),
-    group('Frontend',
-      'technology/react/hooks',
-      'technology/react/patterns',
-      'principle/ui/accessibility'
-    )
-  ]
+    group(
+      "Frontend",
+      "technology/react/hooks",
+      "technology/react/patterns",
+      "principle/ui/accessibility"
+    ),
+  ],
 });
 ```
 
@@ -599,40 +618,37 @@ import {
   withMeta,
   when,
   whenEnv,
-  instructionComponent
-} from 'ums-sdk/authoring';
+  instructionComponent,
+} from "ums-sdk/authoring";
 
-const isProduction = process.env.NODE_ENV === 'production';
-const includeAdvanced = process.env.INCLUDE_ADVANCED === 'true';
+const isProduction = process.env.NODE_ENV === "production";
+const includeAdvanced = process.env.INCLUDE_ADVANCED === "true";
 
 export const myModule = defineModule({
-  id: 'my-module',
-  ...withCapabilities('feature'),
-  ...withMeta('My Module', 'My module description'),
+  id: "my-module",
+  ...withCapabilities("feature"),
+  ...withMeta("My Module", "My module description"),
 
   // Conditional spreading
   ...when(includeAdvanced, {
     relationships: {
-      extends: ['advanced-base'],
-      requires: ['advanced-dependency']
-    }
+      extends: ["advanced-base"],
+      requires: ["advanced-dependency"],
+    },
   }),
 
-  ...whenEnv('production', {
+  ...whenEnv("production", {
     quality: {
       reviewed: true,
-      reviewedBy: 'team-lead'
-    }
+      reviewedBy: "team-lead",
+    },
   }),
 
-  ...instructionComponent(
-    'Guide users through the feature',
-    [
-      'Step 1',
-      'Step 2',
-      ...(includeAdvanced ? ['Advanced Step 3', 'Advanced Step 4'] : [])
-    ]
-  )
+  ...instructionComponent("Guide users through the feature", [
+    "Step 1",
+    "Step 2",
+    ...(includeAdvanced ? ["Advanced Step 3", "Advanced Step 4"] : []),
+  ]),
 });
 ```
 
@@ -641,24 +657,28 @@ export const myModule = defineModule({
 ## Benefits
 
 ### Type Safety
+
 ✅ Full TypeScript inference
 ✅ Autocomplete for all fields
 ✅ Compile-time type checking
 ✅ Refactoring support
 
 ### Composability
+
 ✅ Object spreading for reuse
 ✅ Helper functions for common patterns
 ✅ Extract and share configurations
 ✅ Conditional composition
 
 ### Developer Experience
+
 ✅ Familiar pattern (like defineConfig(), defineComponent())
 ✅ IDE support (autocomplete, type hints, go-to-definition)
 ✅ Progressive complexity (simple cases simple, complex cases possible)
 ✅ Smart defaults reduce boilerplate
 
 ### Maintainability
+
 ✅ Standard TypeScript - no new concepts
 ✅ Easy to test (pure functions)
 ✅ Easy to debug (just objects)
@@ -671,11 +691,13 @@ export const myModule = defineModule({
 ### Package Responsibilities
 
 **ums-lib** (Pure domain logic):
+
 - **Public API**: `validateModule()`, `validateInstructionComponent()`, etc.
 - **Internal**: Validation guards (not exposed)
 - Platform-agnostic validation logic
 
 **ums-sdk** (Node.js runtime + authoring):
+
 - **Public API**: `defineModule()`, `definePersona()`, helper functions
 - **Implementation**: Uses ums-lib's public validators
 - Never imports or exposes validation guards
@@ -684,12 +706,12 @@ export const myModule = defineModule({
 
 ```typescript
 // ums-lib/src/validation/index.ts (Public API)
-export { validateModule } from './validators.js';
-export { validateInstructionComponent } from './validators.js';
+export { validateModule } from "./validators.js";
+export { validateInstructionComponent } from "./validators.js";
 // guards.ts is NOT exported (internal only)
 
 // ums-sdk/src/authoring/define-module.ts
-import { validateModule } from 'ums-lib'; // Only public API
+import { validateModule } from "ums-lib"; // Only public API
 
 export function defineModule(config) {
   const module = applySmartDefaults(config);
@@ -714,16 +736,19 @@ Users never see or interact with guards - validation is automatic and internal.
 ## Rejected Alternatives
 
 ### Builder Pattern (Fluent API)
+
 **Pros**: Maximum type safety with type-state pattern
 **Cons**: Less composable, more complex, steeper learning curve
 **Decision**: Type safety gains don't justify complexity
 
 ### Composable Functions DSL
+
 **Pros**: Maximum composability, functional style
 **Cons**: Less type safety, runtime validation needed
 **Decision**: Type safety is more important than pure functional composition
 
 ### Tagged Template Literals
+
 **Pros**: Very concise, YAML-like
 **Cons**: No type safety, no autocomplete, string parsing
 **Decision**: Type safety and IDE support are critical

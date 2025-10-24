@@ -32,7 +32,7 @@ Node.js SDK for the Unified Module System (UMS) v2.0. Provides file system opera
 The UMS SDK is the Node.js implementation layer for UMS v2.0, providing:
 
 - **File System Operations**: Load `.module.ts` and `.persona.ts` files from disk
-- **TypeScript Module Loading**: Execute TypeScript files on-the-fly using `tsx`
+- **TypeScript Module Loading**: Dynamically import `.ts` modules (run under `tsx`/`ts-node` loader or precompile to JavaScript)
 - **Module Discovery**: Automatically find and load modules from configured directories
 - **Build Orchestration**: Complete workflow for building personas from modular components
 - **Configuration Management**: Load and validate `modules.config.yml` files
@@ -50,14 +50,17 @@ The SDK requires Node.js 22.0.0 or higher and includes `ums-lib` as a dependency
 
 ### Optional Dependencies
 
-- **tsx**: Required for loading TypeScript modules (`.module.ts`, `.persona.ts`)
-- **TypeScript**: Peer dependency (optional)
+- **tsx**: Recommended for loading TypeScript modules (`.module.ts`, `.persona.ts`) at runtime
+- **TypeScript**: Peer dependency for type-checking; optional at runtime if you precompile
 
-If you need to load TypeScript files, install tsx:
+If you need to execute `.ts` files directly, install `tsx` and run your scripts with the loader:
 
 ```bash
-npm install tsx
+npm install tsx --save-dev
+node --loader tsx ./scripts/run-build.ts
 ```
+
+Alternatively, compile source files to JavaScript (`tsc --outDir dist`) and import the emitted `.js` files with the SDK.
 
 ## Architecture
 
@@ -133,6 +136,8 @@ import { validateModule, renderMarkdown } from 'ums-lib';
 const result = await buildPersona('./persona.persona.ts'); // Already validated and rendered!
 ```
 
+> **Runtime note:** When consuming `.persona.ts`/`.module.ts` files directly, run the script with a TypeScript loader (e.g., `node --loader tsx`) or precompile the files to `.js` before calling the SDK.
+
 ## Core Components
 
 ### High-Level API
@@ -184,6 +189,8 @@ if (report.errors.size > 0) {
 }
 ```
 
+> **Persona discovery:** `validateAll({ includePersonas: true })` only scans directories listed in `modules.config.yml`. Ensure persona files live inside (or beneath) one of the configured `localModulePaths`.
+
 #### `listModules(options)`
 
 List all available modules with metadata:
@@ -205,6 +212,8 @@ modules.forEach(module => {
   console.log(`  Source: ${module.source}`);
   console.log(`  Capabilities: ${module.capabilities.join(', ')}`);
 });
+
+// filePath is only defined for modules discovered from local directories and may be omitted.
 ```
 
 ### Loaders
@@ -311,7 +320,6 @@ const isStandard = standardLib.isStandardModule('foundation/ethics/do-no-harm');
 // Get standard library path
 const path = standardLib.getStandardLibraryPath();
 ```
-
 
 ## Usage Examples
 
@@ -453,7 +461,6 @@ listReasoningModules();
 listTypescriptProcedures();
 ```
 
-
 ## TypeScript Support
 
 The SDK uses `tsx` to load TypeScript files on-the-fly, allowing you to write modules and personas in TypeScript without a separate compilation step.
@@ -495,7 +502,8 @@ export const errorHandling: Module = {
   metadata: {
     name: 'Error Handling',
     description: 'Best practices for error handling',
-    semantic: 'exception error handling debugging recovery best-practices patterns',
+    semantic:
+      'exception error handling debugging recovery best-practices patterns',
   },
   instruction: {
     purpose: 'Guide error handling implementation',
@@ -670,7 +678,7 @@ interface ValidationReport {
 interface ListOptions {
   configPath?: string;
   includeStandard?: boolean;
-  level?: number | number[] | CognitiveLevel | CognitiveLevel[];  // Accepts enum or number
+  level?: number | number[] | CognitiveLevel | CognitiveLevel[]; // Accepts enum or number
   capability?: string;
   domain?: string;
   tag?: string;
