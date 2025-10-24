@@ -126,14 +126,14 @@ That's it! You now have a custom-built instruction set in `concise-assistant.md`
 
 ## CLI Command Reference
 
-| Command    | Description                                                     | Example Usage                                      |
-| :--------- | :-------------------------------------------------------------- | :------------------------------------------------- |
-| `build`    | Compiles a `.persona.ts` into a single instruction document.    | `npm start build ./personas/my-persona.ts`         |
-| `list`     | Lists all discoverable modules with filtering options.          | `npm start list --level 2 --capability testing`    |
-| `search`   | Searches for modules by keyword with filtering options.         | `npm start search "error" --domain typescript`     |
-| `validate` | Validates the syntax and integrity of module and persona files. | `npm start validate ./instructions-modules/`       |
-| `inspect`  | Inspects module conflicts and registry state.                   | `npm start inspect --conflicts-only`               |
-| `mcp`      | MCP server development and testing tools.                       | `npm start mcp start --stdio`                      |
+| Command    | Description                                                     | Example Usage                                   |
+| :--------- | :-------------------------------------------------------------- | :---------------------------------------------- |
+| `build`    | Compiles a `.persona.ts` into a single instruction document.    | `npm start build ./personas/my-persona.ts`      |
+| `list`     | Lists all discoverable modules with filtering options.          | `npm start list --level 2 --capability testing` |
+| `search`   | Searches for modules by keyword with filtering options.         | `npm start search "error" --domain typescript`  |
+| `validate` | Validates the syntax and integrity of module and persona files. | `npm start validate ./instructions-modules/`    |
+| `inspect`  | Inspects module conflicts and registry state.                   | `npm start inspect --conflicts-only`            |
+| `mcp`      | MCP server development and testing tools.                       | `npm start mcp start --stdio`                   |
 
 ### MCP Server Commands
 

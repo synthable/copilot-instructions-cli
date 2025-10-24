@@ -32,7 +32,7 @@ const mockInstructionModule: Module = {
   version: '1.0',
   schemaVersion: '2.0',
   capabilities: ['reasoning', 'logic'],
- cognitiveLevel: 2,
+  cognitiveLevel: 2,
   metadata: {
     name: 'Deductive Reasoning',
     description: 'Logical deduction principles',
@@ -65,7 +65,7 @@ const mockKnowledgeModule: Module = {
   version: '1.0',
   schemaVersion: '2.0',
   capabilities: ['patterns', 'design'],
- cognitiveLevel: 2,
+  cognitiveLevel: 2,
   metadata: {
     name: 'Observer Pattern',
     description: 'Behavioral design pattern',
@@ -113,7 +113,7 @@ const mockDataModule: Module = {
   version: '1.0',
   schemaVersion: '2.0',
   capabilities: ['configuration'],
- cognitiveLevel: 2,
+  cognitiveLevel: 2,
   metadata: {
     name: 'Default Configuration',
     description: 'Default system configuration',

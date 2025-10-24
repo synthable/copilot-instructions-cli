@@ -226,7 +226,8 @@ export async function handleSearch(
     if (filteredResults.length === 0) {
       const filters: string[] = [];
       if (options.level) filters.push(`level '${options.level}'`);
-      if (options.capability) filters.push(`capability '${options.capability}'`);
+      if (options.capability)
+        filters.push(`capability '${options.capability}'`);
       if (options.domain) filters.push(`domain '${options.domain}'`);
       if (options.tag) filters.push(`tag '${options.tag}'`);
       const filterMsg = filters.length > 0 ? ` with ${filters.join(', ')}` : '';

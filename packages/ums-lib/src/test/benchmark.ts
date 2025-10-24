@@ -13,7 +13,7 @@ function createMockModule(id: string): Module {
     version: '1.0.0',
     schemaVersion: '2.0',
     capabilities: ['specification'],
- cognitiveLevel: 2,
+    cognitiveLevel: 2,
     metadata: {
       name: `Module ${id}`,
       description: `Test module ${id}`,

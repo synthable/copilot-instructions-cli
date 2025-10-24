@@ -21,7 +21,7 @@ describe('ModuleRegistry', () => {
     version: '1.0.0',
     schemaVersion: '2.0',
     capabilities: ['reasoning', 'logic'],
- cognitiveLevel: 2,
+    cognitiveLevel: 2,
     metadata: {
       name: 'Reasoning Framework',
       description: 'A framework for logical reasoning',
@@ -34,7 +34,7 @@ describe('ModuleRegistry', () => {
     version: '2.0.0',
     schemaVersion: '2.0',
     capabilities: ['reasoning', 'logic', 'advanced'],
- cognitiveLevel: 2,
+    cognitiveLevel: 2,
     metadata: {
       name: 'Advanced Reasoning Framework',
       description: 'An advanced framework for logical reasoning',
@@ -47,7 +47,7 @@ describe('ModuleRegistry', () => {
     version: '1.0.0',
     schemaVersion: '2.0',
     capabilities: ['design', 'modularity'],
- cognitiveLevel: 2,
+    cognitiveLevel: 2,
     metadata: {
       name: 'Modularity Pattern',
       description: 'Design pattern for modular systems',

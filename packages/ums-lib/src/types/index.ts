@@ -41,8 +41,7 @@ export function getCognitiveLevelName(
     [CognitiveLevel.UNIVERSAL_PATTERNS]: 'Universal Patterns',
     [CognitiveLevel.DOMAIN_SPECIFIC_GUIDANCE]: 'Domain-Specific Guidance',
     [CognitiveLevel.PROCEDURES_AND_PLAYBOOKS]: 'Procedures & Playbooks',
-    [CognitiveLevel.SPECIFICATIONS_AND_STANDARDS]:
-      'Specifications & Standards',
+    [CognitiveLevel.SPECIFICATIONS_AND_STANDARDS]: 'Specifications & Standards',
     [CognitiveLevel.META_COGNITION]: 'Meta-Cognition',
   };
   return names[level as number];
@@ -115,7 +114,12 @@ export function parseCognitiveLevel(
  * @returns True if the value is a valid CognitiveLevel (0-6)
  */
 export function isValidCognitiveLevel(value: unknown): value is CognitiveLevel {
-  return typeof value === 'number' && value >= 0 && value <= 6 && Number.isInteger(value);
+  return (
+    typeof value === 'number' &&
+    value >= 0 &&
+    value <= 6 &&
+    Number.isInteger(value)
+  );
 }
 
 // #endregion

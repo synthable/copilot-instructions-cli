@@ -83,7 +83,10 @@ const moduleObj: Module = {
   },
   instruction: {
     purpose: 'Demonstrate module structure',
-    principles: ['Follow UMS v2.0 specification', 'Include all required fields'],
+    principles: [
+      'Follow UMS v2.0 specification',
+      'Include all required fields',
+    ],
   },
 };
 

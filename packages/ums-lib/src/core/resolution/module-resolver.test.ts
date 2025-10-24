@@ -18,7 +18,7 @@ const mockModule1: Module = {
   version: '1.0',
   schemaVersion: '2.0',
   capabilities: ['reasoning', 'logic'],
- cognitiveLevel: 2,
+  cognitiveLevel: 2,
   metadata: {
     name: 'Deductive Reasoning',
     description: 'Logical deduction principles',
@@ -31,7 +31,7 @@ const mockModule2: Module = {
   version: '1.0',
   schemaVersion: '2.0',
   capabilities: ['react', 'hooks'],
- cognitiveLevel: 2,
+  cognitiveLevel: 2,
   metadata: {
     name: 'React Hooks',
     description: 'React hooks best practices',
@@ -46,7 +46,7 @@ const mockModule3: Module = {
   version: '1.0',
   schemaVersion: '2.0',
   capabilities: ['testing', 'quality'],
- cognitiveLevel: 2,
+  cognitiveLevel: 2,
   metadata: {
     name: 'Testing Principles',
     description: 'Software testing best practices',

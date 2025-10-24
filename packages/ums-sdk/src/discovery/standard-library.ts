@@ -71,10 +71,7 @@ export class StandardLibrary {
    */
   isStandardModule(moduleId: string): boolean {
     // Check if module file exists in standard library path
-    const standardModulePath = join(
-      this.standardPath,
-      `${moduleId}.module.ts`
-    );
+    const standardModulePath = join(this.standardPath, `${moduleId}.module.ts`);
     return existsSync(standardModulePath);
   }
 

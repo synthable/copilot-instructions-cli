@@ -109,8 +109,14 @@ describe('search command', () => {
     });
 
     // Check if chalk methods were called
-    console.error('chalk.cyan calls:', (chalk.cyan as any).mock?.calls?.length || 'not mocked');
-    console.error('chalk.cyan.bold calls:', (chalk.cyan.bold as any).mock?.calls?.length || 'not mocked');
+    console.error(
+      'chalk.cyan calls:',
+      (chalk.cyan as any).mock?.calls?.length || 'not mocked'
+    );
+    console.error(
+      'chalk.cyan.bold calls:',
+      (chalk.cyan.bold as any).mock?.calls?.length || 'not mocked'
+    );
   });
 
   it('should search modules by name', async () => {
