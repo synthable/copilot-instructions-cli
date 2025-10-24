@@ -364,12 +364,54 @@ export const defaults = {
   },
 
   /**
-   * Infer tier from module ID
+   * Extract category from hierarchical module ID
+   * @example extractCategory('ethics/do-no-harm') => 'ethics'
+   * @example extractCategory('be-concise') => undefined
    */
-  inferTier(moduleId: string): string | undefined {
-    const tiers = ['foundation', 'principle', 'technology', 'execution'];
-    const firstPart = moduleId.split('/')[0];
-    return tiers.includes(firstPart) ? firstPart : undefined;
+  extractCategory(moduleId: string): string | undefined {
+    const parts = moduleId.split('/');
+    return parts.length > 1 ? parts[0] : undefined;
+  },
+
+  /**
+   * Get cognitive level name from enum value
+   * Converts CognitiveLevel enum (0-6) to human-readable name
+   * @example getCognitiveLevelName(0) => 'Axioms & Ethics'
+   * @example getCognitiveLevelName(CognitiveLevel.REASONING_FRAMEWORKS) => 'Reasoning Frameworks'
+   */
+  getCognitiveLevelName(level: CognitiveLevel): string {
+    const names = {
+      [CognitiveLevel.AXIOMS_AND_ETHICS]: 'Axioms & Ethics',
+      [CognitiveLevel.REASONING_FRAMEWORKS]: 'Reasoning Frameworks',
+      [CognitiveLevel.UNIVERSAL_PATTERNS]: 'Universal Patterns',
+      [CognitiveLevel.DOMAIN_SPECIFIC_GUIDANCE]: 'Domain-Specific Guidance',
+      [CognitiveLevel.PROCEDURES_AND_PLAYBOOKS]: 'Procedures & Playbooks',
+      [CognitiveLevel.SPECIFICATIONS_AND_STANDARDS]: 'Specifications & Standards',
+      [CognitiveLevel.META_COGNITION]: 'Meta-Cognition',
+    };
+    return names[level] ?? 'Unknown';
+  },
+
+  /**
+   * Parse cognitive level from string or number
+   * Accepts enum names (e.g., 'REASONING_FRAMEWORKS') or numeric values (e.g., '1')
+   * @example parseCognitiveLevel('REASONING_FRAMEWORKS') => 1
+   * @example parseCognitiveLevel('1') => 1
+   */
+  parseCognitiveLevel(value: string): CognitiveLevel | undefined {
+    // Try parsing as enum name
+    const enumKey = value.toUpperCase().replace(/-/g, '_');
+    if (enumKey in CognitiveLevel && isNaN(Number(enumKey))) {
+      return CognitiveLevel[enumKey as keyof typeof CognitiveLevel];
+    }
+
+    // Try parsing as number
+    const numValue = parseInt(value, 10);
+    if (!isNaN(numValue) && numValue >= 0 && numValue <= 6) {
+      return numValue as CognitiveLevel;
+    }
+
+    return undefined;
   },
 
   /**
@@ -821,7 +863,7 @@ export const advancedErrorHandling = defineModule({
 |----------|------------|---------|-------------|
 | `generateSemantic` | `{ name, description?, capabilities?, keywords? }` | `string` | Auto-generates semantic metadata |
 | `exportName` | `moduleId: string` | `string` | Calculates export name from ID |
-| `inferTier` | `moduleId: string` | `string \| undefined` | Infers tier from ID |
+| `getPrimaryTag` | `module: Module` | `string \| undefined` | Gets primary level tag from module metadata |
 | `defaultVersion` | - | `'1.0.0'` | Returns default version |
 | `schemaVersion` | - | `'2.0'` | Returns schema version |
 

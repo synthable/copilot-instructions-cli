@@ -62,53 +62,72 @@ import {
   parsePersona,
   renderMarkdown,
 } from 'ums-lib';
-import type { UMSModule, UMSPersona } from 'ums-lib';
+import type { Module, Persona } from 'ums-lib';
 
 // 1. Create a registry with a conflict resolution strategy ('error', 'warn', or 'replace')
 const registry = new ModuleRegistry('warn');
 
-// 2. Parse and add modules to the registry from different sources
-const moduleContent = `
-id: foundation/test/module-a
-version: "1.0.0"
-schemaVersion: "1.0"
-shape: specification
-meta:
-  name: Module A
-  description: A test module.
-  semantic: A test module.
-body:
-  goal: This is a test goal.
-`;
-const module = parseModule(moduleContent);
-registry.add(module, { type: 'local', path: './modules/module-a.yml' });
+// 2. Create module objects (typically loaded from .module.ts files)
+import { CognitiveLevel } from 'ums-lib';
 
-// 3. Parse the persona file
-const personaContent = `
-name: My Test Persona
-version: "1.0.0"
-schemaVersion: "1.0"
-description: A test persona.
-semantic: A test persona for demonstration.
-identity: I am a test persona.
-moduleGroups:
-  - groupName: Core
-    modules:
-      - foundation/test/module-a
-`;
-const persona = parsePersona(personaContent);
+const moduleObj: Module = {
+  id: 'testing/module-a',
+  version: '1.0.0',
+  schemaVersion: '2.0',
+  capabilities: ['testing', 'example'],
+  cognitiveLevel: CognitiveLevel.UNIVERSAL_PATTERNS,
+  metadata: {
+    name: 'Module A',
+    description: 'A test module for demonstration.',
+    semantic: 'Test module demonstrating UMS v2.0 structure and validation.',
+  },
+  instruction: {
+    purpose: 'Demonstrate module structure',
+    principles: ['Follow UMS v2.0 specification', 'Include all required fields'],
+  },
+};
 
-// 4. Resolve all modules required by the persona
-const requiredModuleIds = persona.moduleGroups.flatMap(group => group.modules);
-const resolvedModules: UMSModule[] = [];
-for (const moduleId of requiredModuleIds) {
-  const resolvedModule = registry.resolve(moduleId);
-  if (resolvedModule) {
-    resolvedModules.push(resolvedModule);
+// 3. Parse and validate the module, then add to registry
+const module = parseModule(moduleObj);
+registry.add(module, { type: 'local', path: './modules/module-a.module.ts' });
+
+// 4. Create persona object (typically loaded from .persona.ts file)
+const personaObj: Persona = {
+  name: 'My Test Persona',
+  version: '1.0.0',
+  schemaVersion: '2.0',
+  description: 'A test persona for demonstration.',
+  semantic: 'Demonstration persona showing UMS v2.0 composition patterns.',
+  modules: [
+    {
+      group: 'Core',
+      ids: ['testing/module-a'],
+    },
+  ],
+};
+
+// 5. Parse and validate the persona
+const persona = parsePersona(personaObj);
+
+// 6. Resolve all modules required by the persona
+const resolvedModules: Module[] = [];
+for (const group of persona.modules) {
+  if (Array.isArray(group)) {
+    // Flat array format
+    for (const moduleId of group) {
+      const resolvedModule = registry.resolve(moduleId);
+      if (resolvedModule) resolvedModules.push(resolvedModule);
+    }
+  } else {
+    // Grouped format
+    for (const moduleId of group.ids) {
+      const resolvedModule = registry.resolve(moduleId);
+      if (resolvedModule) resolvedModules.push(resolvedModule);
+    }
   }
 }
 
-// 5. Render the final Markdown output
+// 7. Render the final Markdown output
 const markdownOutput = renderMarkdown(persona, resolvedModules);
 console.log(markdownOutput);
 ```
@@ -124,14 +143,44 @@ import {
   resolvePersonaModules,
   renderMarkdown,
 } from 'ums-lib';
-import type { UMSModule, UMSPersona } from 'ums-lib';
+import type { Module, Persona } from 'ums-lib';
 
-// 1. Parse all content
-const persona = parsePersona(personaContent);
-const module = parseModule(moduleContent);
-const allAvailableModules: UMSModule[] = [module];
+// 1. Create and parse module objects
+import { CognitiveLevel } from 'ums-lib';
 
-// 2. Resolve and render
+const moduleObj: Module = {
+  id: 'testing/example',
+  version: '1.0.0',
+  schemaVersion: '2.0',
+  capabilities: ['testing'],
+  cognitiveLevel: CognitiveLevel.UNIVERSAL_PATTERNS,
+  metadata: {
+    name: 'Example Module',
+    description: 'An example module.',
+    semantic: 'Example module for testing pure functional API.',
+  },
+  instruction: {
+    purpose: 'Demonstrate functional API usage',
+    principles: ['Use pure functions', 'Manage state externally'],
+  },
+};
+
+const module = parseModule(moduleObj);
+const allAvailableModules: Module[] = [module];
+
+// 2. Create and parse persona object
+const personaObj: Persona = {
+  name: 'Test Persona',
+  version: '1.0.0',
+  schemaVersion: '2.0',
+  description: 'A test persona.',
+  semantic: 'Test persona demonstrating functional API.',
+  modules: ['testing/example'],
+};
+
+const persona = parsePersona(personaObj);
+
+// 3. Resolve and render
 const resolutionResult = resolvePersonaModules(persona, allAvailableModules);
 if (resolutionResult.missingModules.length > 0) {
   console.error('Missing modules:', resolutionResult.missingModules);
@@ -161,23 +210,23 @@ This exports all core functions, types, and error classes.
 
 ### Resolution (`ums-lib/core/resolution`)
 
-- `resolvePersonaModules(persona: UMSPersona, modules: UMSModule[]): ModuleResolutionResult`: A high-level function to resolve all modules for a persona from a flat list.
-- `createModuleRegistry(modules: UMSModule[]): Map<string, UMSModule>`: Creates a simple `Map` from an array of modules.
-- `validateModuleReferences(persona: UMSPersona, registry: Map<string, UMSModule>): ValidationResult`: Checks if all modules referenced in a persona exist in a given registry map.
+- `resolvePersonaModules(persona: Persona, modules: Module[]): ModuleResolutionResult`: A high-level function to resolve all modules for a persona from a flat list.
+- `createModuleRegistry(modules: Module[]): Map<string, Module>`: Creates a simple `Map` from an array of modules.
+- `validateModuleReferences(persona: Persona, registry: Map<string, Module>): ValidationResult`: Checks if all modules referenced in a persona exist in a given registry map.
 
 ### Rendering (`ums-lib/core/rendering`)
 
-- `renderMarkdown(persona: UMSPersona, modules: UMSModule[]): string`: Renders a complete persona and its resolved modules into a final Markdown string.
-- `renderModule(module: UMSModule): string`: Renders a single module to a Markdown string.
+- `renderMarkdown(persona: Persona, modules: Module[]): string`: Renders a complete persona and its resolved modules into a final Markdown string.
+- `renderModule(module: Module): string`: Renders a single module to a Markdown string.
 - `generateBuildReport(...)`: Generates a build report compliant with the UMS v2.0 specification.
 
 ### Registry (`ums-lib/core/registry`)
 
 - `ModuleRegistry`: A class that provides a conflict-aware storage and retrieval mechanism for UMS modules.
   - `new ModuleRegistry(strategy: ConflictStrategy = 'error')`
-  - `.add(module: UMSModule, source: ModuleSource): void`
-  - `.resolve(moduleId: string, strategy?: ConflictStrategy): UMSModule | null`
-  - `.resolveAll(strategy: ConflictStrategy): Map<string, UMSModule>`
+  - `.add(module: Module, source: ModuleSource): void`
+  - `.resolve(moduleId: string, strategy?: ConflictStrategy): Module | null`
+  - `.resolveAll(strategy: ConflictStrategy): Map<string, Module>`
   - `.getConflicts(moduleId: string): ModuleEntry[] | null`
   - `.getConflictingIds(): string[]`
 

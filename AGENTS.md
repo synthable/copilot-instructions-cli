@@ -31,9 +31,10 @@
 
 ## Module System
 
-- **Structure**: Four tiers (foundation/principle/technology/execution)
-- **IDs**: `tier/category/name-v1-0` pattern
-- **Validation**: Schema-based with YAML modules, TypeScript personas
+- **Structure**: Tag-based classification (flexible module IDs)
+- **IDs**: `category/name` or `domain/category/name` pattern (e.g., `communication/be-concise`)
+- **Tags**: Modules use tags for classification (foundational, intermediate, advanced, etc.)
+- **Validation**: Schema-based with TypeScript modules and personas
 
 ## Git Workflow
 

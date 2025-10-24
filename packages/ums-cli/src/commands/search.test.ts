@@ -3,7 +3,9 @@ import chalk from 'chalk';
 import { handleSearch } from './search.js';
 import { discoverAllModules } from '../utils/module-discovery.js';
 import { ModuleRegistry, type Module } from 'ums-lib';
-import type { CLIModule } from '../types/cli-extensions.js';
+import { deductiveReasoning } from '../__fixtures__/modules/deductive-reasoning.module.js';
+import { testingPrinciples } from '../__fixtures__/modules/testing-principles.module.js';
+import { errorHandling } from '../__fixtures__/modules/error-handling.module.js';
 
 // Helper to create chainable chalk mocks
 function createChainableMock(): any {
@@ -66,44 +68,48 @@ const mockConsoleLog = vi.spyOn(console, 'log').mockImplementation(() => {
 describe('search command', () => {
   const mockDiscoverAllModules = vi.mocked(discoverAllModules);
 
-  const mockModule1: CLIModule = {
-    id: 'foundation/logic/deductive-reasoning',
-    filePath: '/test/foundation/logic/deductive-reasoning.md',
-    version: '1.0',
-    schemaVersion: '1.0',
-    capabilities: [],
-    metadata: {
-      name: 'Deductive Reasoning',
-      description: 'Logical reasoning from premises',
-      semantic: 'Logical reasoning from premises',
-      tags: ['logic', 'reasoning'],
-    },
-  };
-
-  const mockModule2: CLIModule = {
-    id: 'principle/quality/testing',
-    filePath: '/test/principle/quality/testing.md',
-    version: '1.0',
-    schemaVersion: '1.0',
-    capabilities: [],
-    metadata: {
-      name: 'Testing Principles',
-      description: 'Quality assurance through testing',
-      semantic: 'Quality assurance through testing',
-    },
-  };
+  // Use real test fixtures instead of inline mocks
+  const mockModule1 = deductiveReasoning;
+  const mockModule2 = testingPrinciples;
+  const mockModule3 = errorHandling;
 
   // Helper function to create registry with test modules
-  function createMockRegistry(modules: CLIModule[]): ModuleRegistry {
+  function createMockRegistry(modules: Module[]): ModuleRegistry {
     const registry = new ModuleRegistry('warn');
     for (const module of modules) {
-      registry.add(module as Module, { type: 'standard', path: 'test' });
+      registry.add(module, { type: 'standard', path: 'test' });
     }
     return registry;
   }
 
   beforeEach(() => {
     vi.clearAllMocks();
+  });
+
+  // TODO: Fix chalk mocks - see GitHub issue #101
+  // The fixtures are valid and the search logic works, but console.log mocks
+  // aren't capturing the output from renderSearchResults() correctly.
+  it.skip('debug: check console.log calls', async () => {
+    // Arrange
+    const testRegistry = createMockRegistry([mockModule1, mockModule2]);
+    mockDiscoverAllModules.mockResolvedValue({
+      registry: testRegistry,
+      warnings: [],
+    });
+
+    // Act
+    await handleSearch('Deductive', { verbose: false });
+
+    // Check console.log calls in detail
+    console.error('Console.log call count:', mockConsoleLog.mock.calls.length);
+    console.error('All console.log calls:');
+    mockConsoleLog.mock.calls.forEach((call, index) => {
+      console.error(`  Call ${index}:`, JSON.stringify(call));
+    });
+
+    // Check if chalk methods were called
+    console.error('chalk.cyan calls:', (chalk.cyan as any).mock?.calls?.length || 'not mocked');
+    console.error('chalk.cyan.bold calls:', (chalk.cyan.bold as any).mock?.calls?.length || 'not mocked');
   });
 
   it('should search modules by name', async () => {
@@ -154,7 +160,7 @@ describe('search command', () => {
     );
   });
 
-  it('should filter by tier', async () => {
+  it('should filter by tag', async () => {
     // Arrange
     mockDiscoverAllModules.mockResolvedValue({
       registry: createMockRegistry([mockModule1, mockModule2]),
@@ -162,9 +168,9 @@ describe('search command', () => {
     });
 
     // Act
-    await handleSearch('', { tier: 'foundation', verbose: false });
+    await handleSearch('', { tag: 'logic', verbose: false });
 
-    // Assert - should only show foundation modules
+    // Assert - should only show modules with 'logic' tag
     expect(mockConsoleLog).toHaveBeenCalledWith(
       expect.stringContaining('Found 1 matching modules')
     );
@@ -197,7 +203,7 @@ describe('search command', () => {
     await handleSearch('test', { verbose: false });
 
     // Assert
-    expect(chalk.yellow).toHaveBeenCalledWith('No UMS v1.0 modules found.');
+    expect(chalk.yellow).toHaveBeenCalledWith('No UMS v2.0 modules found.');
   });
 
   it('should handle case-insensitive search', async () => {
@@ -217,23 +223,14 @@ describe('search command', () => {
   });
 
   it('should handle modules without tags', async () => {
-    // Arrange - Create module without tags property
-    const moduleWithoutTags: CLIModule = {
-      ...mockModule2,
-      metadata: {
-        name: 'Testing Principles',
-        description: 'Quality assurance through testing',
-        semantic: 'Quality assurance through testing',
-      },
-    };
-
+    // Arrange - Use mockModule3 (errorHandling) which has no tags
     mockDiscoverAllModules.mockResolvedValue({
-      registry: createMockRegistry([moduleWithoutTags]),
+      registry: createMockRegistry([mockModule3]),
       warnings: [],
     });
 
-    // Act
-    await handleSearch('testing', { verbose: false });
+    // Act - Search by word in description
+    await handleSearch('handling', { verbose: false });
 
     // Assert - should still find module by description
     expect(mockConsoleLog).toHaveBeenCalledWith(

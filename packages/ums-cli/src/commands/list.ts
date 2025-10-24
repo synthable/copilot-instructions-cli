@@ -1,45 +1,83 @@
 /**
  * @module commands/list
- * @description Command to list available UMS v1.0 modules (M5).
+ * @description Command to list available UMS v2.0 modules.
  */
 
 import chalk from 'chalk';
 import Table from 'cli-table3';
 import { handleError } from '../utils/error-handler.js';
-import type { Module } from 'ums-lib';
+import {
+  type Module,
+  parseCognitiveLevel,
+  getCognitiveLevelName,
+} from 'ums-lib';
 import { createDiscoveryProgress } from '../utils/progress.js';
 import { discoverAllModules } from '../utils/module-discovery.js';
 import { getModuleMetadata } from '../types/cli-extensions.js';
 
 interface ListOptions {
-  tier?: string;
+  level?: string;
+  capability?: string;
+  domain?: string;
+  tag?: string;
   verbose?: boolean;
 }
 
 /**
- * Filters and sorts modules according to M5 requirements
+ * Filters and sorts modules by level, capability, domain, tag, and metadata.name
  */
 function filterAndSortModules(
   modules: Module[],
-  tierFilter?: string
+  options: {
+    level?: string;
+    capability?: string;
+    domain?: string;
+    tag?: string;
+  }
 ): Module[] {
   let filteredModules = modules;
 
-  if (tierFilter) {
-    const validTiers = ['foundation', 'principle', 'technology', 'execution'];
-    if (!validTiers.includes(tierFilter)) {
-      throw new Error(
-        `Invalid tier '${tierFilter}'. Must be one of: ${validTiers.join(', ')}`
+  // Filter by cognitive level (accepts numbers or enum names like "UNIVERSAL_PATTERNS")
+  if (options.level) {
+    const levels = options.level
+      .split(',')
+      .map(s => parseCognitiveLevel(s.trim()))
+      .filter((n): n is number => n !== undefined);
+    if (levels.length > 0) {
+      filteredModules = filteredModules.filter(m =>
+        levels.includes(m.cognitiveLevel)
       );
     }
+  }
 
-    filteredModules = modules.filter(m => {
-      const tier = m.id.split('/')[0];
-      return tier === tierFilter;
+  // Filter by capabilities (comma-separated)
+  if (options.capability) {
+    const capabilities = options.capability.split(',').map(s => s.trim());
+    filteredModules = filteredModules.filter(m =>
+      capabilities.some(cap => m.capabilities.includes(cap))
+    );
+  }
+
+  // Filter by domain (comma-separated)
+  if (options.domain) {
+    const domains = options.domain.split(',').map(s => s.trim());
+    filteredModules = filteredModules.filter(m => {
+      if (!m.domain) return false;
+      const moduleDomains = Array.isArray(m.domain) ? m.domain : [m.domain];
+      return domains.some(d => moduleDomains.includes(d));
     });
   }
 
-  // M5 sorting: metadata.name (Title Case) then id
+  // Filter by tag (comma-separated)
+  if (options.tag) {
+    const tags = options.tag.split(',').map(s => s.trim());
+    filteredModules = filteredModules.filter(m => {
+      const metadata = getModuleMetadata(m);
+      return tags.some(tag => metadata.tags?.includes(tag));
+    });
+  }
+
+  // Sorting: metadata.name (Title Case) then id
   filteredModules.sort((a, b) => {
     const metaA = getModuleMetadata(a);
     const metaB = getModuleMetadata(b);
@@ -56,32 +94,33 @@ function filterAndSortModules(
  */
 function renderModulesTable(modules: Module[]): void {
   const table = new Table({
-    head: ['ID', 'Tier/Subject', 'Name', 'Description'],
+    head: ['ID', 'Name', 'Level', 'Capabilities', 'Tags', 'Description'],
     style: {
       head: ['cyan', 'bold'],
       border: ['gray'],
       compact: false,
     },
-    colWidths: [30, 25, 30],
+    colWidths: [28, 22, 16, 18, 18, 28],
     wordWrap: true,
   });
 
   modules.forEach(module => {
-    const idParts = module.id.split('/');
-    const tier = idParts[0];
-    const subject = idParts.slice(1).join('/');
-    const tierSubject = subject ? `${tier}/${subject}` : tier;
     const metadata = getModuleMetadata(module);
+    const capabilities = module.capabilities.join(', ');
+    const tags = metadata.tags?.join(', ') ?? 'none';
+    const levelName = getCognitiveLevelName(module.cognitiveLevel) ?? 'Unknown';
 
     table.push([
       chalk.green(module.id),
-      chalk.yellow(tierSubject),
       chalk.white.bold(metadata.name),
+      chalk.magenta(`${module.cognitiveLevel}: ${levelName}`),
+      chalk.cyan(capabilities),
+      chalk.yellow(tags),
       chalk.gray(metadata.description),
     ]);
   });
 
-  console.log(chalk.cyan.bold('\nAvailable UMS v1.0 modules:\n'));
+  console.log(chalk.cyan.bold('\nAvailable UMS v2.0 modules:\n'));
   console.log(table.toString());
   console.log(
     chalk.cyan(`\nTotal modules: ${chalk.bold(modules.length.toString())}`)
@@ -89,24 +128,28 @@ function renderModulesTable(modules: Module[]): void {
 }
 
 /**
- * Handles the 'list' command for UMS v1.0 modules (M5).
+ * Handles the 'list' command for UMS v2.0 modules.
  * @param options - The command options.
- * @param options.tier - The tier to filter by (foundation|principle|technology|execution).
+ * @param options.level - The cognitive level(s) to filter by (comma-separated).
+ * @param options.capability - The capability(ies) to filter by (comma-separated).
+ * @param options.domain - The domain(s) to filter by (comma-separated).
+ * @param options.tag - The tag(s) to filter by (comma-separated).
+ * @param options.verbose - Enable verbose output.
  */
 export async function handleList(options: ListOptions): Promise<void> {
   const progress = createDiscoveryProgress('list', options.verbose);
 
   try {
-    progress.start('Discovering UMS v1.0 modules...');
+    progress.start('Discovering UMS v2.0 modules...');
 
-    // Use UMS v1.0 module discovery
+    // Use UMS v2.0 module discovery
     const moduleDiscoveryResult = await discoverAllModules();
     const modulesMap = moduleDiscoveryResult.registry.resolveAll('warn');
     const modules = Array.from(modulesMap.values());
 
     if (modules.length === 0) {
       progress.succeed('Module discovery complete.');
-      console.log(chalk.yellow('No UMS v1.0 modules found.'));
+      console.log(chalk.yellow('No UMS v2.0 modules found.'));
       return;
     }
 
@@ -123,14 +166,30 @@ export async function handleList(options: ListOptions): Promise<void> {
     progress.update('Filtering and sorting modules...');
 
     // Filter and sort modules
-    const filteredModules = filterAndSortModules(modules, options.tier);
+    const filterOptions: {
+      level?: string;
+      capability?: string;
+      domain?: string;
+      tag?: string;
+    } = {};
+    if (options.level) filterOptions.level = options.level;
+    if (options.capability) filterOptions.capability = options.capability;
+    if (options.domain) filterOptions.domain = options.domain;
+    if (options.tag) filterOptions.tag = options.tag;
+
+    const filteredModules = filterAndSortModules(modules, filterOptions);
 
     progress.succeed('Module listing complete.');
 
-    // M5 empty state
+    // Empty state
     if (filteredModules.length === 0) {
-      const filterMsg = options.tier ? ` in tier '${options.tier}'` : '';
-      console.log(chalk.yellow(`No UMS v1.0 modules found${filterMsg}.`));
+      const filters: string[] = [];
+      if (options.level) filters.push(`level '${options.level}'`);
+      if (options.capability) filters.push(`capability '${options.capability}'`);
+      if (options.domain) filters.push(`domain '${options.domain}'`);
+      if (options.tag) filters.push(`tag '${options.tag}'`);
+      const filterMsg = filters.length > 0 ? ` with ${filters.join(', ')}` : '';
+      console.log(chalk.yellow(`No UMS v2.0 modules found${filterMsg}.`));
       return;
     }
 

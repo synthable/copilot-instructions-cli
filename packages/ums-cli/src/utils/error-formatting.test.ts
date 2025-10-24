@@ -74,7 +74,7 @@ describe('error-formatting', () => {
       const result = formatError(ctx);
 
       expect(result).toBe(
-        '[ERROR] validate: specification compliance - invalid format (follow the specification)\n  Reference: UMS v1.0 Section 4.2'
+        '[ERROR] validate: specification compliance - invalid format (follow the specification)\n  Reference: UMS v2.0 Section 4.2'
       );
     });
 
@@ -92,7 +92,7 @@ describe('error-formatting', () => {
       const result = formatError(ctx);
 
       expect(result).toBe(
-        '[ERROR] build: module processing - validation failed (check the documentation)\n  File: /modules/test.module.yml\n  Key path: frontmatter.schema\n  Reference: UMS v1.0 Section 3.1'
+        '[ERROR] build: module processing - validation failed (check the documentation)\n  File: /modules/test.module.yml\n  Key path: frontmatter.schema\n  Reference: UMS v2.0 Section 3.1'
       );
     });
 
@@ -185,7 +185,7 @@ describe('error-formatting', () => {
       );
 
       expect(result).toBe(
-        '[ERROR] validate: validation failed - invalid format (follow specification)\n  File: /modules/test.module.yml\n  Reference: UMS v1.0 Section 4.1'
+        '[ERROR] validate: validation failed - invalid format (follow specification)\n  File: /modules/test.module.yml\n  Reference: UMS v2.0 Section 4.1'
       );
     });
 
@@ -200,7 +200,7 @@ describe('error-formatting', () => {
       );
 
       expect(result).toBe(
-        '[ERROR] build: validation failed - schema violation (fix schema)\n  File: /modules/test.module.yml\n  Key path: metadata.description\n  Reference: UMS v1.0 Section 3.2'
+        '[ERROR] build: validation failed - schema violation (fix schema)\n  File: /modules/test.module.yml\n  Key path: metadata.description\n  Reference: UMS v2.0 Section 3.2'
       );
     });
   });
@@ -321,43 +321,11 @@ describe('error-formatting', () => {
   describe('ID_VALIDATION_ERRORS', () => {
     describe('invalidFormat', () => {
       it('should return formatted invalid format message', () => {
-        const result = ID_VALIDATION_ERRORS.invalidFormat('invalid-id');
+        const result = ID_VALIDATION_ERRORS.invalidFormat('Invalid-ID');
 
         expect(result).toBe(
-          "Module ID 'invalid-id' does not match required format '<tier>/<subject>/<module-name>'"
+          "Module ID 'Invalid-ID' does not match required format. Must be lowercase with optional path segments separated by '/'"
         );
-      });
-    });
-
-    describe('invalidTier', () => {
-      it('should return formatted invalid tier message', () => {
-        const validTiers = [
-          'foundation',
-          'principle',
-          'technology',
-          'execution',
-        ];
-        const result = ID_VALIDATION_ERRORS.invalidTier('invalid', validTiers);
-
-        expect(result).toBe(
-          "Tier 'invalid' is invalid. Must be one of: foundation, principle, technology, execution"
-        );
-      });
-
-      it('should handle single tier', () => {
-        const result = ID_VALIDATION_ERRORS.invalidTier('wrong', [
-          'foundation',
-        ]);
-
-        expect(result).toBe(
-          "Tier 'wrong' is invalid. Must be one of: foundation"
-        );
-      });
-
-      it('should handle empty valid tiers array', () => {
-        const result = ID_VALIDATION_ERRORS.invalidTier('any', []);
-
-        expect(result).toBe("Tier 'any' is invalid. Must be one of: ");
       });
     });
 
@@ -431,7 +399,7 @@ describe('error-formatting', () => {
       it('should return formatted wrong schema version message', () => {
         const result = SCHEMA_VALIDATION_ERRORS.wrongSchemaVersion('0.5');
 
-        expect(result).toBe("Schema version must be '1.0', got '0.5'");
+        expect(result).toBe("Schema version must be '2.0', got '0.5'");
       });
     });
 

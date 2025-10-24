@@ -143,14 +143,14 @@ import { listModules } from 'ums-sdk';
 // List all modules
 const allModules = await listModules();
 
-// Filter by tier
-const foundationModules = await listModules({ tier: 'foundation' });
-
 // Filter by capability
 const reasoningModules = await listModules({ capability: 'reasoning' });
 
+// Filter by tag
+const ethicsModules = await listModules({ tag: 'ethics' });
+
 // Display results
-foundationModules.forEach(module => {
+ethicsModules.forEach(module => {
   console.log(`${module.id}`);
   console.log(`  Name: ${module.name}`);
   console.log(`  Description: ${module.description}`);

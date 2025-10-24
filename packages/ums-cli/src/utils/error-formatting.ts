@@ -40,7 +40,7 @@ export function formatError(ctx: ErrorContext): string {
   }
 
   if (ctx.sectionReference) {
-    message += `\n  Reference: UMS v1.0 ${ctx.sectionReference}`;
+    message += `\n  Reference: UMS v2.0 ${ctx.sectionReference}`;
   }
 
   return message;
@@ -134,10 +134,7 @@ export function formatDeprecationWarning(
  */
 export const ID_VALIDATION_ERRORS = {
   invalidFormat: (id: string): string =>
-    `Module ID '${id}' does not match required format '<tier>/<subject>/<module-name>'`,
-
-  invalidTier: (tier: string, validTiers: string[]): string =>
-    `Tier '${tier}' is invalid. Must be one of: ${validTiers.join(', ')}`,
+    `Module ID '${id}' does not match required format. Must be lowercase with optional path segments separated by '/'`,
 
   emptySegment: (id: string): string =>
     `Module ID '${id}' contains empty segments (double slashes or leading/trailing slashes)`,
@@ -163,7 +160,7 @@ export const SCHEMA_VALIDATION_ERRORS = {
     `Field '${field}' must be ${expected}, got ${actual}`,
 
   wrongSchemaVersion: (actual: string): string =>
-    `Schema version must be '1.0', got '${actual}'`,
+    `Schema version must be '2.0', got '${actual}'`,
 
   undeclaredDirective: (directive: string, declared: string[]): string =>
     `Directive '${directive}' is not declared. Declared directives: ${declared.join(', ')}`,

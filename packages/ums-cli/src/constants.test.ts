@@ -1,7 +1,5 @@
 import { describe, it, expect } from 'vitest';
 import {
-  VALID_TIERS,
-  type ValidTier,
   ID_REGEX,
   DIRECTIVE_KEYS,
   type DirectiveKey,
@@ -14,97 +12,35 @@ import {
 } from './constants.js';
 
 describe('constants', () => {
-  describe('VALID_TIERS', () => {
-    it('should export all four tiers as specified in UMS v1.0', () => {
-      expect(VALID_TIERS).toEqual([
-        'foundation',
-        'principle',
-        'technology',
-        'execution',
-      ]);
-    });
-
-    it('should have exactly 4 tiers', () => {
-      expect(VALID_TIERS).toHaveLength(4);
-    });
-
-    it('should be readonly array', () => {
-      expect(Object.isFrozen(VALID_TIERS)).toBe(false); // const assertion, not frozen
-      expect(Array.isArray(VALID_TIERS)).toBe(true);
-    });
-  });
-
-  describe('ValidTier type', () => {
-    it('should accept valid tier values', () => {
-      const foundation: ValidTier = 'foundation';
-      const principle: ValidTier = 'principle';
-      const technology: ValidTier = 'technology';
-      const execution: ValidTier = 'execution';
-
-      expect(foundation).toBe('foundation');
-      expect(principle).toBe('principle');
-      expect(technology).toBe('technology');
-      expect(execution).toBe('execution');
-    });
-  });
-
   describe('ID_REGEX', () => {
     describe('valid module IDs', () => {
-      it('should match foundation tier modules', () => {
-        expect(ID_REGEX.test('foundation/logic/deductive-reasoning')).toBe(
-          true
-        );
-        expect(ID_REGEX.test('foundation/ethics/core-principles')).toBe(true);
-        expect(
-          ID_REGEX.test('foundation/problem-solving/systematic-approach')
-        ).toBe(true);
+      it('should match flat module IDs', () => {
+        expect(ID_REGEX.test('be-concise')).toBe(true);
+        expect(ID_REGEX.test('error-handling')).toBe(true);
+        expect(ID_REGEX.test('example-module')).toBe(true);
       });
 
-      it('should match principle tier modules', () => {
-        expect(ID_REGEX.test('principle/solid/single-responsibility')).toBe(
-          true
-        );
-        expect(ID_REGEX.test('principle/patterns/observer')).toBe(true);
-        expect(ID_REGEX.test('principle/testing/unit-testing')).toBe(true);
+      it('should match hierarchical module IDs', () => {
+        expect(ID_REGEX.test('logic/deductive-reasoning')).toBe(true);
+        expect(ID_REGEX.test('ethics/core-principles')).toBe(true);
+        expect(ID_REGEX.test('problem-solving/systematic-approach')).toBe(true);
       });
 
-      it('should match technology tier modules', () => {
-        expect(ID_REGEX.test('technology/javascript/async-patterns')).toBe(
-          true
-        );
-        expect(ID_REGEX.test('technology/react/hooks-patterns')).toBe(true);
-        expect(ID_REGEX.test('technology/nodejs/error-handling')).toBe(true);
-      });
-
-      it('should match execution tier modules', () => {
-        expect(ID_REGEX.test('execution/debugging/systematic-debugging')).toBe(
-          true
-        );
-        expect(ID_REGEX.test('execution/deployment/ci-cd-pipeline')).toBe(true);
-        expect(ID_REGEX.test('execution/code-review/checklist')).toBe(true);
-      });
-
-      it('should match nested directory structures', () => {
-        expect(ID_REGEX.test('foundation/logic/reasoning/deductive')).toBe(
-          true
-        );
-        expect(
-          ID_REGEX.test('technology/frontend/react/hooks/use-effect')
-        ).toBe(true);
+      it('should match deeply nested hierarchical IDs', () => {
+        expect(ID_REGEX.test('logic/reasoning/deductive')).toBe(true);
+        expect(ID_REGEX.test('frontend/react/hooks/use-effect')).toBe(true);
       });
 
       it('should match single character module names', () => {
-        expect(ID_REGEX.test('foundation/logic/a')).toBe(true);
-        expect(ID_REGEX.test('principle/patterns/x')).toBe(true);
+        expect(ID_REGEX.test('a')).toBe(true);
+        expect(ID_REGEX.test('x')).toBe(true);
+        expect(ID_REGEX.test('logic/a')).toBe(true);
       });
 
       it('should match hyphenated module names', () => {
-        expect(
-          ID_REGEX.test('foundation/problem-solving/root-cause-analysis')
-        ).toBe(true);
-        expect(ID_REGEX.test('technology/web-dev/responsive-design')).toBe(
-          true
-        );
+        expect(ID_REGEX.test('problem-solving')).toBe(true);
+        expect(ID_REGEX.test('root-cause-analysis')).toBe(true);
+        expect(ID_REGEX.test('web-dev/responsive-design')).toBe(true);
       });
     });
 
@@ -113,66 +49,51 @@ describe('constants', () => {
         expect(ID_REGEX.test('')).toBe(false);
       });
 
-      it('should reject invalid tiers', () => {
-        expect(ID_REGEX.test('invalid/logic/reasoning')).toBe(false);
-        expect(ID_REGEX.test('base/logic/reasoning')).toBe(false);
-        expect(ID_REGEX.test('core/logic/reasoning')).toBe(false);
-      });
-
-      it('should reject missing category', () => {
-        expect(ID_REGEX.test('foundation/reasoning')).toBe(false);
-        expect(ID_REGEX.test('principle/single-responsibility')).toBe(false);
-      });
-
       it('should reject uppercase characters', () => {
-        expect(ID_REGEX.test('Foundation/logic/reasoning')).toBe(false);
-        expect(ID_REGEX.test('foundation/Logic/reasoning')).toBe(false);
-        expect(ID_REGEX.test('foundation/logic/Reasoning')).toBe(false);
+        expect(ID_REGEX.test('Foundation')).toBe(false);
+        expect(ID_REGEX.test('Logic/reasoning')).toBe(false);
+        expect(ID_REGEX.test('logic/Reasoning')).toBe(false);
       });
 
       it('should reject underscores', () => {
-        expect(ID_REGEX.test('foundation/logic/deductive_reasoning')).toBe(
-          false
-        );
-        expect(ID_REGEX.test('foundation/problem_solving/analysis')).toBe(
-          false
-        );
+        expect(ID_REGEX.test('deductive_reasoning')).toBe(false);
+        expect(ID_REGEX.test('logic/deductive_reasoning')).toBe(false);
+        expect(ID_REGEX.test('problem_solving/analysis')).toBe(false);
       });
 
       it('should reject spaces', () => {
-        expect(ID_REGEX.test('foundation/logic/deductive reasoning')).toBe(
-          false
-        );
-        expect(ID_REGEX.test('foundation/problem solving/analysis')).toBe(
-          false
-        );
+        expect(ID_REGEX.test('deductive reasoning')).toBe(false);
+        expect(ID_REGEX.test('logic/deductive reasoning')).toBe(false);
+        expect(ID_REGEX.test('problem solving/analysis')).toBe(false);
       });
 
       it('should reject special characters except hyphens', () => {
-        expect(ID_REGEX.test('foundation/logic/reasoning!')).toBe(false);
-        expect(ID_REGEX.test('foundation/logic/reasoning@')).toBe(false);
-        expect(ID_REGEX.test('foundation/logic/reasoning#')).toBe(false);
-        expect(ID_REGEX.test('foundation/logic/reasoning$')).toBe(false);
-        expect(ID_REGEX.test('foundation/logic/reasoning%')).toBe(false);
+        expect(ID_REGEX.test('reasoning!')).toBe(false);
+        expect(ID_REGEX.test('reasoning@')).toBe(false);
+        expect(ID_REGEX.test('reasoning#')).toBe(false);
+        expect(ID_REGEX.test('reasoning$')).toBe(false);
+        expect(ID_REGEX.test('reasoning%')).toBe(false);
       });
 
       it('should reject module names starting with hyphen', () => {
-        expect(ID_REGEX.test('foundation/logic/-reasoning')).toBe(false);
-        expect(ID_REGEX.test('principle/patterns/-observer')).toBe(false);
+        expect(ID_REGEX.test('-reasoning')).toBe(false);
+        expect(ID_REGEX.test('logic/-reasoning')).toBe(false);
+        expect(ID_REGEX.test('patterns/-observer')).toBe(false);
       });
 
       it('should reject double slashes', () => {
-        expect(ID_REGEX.test('foundation//logic/reasoning')).toBe(false);
-        expect(ID_REGEX.test('foundation/logic//reasoning')).toBe(false);
+        expect(ID_REGEX.test('logic//reasoning')).toBe(false);
+        expect(ID_REGEX.test('category//module')).toBe(false);
       });
 
       it('should reject trailing slashes', () => {
-        expect(ID_REGEX.test('foundation/logic/reasoning/')).toBe(false);
-        expect(ID_REGEX.test('foundation/logic/')).toBe(false);
+        expect(ID_REGEX.test('logic/reasoning/')).toBe(false);
+        expect(ID_REGEX.test('logic/')).toBe(false);
       });
 
       it('should reject leading slashes', () => {
-        expect(ID_REGEX.test('/foundation/logic/reasoning')).toBe(false);
+        expect(ID_REGEX.test('/logic/reasoning')).toBe(false);
+        expect(ID_REGEX.test('/reasoning')).toBe(false);
       });
     });
   });
@@ -251,8 +172,8 @@ describe('constants', () => {
   });
 
   describe('UMS_SCHEMA_VERSION', () => {
-    it('should be set to version 1.0', () => {
-      expect(UMS_SCHEMA_VERSION).toBe('1.0');
+    it('should be set to version 2.0', () => {
+      expect(UMS_SCHEMA_VERSION).toBe('2.0');
     });
 
     it('should be a string', () => {
@@ -262,8 +183,8 @@ describe('constants', () => {
 
   describe('File Extensions', () => {
     describe('MODULE_FILE_EXTENSION', () => {
-      it('should be set to .module.yml', () => {
-        expect(MODULE_FILE_EXTENSION).toBe('.module.yml');
+      it('should be set to .module.ts', () => {
+        expect(MODULE_FILE_EXTENSION).toBe('.module.ts');
       });
 
       it('should start with a dot', () => {
@@ -272,8 +193,8 @@ describe('constants', () => {
     });
 
     describe('PERSONA_FILE_EXTENSION', () => {
-      it('should be set to .persona.yml', () => {
-        expect(PERSONA_FILE_EXTENSION).toBe('.persona.yml');
+      it('should be set to .persona.ts', () => {
+        expect(PERSONA_FILE_EXTENSION).toBe('.persona.ts');
       });
 
       it('should start with a dot', () => {

@@ -11,6 +11,7 @@ describe('UMS v2.0 Module Validation', () => {
         version: '1.0.0',
         schemaVersion: '2.0',
         capabilities: ['architecture', 'design'],
+    cognitiveLevel: 2,
         metadata: {
           name: 'Separation of Concerns',
           description: 'A specification that mandates decomposing systems.',
@@ -49,6 +50,7 @@ describe('UMS v2.0 Module Validation', () => {
         version: '1.0.0',
         schemaVersion: '2.0',
         capabilities: ['patterns', 'design'],
+    cognitiveLevel: 2,
         metadata: {
           name: 'Observer Pattern',
           description: 'Behavioral design pattern for event handling.',
@@ -90,6 +92,7 @@ describe('UMS v2.0 Module Validation', () => {
         version: '1.0.0',
         schemaVersion: '2.0',
         capabilities: ['data', 'configuration'],
+    cognitiveLevel: 2,
         metadata: {
           name: 'Build Target Matrix',
           description: 'Provides a JSON matrix of supported build targets.',
@@ -116,6 +119,7 @@ describe('UMS v2.0 Module Validation', () => {
         version: '1.0.0',
         schemaVersion: '2.0',
         capabilities: ['testing', 'quality'],
+    cognitiveLevel: 2,
         metadata: {
           name: 'Comprehensive Testing',
           description: 'Complete testing guidance.',
@@ -155,6 +159,7 @@ describe('UMS v2.0 Module Validation', () => {
         version: '1.0.0',
         schemaVersion: '2.0',
         capabilities: ['test'],
+    cognitiveLevel: 2,
         metadata: {
           name: 'Test',
           description: 'Test',
@@ -183,6 +188,7 @@ describe('UMS v2.0 Module Validation', () => {
         version: '1.0.0',
         schemaVersion: '2.0',
         capabilities: ['test'],
+    cognitiveLevel: 2,
         metadata: {
           name: 'Test',
           description: 'Test',
@@ -210,6 +216,7 @@ describe('UMS v2.0 Module Validation', () => {
         version: '1.0.0',
         schemaVersion: '1.0', // v1.0 not supported anymore
         capabilities: ['test'],
+    cognitiveLevel: 2,
         metadata: {
           name: 'Test',
           description: 'Test',
@@ -250,6 +257,7 @@ describe('UMS v2.0 Module Validation', () => {
         version: '1.0.0',
         schemaVersion: '2.0',
         capabilities: ['test'],
+    cognitiveLevel: 2,
         metadata: {
           name: 'Test',
           description: 'Test',
@@ -271,6 +279,7 @@ describe('UMS v2.0 Module Validation', () => {
         version: '1.0.0',
         schemaVersion: '2.0',
         capabilities: ['test'],
+    cognitiveLevel: 2,
         metadata: {
           name: 'Test',
           description: 'Test',
@@ -299,6 +308,7 @@ describe('UMS v2.0 Module Validation', () => {
         version: '1.0.0',
         schemaVersion: '2.0',
         capabilities: ['procedure'],
+    cognitiveLevel: 2,
         metadata: {
           name: 'Old Refactoring Procedure',
           description: 'Deprecated refactoring procedure.',
@@ -332,6 +342,7 @@ describe('UMS v2.0 Module Validation', () => {
         version: '1.0.0',
         schemaVersion: '2.0',
         capabilities: ['procedure'],
+    cognitiveLevel: 2,
         metadata: {
           name: 'Bad Replacement',
           description: 'Invalid replacement reference.',
@@ -361,6 +372,7 @@ describe('UMS v2.0 Module Validation', () => {
         version: '1.0.0',
         schemaVersion: '2.0',
         capabilities: ['procedure'],
+    cognitiveLevel: 2,
         metadata: {
           name: 'Non-deprecated with replacement',
           description: 'Should not have replacedBy.',
@@ -390,6 +402,7 @@ describe('UMS v2.0 Module Validation', () => {
         version: '1.0.0',
         schemaVersion: '2.0',
         capabilities: ['test'],
+    cognitiveLevel: 2,
         metadata: {
           name: 'Uppercase Tags',
           description: 'Module with uppercase tags.',
@@ -418,6 +431,7 @@ describe('UMS v2.0 Module Validation', () => {
         version: 'not-semver',
         schemaVersion: '2.0',
         capabilities: ['test'],
+    cognitiveLevel: 2,
         metadata: {
           name: 'Test',
           description: 'Test',
@@ -443,6 +457,7 @@ describe('UMS v2.0 Module Validation', () => {
         version: '1.0.0',
         schemaVersion: '2.0',
         capabilities: [],
+    cognitiveLevel: 2,
         metadata: {
           name: 'Test',
           description: 'Test',
@@ -467,6 +482,7 @@ describe('UMS v2.0 Module Validation', () => {
         version: '1.0.0',
         schemaVersion: '2.0',
         capabilities: ['testing'],
+    cognitiveLevel: 2,
         metadata: {
           name: 'Comprehensive Testing',
           description: 'Complete testing procedure.',
