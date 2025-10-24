@@ -140,6 +140,8 @@ vite.config.ts.timestamp-*
 
 .DS_Store
 docs/archive/
+!docs/archive/unified-module-system-v1/
+!docs/archive/unified-module-system-v1/**
 docs/todo.md
 #CLAUDE.md
 .geminiignore
@@ -147,3 +149,4 @@ docs/old/
 #GEMINI.md
 untracked/
 #.gemini/
+instruct-modules-v2/

@@ -6,7 +6,62 @@ This directory contains specialized agents for working with the Unified Module S
 
 Agents are specialized AI assistants with deep expertise in specific domains. They can be invoked using Claude Code's Task tool to perform complex, multi-step operations autonomously.
 
-## Available Agents
+## Agent Types
+
+This project has access to two types of agents:
+
+1. **Built-in Agents**: Provided by Claude Code for common development tasks
+2. **Project-Specific Agents**: Custom agents for UMS v2.0 development
+
+## Built-in Agents
+
+### 🔧 gh-cli-expert
+
+**Purpose**: GitHub CLI operations and repository management expert
+
+**Expertise**:
+- GitHub CLI (`gh`) command execution
+- Pull request management
+- Issue tracking and management
+- GitHub Actions workflow operations
+- Repository operations
+- GitHub API interactions
+
+**When to use**:
+- When user invokes `gh` commands
+- Creating, viewing, or managing pull requests
+- Working with GitHub issues
+- Checking CI/CD workflow status
+- Any GitHub repository operations
+- Analyzing PR comments or reviews
+
+**Key capabilities**:
+- Execute `gh` commands with proper error handling
+- Create and manage pull requests
+- List and filter issues
+- Check workflow run status
+- Clone repositories
+- Manage PR comments and reviews
+- Query GitHub GraphQL API
+
+**Examples**:
+
+```bash
+# User: "Create a PR for this feature"
+# Agent launches gh-cli-expert to handle PR creation
+
+# User: "Check the CI status"
+# Agent launches gh-cli-expert to query workflows
+
+# User: "gh pr list --state open"
+# Agent launches gh-cli-expert to execute command
+```
+
+**Note**: This agent is automatically triggered when `gh` commands are detected in user requests.
+
+---
+
+## Project-Specific Agents (UMS v2.0)
 
 ### 🏗️ build-developer
 
@@ -196,6 +251,10 @@ Task(
 )
 ```
 
+**Built-in vs. Project-Specific Agents**:
+- **Built-in agents** (like `gh-cli-expert`) are often triggered automatically when Claude detects relevant commands or contexts
+- **Project-specific agents** (UMS v2.0 agents) should be explicitly invoked for UMS-related tasks
+
 ### Example: Generate a Module
 
 ```typescript
@@ -346,6 +405,18 @@ To add a new agent:
 - Check if required files exist
 - Verify spec is accessible
 - Simplify the task into smaller steps
+
+## Available Agent Summary
+
+**Built-in Agents** (1):
+- `gh-cli-expert` - GitHub CLI and repository operations
+
+**Project-Specific Agents** (5):
+- `build-developer` - UMS v2.0 build system development
+- `library-curator` - Standard library curation and organization
+- `module-generator` - UMS v2.0 module generation
+- `module-validator` - Module spec compliance validation
+- `persona-validator` - Persona structure and composition validation
 
 ## Resources
 
