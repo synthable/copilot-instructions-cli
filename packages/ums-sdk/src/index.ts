@@ -68,6 +68,19 @@ export {
 // ===== HIGH-LEVEL API (Recommended) =====
 export { buildPersona, validateAll, listModules } from './api/index.js';
 
+// ===== AUTHORING API (Builder Pattern) =====
+export { defineModule } from './authoring/index.js';
+export type {
+  IModuleBuilder,
+  IMetadataBuilder,
+  IQualityBuilder,
+  IInstructionBuilder,
+  IKnowledgeBuilder,
+  IDataBuilder,
+  IComponentBuilder,
+  BuilderFn,
+} from './authoring/index.js';
+
 // ===== LOW-LEVEL API (Advanced) =====
 export { ModuleLoader, PersonaLoader, ConfigManager } from './loaders/index.js';
 export { ModuleDiscovery, StandardLibrary } from './discovery/index.js';
