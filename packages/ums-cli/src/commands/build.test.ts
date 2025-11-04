@@ -11,7 +11,7 @@ import {
   ModuleRegistry,
 } from 'ums-lib';
 import { discoverAllModules } from '../utils/module-discovery.js';
-import { loadTypeScriptPersona } from '../utils/typescript-loader.js';
+import { PersonaLoader } from 'ums-sdk';
 
 // Mock dependencies
 vi.mock('fs/promises', () => ({
@@ -72,9 +72,15 @@ vi.mock('../utils/module-discovery.js', () => ({
   discoverAllModules: vi.fn(),
 }));
 
-vi.mock('../utils/typescript-loader.js', () => ({
-  loadTypeScriptPersona: vi.fn(),
-}));
+vi.mock('ums-sdk', async () => {
+  const actual = await vi.importActual<typeof import('ums-sdk')>('ums-sdk');
+  return {
+    ...actual,
+    PersonaLoader: vi.fn().mockImplementation(() => ({
+      loadPersona: vi.fn(),
+    })),
+  };
+});
 
 vi.mock('../utils/error-handler.js', () => ({
   handleError: vi.fn(),
@@ -91,9 +97,12 @@ describe('build command', () => {
   const mockGenerateBuildReport = vi.mocked(generateBuildReport);
   const mockResolvePersonaModules = vi.mocked(resolvePersonaModules);
   const mockDiscoverAllModules = vi.mocked(discoverAllModules);
-  const mockLoadTypeScriptPersona = vi.mocked(loadTypeScriptPersona);
+  const mockPersonaLoader = vi.mocked(PersonaLoader);
   const mockWriteOutputFile = vi.mocked(writeOutputFile);
   const mockReadFromStdin = vi.mocked(readFromStdin);
+
+  // Mock instance methods
+  let mockLoadPersona: ReturnType<typeof vi.fn>;
 
   const mockPersona: Persona = {
     name: 'Test Persona',
@@ -166,6 +175,12 @@ describe('build command', () => {
     vi.clearAllMocks();
     mockExit.mockClear();
 
+    // Setup PersonaLoader mock
+    mockLoadPersona = vi.fn().mockResolvedValue(mockPersona);
+    mockPersonaLoader.mockImplementation(() => ({
+      loadPersona: mockLoadPersona,
+    }) as any);
+
     // Setup default mocks with ModuleRegistry
     const mockRegistry = new ModuleRegistry('warn');
     for (const module of mockModules) {
@@ -177,7 +192,6 @@ describe('build command', () => {
       warnings: [],
     });
 
-    mockLoadTypeScriptPersona.mockResolvedValue(mockPersona);
     mockRenderMarkdown.mockReturnValue(
       '# Test Persona Instructions\\n\\nTest content'
     );
@@ -205,7 +219,7 @@ describe('build command', () => {
 
     // Assert
     expect(mockDiscoverAllModules).toHaveBeenCalled();
-    expect(mockLoadTypeScriptPersona).toHaveBeenCalledWith('test.persona.yml');
+    expect(mockLoadPersona).toHaveBeenCalledWith('test.persona.yml');
     expect(mockRenderMarkdown).toHaveBeenCalledWith(mockPersona, mockModules);
     expect(mockGenerateBuildReport).toHaveBeenCalledWith(
       mockPersona,
@@ -238,7 +252,7 @@ describe('build command', () => {
     await handleBuild(options);
 
     // Assert
-    expect(mockLoadTypeScriptPersona).toHaveBeenCalledWith('test.persona.yml');
+    expect(mockLoadPersona).toHaveBeenCalledWith('test.persona.yml');
     expect(mockConsoleLog).toHaveBeenCalledWith(
       '# Test Persona Instructions\\n\\nTest content'
     );
