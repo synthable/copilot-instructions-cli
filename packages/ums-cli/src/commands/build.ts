@@ -10,6 +10,7 @@ import {
   renderMarkdown,
   generateBuildReport,
   ConflictError,
+  PersonaLoader,
   type Persona,
   type Module,
   type BuildReport,
@@ -18,7 +19,6 @@ import {
 import { createBuildProgress } from '../utils/progress.js';
 import { writeOutputFile } from '../utils/file-operations.js';
 import { discoverAllModules } from '../utils/module-discovery.js';
-import { loadTypeScriptPersona } from '../utils/typescript-loader.js';
 
 /**
  * Options for the build command
@@ -136,7 +136,8 @@ async function setupBuildEnvironment(
   progress.update('Loading persona...');
   progress.update(`Reading persona file: ${personaPath}`);
 
-  const persona = await loadTypeScriptPersona(personaPath);
+  const personaLoader = new PersonaLoader();
+  const persona = await personaLoader.loadPersona(personaPath);
 
   if (verbose) {
     console.log(

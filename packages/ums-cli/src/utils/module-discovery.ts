@@ -5,10 +5,8 @@
  */
 
 import type { ModuleConfig } from 'ums-sdk';
-import { ModuleRegistry } from 'ums-sdk';
+import { ModuleRegistry, ConfigManager, ModuleLoader } from 'ums-sdk';
 import { discoverModuleFiles } from './file-operations.js';
-import { loadModuleConfig, getConfiguredModulePaths } from './config-loader.js';
-import { loadTypeScriptModule } from './typescript-loader.js';
 import { basename } from 'path';
 import type { CLIModule } from '../types/cli-extensions.js';
 
@@ -22,7 +20,8 @@ async function loadModuleFile(filePath: string): Promise<CLIModule> {
   const fileName = basename(filePath, '.module.ts');
   // For now, use filename as module ID - this may need refinement
   // based on actual module structure
-  const module = (await loadTypeScriptModule(filePath, fileName)) as CLIModule;
+  const loader = new ModuleLoader();
+  const module = (await loader.loadModule(filePath, fileName)) as CLIModule;
   module.filePath = filePath;
   return module;
 }
@@ -70,7 +69,7 @@ export async function discoverStandardModules(
 export async function discoverLocalModules(
   config: ModuleConfig
 ): Promise<CLIModule[]> {
-  const localPaths = getConfiguredModulePaths(config);
+  const localPaths = config.localModulePaths.map(entry => entry.path);
   const moduleFiles = await discoverModuleFiles(localPaths);
   const modules: CLIModule[] = [];
 
@@ -105,14 +104,15 @@ export interface ModuleDiscoveryResult {
  * loading test modules and to allow full configuration control.
  */
 export async function discoverAllModules(): Promise<ModuleDiscoveryResult> {
-  const config = await loadModuleConfig();
+  const configManager = new ConfigManager();
+  const config = await configManager.load();
 
   // Use 'error' as fallback default for registry
   const registry = new ModuleRegistry('error');
   const warnings: string[] = [];
 
-  // Discover and add local modules if config exists
-  if (config) {
+  // Discover and add local modules if config has paths
+  if (config.localModulePaths.length > 0) {
     const localModules = await discoverLocalModules(config);
     for (const module of localModules) {
       // Find which local path this module belongs to
