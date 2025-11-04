@@ -89,6 +89,7 @@ export interface IQualityBuilder {
 export interface IInstructionBuilder {
   purpose(purpose: string): this;
   process(steps: (string | ProcessStep)[]): this;
+  step(step: string | ProcessStep): this;
   constraint(rule: string, severity?: 'error' | 'warning' | 'info'): this;
   constraint(constraint: Constraint): this;
   principle(principle: string): this;

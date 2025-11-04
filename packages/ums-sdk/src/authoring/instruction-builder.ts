@@ -32,6 +32,11 @@ export class InstructionBuilder implements IInstructionBuilder {
     return this;
   }
 
+  step(step: string | ProcessStep): this {
+    this.processSteps.push(step);
+    return this;
+  }
+
   constraint(
     ruleOrConstraint: string | Constraint,
     severity?: 'error' | 'warning' | 'info'
