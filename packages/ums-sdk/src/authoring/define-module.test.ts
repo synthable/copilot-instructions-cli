@@ -155,6 +155,7 @@ describe('defineModule()', () => {
   });
 
   it('should throw error if required fields are missing', () => {
+    // Missing id
     expect(() =>
       defineModule(m =>
         m
@@ -168,6 +169,7 @@ describe('defineModule()', () => {
       )
     ).toThrow('Module requires an id');
 
+    // Missing version
     expect(() =>
       defineModule(m =>
         m
@@ -180,6 +182,93 @@ describe('defineModule()', () => {
           .instruction(i => i.purpose('Test'))
       )
     ).toThrow('Module requires a version');
+
+    // Missing schemaVersion (when explicitly set to undefined/empty)
+    expect(() =>
+      defineModule(m =>
+        m
+          .id('test/module')
+          .version('1.0.0')
+          .schemaVersion('') // Empty schema version
+          .capabilities(['test'])
+          .cognitiveLevel(1)
+          .metadata(meta =>
+            meta.name('Test').description('Test').semantic('test')
+          )
+          .instruction(i => i.purpose('Test'))
+      )
+    ).toThrow('Module requires a schemaVersion');
+
+    // Missing capabilities
+    expect(() =>
+      defineModule(m =>
+        m
+          .id('test/module')
+          .version('1.0.0')
+          .cognitiveLevel(1)
+          .metadata(meta =>
+            meta.name('Test').description('Test').semantic('test')
+          )
+          .instruction(i => i.purpose('Test'))
+      )
+    ).toThrow('Module requires at least one capability');
+
+    // Empty capabilities array
+    expect(() =>
+      defineModule(m =>
+        m
+          .id('test/module')
+          .version('1.0.0')
+          .capabilities([]) // Empty array
+          .cognitiveLevel(1)
+          .metadata(meta =>
+            meta.name('Test').description('Test').semantic('test')
+          )
+          .instruction(i => i.purpose('Test'))
+      )
+    ).toThrow('Module requires at least one capability');
+
+    // Missing cognitiveLevel
+    expect(() =>
+      defineModule(m =>
+        m
+          .id('test/module')
+          .version('1.0.0')
+          .capabilities(['test'])
+          .metadata(meta =>
+            meta.name('Test').description('Test').semantic('test')
+          )
+          .instruction(i => i.purpose('Test'))
+      )
+    ).toThrow('Module requires a cognitiveLevel');
+
+    // Missing metadata
+    expect(() =>
+      defineModule(m =>
+        m
+          .id('test/module')
+          .version('1.0.0')
+          .capabilities(['test'])
+          .cognitiveLevel(1)
+          .instruction(i => i.purpose('Test'))
+      )
+    ).toThrow('Module requires metadata');
+
+    // Missing component
+    expect(() =>
+      defineModule(m =>
+        m
+          .id('test/module')
+          .version('1.0.0')
+          .capabilities(['test'])
+          .cognitiveLevel(1)
+          .metadata(meta =>
+            meta.name('Test').description('Test').semantic('test')
+          )
+      )
+    ).toThrow(
+      'Module requires at least one component (instruction, knowledge, data, or components array)'
+    );
   });
 
   it('should validate cognitive level range', () => {
