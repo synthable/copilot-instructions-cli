@@ -14,7 +14,7 @@ import {
   type Module,
   type BuildReport,
   type ModuleRegistry,
-} from 'ums-lib';
+} from 'ums-sdk';
 import { createBuildProgress } from '../utils/progress.js';
 import { writeOutputFile } from '../utils/file-operations.js';
 import { discoverAllModules } from '../utils/module-discovery.js';

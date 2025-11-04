@@ -5,7 +5,7 @@
 
 import { parse } from 'yaml';
 import { fileExists, readModuleFile } from './file-operations.js';
-import type { ModuleConfig } from 'ums-lib';
+import type { ModuleConfig } from 'ums-sdk';
 
 /**
  * Loads module configuration from modules.config.yml
