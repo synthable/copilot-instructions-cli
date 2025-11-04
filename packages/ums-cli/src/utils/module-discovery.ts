@@ -2,89 +2,17 @@
  * CLI Module Discovery Utilities
  * Handles module discovery and populates ModuleRegistry for CLI operations
  * Supports UMS v2.0 TypeScript format only
+ *
+ * Uses SDK's ModuleDiscovery and StandardLibrary for all discovery operations.
  */
 
-import type { ModuleConfig } from 'ums-sdk';
-import { ModuleRegistry, ConfigManager, ModuleLoader } from 'ums-sdk';
-import { discoverModuleFiles } from './file-operations.js';
-import { basename } from 'path';
-import type { CLIModule } from '../types/cli-extensions.js';
-
-const DEFAULT_STANDARD_MODULES_PATH = './instructions-modules';
-
-/**
- * Loads a v2.0 TypeScript module file
- */
-async function loadModuleFile(filePath: string): Promise<CLIModule> {
-  // v2.0 TypeScript format - extract module ID from filename
-  const fileName = basename(filePath, '.module.ts');
-  // For now, use filename as module ID - this may need refinement
-  // based on actual module structure
-  const loader = new ModuleLoader();
-  const module = (await loader.loadModule(filePath, fileName)) as CLIModule;
-  module.filePath = filePath;
-  return module;
-}
-
-/**
- * Discovers standard library modules from the specified modules directory
- * Supports UMS v2.0 TypeScript format only
- */
-export async function discoverStandardModules(
-  standardModulesPath: string = DEFAULT_STANDARD_MODULES_PATH
-): Promise<CLIModule[]> {
-  try {
-    const moduleFiles = await discoverModuleFiles([standardModulesPath]);
-    const modules: CLIModule[] = [];
-
-    for (const filePath of moduleFiles) {
-      try {
-        const module = await loadModuleFile(filePath);
-        modules.push(module);
-      } catch (error) {
-        const message = error instanceof Error ? error.message : String(error);
-        throw new Error(
-          `Failed to load standard module '${filePath}': ${message}`
-        );
-      }
-    }
-
-    return modules;
-  } catch (error) {
-    if (
-      error instanceof Error &&
-      error.message.includes('Failed to discover modules')
-    ) {
-      // No standard modules directory - return empty array
-      return [];
-    }
-    throw error;
-  }
-}
-
-/**
- * Discovers local modules based on configuration
- * Supports UMS v2.0 TypeScript format only
- */
-export async function discoverLocalModules(
-  config: ModuleConfig
-): Promise<CLIModule[]> {
-  const localPaths = config.localModulePaths.map(entry => entry.path);
-  const moduleFiles = await discoverModuleFiles(localPaths);
-  const modules: CLIModule[] = [];
-
-  for (const filePath of moduleFiles) {
-    try {
-      const module = await loadModuleFile(filePath);
-      modules.push(module);
-    } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
-      throw new Error(`Failed to load local module '${filePath}': ${message}`);
-    }
-  }
-
-  return modules;
-}
+import type { Module } from 'ums-sdk';
+import {
+  ModuleRegistry,
+  ConfigManager,
+  ModuleDiscovery,
+  StandardLibrary,
+} from 'ums-sdk';
 
 /**
  * Result of module discovery operation
@@ -99,28 +27,54 @@ export interface ModuleDiscoveryResult {
 /**
  * Discovers all modules (standard + local) and populates ModuleRegistry
  *
- * Note: Standard modules discovery is intentionally skipped.
- * All modules should be configured via modules.config.yml to prevent
- * loading test modules and to allow full configuration control.
+ * Uses SDK's ModuleDiscovery and StandardLibrary for discovery operations.
+ * Builds a registry with conflict resolution for use by CLI commands.
  */
 export async function discoverAllModules(): Promise<ModuleDiscoveryResult> {
   const configManager = new ConfigManager();
+  const moduleDiscovery = new ModuleDiscovery();
+  const standardLibrary = new StandardLibrary();
+
+  // Load configuration
   const config = await configManager.load();
 
-  // Use 'error' as fallback default for registry
-  const registry = new ModuleRegistry('error');
+  // Discover all modules
+  const modules: Module[] = [];
   const warnings: string[] = [];
 
-  // Discover and add local modules if config has paths
+  // Discover standard library modules
+  const standardModules = await standardLibrary.discoverStandard();
+  modules.push(...standardModules);
+
+  // Discover local modules from configuration
   if (config.localModulePaths.length > 0) {
-    const localModules = await discoverLocalModules(config);
-    for (const module of localModules) {
-      // Find which local path this module belongs to
-      const localPath = findModulePath(module, config);
+    const localModules = await moduleDiscovery.discover(config);
+    modules.push(...localModules);
+  }
+
+  // Build registry with conflict resolution
+  // Use configured strategy or default to 'error'
+  const conflictStrategy = config.conflictStrategy ?? 'error';
+  const registry = new ModuleRegistry(conflictStrategy);
+
+  for (const module of modules) {
+    try {
+      // Determine if module is from standard library or local
+      const isStandard = standardLibrary.isStandardModule(module.id);
+
       registry.add(module, {
-        type: 'local',
-        path: localPath ?? 'unknown',
+        type: isStandard ? 'standard' : 'local',
+        path: isStandard
+          ? standardLibrary.getStandardLibraryPath()
+          : 'local',
       });
+    } catch (error) {
+      // If conflict strategy is 'warn', collect warnings
+      if (conflictStrategy === 'warn' && error instanceof Error) {
+        warnings.push(error.message);
+      } else {
+        throw error;
+      }
     }
   }
 
@@ -128,22 +82,4 @@ export async function discoverAllModules(): Promise<ModuleDiscoveryResult> {
     registry,
     warnings,
   };
-}
-
-/**
- * Finds which configured path a module belongs to
- */
-function findModulePath(
-  module: CLIModule,
-  config: ModuleConfig
-): string | null {
-  if (!module.filePath) return null;
-
-  for (const entry of config.localModulePaths) {
-    if (module.filePath.startsWith(entry.path)) {
-      return entry.path;
-    }
-  }
-
-  return null;
 }

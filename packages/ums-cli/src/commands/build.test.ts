@@ -1,30 +1,19 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { writeOutputFile, readFromStdin } from '../utils/file-operations.js';
+import { writeOutputFile } from '../utils/file-operations.js';
 import { handleBuild } from './build.js';
-import {
-  renderMarkdown,
-  generateBuildReport,
-  resolvePersonaModules,
-  type Persona,
-  type Module,
-  type BuildReport,
-  ModuleRegistry,
-} from 'ums-lib';
-import { discoverAllModules } from '../utils/module-discovery.js';
-import { PersonaLoader } from 'ums-sdk';
+import { buildPersona, type BuildResult, type Persona, type Module, type BuildReport } from 'ums-sdk';
 
 // Mock dependencies
-vi.mock('fs/promises', () => ({
-  writeFile: vi.fn(),
-  readFile: vi.fn(),
-}));
-
 vi.mock('chalk', () => ({
   default: {
     green: vi.fn((str: string) => str),
     red: vi.fn((str: string) => str),
     yellow: vi.fn((str: string) => str),
     gray: vi.fn((str: string) => str),
+    cyan: vi.fn((str: string) => str),
+    bold: {
+      green: vi.fn((str: string) => str),
+    },
   },
 }));
 
@@ -33,54 +22,25 @@ vi.mock('ora', () => {
     start: vi.fn().mockReturnThis(),
     succeed: vi.fn().mockReturnThis(),
     fail: vi.fn().mockReturnThis(),
+    update: vi.fn().mockReturnThis(),
     text: '',
   };
   return { default: vi.fn(() => mockSpinner) };
 });
 
-// Mock pure functions from UMS library
-vi.mock('ums-lib', () => ({
-  renderMarkdown: vi.fn(),
-  generateBuildReport: vi.fn(),
-  resolvePersonaModules: vi.fn(),
-  ModuleRegistry: vi.fn().mockImplementation((strategy = 'warn') => {
-    let mockSize = 0;
-    const mockModules = new Map();
-    return {
-      strategy: strategy as string,
-      modules: mockModules,
-      add: vi.fn().mockImplementation((module: { id: string }) => {
-        mockModules.set(module.id, module);
-        mockSize++;
-      }),
-      resolve: vi.fn().mockImplementation(id => mockModules.get(id)),
-      resolveAll: vi.fn(),
-      size: vi.fn(() => mockSize),
-      getConflicts: vi.fn(() => []),
-      getConflictingIds: vi.fn(() => []),
-    };
-  }),
-}));
-
-// Mock utility functions
-vi.mock('../utils/file-operations.js', () => ({
-  writeOutputFile: vi.fn(),
-  readFromStdin: vi.fn(),
-}));
-
-vi.mock('../utils/module-discovery.js', () => ({
-  discoverAllModules: vi.fn(),
-}));
-
+// Mock SDK's buildPersona function
 vi.mock('ums-sdk', async () => {
   const actual = await vi.importActual<typeof import('ums-sdk')>('ums-sdk');
   return {
     ...actual,
-    PersonaLoader: vi.fn().mockImplementation(() => ({
-      loadPersona: vi.fn(),
-    })),
+    buildPersona: vi.fn(),
   };
 });
+
+// Mock utility functions
+vi.mock('../utils/file-operations.js', () => ({
+  writeOutputFile: vi.fn(),
+}));
 
 vi.mock('../utils/error-handler.js', () => ({
   handleError: vi.fn(),
@@ -93,16 +53,8 @@ const mockExit = vi.spyOn(process, 'exit').mockImplementation(() => {
 
 describe('build command', () => {
   // Type-safe mocks
-  const mockRenderMarkdown = vi.mocked(renderMarkdown);
-  const mockGenerateBuildReport = vi.mocked(generateBuildReport);
-  const mockResolvePersonaModules = vi.mocked(resolvePersonaModules);
-  const mockDiscoverAllModules = vi.mocked(discoverAllModules);
-  const mockPersonaLoader = vi.mocked(PersonaLoader);
+  const mockBuildPersona = vi.mocked(buildPersona);
   const mockWriteOutputFile = vi.mocked(writeOutputFile);
-  const mockReadFromStdin = vi.mocked(readFromStdin);
-
-  // Mock instance methods
-  let mockLoadPersona: ReturnType<typeof vi.fn>;
 
   const mockPersona: Persona = {
     name: 'Test Persona',
@@ -175,32 +127,17 @@ describe('build command', () => {
     vi.clearAllMocks();
     mockExit.mockClear();
 
-    // Setup PersonaLoader mock
-    mockLoadPersona = vi.fn().mockResolvedValue(mockPersona);
-    mockPersonaLoader.mockImplementation(() => ({
-      loadPersona: mockLoadPersona,
-    }) as any);
-
-    // Setup default mocks with ModuleRegistry
-    const mockRegistry = new ModuleRegistry('warn');
-    for (const module of mockModules) {
-      mockRegistry.add(module, { type: 'standard', path: 'test' });
-    }
-
-    mockDiscoverAllModules.mockResolvedValue({
-      registry: mockRegistry,
-      warnings: [],
-    });
-
-    mockRenderMarkdown.mockReturnValue(
-      '# Test Persona Instructions\\n\\nTest content'
-    );
-    mockGenerateBuildReport.mockReturnValue(mockBuildReport);
-    mockResolvePersonaModules.mockReturnValue({
+    // Setup default mock for buildPersona - returns successful build result
+    const mockResult: BuildResult = {
+      markdown: '# Test Persona Instructions\\n\\nTest content',
+      persona: mockPersona,
       modules: mockModules,
-      missingModules: [],
+      buildReport: mockBuildReport,
       warnings: [],
-    });
+    };
+
+    mockBuildPersona.mockResolvedValue(mockResult);
+    mockWriteOutputFile.mockResolvedValue();
   });
 
   it('should build persona from file with output to file', async () => {
@@ -211,20 +148,13 @@ describe('build command', () => {
       verbose: false,
     };
 
-    mockReadFromStdin.mockResolvedValue('');
-    mockWriteOutputFile.mockResolvedValue();
-
     // Act
     await handleBuild(options);
 
     // Assert
-    expect(mockDiscoverAllModules).toHaveBeenCalled();
-    expect(mockLoadPersona).toHaveBeenCalledWith('test.persona.yml');
-    expect(mockRenderMarkdown).toHaveBeenCalledWith(mockPersona, mockModules);
-    expect(mockGenerateBuildReport).toHaveBeenCalledWith(
-      mockPersona,
-      mockModules
-    );
+    expect(mockBuildPersona).toHaveBeenCalledWith('test.persona.yml', {
+      includeStandard: true,
+    });
     expect(mockWriteOutputFile).toHaveBeenCalledWith(
       'output.md',
       '# Test Persona Instructions\\n\\nTest content'
@@ -243,7 +173,6 @@ describe('build command', () => {
       // No output specified - should write to stdout
     };
 
-    mockReadFromStdin.mockResolvedValue('');
     const mockConsoleLog = vi
       .spyOn(console, 'log')
       .mockImplementation(() => {});
@@ -252,7 +181,9 @@ describe('build command', () => {
     await handleBuild(options);
 
     // Assert
-    expect(mockLoadPersona).toHaveBeenCalledWith('test.persona.yml');
+    expect(mockBuildPersona).toHaveBeenCalledWith('test.persona.yml', {
+      includeStandard: true,
+    });
     expect(mockConsoleLog).toHaveBeenCalledWith(
       '# Test Persona Instructions\\n\\nTest content'
     );
@@ -285,7 +216,7 @@ describe('build command', () => {
   it('should handle build errors gracefully', async () => {
     // Arrange
     const error = new Error('Build failed');
-    mockDiscoverAllModules.mockRejectedValue(error);
+    mockBuildPersona.mockRejectedValue(error);
     const { handleError } = await import('../utils/error-handler.js');
     const mockHandleError = vi.mocked(handleError);
 
@@ -314,13 +245,9 @@ describe('build command', () => {
       verbose: false,
     };
 
-    // Create empty registry - modules will be missing
-    const emptyRegistry = new ModuleRegistry('warn');
-
-    mockDiscoverAllModules.mockResolvedValue({
-      registry: emptyRegistry,
-      warnings: [],
-    });
+    // Mock buildPersona to throw missing modules error
+    const error = new Error('Missing modules: test/module-1');
+    mockBuildPersona.mockRejectedValue(error);
 
     // Act & Assert
     await expect(handleBuild(options)).rejects.toThrow(
@@ -335,21 +262,16 @@ describe('build command', () => {
       verbose: false,
     };
 
-    const warningsRegistry = new ModuleRegistry('warn');
-    for (const module of mockModules) {
-      warningsRegistry.add(module, { type: 'standard', path: 'test' });
-    }
-
-    mockDiscoverAllModules.mockResolvedValue({
-      registry: warningsRegistry,
-      warnings: ['Test warning'],
-    });
-
-    mockResolvePersonaModules.mockReturnValue({
+    // Mock buildPersona to return warnings
+    const resultWithWarnings: BuildResult = {
+      markdown: '# Test Persona Instructions\\n\\nTest content',
+      persona: mockPersona,
       modules: mockModules,
-      missingModules: [],
-      warnings: ['Resolution warning'],
-    });
+      buildReport: mockBuildReport,
+      warnings: ['Test warning', 'Resolution warning'],
+    };
+
+    mockBuildPersona.mockResolvedValue(resultWithWarnings);
 
     const mockConsoleLog = vi
       .spyOn(console, 'log')
