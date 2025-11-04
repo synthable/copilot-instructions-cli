@@ -31,6 +31,7 @@ export interface IModuleBuilder {
   version(version: string): this;
   schemaVersion(version: string): this;
   capabilities(capabilities: string[]): this;
+  capability(capability: string): this;
   cognitiveLevel(level: number): this;
   domain(domain: string | string[]): this;
   metadata(fn: BuilderFn<IMetadataBuilder, IMetadataBuilder>): this;
@@ -58,6 +59,7 @@ export interface IMetadataBuilder {
   description(description: string): this;
   semantic(semantic: string): this;
   tags(tags: string[]): this;
+  tag(tag: string): this;
   solves(problems: { problem: string; keywords: string[] }[]): this;
   requires(moduleIds: string[]): this;
   recommends(moduleIds: string[]): this;
@@ -120,20 +122,4 @@ export interface IDataBuilder {
   value(value: unknown): this;
   description(description: string): this;
   build(): DataComponent;
-}
-
-/**
- * Simple constraint shorthand
- */
-export interface SimpleConstraint {
-  rule: string;
-  severity?: 'error' | 'warning' | 'info';
-}
-
-/**
- * Simple criterion shorthand
- */
-export interface SimpleCriterion {
-  item: string;
-  severity?: 'critical' | 'important' | 'nice-to-have';
 }

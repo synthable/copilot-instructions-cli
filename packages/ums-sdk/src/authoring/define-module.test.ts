@@ -154,6 +154,79 @@ describe('defineModule()', () => {
     expect(data?.data.description).toBe('Test data');
   });
 
+  it('should support .capability() convenience method', () => {
+    const module = defineModule(m =>
+      m
+        .id('test/capability')
+        .version('1.0.0')
+        .capability('capability-1')
+        .capability('capability-2')
+        .capability('capability-3')
+        .cognitiveLevel(2)
+        .metadata(meta =>
+          meta
+            .name('Capability Test')
+            .description('Testing capability method')
+            .semantic('capability test')
+        )
+        .instruction(i => i.purpose('Test capability'))
+    );
+
+    expect(module.capabilities).toEqual([
+      'capability-1',
+      'capability-2',
+      'capability-3',
+    ]);
+  });
+
+  it('should support .tag() convenience method', () => {
+    const module = defineModule(m =>
+      m
+        .id('test/tag')
+        .version('1.0.0')
+        .capabilities(['test'])
+        .cognitiveLevel(2)
+        .metadata(meta =>
+          meta
+            .name('Tag Test')
+            .description('Testing tag method')
+            .semantic('tag test')
+            .tag('tag1')
+            .tag('tag2')
+            .tag('tag3')
+        )
+        .instruction(i => i.purpose('Test tags'))
+    );
+
+    expect(module.metadata.tags).toEqual(['tag1', 'tag2', 'tag3']);
+  });
+
+  it('should support mixing array and convenience methods', () => {
+    const module = defineModule(m =>
+      m
+        .id('test/mixed')
+        .version('1.0.0')
+        .capabilities(['initial-capability'])
+        .capability('added-capability')
+        .cognitiveLevel(2)
+        .metadata(meta =>
+          meta
+            .name('Mixed Test')
+            .description('Testing mixed methods')
+            .semantic('mixed test')
+            .tags(['initial-tag'])
+            .tag('added-tag')
+        )
+        .instruction(i => i.purpose('Test mixed methods'))
+    );
+
+    expect(module.capabilities).toEqual([
+      'initial-capability',
+      'added-capability',
+    ]);
+    expect(module.metadata.tags).toEqual(['initial-tag', 'added-tag']);
+  });
+
   it('should throw error if required fields are missing', () => {
     // Missing id
     expect(() =>

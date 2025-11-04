@@ -55,7 +55,7 @@ class ComponentBuilder implements IComponentBuilder {
  * Core module builder class
  */
 export class ModuleBuilder implements IModuleBuilder {
-  private moduleData: Partial<Module> = {
+  protected moduleData: Partial<Module> = {
     schemaVersion: '2.0', // Default schema version
   };
 
@@ -76,6 +76,12 @@ export class ModuleBuilder implements IModuleBuilder {
 
   capabilities(capabilities: string[]): this {
     this.moduleData.capabilities = capabilities;
+    return this;
+  }
+
+  capability(capability: string): this {
+    this.moduleData.capabilities ??= [];
+    this.moduleData.capabilities.push(capability);
     return this;
   }
 

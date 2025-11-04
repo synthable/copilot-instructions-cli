@@ -74,6 +74,12 @@ export class MetadataBuilder implements IMetadataBuilder {
     return this;
   }
 
+  tag(tag: string): this {
+    this.data.tags ??= [];
+    this.data.tags.push(tag);
+    return this;
+  }
+
   solves(problems: { problem: string; keywords: string[] }[]): this {
     this.data.solves = problems;
     return this;
