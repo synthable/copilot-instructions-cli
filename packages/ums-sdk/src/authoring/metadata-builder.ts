@@ -5,6 +5,7 @@
 
 import type { ModuleMetadata, QualityMetadata } from 'ums-lib';
 import type { IMetadataBuilder, IQualityBuilder, BuilderFn } from './types.js';
+import { deepFreeze } from './deep-freeze.js';
 
 /**
  * Builder for quality metadata
@@ -43,7 +44,7 @@ export class QualityBuilder implements IQualityBuilder {
       throw new Error('Quality metadata requires confidence field');
     }
 
-    return this.data as QualityMetadata;
+    return deepFreeze(this.data) as QualityMetadata;
   }
 }
 
@@ -146,6 +147,6 @@ export class MetadataBuilder implements IMetadataBuilder {
       throw new Error('Module metadata requires semantic field');
     }
 
-    return this.data as ModuleMetadata;
+    return deepFreeze(this.data) as ModuleMetadata;
   }
 }

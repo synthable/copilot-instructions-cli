@@ -287,7 +287,7 @@ describe('defineModule()', () => {
     ).toThrow('Cognitive level must be an integer between 0 and 6');
   });
 
-  it('should return immutable module', () => {
+  it('should return deeply immutable module', () => {
     const module = defineModule(m =>
       m
         .id('test/immutable')
@@ -300,9 +300,22 @@ describe('defineModule()', () => {
         .instruction(i => i.purpose('Test immutability'))
     );
 
+    // Test top-level immutability
     expect(() => {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       (module as any).id = 'changed';
+    }).toThrow();
+
+    // Test nested object immutability (deep freeze)
+    expect(() => {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      (module.metadata as any).name = 'changed';
+    }).toThrow();
+
+    // Test deeply nested immutability (instruction component)
+    expect(() => {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      (module.instruction?.instruction as any).purpose = 'changed';
     }).toThrow();
   });
 });

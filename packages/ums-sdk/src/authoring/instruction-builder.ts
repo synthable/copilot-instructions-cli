@@ -11,6 +11,7 @@ import type {
 } from 'ums-lib';
 import { ComponentType as CT } from 'ums-lib';
 import type { IInstructionBuilder } from './types.js';
+import { deepFreeze } from './deep-freeze.js';
 
 /**
  * Builder for instruction components
@@ -100,6 +101,6 @@ export class InstructionBuilder implements IInstructionBuilder {
       component.instruction.criteria = this.criteria;
     }
 
-    return component;
+    return deepFreeze(component);
   }
 }

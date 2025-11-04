@@ -6,6 +6,7 @@
 import type { DataComponent } from 'ums-lib';
 import { ComponentType as CT } from 'ums-lib';
 import type { IDataBuilder } from './types.js';
+import { deepFreeze } from './deep-freeze.js';
 
 /**
  * Builder for data components
@@ -51,6 +52,6 @@ export class DataBuilder implements IDataBuilder {
       component.data.description = this.descriptionValue;
     }
 
-    return component;
+    return deepFreeze(component);
   }
 }

@@ -17,6 +17,7 @@ import { MetadataBuilder } from './metadata-builder.js';
 import { InstructionBuilder } from './instruction-builder.js';
 import { KnowledgeBuilder } from './knowledge-builder.js';
 import { DataBuilder } from './data-builder.js';
+import { deepFreeze } from './deep-freeze.js';
 
 /**
  * Component builder for multi-component modules
@@ -224,7 +225,7 @@ export class ModuleBuilder implements IModuleBuilder {
       );
     }
 
-    // Return a frozen copy to ensure immutability
-    return Object.freeze({ ...this.moduleData }) as Module;
+    // Return a deeply frozen copy to ensure complete immutability
+    return deepFreeze({ ...this.moduleData }) as Module;
   }
 }

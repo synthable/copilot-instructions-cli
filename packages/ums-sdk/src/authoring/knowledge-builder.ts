@@ -6,6 +6,7 @@
 import type { KnowledgeComponent, Concept, Example, Pattern } from 'ums-lib';
 import { ComponentType as CT } from 'ums-lib';
 import type { IKnowledgeBuilder } from './types.js';
+import { deepFreeze } from './deep-freeze.js';
 
 /**
  * Builder for knowledge components
@@ -59,6 +60,6 @@ export class KnowledgeBuilder implements IKnowledgeBuilder {
       component.knowledge.patterns = this.patterns;
     }
 
-    return component;
+    return deepFreeze(component);
   }
 }
