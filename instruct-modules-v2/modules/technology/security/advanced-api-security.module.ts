@@ -1,0 +1,521 @@
+import { Module, ComponentType, CognitiveLevel } from '../../../../types/index.js';
+
+export const advancedApiSecurity: Module = {
+  /**
+   * @property {string} id - A unique, machine-readable identifier for the module.
+   * @description This ID is the primary key for the module within the UMS ecosystem. It is used by the build system to resolve module references in persona files and to compose the final instruction set.
+   */
+  id: 'technology/security/advanced-api-security',
+  /**
+   * @property {string} version - The semantic version (SemVer 2.0.0) of the module.
+   * @description This version string allows for precise dependency management. Personas can be configured to use specific versions of a module, enabling stable instruction sets even as modules evolve.
+   */
+  version: '1.0.0-beta',
+  /**
+   * @property {string} schemaVersion - The version of the UMS specification this module conforms to.
+   * @description A declaration of conformity. Build tools use it to validate the module's structure and reject modules that use an incompatible schema.
+   */
+  schemaVersion: '2.0',
+  /**
+   * @property {string[]} capabilities - An array of functional capabilities the module provides.
+   * @description Describes what the module *helps an AI do*. This is a primary field for discovery, allowing tools to find modules with specific capabilities to solve a task.
+   */
+  capabilities: [
+    'api-security',
+    'authentication',
+    'authorization',
+    'data-protection',
+    'threat-modeling',
+  ],
+  /**
+   * @property {number} cognitiveLevel - A number from 0-6 classifying the module's position in the cognitive abstraction hierarchy.
+   * @description Guides the AI on *how to think*, structuring the final prompt from foundational reasoning (low numbers) to concrete procedures (high numbers). Level 5 indicates a focus on precise specifications and standards.
+   */
+  cognitiveLevel: 5, // Specifications and Standards
+  /**
+   * @property {string | string[]} domain - The technology, language, or field where this module is applicable.
+   * @description Used to filter modules for a specific context. For example, a build tool could select modules with `domain: 'backend'` when building a persona for a backend developer.
+   */
+  domain: ['backend', 'api', 'language-agnostic'],
+
+  /**
+   * @property {object} metadata - A container for all human-readable and AI-discoverable metadata.
+   * @description This object holds supplementary information used for search, discovery, and documentation generation. It is not typically rendered directly into the final prompt but is essential for the toolchain.
+   */
+  metadata: {
+    /**
+     * @property {string} name - A concise, human-readable, Title Case name for the module.
+     * @description Used as the display name in UIs, search results, and build reports.
+     */
+    name: 'Advanced API Security',
+    /**
+     * @property {string} description - A clear, single-sentence summary of the module's function.
+     * @description Used in tooltips, list views, and other places where a brief summary is required.
+     */
+    description: 'A comprehensive guide to designing, implementing, and testing advanced security measures for modern APIs, based on OWASP Top 10 and industry best practices.',
+    /**
+     * @property {string} semantic - A detailed, semantically rich paragraph for vector embedding and semantic search.
+     * @description This content is fed into embedding models to create a vector representation of the module, allowing discovery tools to find modules based on conceptual similarity to a user's query.
+     */
+    semantic: 'API security, authentication (AuthN), authorization (AuthZ), JWT, OAuth2, OpenID Connect, rate limiting, input validation, output encoding, threat modeling, penetration testing, secure headers, content security policy (CSP), cross-site scripting (XSS), SQL injection (SQLi), broken object level authorization (BOLA), OWASP API Security Top 10.',
+    /**
+     * @property {string[]} tags - Additional lowercase keywords for search and filtering.
+     * @description Tags provide another dimension for discovery, often capturing methodologies (`owasp`), patterns (`jwt`), or characteristics not covered by `capabilities` or `domain`.
+     */
+    tags: ['security', 'owasp', 'jwt', 'oauth2', 'authentication', 'authorization', 'best-practices'],
+    /**
+     * @property {object[]} solves - Maps user-facing problems to the solutions this module provides.
+     * @description This allows a user or AI to find a module by asking a question in natural language (e.g., "How do I secure my API?").
+     */
+    solves: [
+      {
+        /**
+         * @property {string} problem - A user-facing problem statement, phrased as a question or a need.
+         */
+        problem: 'How do I properly secure my REST or GraphQL API?',
+        /**
+         * @property {string[]} keywords - Search keywords associated with the problem to improve search recall.
+         */
+        keywords: ['api', 'security', 'best practices', 'secure'],
+      },
+      {
+        problem: 'What are the most common API vulnerabilities?',
+        keywords: ['vulnerability', 'owasp', 'top 10', 'hack'],
+      },
+    ],
+    /**
+     * @property {object} relationships - Declares dependencies and relationships with other modules.
+     * @description This information is used by build tools to validate personas, suggest companion modules, or warn about conflicts.
+     */
+    relationships: {
+      /**
+       * @property {string[]} requires - A list of module IDs that are hard dependencies.
+       * @description A build tool should fail if these modules are not also included in the persona.
+       */
+      requires: ['principle/architecture/separation-of-concerns'],
+      /**
+       * @property {string[]} recommends - A list of module IDs that are recommended as companions.
+       * @description A build tool can use this to suggest adding these modules to a persona that already includes this one.
+       */
+      recommends: ['technology/security/threat-modeling-for-developers', 'execution/testing/security-testing-playbook'],
+      /**
+       * @property {string[]} conflictsWith - A list of module IDs that are incompatible with this one.
+       * @description A build tool should warn or fail if this module is used alongside a conflicting one.
+       */
+      conflictsWith: ['legacy/insecure-defaults', 'pattern/basic-auth-only'],
+      /**
+       * @property {string} extends - The ID of a module that this module logically extends or specializes.
+       * @description This provides a semantic link between a base module and a more specific one.
+       */
+      extends: 'rest-api-design',
+    },
+    /**
+     * @property {object} quality - Indicates the module's quality and maturity.
+     * @description Provides signals to users and tools about the reliability and readiness of the module.
+     */
+    quality: {
+      /**
+       * @property {string} maturity - The development stage of the module ('alpha', 'beta', 'stable').
+       * @description Used to filter out experimental modules or to signal to users that a module is production-ready.
+       */
+      maturity: 'beta',
+      /**
+       * @property {number} confidence - A 0-1 score indicating the author's confidence in the module's effectiveness.
+       * @description Used as a quality signal for sorting and filtering during discovery.
+       */
+      confidence: 0.9,
+      /**
+       * @property {string} lastVerified - The ISO 8601 date when the module was last verified for quality.
+       * @description Helps users understand how recent and relevant the quality assessment is.
+       */
+      lastVerified: '2025-11-04',
+      /**
+       * @property {boolean} experimental - A flag to indicate that the module is experimental and may change.
+       * @description Used to warn users that the module is not yet stable.
+       */
+      experimental: true,
+    },
+    /**
+     * @property {string} license - The SPDX license identifier for the module's content.
+     * @description Clarifies the legal terms under which the module can be used and distributed.
+     */
+    license: 'MIT',
+    /**
+     * @property {string[]} authors - The primary authors or maintainers of the module.
+     * @description Provides attribution and contact points for module maintenance.
+     */
+    authors: ['Gemini, AI Assistant <gemini@google.com>'],
+    /**
+     * @property {string} homepage - A URL to the source repository, documentation, or homepage for the module.
+     */
+    homepage: 'https://github.com/google/gemini',
+    /**
+     * @property {boolean} deprecated - A flag indicating that this module is deprecated and should no longer be used.
+     * @description Build tools will warn users when a deprecated module is included in a persona.
+     */
+    deprecated: true,
+    /**
+     * @property {string} replacedBy - The ID of the module that supersedes this one.
+     * @description Used in conjunction with `deprecated`, this tells tools which module to recommend as a replacement.
+     */
+    replacedBy: 'technology/security/next-gen-api-security-v2',
+  },
+
+  /**
+   * @property {object[]} components - An array of reusable component blocks that constitute the module's content.
+   * @description This is the core content of the module. The build process iterates through these components and renders them into the final Markdown prompt in the order they are defined.
+   */
+  components: [
+    {
+      /**
+       * @property {string} type - The type of the component, which determines how its content is structured and rendered.
+       * @description `ComponentType.Instruction` signifies that this component contains direct orders for the AI.
+       */
+      type: ComponentType.Instruction,
+      /**
+       * @property {object} metadata - Metadata specific to this component.
+       * @description Provides context that can be used by the renderer or other tools, but is not part of the core instruction itself.
+       */
+      metadata: {
+        /**
+         * @property {string} purpose - The specific purpose of this component within the module.
+         * @description Explains why this component exists, e.g., to provide the core workflow.
+         */
+        purpose: 'Provide a step-by-step process for implementing a secure API development lifecycle.',
+        /**
+         * @property {string[]} context - Describes the situations or workflows where this component is most useful.
+         * @description Helps tools or AIs understand when to apply this specific block of instructions.
+         */
+        context: ['api-development', 'security-review', 'code-hardening'],
+      },
+      /**
+       * @property {object} instruction - The main content of an 'Instruction' component, containing directives for the AI.
+       */
+      instruction: {
+        /**
+         * @property {string} purpose - The primary objective or goal of this instruction set.
+         * @description Rendered as a high-level summary of the instructions to follow.
+         */
+        purpose: 'To systematically apply security controls at every stage of the API lifecycle, from design to deployment.',
+        /**
+         * @property {Array<string | object>} process - A sequence of step-by-step procedural instructions.
+         * @description Rendered as a numbered list for the AI to follow sequentially. Can contain simple strings or complex step objects.
+         */
+        process: [
+          {
+            /**
+             * @property {string} step - The main description of the action to perform in this step.
+             */
+            step: 'Establish Strong Authentication',
+            /**
+             * @property {string} detail - A more detailed explanation of the step, providing context or clarification.
+             */
+            detail: 'Implement a robust mechanism to verify the identity of clients and users. Prefer token-based standards like OAuth2 and OIDC over static API keys.',
+            /**
+             * @property {string} when - A condition describing when this step should be performed.
+             */
+            when: 'During the initial design and authentication layer implementation.',
+            /**
+             * @property {object} validate - A post-condition check to verify the step was completed correctly.
+             */
+            validate: {
+              /**
+               * @property {string} check - The condition to be verified. Rendered as a checklist item for the AI.
+               */
+              check: 'Authentication mechanism uses a standard, well-vetted protocol (e.g., OAuth2 with PKCE).',
+              /**
+               * @property {string} severity - The importance of the check. 'error' means it is critical.
+               */
+              severity: 'error',
+            },
+          },
+          {
+            step: 'Enforce Granular Authorization',
+            detail: 'Implement authorization checks at the beginning of every request handler to ensure the authenticated principal has the required permissions to perform the requested action on the specific resource.',
+            /**
+             * @property {string} do - A specific, actionable instruction within a step.
+             */
+            do: 'Check permissions against a role or attribute-based access control (RBAC/ABAC) system.',
+            validate: {
+              check: 'Every endpoint that modifies or accesses sensitive data performs an explicit authorization check.',
+              severity: 'critical',
+            },
+          },
+          'Apply Rate Limiting and Resource Quotas',
+          {
+            step: 'Validate All Incoming Data',
+            detail: 'Rigorously validate all incoming data from clients, including path parameters, query strings, headers, and request bodies. Use a schema-based validation library.',
+            when: 'At the edge, before any business logic is executed.',
+            validate: {
+              check: 'A validation schema is defined and enforced for every API endpoint.',
+              severity: 'error',
+            },
+          },
+        ],
+        /**
+         * @property {object[]} constraints - Non-negotiable rules that the AI must follow.
+         * @description Rendered as a list of strict rules, often with a `NEVER` or `ALWAYS` prefix.
+         */
+        constraints: [
+          {
+            /**
+             * @property {string} rule - The description of the rule to be followed.
+             */
+            rule: 'NEVER trust user-supplied data.',
+            /**
+             * @property {string} severity - The consequence of violating the rule.
+             */
+            severity: 'error',
+            when: 'Always',
+            /**
+             * @property {object} examples - Concrete examples of valid and invalid patterns related to the constraint.
+             * @description Used to provide clear, actionable guidance to the AI.
+             */
+            examples: {
+              /**
+               * @property {string[]} valid - Examples of code or patterns that adhere to the rule.
+               */
+              valid: ["const userId = schema.validate(req.params.id);"],
+              /**
+               * @property {string[]} invalid - Examples of code or patterns that violate the rule.
+               */
+              invalid: ["const userId = req.params.id;"],
+            },
+          },
+          {
+            rule: 'NEVER expose internal identifiers in URLs or responses.',
+            severity: 'warning',
+            examples: {
+              valid: ["/users/a7b2c-d9e1f"],
+              invalid: ["/users/12345"],
+            },
+          },
+        ],
+        /**
+         * @property {string[]} principles - High-level guiding principles that should inform the AI's behavior.
+         * @description These are less strict than constraints and are meant to guide decision-making. Each string is a distinct principle.
+         */
+        principles: [
+          'Principle of Least Privilege',
+          'Defense in Depth',
+          'Fail Securely',
+        ],
+        /**
+         * @property {object[]} criteria - A list of verification criteria to determine the success of the final output.
+         * @description Rendered as a final checklist for the AI to review its work against.
+         */
+        criteria: [
+          {
+            /**
+             * @property {string} item - The verification item to be checked.
+             */
+            item: 'Are all data access endpoints protected by authentication?',
+            /**
+             * @property {string} category - A string used to group related criteria together.
+             * @description This can be used by rendering tools to organize criteria into sections.
+             */
+            category: 'Authentication',
+            severity: 'critical',
+          },
+          {
+            item: 'Does the API implement object-level authorization checks?',
+            category: 'Authorization',
+            severity: 'critical',
+          },
+          {
+            item: 'Is all user input validated against a strict schema?',
+            category: 'Input Validation',
+            severity: 'important',
+          },
+          {
+            item: 'Are secure HTTP headers (e.g., CSP, HSTS) implemented?',
+            category: 'Transport Security',
+            severity: 'nice-to-have',
+          },
+        ],
+      },
+    },
+    {
+      type: ComponentType.Knowledge,
+      metadata: {
+        purpose: 'To educate on the theoretical foundations and common patterns of API security.',
+        context: ['learning', 'security-architecture', 'threat-awareness'],
+      },
+      /**
+       * @property {object} knowledge - The main content of a 'Knowledge' component.
+       */
+      knowledge: {
+        /**
+         * @property {string} explanation - A high-level conceptual overview of the knowledge being imparted.
+         * @description Rendered as an introductory paragraph in the knowledge section.
+         */
+        explanation: 'Modern API security is a multi-layered discipline that goes beyond simple authentication. It involves understanding common threats, applying architectural patterns, and adopting a security-first mindset.',
+        /**
+         * @property {object[]} concepts - A list of core concepts to teach the AI.
+         * @description Used to explain foundational ideas, terminology, and theories.
+         */
+        concepts: [
+          {
+            /**
+             * @property {string} name - The name of the concept.
+             */
+            name: 'JWT (JSON Web Token)',
+            /**
+             * @property {string} description - A detailed explanation of the concept.
+             */
+            description: 'A compact, URL-safe means of representing claims to be transferred between two parties. It is commonly used for stateless authentication sessions.',
+            /**
+             * @property {string} rationale - An explanation of why this concept is important.
+             */
+            rationale: 'JWTs allow services to verify identity and claims without needing to contact an identity provider on every request, improving scalability.',
+            /**
+             * @property {string[]} examples - Simple, illustrative examples of the concept.
+             */
+            examples: ['Header: {"alg": "HS256", "typ": "JWT"}', 'Payload: {"sub": "12345", "name": "John Doe", "iat": 1516239022}'],
+            /**
+             * @property {string[]} tradeoffs - A list of pros and cons or other trade-offs associated with the concept.
+             */
+            tradeoffs: ['Stateless nature makes immediate revocation difficult without a blacklist.', 'Can become large if too many claims are included.'],
+          },
+        ],
+        /**
+         * @property {object[]} examples - A list of rich, illustrative code examples.
+         * @description This top-level `examples` property is used for standalone examples that are not tied to a specific pattern.
+         */
+        examples: [
+          {
+            /**
+             * @property {string} title - The title of the example code snippet.
+             */
+            title: 'Secure JWT Validation Middleware',
+            /**
+             * @property {string} rationale - Explains what the code example demonstrates.
+             */
+            rationale: 'Demonstrates a typical middleware pattern for validating a JWT bearer token in an Express.js application.',
+            /**
+             * @property {string} language - The programming language of the snippet, used for syntax highlighting.
+             */
+            language: 'typescript',
+            /**
+             * @property {string} snippet - The actual code snippet to be displayed.
+             */
+            snippet: `
+import jwt from 'jsonwebtoken';
+import jwksClient from 'jwks-rsa';
+
+const client = jwksClient({
+  jwksUri: 'https://<auth-provider>/.well-known/jwks.json'
+});
+
+function getKey(header, callback){
+  client.getSigningKey(header.kid, function(err, key) {
+    const signingKey = key.publicKey || key.rsaPublicKey;
+    callback(null, signingKey);
+  });
+}
+
+function validateToken(req, res, next) {
+  const token = req.headers.authorization?.split(' ')[1];
+  if (!token) return res.sendStatus(401);
+
+  jwt.verify(token, getKey, { algorithms: ['RS256'] }, (err, decoded) => {
+    if (err) return res.sendStatus(403);
+    req.user = decoded;
+    next();
+  });
+}
+            `,
+          },
+        ],
+        /**
+         * @property {object[]} patterns - A list of design patterns or other reusable solutions.
+         * @description Used to teach the AI about established best practices and how to apply them.
+         */
+        patterns: [
+          {
+            /**
+             * @property {string} name - The formal name of the pattern.
+             */
+            name: 'Rate Limiting Pattern',
+            /**
+             * @property {string} useCase - Describes the specific situations or contexts where this pattern is applicable.
+             */
+            useCase: 'To prevent denial-of-service (DoS) attacks and brute-force attempts on authentication endpoints.',
+            /**
+             * @property {string} description - Explains the mechanics of the pattern: how it works.
+             */
+            description: 'Track the number of requests from a specific IP address or user account within a given time window. If the count exceeds a threshold, temporarily block further requests.',
+            /**
+             * @property {string[]} advantages - Lists the benefits of applying the pattern.
+             */
+            advantages: ['Protects downstream services from being overwhelmed.', 'Increases resilience against simple DoS attacks.'],
+            /**
+             * @property {string[]} disadvantages - Lists the drawbacks or trade-offs of using the pattern.
+             */
+            disadvantages: ['Can inadvertently block legitimate high-volume users if not configured carefully.', 'Distributed rate limiting can be complex to implement.'],
+            /**
+             * @property {object} example - A concrete illustration of the pattern in action.
+             */
+            example: {
+              title: 'IP-based Rate Limiter in Express.js',
+              rationale: 'A simple in-memory rate limiter for an Express.js application.',
+              language: 'typescript',
+              snippet: `
+import rateLimit from 'express-rate-limit';
+
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // Limit each IP to 100 requests per window
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+app.use('/api/', apiLimiter);
+              `,
+            },
+          },
+        ],
+      },
+    },
+    {
+      type: ComponentType.Data,
+      metadata: {
+        purpose: 'To provide structured, machine-readable data for reference, such as checklists and configurations.',
+        context: ['security-auditing', 'configuration-as-code'],
+      },
+      /**
+       * @property {object} data - The main content of a 'Data' component.
+       */
+      data: {
+        /**
+         * @property {string} format - The media type of the data (e.g., 'json', 'yaml').
+         * @description This tells the renderer how to format the `value` content, e.g., as a JSON code block.
+         */
+        format: 'json',
+        /**
+         * @property {string} description - A human-readable description of what the data represents.
+         * @description Rendered as a title or header for the data block.
+         */
+        description: 'OWASP API Security Top 10 (2023) Checklist',
+        /**
+         * @property {any} value - The actual data content. While the UMS spec defines this as `unknown`, this module provides a specific structure.
+         * @description This value is serialized (e.g., to a JSON string) and placed inside a formatted code block for the AI to reference as a structured checklist.
+         */
+        value: {
+          "owaspApiTop10_2023": [
+            { "id": "API1:2023", "name": "Broken Object Level Authorization", "checked": false },
+            { "id": "API2:2023", "name": "Broken Authentication", "checked": false },
+            { "id": "API3:2023", "name": "Broken Object Property Level Authorization", "checked": false },
+            { "id": "API4:2023", "name": "Unrestricted Resource Consumption", "checked": false },
+            { "id": "API5:2023", "name": "Broken Function Level Authorization", "checked": false },
+            { "id": "API6:2023", "name": "Unrestricted Access to Sensitive Business Flows", "checked": false },
+            { "id": "API7:2023", "name": "Server Side Request Forgery", "checked": false },
+            { "id": "API8:2023", "name": "Security Misconfiguration", "checked": false },
+            { "id": "API9:2023", "name": "Improper Inventory Management", "checked": false },
+            { "id": "API10:2023", "name": "Unsafe Consumption of APIs", "checked": false }
+          ]
+        },
+      },
+    },
+  ],
+};
