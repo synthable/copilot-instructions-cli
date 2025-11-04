@@ -4,15 +4,19 @@
  * Node.js SDK for UMS v2.0 - provides file system operations,
  * TypeScript module loading, and high-level orchestration.
  *
- * ARCHITECTURE:
- * - This package re-exports TYPES from ums-lib for convenience
- * - For domain functions, import ums-lib directly or use SDK's high-level API
- * - SDK = I/O layer, ums-lib = domain layer
+ * ARCHITECTURE (4-Tier API):
+ * - Tier 1: High-level convenience functions (recommended)
+ * - Tier 2: I/O operations - loaders, discovery, orchestration (advanced)
+ * - Tier 3: Domain utilities - validation, registry, transforms (common needs)
+ * - Tier 4: Types and errors (all re-exported)
+ *
+ * IMPORTANT: Applications should import from ums-sdk only, never from ums-lib directly.
+ * ums-lib is an internal implementation detail of the SDK.
  *
  * @see {@link file://./../../docs/spec/ums_sdk_v1_spec.md}
  */
 
-// ===== RE-EXPORT TYPES FROM UMS-LIB (for convenience) =====
+// ===== TIER 4: UMS-LIB TYPE RE-EXPORTS (for convenience) =====
 export type {
   // Core types
   Module,
@@ -52,7 +56,7 @@ export type {
   ModuleConfig,
 } from 'ums-lib';
 
-// Re-export error classes (needed for error handling)
+// ===== TIER 4: UMS-LIB ERROR RE-EXPORTS (for error handling) =====
 export {
   UMSError,
   ConflictError,
@@ -65,14 +69,35 @@ export {
   type ErrorLocation,
 } from 'ums-lib';
 
-// ===== HIGH-LEVEL API (Recommended) =====
+// ===== TIER 1: HIGH-LEVEL API (Recommended) =====
 export { buildPersona, validateAll, listModules } from './api/index.js';
 
-// ===== LOW-LEVEL API (Advanced) =====
+// ===== TIER 2: I/O OPERATIONS (Advanced) =====
 export { ModuleLoader, PersonaLoader, ConfigManager } from './loaders/index.js';
 export { ModuleDiscovery, StandardLibrary } from './discovery/index.js';
 
-// ===== SDK-SPECIFIC TYPES =====
+// ===== TIER 3: DOMAIN UTILITIES (Common Needs) =====
+// Re-export commonly needed domain functions from ums-lib for application use
+export {
+  // Validation - for custom validation workflows beyond validateAll()
+  validateModule,
+  validatePersona,
+  // Registry - for inspect/debug tools and conflict analysis
+  ModuleRegistry,
+  // Rendering - for custom build workflows (until migrated to buildPersona())
+  renderMarkdown,
+  generateBuildReport,
+  // Transforms - for path/name calculations
+  moduleIdToExportName,
+  // Formatting utilities - for CLI display and user-facing output
+  parseCognitiveLevel,
+  getCognitiveLevelName,
+  // Constants - for validation and regex matching
+  MODULE_ID_REGEX,
+  UMS_SCHEMA_VERSION,
+} from 'ums-lib';
+
+// ===== TIER 4: SDK-SPECIFIC TYPES =====
 export type {
   LocalModulePath,
   ConfigValidationResult,
@@ -85,7 +110,7 @@ export type {
   ModuleInfo,
 } from './types/index.js';
 
-// ===== SDK-SPECIFIC ERRORS =====
+// ===== TIER 4: SDK-SPECIFIC ERRORS =====
 export {
   SDKError,
   ModuleNotFoundError,
