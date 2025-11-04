@@ -3,8 +3,8 @@
  * UMS v2.0 compliant module without tags (for testing edge case)
  */
 
-import type { Module } from 'ums-lib';
-import { CognitiveLevel, ComponentType } from 'ums-lib';
+import type { Module } from 'ums-sdk';
+import { CognitiveLevel, ComponentType } from 'ums-sdk';
 
 export const errorHandling: Module = {
   id: 'principle/resilience/error-handling',

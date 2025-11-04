@@ -2,8 +2,8 @@
  * Constants for the UMS v2.0 CLI implementation
  */
 
-// Import MODULE_ID_REGEX from ums-lib to maintain single source of truth
-import { MODULE_ID_REGEX } from 'ums-lib';
+// Import MODULE_ID_REGEX from ums-sdk to maintain single source of truth
+import { MODULE_ID_REGEX } from 'ums-sdk';
 
 // Re-export as ID_REGEX for CLI convenience
 export const ID_REGEX = MODULE_ID_REGEX;

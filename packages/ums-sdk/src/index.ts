@@ -56,11 +56,16 @@ export type {
   ModuleConfig,
 } from 'ums-lib';
 
+// Re-export enums (not types)
+export { CognitiveLevel, ComponentType } from 'ums-lib';
+
 // ===== TIER 4: UMS-LIB ERROR RE-EXPORTS (for error handling) =====
 export {
   UMSError,
+  UMSValidationError,
+  ModuleLoadError as UMSModuleLoadError,  // Alias to avoid conflict with SDK's internal ModuleLoadError
+  PersonaLoadError,
   ConflictError,
-  ValidationError as UMSValidationError,
   ModuleParseError,
   PersonaParseError,
   BuildError,

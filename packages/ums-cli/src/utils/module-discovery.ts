@@ -4,8 +4,8 @@
  * Supports UMS v2.0 TypeScript format only
  */
 
-import type { ModuleConfig } from 'ums-lib';
-import { ModuleRegistry } from 'ums-lib';
+import type { ModuleConfig } from 'ums-sdk';
+import { ModuleRegistry } from 'ums-sdk';
 import { discoverModuleFiles } from './file-operations.js';
 import { loadModuleConfig, getConfiguredModulePaths } from './config-loader.js';
 import { loadTypeScriptModule } from './typescript-loader.js';

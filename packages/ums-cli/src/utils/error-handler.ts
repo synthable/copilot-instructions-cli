@@ -7,14 +7,14 @@ import chalk from 'chalk';
 import type { Ora } from 'ora';
 import {
   UMSValidationError,
-  ModuleLoadError,
+  UMSModuleLoadError,
   PersonaLoadError,
   BuildError,
   ConflictError,
   isUMSError,
   type UMSError,
   type ErrorLocation,
-} from 'ums-lib';
+} from 'ums-sdk';
 
 /**
  * Error handler with M0.5 standardized formatting support
@@ -138,11 +138,11 @@ function handleValidationError(
  * Handle module/persona load errors with file path info
  */
 function handleLoadError(
-  error: ModuleLoadError | PersonaLoadError,
+  error: UMSModuleLoadError | PersonaLoadError,
   _command: string,
   _context?: string
 ): void {
-  const isModule = error instanceof ModuleLoadError;
+  const isModule = error instanceof UMSModuleLoadError;
 
   // Error header
   console.error(chalk.red(`❌ Error: ${error.message}`));
@@ -197,7 +197,7 @@ function handleUMSError(error: UMSError, options: ErrorHandlerOptions): void {
   } else if (error instanceof UMSValidationError) {
     handleValidationError(error, command, context);
   } else if (
-    error instanceof ModuleLoadError ||
+    error instanceof UMSModuleLoadError ||
     error instanceof PersonaLoadError
   ) {
     handleLoadError(error, command, context);

@@ -4,8 +4,8 @@
  */
 
 import { pathToFileURL } from 'node:url';
-import { moduleIdToExportName } from 'ums-lib';
-import type { Module, Persona } from 'ums-lib';
+import { moduleIdToExportName } from 'ums-sdk';
+import type { Module, Persona } from 'ums-sdk';
 
 // File extension constants
 const FILE_EXTENSIONS = {

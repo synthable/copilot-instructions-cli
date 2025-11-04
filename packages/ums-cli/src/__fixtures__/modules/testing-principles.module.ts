@@ -3,8 +3,8 @@
  * UMS v2.0 compliant module for search/list command testing
  */
 
-import type { Module } from 'ums-lib';
-import { CognitiveLevel, ComponentType } from 'ums-lib';
+import type { Module } from 'ums-sdk';
+import { CognitiveLevel, ComponentType } from 'ums-sdk';
 
 export const testingPrinciples: Module = {
   id: 'principle/quality/testing',

@@ -6,7 +6,7 @@
 import chalk from 'chalk';
 import Table from 'cli-table3';
 import { handleError } from '../utils/error-handler.js';
-import type { ModuleRegistry } from 'ums-lib';
+import type { ModuleRegistry } from 'ums-sdk';
 import { createDiscoveryProgress } from '../utils/progress.js';
 import { discoverAllModules } from '../utils/module-discovery.js';
 import { getModuleMetadata, isCLIModule } from '../types/cli-extensions.js';
