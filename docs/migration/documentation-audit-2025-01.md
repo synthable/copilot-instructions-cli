@@ -136,7 +136,7 @@ Following the implementation of the new cognitive level classification system (0
 - Verify all type definitions match current implementation
 - Check for YAML vs TypeScript format references
 - Validate examples include `cognitiveLevel`
-- Ensure consistency with `spec/unified_module_system_v2_spec.md`
+- Ensure consistency with `docs/spec/unified_module_system_v2_spec.md`
 
 **Estimated Effort**: 4-6 hours total
 
@@ -158,7 +158,7 @@ Following the implementation of the new cognitive level classification system (0
 
 ### 3.1 Core Specification
 
-**File**: `spec/unified_module_system_v2_spec.md`
+**File**: `docs/spec/unified_module_system_v2_spec.md`
 **Status**: ✅ **Up to Date**
 **Last Updated**: Phase 1 & 2 implementation (January 2025)
 

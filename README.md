@@ -209,7 +209,7 @@ Module IDs use a flexible hierarchical format:
 - Examples: `communication/be-concise`, `typescript/error-handling/try-catch`
 - All segments use kebab-case (lowercase with hyphens)
 
-For complete specification details, see [UMS v2.0 Specification](./spec/unified_module_system_v2_spec.md).
+For complete specification details, see [UMS v2.0 Specification](./docs/spec/unified_module_system_v2_spec.md).
 
 ## Contributing
 

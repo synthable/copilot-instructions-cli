@@ -35,7 +35,9 @@ export async function handleBuild(options: BuildOptions): Promise<void> {
     progress.start('Starting UMS build process...');
 
     if (verbose) {
-      console.log(chalk.gray(`[INFO] build: Building persona from ${personaPath}`));
+      console.log(
+        chalk.gray(`[INFO] build: Building persona from ${personaPath}`)
+      );
     }
 
     progress.update('Building persona...');
@@ -47,9 +49,7 @@ export async function handleBuild(options: BuildOptions): Promise<void> {
 
     if (verbose) {
       console.log(
-        chalk.gray(
-          `[INFO] build: Discovered ${result.modules.length} modules`
-        )
+        chalk.gray(`[INFO] build: Discovered ${result.modules.length} modules`)
       );
     }
 
@@ -125,4 +125,3 @@ export async function handleBuild(options: BuildOptions): Promise<void> {
     process.exit(1);
   }
 }
-

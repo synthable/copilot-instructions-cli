@@ -44,7 +44,7 @@ export function getCognitiveLevelName(
     [CognitiveLevel.SPECIFICATIONS_AND_STANDARDS]: 'Specifications & Standards',
     [CognitiveLevel.META_COGNITION]: 'Meta-Cognition',
   };
-  return names[level as number];
+  return names[level];
 }
 
 /**
@@ -71,7 +71,7 @@ export function getCognitiveLevelDescription(
     [CognitiveLevel.META_COGNITION]:
       'Self-reflection, process improvement, learning from experience',
   };
-  return descriptions[level as number];
+  return descriptions[level];
 }
 
 /**
@@ -309,8 +309,6 @@ export interface Criterion {
   category?: string;
   /** The severity level of the criterion. */
   severity?: 'critical' | 'important' | 'nice-to-have';
-  /** The weight or importance of the criterion. */
-  weight?: 'required' | 'recommended' | 'optional';
 }
 
 /**
@@ -427,6 +425,8 @@ export type Component =
  * Defines an AI persona by composing a set of UMS modules.
  */
 export interface Persona {
+  /** The unique identifier for the persona. */
+  id: string;
   /** The unique name of the persona. */
   name: string;
   /** The semantic version of the persona. */
@@ -577,6 +577,22 @@ export interface BuildReportGroup {
 }
 
 /**
+ * A composition event representing a module replacement or merge operation.
+ */
+export interface CompositionEvent {
+  /** The ID of the module. */
+  id: string;
+  /** The version of the module. */
+  version: string;
+  /** The source of the module. */
+  source: string;
+  /** The SHA-256 digest of the module content. */
+  digest: string;
+  /** The composition strategy used (base or replace). */
+  strategy: 'base' | 'replace';
+}
+
+/**
  * A report for a single module within the build.
  */
 export interface BuildReportModule {
@@ -594,6 +610,8 @@ export interface BuildReportModule {
   deprecated: boolean;
   /** The ID of a successor module, if this module is deprecated. */
   replacedBy?: string;
+  /** Optional composition history if this module was replaced or merged. */
+  composedFrom?: CompositionEvent[];
 }
 
 // #endregion

@@ -1,7 +1,13 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { writeOutputFile } from '../utils/file-operations.js';
 import { handleBuild } from './build.js';
-import { buildPersona, type BuildResult, type Persona, type Module, type BuildReport } from 'ums-sdk';
+import {
+  buildPersona,
+  type BuildResult,
+  type Persona,
+  type Module,
+  type BuildReport,
+} from 'ums-sdk';
 
 // Mock dependencies
 vi.mock('chalk', () => ({

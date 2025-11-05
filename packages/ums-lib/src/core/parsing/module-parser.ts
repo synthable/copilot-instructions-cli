@@ -50,6 +50,13 @@ export function parseModule(obj: unknown): Module {
       'Module missing or invalid required field: metadata'
     );
   }
+  // Validate cognitiveLevel is present (required field per spec Section 2.1)
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+  if (module.cognitiveLevel === undefined || module.cognitiveLevel === null) {
+    throw new ModuleParseError(
+      'Module missing or invalid required field: cognitiveLevel'
+    );
+  }
 
   // Validate that at least one component type is present
   const hasComponents =

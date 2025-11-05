@@ -261,7 +261,7 @@ See [Migration Guide](./tier-to-tags.md) for detailed instructions.
 - `src/api/high-level-api.ts` - Updated filtering to support new dimensions
 
 ### Documentation
-- `spec/unified_module_system_v2_spec.md` - Complete cognitive level specification
+- `docs/spec/unified_module_system_v2_spec.md` - Complete cognitive level specification
 - `docs/migration/tier-to-tags.md` - Migration guide (needs update)
 - `docs/migration/tag-system-implementation-summary.md` - This document
 - `docs/unified-module-system/12-module-authoring-guide.md` - Added enum usage examples

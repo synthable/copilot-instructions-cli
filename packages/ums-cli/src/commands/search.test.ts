@@ -1,9 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import {
-  handleSearch,
-  searchModules,
-  filterAndSortModules,
-} from './search.js';
+import { handleSearch, searchModules, filterAndSortModules } from './search.js';
 import { discoverAllModules } from '../utils/module-discovery.js';
 import { ModuleRegistry, CognitiveLevel } from 'ums-lib';
 import { deductiveReasoning } from '../__fixtures__/modules/deductive-reasoning.module.js';
@@ -64,9 +60,9 @@ describe('searchModules', () => {
     const results = searchModules(modules, 'reasoning');
 
     expect(results.length).toBeGreaterThan(0);
-    expect(results.some(m => m.id === 'foundation/logic/deductive-reasoning')).toBe(
-      true
-    );
+    expect(
+      results.some(m => m.id === 'foundation/logic/deductive-reasoning')
+    ).toBe(true);
   });
 
   it('should be case-insensitive', () => {
@@ -115,7 +111,9 @@ describe('filterAndSortModules', () => {
       const results = filterAndSortModules(modules, { level: '1' });
 
       expect(results).toHaveLength(1);
-      expect(results[0].cognitiveLevel).toBe(CognitiveLevel.REASONING_FRAMEWORKS);
+      expect(results[0].cognitiveLevel).toBe(
+        CognitiveLevel.REASONING_FRAMEWORKS
+      );
     });
 
     it('should filter by multiple cognitive levels', () => {
@@ -139,16 +137,22 @@ describe('filterAndSortModules', () => {
       });
 
       expect(results).toHaveLength(1);
-      expect(results[0].cognitiveLevel).toBe(CognitiveLevel.REASONING_FRAMEWORKS);
+      expect(results[0].cognitiveLevel).toBe(
+        CognitiveLevel.REASONING_FRAMEWORKS
+      );
     });
   });
 
   describe('capability filtering', () => {
     it('should filter by single capability', () => {
       const modules = [mockModule1, mockModule2];
-      const results = filterAndSortModules(modules, { capability: 'reasoning' });
+      const results = filterAndSortModules(modules, {
+        capability: 'reasoning',
+      });
 
-      expect(results.every(m => m.capabilities.includes('reasoning'))).toBe(true);
+      expect(results.every(m => m.capabilities.includes('reasoning'))).toBe(
+        true
+      );
     });
 
     it('should filter by multiple capabilities', () => {
@@ -168,11 +172,13 @@ describe('filterAndSortModules', () => {
       const results = filterAndSortModules(modules, { domain: 'typescript' });
 
       // Should filter out modules without matching domain
-      expect(results.every(m => {
-        if (!m.domain) return false;
-        const domains = Array.isArray(m.domain) ? m.domain : [m.domain];
-        return domains.includes('typescript');
-      })).toBe(true);
+      expect(
+        results.every(m => {
+          if (!m.domain) return false;
+          const domains = Array.isArray(m.domain) ? m.domain : [m.domain];
+          return domains.includes('typescript');
+        })
+      ).toBe(true);
     });
   });
 
@@ -187,7 +193,9 @@ describe('filterAndSortModules', () => {
 
     it('should filter by multiple tags', () => {
       const modules = [mockModule1, mockModule2];
-      const results = filterAndSortModules(modules, { tag: 'logic,best-practices' });
+      const results = filterAndSortModules(modules, {
+        tag: 'logic,best-practices',
+      });
 
       expect(results.length).toBeGreaterThan(0);
     });
@@ -216,7 +224,9 @@ describe('filterAndSortModules', () => {
       });
 
       expect(
-        results.every(m => m.cognitiveLevel === CognitiveLevel.UNIVERSAL_PATTERNS)
+        results.every(
+          m => m.cognitiveLevel === CognitiveLevel.UNIVERSAL_PATTERNS
+        )
       ).toBe(true);
       expect(results.every(m => m.capabilities.includes('testing'))).toBe(true);
     });
@@ -227,7 +237,9 @@ describe('handleSearch integration', () => {
   const mockDiscoverAllModules = vi.mocked(discoverAllModules);
 
   // Helper function to create registry with test modules
-  function createMockRegistry(modules: typeof deductiveReasoning[]): ModuleRegistry {
+  function createMockRegistry(
+    modules: (typeof deductiveReasoning)[]
+  ): ModuleRegistry {
     const registry = new ModuleRegistry('warn');
     for (const module of modules) {
       registry.add(module, { type: 'standard', path: 'test' });
@@ -240,14 +252,19 @@ describe('handleSearch integration', () => {
   });
 
   it('should handle successful search workflow', async () => {
-    const registry = createMockRegistry([deductiveReasoning, testingPrinciples]);
+    const registry = createMockRegistry([
+      deductiveReasoning,
+      testingPrinciples,
+    ]);
     mockDiscoverAllModules.mockResolvedValue({
       registry,
       warnings: [],
     });
 
     // Should not throw
-    await expect(handleSearch('Deductive', { verbose: false })).resolves.not.toThrow();
+    await expect(
+      handleSearch('Deductive', { verbose: false })
+    ).resolves.not.toThrow();
   });
 
   it('should handle empty module registry', async () => {
@@ -258,11 +275,16 @@ describe('handleSearch integration', () => {
     });
 
     // Should not throw
-    await expect(handleSearch('test', { verbose: false })).resolves.not.toThrow();
+    await expect(
+      handleSearch('test', { verbose: false })
+    ).resolves.not.toThrow();
   });
 
   it('should handle no search results', async () => {
-    const registry = createMockRegistry([deductiveReasoning, testingPrinciples]);
+    const registry = createMockRegistry([
+      deductiveReasoning,
+      testingPrinciples,
+    ]);
     mockDiscoverAllModules.mockResolvedValue({
       registry,
       warnings: [],
@@ -275,7 +297,10 @@ describe('handleSearch integration', () => {
   });
 
   it('should handle search with filters', async () => {
-    const registry = createMockRegistry([deductiveReasoning, testingPrinciples]);
+    const registry = createMockRegistry([
+      deductiveReasoning,
+      testingPrinciples,
+    ]);
     mockDiscoverAllModules.mockResolvedValue({
       registry,
       warnings: [],

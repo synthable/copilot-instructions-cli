@@ -154,45 +154,35 @@ export function validateModule(module: Module): ValidationResult {
     });
   }
 
-  // Validate cognitive level (required)
-  if (module.cognitiveLevel === undefined || module.cognitiveLevel === null) {
+  // Validate cognitive level (guaranteed to exist after parseModule, validate semantics only)
+  // Validate it's an integer
+  if (!Number.isInteger(module.cognitiveLevel)) {
     errors.push(
       new ValidationErrorClass(
-        'Missing required field: cognitiveLevel',
+        `cognitiveLevel must be an integer, got: ${module.cognitiveLevel}`,
         'cognitiveLevel',
         'Section 2.1'
       )
     );
-  } else {
-    // Validate it's an integer
-    if (!Number.isInteger(module.cognitiveLevel)) {
-      errors.push(
-        new ValidationErrorClass(
-          `cognitiveLevel must be an integer, got: ${module.cognitiveLevel}`,
-          'cognitiveLevel',
-          'Section 2.1'
-        )
-      );
-    }
-    // Validate it's a valid CognitiveLevel enum value (0-6)
-    const validLevels = [
-      CognitiveLevel.AXIOMS_AND_ETHICS,
-      CognitiveLevel.REASONING_FRAMEWORKS,
-      CognitiveLevel.UNIVERSAL_PATTERNS,
-      CognitiveLevel.DOMAIN_SPECIFIC_GUIDANCE,
-      CognitiveLevel.PROCEDURES_AND_PLAYBOOKS,
-      CognitiveLevel.SPECIFICATIONS_AND_STANDARDS,
-      CognitiveLevel.META_COGNITION,
-    ];
-    if (!validLevels.includes(module.cognitiveLevel)) {
-      errors.push(
-        new ValidationErrorClass(
-          `Invalid cognitiveLevel: ${module.cognitiveLevel}. Must be a valid CognitiveLevel (0-6). See CognitiveLevel enum for valid values.`,
-          'cognitiveLevel',
-          'Section 2.1'
-        )
-      );
-    }
+  }
+  // Validate it's a valid CognitiveLevel enum value (0-6)
+  const validLevels = [
+    CognitiveLevel.AXIOMS_AND_ETHICS,
+    CognitiveLevel.REASONING_FRAMEWORKS,
+    CognitiveLevel.UNIVERSAL_PATTERNS,
+    CognitiveLevel.DOMAIN_SPECIFIC_GUIDANCE,
+    CognitiveLevel.PROCEDURES_AND_PLAYBOOKS,
+    CognitiveLevel.SPECIFICATIONS_AND_STANDARDS,
+    CognitiveLevel.META_COGNITION,
+  ];
+  if (!validLevels.includes(module.cognitiveLevel)) {
+    errors.push(
+      new ValidationErrorClass(
+        `Invalid cognitiveLevel: ${module.cognitiveLevel}. Must be a valid CognitiveLevel (0-6). See CognitiveLevel enum for valid values.`,
+        'cognitiveLevel',
+        'Section 2.1'
+      )
+    );
   }
 
   // Validate components exist

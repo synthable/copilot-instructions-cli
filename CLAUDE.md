@@ -216,6 +216,7 @@ Personas are defined in `.persona.ts` files (UMS v2.0 format):
 import type { Persona } from 'ums-lib';
 
 export default {
+  id: 'persona-id',
   name: 'Persona Name',
   version: '1.0.0',
   schemaVersion: '2.0',

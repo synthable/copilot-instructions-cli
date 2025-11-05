@@ -33,19 +33,19 @@ All modules MUST be defined as TypeScript files with the `.module.ts` extension.
 
 A valid module for v2.0 MUST contain the following top-level keys:
 
-| Key              | Type                 | Required? | Description                                      |
-| :--------------- | :------------------- | :-------- | :----------------------------------------------- |
-| `id`             | String               | Yes       | Unique module identifier                         |
-| `version`        | String               | Yes       | Semantic version (SemVer 2.0.0)                  |
-| `schemaVersion`  | String               | Yes       | Must be `"2.0"`                                  |
-| `capabilities`   | Array[String]        | Yes       | What this module provides                        |
-| `metadata`       | Object               | Yes       | Human-readable and AI-discoverable metadata      |
-| `cognitiveLevel` | Integer              | No        | Cognitive hierarchy (0-4) for foundation modules |
-| `domain`         | String/Array         | No        | Domain applicability                             |
-| `components`     | Array[Component]     | No\*      | Component blocks (see 2.2)                       |
-| `instruction`    | InstructionComponent | No\*      | Shorthand for single instruction component       |
-| `knowledge`      | KnowledgeComponent   | No\*      | Shorthand for single knowledge component         |
-| `data`           | DataComponent        | No\*      | Shorthand for single data component              |
+| Key              | Type                 | Required? | Description                                       |
+| :--------------- | :------------------- | :-------- | :------------------------------------------------ |
+| `id`             | String               | Yes       | Unique module identifier                          |
+| `version`        | String               | Yes       | Semantic version (SemVer 2.0.0)                   |
+| `schemaVersion`  | String               | Yes       | Must be `"2.0"`                                   |
+| `capabilities`   | Array[String]        | Yes       | What functional capabilities this module provides |
+| `cognitiveLevel` | Integer              | Yes       | Cognitive abstraction level (0-6)                 |
+| `metadata`       | Object               | Yes       | Human-readable and AI-discoverable metadata       |
+| `domain`         | String/Array         | No        | Technology or field this module applies to        |
+| `components`     | Array[Component]     | No\*      | Component blocks (see 2.2)                        |
+| `instruction`    | InstructionComponent | No\*      | Shorthand for single instruction component        |
+| `knowledge`      | KnowledgeComponent   | No\*      | Shorthand for single knowledge component          |
+| `data`           | DataComponent        | No\*      | Shorthand for single data component               |
 
 \* At least one of `components`, `instruction`, `knowledge`, or `data` MUST be present.
 
@@ -60,7 +60,7 @@ A valid module for v2.0 MUST contain the following top-level keys:
   - `"foundation/reasoning/systems-thinking"`
   - `"principle/architecture/separation-of-concerns"`
 
-**Recommended Structure**: For standard library modules, use the tier structure (`foundation|principle|technology|execution`) for consistency. Custom modules MAY use any valid identifier structure.
+**Recommended Structure**: Module IDs can be flat (e.g., `be-concise`) or hierarchical (e.g., `ethics/do-no-harm`). Use the classification fields (`capabilities`, `domain`, `cognitiveLevel`, and `metadata.tags`) for categorization and discovery rather than encoding classification in the ID structure.
 
 #### `version`
 
@@ -82,16 +82,18 @@ A valid module for v2.0 MUST contain the following top-level keys:
 
 - **Type**: `Array<string>`
 - **Required**: Yes
-- **Purpose**: Declare what functional capabilities this module provides
+- **Purpose**: Declare what functional capabilities this module provides (what it helps you do)
 - **Constraints**:
   - MUST be a non-empty array
   - Each capability SHOULD be lowercase kebab-case
-  - Capabilities SHOULD be concrete and searchable (e.g., `"error-handling"`, `"api-design"`)
-  - Capabilities enable semantic search and module discovery
+  - Capabilities SHOULD be concrete, functional, and searchable
+  - Focus on **what** the module helps accomplish (not the domain or pattern)
 - **Examples**:
-  - `["testing", "quality"]`
-  - `["api-design", "rest", "http"]`
-  - `["error-handling", "best-practices"]`
+  - `["testing", "quality-assurance"]` - helps with testing and quality
+  - `["api-design", "rest-api"]` - helps design REST APIs
+  - `["error-handling", "logging", "debugging"]` - helps handle errors and debug
+  - `["performance-optimization", "caching"]` - helps optimize performance
+- **Distinction**: Use `capabilities` for **what the module helps accomplish**, `domain` for **where it applies**, and `metadata.tags` for **patterns/keywords**
 
 #### `metadata`
 
@@ -102,27 +104,49 @@ A valid module for v2.0 MUST contain the following top-level keys:
 
 #### `cognitiveLevel`
 
-- **Type**: `Integer` (0-4)
-- **Required**: No (but RECOMMENDED for foundation modules)
-- **Purpose**: Position in cognitive hierarchy
-- **Allowed Values**: `0`, `1`, `2`, `3`, `4`
-- **Semantics**:
-  - **0**: Bedrock / Axioms - Core principles and ethical guardrails
-  - **1**: Core Processes - Fundamental reasoning frameworks
-  - **2**: Evaluation & Synthesis - Analysis, judgment, creativity
-  - **3**: Action / Decision - Making decisions and formulating plans
-  - **4**: Meta-Cognition - Self-awareness and reflection
+- **Type**: `CognitiveLevel` enum (0-6)
+- **Required**: Yes
+- **Purpose**: Classify the module's position in the cognitive abstraction hierarchy
+- **Import**: `import { CognitiveLevel } from 'ums-lib';`
+- **Enum Values**:
+  - **0 / `CognitiveLevel.AXIOMS_AND_ETHICS`**: Universal truths, ethical bedrock, non-negotiable principles
+  - **1 / `CognitiveLevel.REASONING_FRAMEWORKS`**: How to think, analyze, and form judgments
+  - **2 / `CognitiveLevel.UNIVERSAL_PATTERNS`**: Cross-domain patterns and principles that apply broadly
+  - **3 / `CognitiveLevel.DOMAIN_SPECIFIC_GUIDANCE`**: Field-specific but technology-agnostic best practices
+  - **4 / `CognitiveLevel.PROCEDURES_AND_PLAYBOOKS`**: Step-by-step instructions and actionable guides
+  - **5 / `CognitiveLevel.SPECIFICATIONS_AND_STANDARDS`**: Precise requirements, validation criteria, compliance rules
+  - **6 / `CognitiveLevel.META_COGNITION`**: Self-reflection, process improvement, learning from experience
+- **Classification Guidance**:
+  - More abstract/universal → lower numbers (0-2)
+  - More concrete/specific → higher numbers (4-5)
+  - Domain principles → middle range (3)
+  - Self-reflective processes → highest level (6)
+- **Usage Examples**:
+  - `cognitiveLevel: CognitiveLevel.AXIOMS_AND_ETHICS` - "Do No Harm", "Respect Privacy"
+  - `cognitiveLevel: CognitiveLevel.REASONING_FRAMEWORKS` - "Systems Thinking", "Critical Analysis"
+  - `cognitiveLevel: CognitiveLevel.UNIVERSAL_PATTERNS` - "Separation of Concerns", "SOLID Principles"
+  - `cognitiveLevel: CognitiveLevel.DOMAIN_SPECIFIC_GUIDANCE` - "REST API Design", "Database Normalization"
+  - `cognitiveLevel: CognitiveLevel.PROCEDURES_AND_PLAYBOOKS` - "Git Workflow Guide", "Code Review Process"
+  - `cognitiveLevel: CognitiveLevel.SPECIFICATIONS_AND_STANDARDS` - "OpenAPI Schema Validation", "Security Compliance Checklist"
+  - `cognitiveLevel: CognitiveLevel.META_COGNITION` - "Retrospective Practice", "Continuous Improvement"
 
 #### `domain`
 
 - **Type**: `String` or `Array<string>`
 - **Required**: No
-- **Purpose**: Declare target domain(s) for the module
+- **Purpose**: Declare the technology, language, or field this module applies to (where it's used)
+- **Constraints**:
+  - Use for technology/language specificity (e.g., `"typescript"`, `"python"`)
+  - Use for technical domains (e.g., `"backend"`, `"frontend"`, `"database"`)
+  - Use `"language-agnostic"` for universal applicability
+  - Can be a single string or array of strings
 - **Examples**:
-  - `"python"`
-  - `"language-agnostic"`
-  - `["backend", "api"]`
-  - `["frontend", "react", "typescript"]`
+  - `"python"` - Python-specific module
+  - `"language-agnostic"` - Applies to all languages
+  - `["backend", "api"]` - Backend API development
+  - `["frontend", "react", "typescript"]` - React + TypeScript frontend
+  - `["database", "postgresql"]` - PostgreSQL database specific
+- **Distinction**: Use `domain` for **where the module applies** (technology/field), `capabilities` for **what it helps accomplish**, and `metadata.tags` for **additional keywords/patterns**
 
 ### 2.1.1. TypeScript Module Export Requirements
 
@@ -203,7 +227,7 @@ Tells the AI **what to do**.
 
 ```typescript
 interface InstructionComponent {
-  type: "instruction";
+  type: 'instruction';
   metadata?: ComponentMetadata;
   instruction: {
     purpose: string; // Primary objective
@@ -229,7 +253,7 @@ Teaches the AI **concepts and patterns**.
 
 ```typescript
 interface KnowledgeComponent {
-  type: "knowledge";
+  type: 'knowledge';
   metadata?: ComponentMetadata;
   knowledge: {
     explanation: string; // High-level overview
@@ -253,7 +277,7 @@ Provides **reference information**.
 
 ```typescript
 interface DataComponent {
-  type: "data";
+  type: 'data';
   metadata?: ComponentMetadata;
   data: {
     format: string; // Media type (json, yaml, xml, etc.)
@@ -317,9 +341,25 @@ interface DataComponent {
 
 - **Type**: `Array<string>`
 - **Required**: No
-- **Purpose**: Explicit keywords for faceted search and filtering
-- **Constraints**: All tags MUST be lowercase, SHOULD be kebab-case
-- **Example**: `["testing", "tdd", "quality", "best-practices"]`
+- **Purpose**: Additional keywords, patterns, and descriptive labels for search and filtering
+- **Constraints**:
+  - All tags MUST be lowercase, SHOULD be kebab-case
+  - Use for patterns, methodologies, and keywords not captured by `capabilities` or `domain`
+- **Common Tag Types**:
+  - **Patterns**: `"solid"`, `"ddd"`, `"tdd"`, `"mvc"`, `"factory-pattern"`
+  - **Methodologies**: `"agile"`, `"devops"`, `"ci-cd"`
+  - **Characteristics**: `"async"`, `"reactive"`, `"functional"`, `"imperative"`
+  - **Keywords**: `"best-practices"`, `"anti-patterns"`, `"refactoring"`
+- **Examples**:
+  - `["tdd", "red-green-refactor"]` - TDD pattern keywords
+  - `["solid", "single-responsibility"]` - SOLID principle tags
+  - `["async", "promises", "event-loop"]` - Async programming keywords
+  - `["best-practices", "clean-code"]` - General quality tags
+- **Distinction**:
+  - Use `capabilities` for **what** the module helps accomplish (functional capabilities)
+  - Use `domain` for **where** it applies (technology/field)
+  - Use `cognitiveLevel` for **abstraction level** (0-6 hierarchy)
+  - Use `tags` for **patterns, keywords, and additional descriptors**
 
 #### `solves`
 
@@ -357,7 +397,7 @@ interface ModuleRelationships {
 
 ```typescript
 interface QualityMetadata {
-  maturity: "alpha" | "beta" | "stable" | "deprecated";
+  maturity: 'alpha' | 'beta' | 'stable' | 'deprecated';
   confidence: number; // 0-1 score
   lastVerified?: string; // ISO 8601 date
   experimental?: boolean;
@@ -396,11 +436,11 @@ components: [
   {
     type: ComponentType.Instruction,
     metadata: {
-      purpose: "Core TDD workflow",
-      context: ["unit-testing", "development"],
+      purpose: 'Core TDD workflow',
+      context: ['unit-testing', 'development'],
     },
     instruction: {
-      purpose: "Apply TDD rigorously",
+      purpose: 'Apply TDD rigorously',
       // ...
     },
   },
@@ -417,7 +457,7 @@ interface ProcessStep {
   detail?: string; // Detailed explanation
   validate?: {
     check: string;
-    severity?: "error" | "warning";
+    severity?: 'error' | 'warning';
   };
   when?: string; // Conditional execution
   do?: string; // Action to perform
@@ -429,14 +469,14 @@ interface ProcessStep {
 ```typescript
 process: [
   {
-    step: "Identify resources (nouns, not verbs)",
-    detail: "Resources should be things, not actions. Use plural nouns.",
+    step: 'Identify resources (nouns, not verbs)',
+    detail: 'Resources should be things, not actions. Use plural nouns.',
     validate: {
-      check: "Endpoint URLs contain nouns only",
-      severity: "error",
+      check: 'Endpoint URLs contain nouns only',
+      severity: 'error',
     },
   },
-  "Map HTTP methods to CRUD operations",
+  'Map HTTP methods to CRUD operations',
 ];
 ```
 
@@ -445,7 +485,7 @@ process: [
 ```typescript
 interface Constraint {
   rule: string; // The rule description
-  severity?: "error" | "warning" | "info";
+  severity?: 'error' | 'warning' | 'info';
   when?: string; // Conditional application
   examples?: {
     valid?: string[];
@@ -459,11 +499,11 @@ interface Constraint {
 ```typescript
 constraints: [
   {
-    rule: "URLs MUST use plural nouns for collections",
-    severity: "error",
+    rule: 'URLs MUST use plural nouns for collections',
+    severity: 'error',
     examples: {
-      valid: ["/users", "/users/123"],
-      invalid: ["/user", "/getUser"],
+      valid: ['/users', '/users/123'],
+      invalid: ['/user', '/getUser'],
     },
   },
 ];
@@ -475,7 +515,7 @@ constraints: [
 interface Criterion {
   item: string; // The verification item
   category?: string; // Category grouping
-  severity?: "critical" | "important" | "nice-to-have";
+  severity?: 'critical' | 'important' | 'nice-to-have';
 }
 ```
 
@@ -484,12 +524,12 @@ interface Criterion {
 ```typescript
 criteria: [
   {
-    item: "Are all endpoints resource-based (nouns)?",
-    severity: "critical",
+    item: 'Are all endpoints resource-based (nouns)?',
+    severity: 'critical',
   },
   {
-    item: "Is the API versioned?",
-    severity: "important",
+    item: 'Is the API versioned?',
+    severity: 'important',
   },
 ];
 ```
@@ -511,12 +551,12 @@ interface Concept {
 ```typescript
 concepts: [
   {
-    name: "Resource-Based URLs",
-    description: "URLs represent resources (things), not actions",
-    rationale: "Resources are stable; operations change",
+    name: 'Resource-Based URLs',
+    description: 'URLs represent resources (things), not actions',
+    rationale: 'Resources are stable; operations change',
     examples: [
-      " GET /users/123 (resource: user)",
-      " GET /getUser?id=123 (action: get)",
+      ' GET /users/123 (resource: user)',
+      ' GET /getUser?id=123 (action: get)',
     ],
   },
 ];
@@ -528,9 +568,8 @@ concepts: [
 interface Example {
   title: string; // Example title
   rationale: string; // What this demonstrates
-  language?: string; // Programming language
   snippet: string; // Code snippet
-  code?: string; // Deprecated alias for snippet
+  language?: string; // Programming language
 }
 ```
 
@@ -539,9 +578,9 @@ interface Example {
 ```typescript
 examples: [
   {
-    title: "Basic Error Handling",
-    rationale: "Shows try-catch with proper logging",
-    language: "typescript",
+    title: 'Basic Error Handling',
+    rationale: 'Shows try-catch with proper logging',
+    language: 'typescript',
     snippet: `
       try {
         await riskyOperation();
@@ -572,11 +611,11 @@ interface Pattern {
 ```typescript
 patterns: [
   {
-    name: "Repository Pattern",
-    useCase: "Abstract data access layer",
-    description: "Encapsulate data access logic in repository classes",
-    advantages: ["Testable in isolation", "Centralized data access logic"],
-    disadvantages: ["Additional abstraction layer"],
+    name: 'Repository Pattern',
+    useCase: 'Abstract data access layer',
+    description: 'Encapsulate data access logic in repository classes',
+    advantages: ['Testable in isolation', 'Centralized data access logic'],
+    disadvantages: ['Additional abstraction layer'],
   },
 ];
 ```
@@ -589,6 +628,7 @@ Personas are TypeScript files (`.persona.ts`) that define AI agent configuration
 
 ```typescript
 interface Persona {
+  id: string; // Unique persona identifier
   name: string; // Human-readable persona name
   version: string; // Semantic version
   schemaVersion: string; // Must be "2.0"
@@ -597,7 +637,6 @@ interface Persona {
   identity?: string; // Persona prologue (voice, traits, capabilities)
   tags?: string[]; // Keywords for filtering
   domains?: string[]; // Broader categories
-  attribution?: boolean; // Include module attribution in output
   modules: ModuleEntry[]; // Composition block
 }
 ```
@@ -624,15 +663,15 @@ interface ModuleGroup {
 
 ```typescript
 modules: [
-  "foundation/ethics/do-no-harm",
+  'foundation/ethics/do-no-harm',
   {
-    group: "Professional Standards",
+    group: 'Professional Standards',
     ids: [
-      "principle/testing/test-driven-development",
-      "principle/architecture/separation-of-concerns",
+      'principle/testing/test-driven-development',
+      'principle/architecture/separation-of-concerns',
     ],
   },
-  "error-handling",
+  'error-handling',
 ];
 ```
 
@@ -650,7 +689,7 @@ Implementations construct the Module Registry by:
 
 ### 5.1.1. Standard Library
 
-The **Standard Library** is a curated collection of foundation modules that provide core AI instruction patterns, reasoning frameworks, and best practices.
+The **Standard Library** is a curated collection of reusable modules that provide core AI instruction patterns, reasoning frameworks, and best practices across all cognitive levels.
 
 **Discovery and Location**:
 
@@ -682,12 +721,12 @@ The **Standard Library** is a curated collection of foundation modules that prov
 
 ```yaml
 localModulePaths:
-  - path: "./company-standards"
-    onConflict: "error" # Fail on collision
-  - path: "./project-overrides"
-    onConflict: "replace" # Override existing
-  - path: "./experimental"
-    onConflict: "warn" # Warn and keep original
+  - path: './company-standards'
+    onConflict: 'error' # Fail on collision
+  - path: './project-overrides'
+    onConflict: 'replace' # Override existing
+  - path: './experimental'
+    onConflict: 'warn' # Warn and keep original
 ```
 
 ### 5.3. Conflict Resolution Strategies
@@ -784,14 +823,6 @@ _Why_: {rationale}
 
 ````
 
-#### Attribution
-
-If `attribution: true` is set in persona, append after each module:
-
-```markdown
-[Attribution: {module-id}]
-````
-
 ## 7. The Build Report
 
 For every successful build operation, implementations MUST generate a `.build.json` file alongside the output prompt.
@@ -841,7 +872,7 @@ interface CompositionEvent {
   version: string; // Version
   source: string; // Source label
   digest: string; // Content digest
-  strategy: "base" | "replace"; // Composition strategy
+  strategy: 'base' | 'replace'; // Composition strategy
 }
 ```
 
@@ -912,37 +943,40 @@ interface CompositionEvent {
 
 ```typescript
 // error-handling.module.ts
-import { Module, ComponentType } from "./types/index.js";
+import { Module, ComponentType, CognitiveLevel } from './types/index.js';
 
 export const errorHandling: Module = {
-  id: "error-handling",
-  version: "1.0.0",
-  schemaVersion: "2.0",
-  capabilities: ["error-handling", "best-practices"],
+  id: 'error-handling',
+  version: '1.0.0',
+  schemaVersion: '2.0',
+  capabilities: ['error-handling', 'resilience'],
+  cognitiveLevel: CognitiveLevel.UNIVERSAL_PATTERNS,
+  domain: 'language-agnostic',
 
   metadata: {
-    name: "Error Handling Best Practices",
-    description: "Handle errors gracefully with proper patterns",
+    name: 'Error Handling Best Practices',
+    description: 'Handle errors gracefully with proper patterns',
     semantic:
-      "Error handling, exception management, fault tolerance, resilience, try-catch, error propagation, logging",
+      'Error handling, exception management, fault tolerance, resilience, try-catch, error propagation, logging',
+    tags: ['best-practices', 'fault-tolerance'],
   },
 
   instruction: {
     type: ComponentType.Instruction,
     instruction: {
-      purpose: "Implement robust error handling",
+      purpose: 'Implement robust error handling',
       constraints: [
         {
-          rule: "Never swallow errors silently",
-          severity: "error",
+          rule: 'Never swallow errors silently',
+          severity: 'error',
         },
         {
-          rule: "Log errors with context",
-          severity: "error",
+          rule: 'Log errors with context',
+          severity: 'error',
         },
         {
-          rule: "Use typed error classes",
-          severity: "warning",
+          rule: 'Use typed error classes',
+          severity: 'warning',
         },
       ],
     },
@@ -954,23 +988,24 @@ export const errorHandling: Module = {
 
 ```typescript
 // test-driven-development.module.ts
-import { Module, ComponentType } from "./types/index.js";
+import { Module, ComponentType, CognitiveLevel } from './types/index.js';
 
 export const tddModule: Module = {
-  id: "test-driven-development",
-  version: "2.0.0",
-  schemaVersion: "2.0",
-  capabilities: ["testing", "quality", "tdd"],
-  domain: "language-agnostic",
+  id: 'test-driven-development',
+  version: '2.0.0',
+  schemaVersion: '2.0',
+  capabilities: ['testing', 'quality-assurance'],
+  cognitiveLevel: CognitiveLevel.UNIVERSAL_PATTERNS,
+  domain: 'language-agnostic',
 
   metadata: {
-    name: "Test-Driven Development",
-    description: "Apply TDD methodology for higher quality code",
+    name: 'Test-Driven Development',
+    description: 'Apply TDD methodology for higher quality code',
     semantic:
-      "TDD, test-driven development, red-green-refactor, unit testing, test-first development, quality assurance, regression prevention",
-    tags: ["testing", "tdd", "quality"],
+      'TDD, test-driven-development, red-green-refactor, unit testing, test-first development, quality assurance, regression prevention',
+    tags: ['tdd', 'red-green-refactor', 'test-first'],
     quality: {
-      maturity: "stable",
+      maturity: 'stable',
       confidence: 0.9,
     },
   },
@@ -979,16 +1014,16 @@ export const tddModule: Module = {
     {
       type: ComponentType.Instruction,
       instruction: {
-        purpose: "Apply TDD methodology rigorously",
+        purpose: 'Apply TDD methodology rigorously',
         process: [
-          "Write a failing test that defines desired behavior",
-          "Write minimal code to make the test pass",
-          "Refactor code while keeping tests green",
+          'Write a failing test that defines desired behavior',
+          'Write minimal code to make the test pass',
+          'Refactor code while keeping tests green',
         ],
         principles: [
-          "Test first, code second",
-          "Write only enough code to pass the test",
-          "Refactor mercilessly",
+          'Test first, code second',
+          'Write only enough code to pass the test',
+          'Refactor mercilessly',
         ],
       },
     },
@@ -996,17 +1031,17 @@ export const tddModule: Module = {
       type: ComponentType.Knowledge,
       knowledge: {
         explanation:
-          "TDD is a development process where tests drive the design and implementation of code through short, iterative cycles.",
+          'TDD is a development process where tests drive the design and implementation of code through short, iterative cycles.',
         concepts: [
           {
-            name: "Red-Green-Refactor",
-            description: "The core TDD cycle",
+            name: 'Red-Green-Refactor',
+            description: 'The core TDD cycle',
             rationale:
-              "Ensures tests fail first (red), pass with minimal code (green), then improve design (refactor)",
+              'Ensures tests fail first (red), pass with minimal code (green), then improve design (refactor)',
             examples: [
-              "Red: Write test, see it fail",
-              "Green: Write minimal code to pass",
-              "Refactor: Improve design without changing behavior",
+              'Red: Write test, see it fail',
+              'Green: Write minimal code to pass',
+              'Refactor: Improve design without changing behavior',
             ],
           },
         ],
@@ -1020,49 +1055,49 @@ export const tddModule: Module = {
 
 ```typescript
 // rest-api-design.module.ts
-import { Module, ComponentType } from "./types/index.js";
+import { Module, ComponentType, CognitiveLevel } from './types/index.js';
 
 export const apiDesign: Module = {
-  id: "rest-api-design",
-  version: "1.0.0",
-  schemaVersion: "2.0",
-  capabilities: ["api-design", "rest", "http"],
-  cognitiveLevel: 2,
-  domain: "language-agnostic",
+  id: 'rest-api-design',
+  version: '1.0.0',
+  schemaVersion: '2.0',
+  capabilities: ['api-design', 'rest-api'],
+  cognitiveLevel: CognitiveLevel.DOMAIN_SPECIFIC_GUIDANCE,
+  domain: 'language-agnostic',
 
   metadata: {
-    name: "REST API Design Best Practices",
+    name: 'REST API Design Best Practices',
     description:
-      "Design clean, intuitive REST APIs following industry standards",
+      'Design clean, intuitive REST APIs following industry standards',
     semantic: `
       REST API design, RESTful architecture, HTTP methods, resource naming,
       API versioning, status codes, error handling, HATEOAS, Richardson
       Maturity Model, API documentation, OpenAPI, Swagger
     `,
-    tags: ["api", "rest", "http", "web-services"],
+    tags: ['rest', 'restful', 'resource-based', 'http-methods'],
 
     solves: [
       {
-        problem: "How should I structure my API endpoints?",
-        keywords: ["endpoint", "url", "resource", "naming"],
+        problem: 'How should I structure my API endpoints?',
+        keywords: ['endpoint', 'url', 'resource', 'naming'],
       },
       {
-        problem: "What HTTP methods should I use?",
-        keywords: ["GET", "POST", "PUT", "DELETE", "PATCH"],
+        problem: 'What HTTP methods should I use?',
+        keywords: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
       },
     ],
 
     relationships: {
-      recommends: ["error-handling", "api-documentation"],
+      recommends: ['error-handling', 'api-documentation'],
     },
 
     quality: {
-      maturity: "stable",
+      maturity: 'stable',
       confidence: 0.95,
-      lastVerified: "2025-01-15",
+      lastVerified: '2025-01-15',
     },
 
-    license: "MIT",
+    license: 'MIT',
   },
 
   components: [
@@ -1070,50 +1105,50 @@ export const apiDesign: Module = {
       type: ComponentType.Instruction,
       instruction: {
         purpose:
-          "Design RESTful APIs that are intuitive, consistent, and follow industry standards",
+          'Design RESTful APIs that are intuitive, consistent, and follow industry standards',
 
         process: [
           {
-            step: "Identify resources (nouns, not verbs)",
+            step: 'Identify resources (nouns, not verbs)',
             detail:
-              "Resources should be things, not actions. Use plural nouns.",
+              'Resources should be things, not actions. Use plural nouns.',
             validate: {
               check:
-                "Endpoint URLs contain nouns only (e.g., /users, not /getUsers)",
-              severity: "error",
+                'Endpoint URLs contain nouns only (e.g., /users, not /getUsers)',
+              severity: 'error',
             },
           },
-          "Map HTTP methods to CRUD operations",
-          "Design URL hierarchy reflecting relationships",
-          "Choose appropriate status codes",
-          "Version your API from day one",
+          'Map HTTP methods to CRUD operations',
+          'Design URL hierarchy reflecting relationships',
+          'Choose appropriate status codes',
+          'Version your API from day one',
         ],
 
         constraints: [
           {
-            rule: "URLs MUST use plural nouns for collections",
-            severity: "error",
+            rule: 'URLs MUST use plural nouns for collections',
+            severity: 'error',
             examples: {
-              valid: ["/users", "/users/123", "/users/123/orders"],
-              invalid: ["/user", "/getUser", "/createUser"],
+              valid: ['/users', '/users/123', '/users/123/orders'],
+              invalid: ['/user', '/getUser', '/createUser'],
             },
           },
           {
-            rule: "URLs MUST NOT contain verbs",
-            severity: "error",
+            rule: 'URLs MUST NOT contain verbs',
+            severity: 'error',
           },
         ],
 
         criteria: [
           {
-            item: "Are all endpoints resource-based (nouns)?",
-            severity: "critical",
+            item: 'Are all endpoints resource-based (nouns)?',
+            severity: 'critical',
           },
           {
-            item: "Do responses use correct HTTP status codes?",
-            severity: "critical",
+            item: 'Do responses use correct HTTP status codes?',
+            severity: 'critical',
           },
-          { item: "Is the API versioned?", severity: "important" },
+          { item: 'Is the API versioned?', severity: 'important' },
         ],
       },
     },
@@ -1130,25 +1165,25 @@ export const apiDesign: Module = {
 
         concepts: [
           {
-            name: "Resource-Based URLs",
-            description: "URLs represent resources (things), not actions",
+            name: 'Resource-Based URLs',
+            description: 'URLs represent resources (things), not actions',
             rationale:
-              "Resources are stable; operations change. Resource-based design is more maintainable.",
+              'Resources are stable; operations change. Resource-based design is more maintainable.',
             examples: [
-              " GET /users/123 (resource: user)",
-              " GET /getUser?id=123 (action: get)",
-              " POST /orders (create order)",
-              " POST /createOrder (redundant verb)",
+              ' GET /users/123 (resource: user)',
+              ' GET /getUser?id=123 (action: get)',
+              ' POST /orders (create order)',
+              ' POST /createOrder (redundant verb)',
             ],
           },
         ],
 
         examples: [
           {
-            title: "Complete User API",
-            language: "typescript",
+            title: 'Complete User API',
+            language: 'typescript',
             rationale:
-              "Shows a well-designed REST API with proper status codes",
+              'Shows a well-designed REST API with proper status codes',
             snippet: `
 app.get('/v1/users', async (req, res) => {
   const users = await db.users.findAll();
@@ -1176,24 +1211,24 @@ app.post('/v1/users', async (req, res) => {
     {
       type: ComponentType.Data,
       data: {
-        format: "json",
-        description: "HTTP Status Code Quick Reference",
+        format: 'json',
+        description: 'HTTP Status Code Quick Reference',
         value: {
           success: {
-            200: "OK - Request succeeded",
-            201: "Created - Resource created",
-            204: "No Content - Success, no body",
+            200: 'OK - Request succeeded',
+            201: 'Created - Resource created',
+            204: 'No Content - Success, no body',
           },
           client_errors: {
-            400: "Bad Request - Validation error",
-            401: "Unauthorized - Authentication required",
-            403: "Forbidden - Not authorized",
+            400: 'Bad Request - Validation error',
+            401: 'Unauthorized - Authentication required',
+            403: 'Forbidden - Not authorized',
             404: "Not Found - Resource doesn't exist",
           },
           server_errors: {
-            500: "Internal Server Error - Server error",
-            502: "Bad Gateway - Upstream error",
-            503: "Service Unavailable - Temporary unavailability",
+            500: 'Internal Server Error - Server error',
+            502: 'Bad Gateway - Upstream error',
+            503: 'Service Unavailable - Temporary unavailability',
           },
         },
       },
