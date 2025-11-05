@@ -10,7 +10,7 @@ import {
   type Module,
   parseCognitiveLevel,
   getCognitiveLevelName,
-} from 'ums-lib';
+} from 'ums-sdk';
 import { createDiscoveryProgress } from '../utils/progress.js';
 import { discoverAllModules } from '../utils/module-discovery.js';
 import { getModuleMetadata } from '../types/cli-extensions.js';

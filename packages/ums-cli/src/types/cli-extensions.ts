@@ -5,7 +5,7 @@
  * like file paths for tracking module sources.
  */
 
-import type { Module } from 'ums-lib';
+import type { Module } from 'ums-sdk';
 
 /**
  * CLI-extended Module type that includes file path tracking
