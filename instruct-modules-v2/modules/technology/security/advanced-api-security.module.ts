@@ -1,4 +1,4 @@
-import { Module, ComponentType, CognitiveLevel } from '../../../../types/index.js';
+import type { Module, ComponentType, CognitiveLevel } from 'ums-sdk';
 
 export const advancedApiSecurity: Module = {
   /**
@@ -31,7 +31,7 @@ export const advancedApiSecurity: Module = {
    * @property {number} cognitiveLevel - A number from 0-6 classifying the module's position in the cognitive abstraction hierarchy.
    * @description Guides the AI on *how to think*, structuring the final prompt from foundational reasoning (low numbers) to concrete procedures (high numbers). Level 5 indicates a focus on precise specifications and standards.
    */
-  cognitiveLevel: 5, // Specifications and Standards
+  cognitiveLevel: CognitiveLevel.SPECIFICATIONS_AND_STANDARDS,
   /**
    * @property {string | string[]} domain - The technology, language, or field where this module is applicable.
    * @description Used to filter modules for a specific context. For example, a build tool could select modules with `domain: 'backend'` when building a persona for a backend developer.
