@@ -31,12 +31,10 @@ export const testingPrinciples: Module = {
       ],
       constraints: [
         {
-          rule: 'All public APIs must have unit tests',
-          severity: 'error',
+          rule: 'All public APIs MUST have unit tests',
         },
         {
-          rule: 'Test coverage should exceed 80%',
-          severity: 'warning',
+          rule: 'Test coverage SHOULD exceed 80%',
         },
       ],
     },

@@ -115,8 +115,9 @@ describe('validateModule - edge cases', () => {
     });
 
     it('should warn when both components array and shorthand knowledge exist', () => {
+      const { instruction, ...baseWithoutInstruction } = baseModule;
       const module: Module = {
-        ...baseModule,
+        ...baseWithoutInstruction,
         components: [
           {
             type: ComponentType.Knowledge,
@@ -127,7 +128,6 @@ describe('validateModule - edge cases', () => {
           type: ComponentType.Knowledge,
           knowledge: { explanation: 'From shorthand' },
         },
-        instruction: undefined,
       };
 
       const result = validateModule(module);
@@ -138,8 +138,9 @@ describe('validateModule - edge cases', () => {
     });
 
     it('should warn when both components array and shorthand data exist', () => {
+      const { instruction, ...baseWithoutInstruction } = baseModule;
       const module: Module = {
-        ...baseModule,
+        ...baseWithoutInstruction,
         components: [
           {
             type: ComponentType.Data,
@@ -150,7 +151,6 @@ describe('validateModule - edge cases', () => {
           type: ComponentType.Data,
           data: { format: 'json', value: { other: true } },
         },
-        instruction: undefined,
       };
 
       const result = validateModule(module);

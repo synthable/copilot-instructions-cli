@@ -25,6 +25,28 @@ export function validatePersona(persona: Persona): ValidationResult {
   const errors: ValidationError[] = [];
   const warnings: ValidationWarning[] = [];
 
+  // Validate id field exists and is non-empty
+  if (!persona.id || typeof persona.id !== 'string' || persona.id.trim() === '') {
+    errors.push(
+      new ValidationErrorClass(
+        'Persona must have a non-empty id field',
+        'id',
+        'Section 4.1'
+      )
+    );
+  }
+
+  // Validate name field exists and is non-empty
+  if (!persona.name || typeof persona.name !== 'string' || persona.name.trim() === '') {
+    errors.push(
+      new ValidationErrorClass(
+        'Persona must have a non-empty name field',
+        'name',
+        'Section 4.1'
+      )
+    );
+  }
+
   // Validate schema version (v2.0 only)
   if (persona.schemaVersion !== '2.0') {
     errors.push(

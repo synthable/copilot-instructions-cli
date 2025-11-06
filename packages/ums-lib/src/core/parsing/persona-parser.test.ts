@@ -6,6 +6,7 @@ describe('UMS v2.0 Persona Validation', () => {
   describe('validatePersona', () => {
     it('should validate a complete valid persona', () => {
       const validPersona: Persona = {
+        id: 'software-engineer',
         name: 'Software Engineer',
         version: '1.0.0',
         schemaVersion: '2.0',
@@ -31,6 +32,7 @@ describe('UMS v2.0 Persona Validation', () => {
 
     it('should validate a minimal valid persona', () => {
       const validPersona: Persona = {
+        id: 'minimal-persona',
         name: 'Minimal Persona',
         version: '1.0.0',
         schemaVersion: '2.0',
@@ -46,6 +48,7 @@ describe('UMS v2.0 Persona Validation', () => {
 
     it('should validate persona with grouped modules', () => {
       const validPersona: Persona = {
+        id: 'grouped-persona',
         name: 'Grouped Persona',
         version: '1.0.0',
         schemaVersion: '2.0',
@@ -70,6 +73,7 @@ describe('UMS v2.0 Persona Validation', () => {
 
     it('should validate persona with mixed module entries', () => {
       const validPersona: Persona = {
+        id: 'mixed-persona',
         name: 'Mixed Persona',
         version: '1.0.0',
         schemaVersion: '2.0',
@@ -101,7 +105,7 @@ describe('UMS v2.0 Persona Validation', () => {
     it('should reject persona with missing required fields', () => {
       const invalidPersona = {
         name: 'Test Persona',
-        // missing version, schemaVersion, description, semantic, modules
+        // missing id, version, schemaVersion, description, semantic, modules
       } as unknown as Persona;
 
       const result = validatePersona(invalidPersona);
@@ -111,6 +115,7 @@ describe('UMS v2.0 Persona Validation', () => {
 
     it('should reject persona with wrong schema version', () => {
       const invalidPersona: Persona = {
+        id: 'test-persona',
         name: 'Test Persona',
         version: '1.0.0',
         schemaVersion: '1.0', // v1.0 not supported anymore
@@ -129,6 +134,7 @@ describe('UMS v2.0 Persona Validation', () => {
 
     it('should reject persona with invalid version format', () => {
       const invalidPersona = {
+        id: 'test-persona',
         name: 'Test Persona',
         version: 'not-semver',
         schemaVersion: '2.0',
@@ -145,6 +151,7 @@ describe('UMS v2.0 Persona Validation', () => {
 
     it('should reject persona with empty modules array', () => {
       const invalidPersona: Persona = {
+        id: 'empty-modules',
         name: 'Empty Modules',
         version: '1.0.0',
         schemaVersion: '2.0',
@@ -163,6 +170,7 @@ describe('UMS v2.0 Persona Validation', () => {
 
     it('should reject persona with non-array modules', () => {
       const invalidPersona = {
+        id: 'invalid-modules-type',
         name: 'Invalid Modules Type',
         version: '1.0.0',
         schemaVersion: '2.0',
@@ -178,6 +186,7 @@ describe('UMS v2.0 Persona Validation', () => {
 
     it('should reject module entry with invalid structure', () => {
       const invalidPersona = {
+        id: 'invalid-entry',
         name: 'Invalid Entry',
         version: '1.0.0',
         schemaVersion: '2.0',
@@ -198,6 +207,7 @@ describe('UMS v2.0 Persona Validation', () => {
 
     it('should reject grouped module with empty ids array', () => {
       const invalidPersona: Persona = {
+        id: 'empty-ids',
         name: 'Empty IDs',
         version: '1.0.0',
         schemaVersion: '2.0',
@@ -218,6 +228,7 @@ describe('UMS v2.0 Persona Validation', () => {
 
     it('should reject grouped module without ids array', () => {
       const invalidPersona = {
+        id: 'missing-ids',
         name: 'Missing IDs',
         version: '1.0.0',
         schemaVersion: '2.0',
@@ -235,6 +246,7 @@ describe('UMS v2.0 Persona Validation', () => {
 
     it('should reject duplicate module IDs', () => {
       const invalidPersona: Persona = {
+        id: 'duplicate-modules',
         name: 'Duplicate Modules',
         version: '1.0.0',
         schemaVersion: '2.0',
@@ -256,6 +268,7 @@ describe('UMS v2.0 Persona Validation', () => {
 
     it('should reject duplicate module IDs in grouped entries', () => {
       const invalidPersona: Persona = {
+        id: 'duplicate-in-groups',
         name: 'Duplicate in Groups',
         version: '1.0.0',
         schemaVersion: '2.0',
@@ -281,6 +294,7 @@ describe('UMS v2.0 Persona Validation', () => {
 
     it('should reject duplicate module IDs across different entries', () => {
       const invalidPersona: Persona = {
+        id: 'duplicate-across-entries',
         name: 'Duplicate Across Entries',
         version: '1.0.0',
         schemaVersion: '2.0',
@@ -304,6 +318,7 @@ describe('UMS v2.0 Persona Validation', () => {
 
     it('should reject non-string module IDs', () => {
       const invalidPersona = {
+        id: 'non-string-ids',
         name: 'Non-String IDs',
         version: '1.0.0',
         schemaVersion: '2.0',
@@ -329,6 +344,7 @@ describe('UMS v2.0 Persona Validation', () => {
 
     it('should allow optional identity field', () => {
       const validPersona: Persona = {
+        id: 'no-identity',
         name: 'No Identity',
         version: '1.0.0',
         schemaVersion: '2.0',
@@ -344,6 +360,7 @@ describe('UMS v2.0 Persona Validation', () => {
 
     it('should allow empty identity string', () => {
       const validPersona: Persona = {
+        id: 'empty-identity',
         name: 'Empty Identity',
         version: '1.0.0',
         schemaVersion: '2.0',
@@ -360,6 +377,7 @@ describe('UMS v2.0 Persona Validation', () => {
 
     it('should allow optional attribution field', () => {
       const validPersona: Persona = {
+        id: 'no-attribution',
         name: 'No Attribution',
         version: '1.0.0',
         schemaVersion: '2.0',
@@ -375,6 +393,7 @@ describe('UMS v2.0 Persona Validation', () => {
 
     it('should validate attribution as boolean', () => {
       const validWithAttribution: Persona = {
+        id: 'with-attribution',
         name: 'With Attribution',
         version: '1.0.0',
         schemaVersion: '2.0',
@@ -391,6 +410,7 @@ describe('UMS v2.0 Persona Validation', () => {
 
     it('should allow optional tags array', () => {
       const validPersona: Persona = {
+        id: 'with-tags',
         name: 'With Tags',
         version: '1.0.0',
         schemaVersion: '2.0',
@@ -407,6 +427,7 @@ describe('UMS v2.0 Persona Validation', () => {
 
     it('should allow optional domains array', () => {
       const validPersona: Persona = {
+        id: 'with-domains',
         name: 'With Domains',
         version: '1.0.0',
         schemaVersion: '2.0',
@@ -423,6 +444,7 @@ describe('UMS v2.0 Persona Validation', () => {
 
     it('should validate grouped modules with optional group name', () => {
       const validPersona: Persona = {
+        id: 'no-group-name',
         name: 'No Group Name',
         version: '1.0.0',
         schemaVersion: '2.0',
