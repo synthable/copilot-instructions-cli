@@ -1,9 +1,11 @@
 # RFC: Simplify Criterion Structure (UMS v2.1)
 
-**Status:** PROPOSAL - Seeking Feedback
+**Status:** ACCEPTED
 **Author:** Jason Knight
 **Date:** 2025-01-15
+**Accepted:** 2025-01-15
 **Related:** Follows ProcessStep (ADR 0005) and Constraint (ADR 0006) simplification
+**Implementation:** ADR 0007, commit b774ef9
 
 ---
 
@@ -297,6 +299,462 @@ criteria: [
 
 ---
 
+## Rendering Specification
+
+This section provides a precise specification for rendering criteria with categories and notes.
+
+### Rendering Algorithm
+
+```typescript
+function renderCriteria(criteria: Criterion[]): string {
+  // 1. Group criteria
+  const uncategorized: Criterion[] = [];
+  const categorized = new Map<string, Criterion[]>();
+
+  for (const criterion of criteria) {
+    if (typeof criterion === 'string' || !criterion.category) {
+      uncategorized.push(criterion);
+    } else {
+      if (!categorized.has(criterion.category)) {
+        categorized.set(criterion.category, []);
+      }
+      categorized.get(criterion.category).push(criterion);
+    }
+  }
+
+  const sections: string[] = [];
+
+  // 2. Render uncategorized first
+  if (uncategorized.length > 0) {
+    sections.push(uncategorized.map(renderItem).join('\n\n'));
+  }
+
+  // 3. Render categorized groups
+  for (const [category, items] of categorized.entries()) {
+    sections.push(`### ${category}\n`);
+    sections.push(items.map(renderItem).join('\n\n'));
+  }
+
+  return sections.join('\n\n');
+}
+
+function renderItem(criterion: Criterion): string {
+  if (typeof criterion === 'string') {
+    return `- [ ] ${criterion}`;
+  }
+
+  if (criterion.notes && criterion.notes.length > 0) {
+    let text = `- [ ] **${criterion.item}**`;
+    text += '\n' + criterion.notes.map(note => `  - ${note}`).join('\n');
+    return text;
+  }
+
+  return `- [ ] ${criterion.item}`;
+}
+```
+
+### Heading Levels
+
+**Category headings:**
+- **Level:** `###` (heading level 3)
+- **Rationale:** Criteria section uses `##` (level 2), so categories are one level below
+- **Format:** `### ${category}\n` (heading + newline)
+
+**Example:**
+```markdown
+## Criteria    ← Level 2 (section heading)
+
+### Security   ← Level 3 (category)
+### Performance ← Level 3 (category)
+```
+
+### Indentation Rules
+
+**Checkbox items:**
+- No indentation (aligned to left margin)
+- Format: `- [ ] ${text}`
+
+**Notes under criteria:**
+- **Indentation:** 2 spaces
+- **Format:** `  - ${note}` (2 spaces + dash + space + note text)
+- **Rationale:** Standard Markdown nested list indentation
+
+**Example:**
+```markdown
+- [ ] **Rate limiting prevents abuse**
+  - Test: Send 100 requests       ← 2-space indent
+  - Expected: Receive 429          ← 2-space indent
+```
+
+### Blank Line Handling
+
+**Between uncategorized items:**
+- One blank line between items (rendered as `\n\n`)
+- **Rationale:** Improves readability when notes are present
+
+**Between categories:**
+- One blank line before each category heading
+- One blank line after category heading (provided by the `\n` after heading)
+
+**Between items in same category:**
+- One blank line between items
+
+**Example:**
+```markdown
+- [ ] Uncategorized item 1
+
+- [ ] Uncategorized item 2
+
+### Security
+
+- [ ] Security item 1
+
+- [ ] Security item 2
+
+### Performance
+
+- [ ] Performance item 1
+```
+
+### Markdown Escaping
+
+**Item text:**
+- Escape Markdown special characters in `criterion.item`
+- Special characters: `*`, `_`, `[`, `]`, `(`, `)`, `#`, `\`
+- **However:** Current implementation does NOT escape (assumes authors write Markdown-safe text)
+- **Future consideration:** Add escaping function if needed
+
+**Category names:**
+- No escaping applied (assumes valid heading text)
+- Invalid characters in category names are author's responsibility
+
+**Note text:**
+- No escaping applied to notes
+- Authors may use Markdown formatting within notes (e.g., `\`code\``, `**bold**`)
+
+**Example with Markdown in notes:**
+```typescript
+{
+  item: 'API endpoints follow REST conventions',
+  notes: [
+    'Good: `/users`, `/users/123`, `/orders`',
+    'Bad: `/getUser`, `/createOrder`',
+    'Use `snake_case` for query parameters'  // backticks work
+  ]
+}
+```
+
+**Rendered:**
+```markdown
+- [ ] **API endpoints follow REST conventions**
+  - Good: `/users`, `/users/123`, `/orders`
+  - Bad: `/getUser`, `/createOrder`
+  - Use `snake_case` for query parameters
+```
+
+### Edge Cases
+
+#### 1. Empty Category Name
+
+```typescript
+{ item: 'Test item', category: '' }
+```
+
+**Behavior:** Treated as uncategorized (empty string is falsy)
+
+**Rendered:**
+```markdown
+- [ ] Test item
+```
+
+#### 2. Empty Notes Array
+
+```typescript
+{ item: 'Test item', notes: [] }
+```
+
+**Behavior:** Rendered as regular item (no bold, no notes)
+
+**Rendered:**
+```markdown
+- [ ] Test item
+```
+
+#### 3. Whitespace-Only Category
+
+```typescript
+{ item: 'Test item', category: '   ' }
+```
+
+**Behavior:** Rendered with whitespace category heading (spec does not trim)
+
+**Rendered:**
+```markdown
+###
+
+- [ ] Test item
+```
+
+**Recommendation:** Validation should reject whitespace-only categories
+
+#### 4. Duplicate Categories
+
+```typescript
+[
+  { item: 'Item 1', category: 'Security' },
+  { item: 'Item 2', category: 'Performance' },
+  { item: 'Item 3', category: 'Security' }  // Duplicate
+]
+```
+
+**Behavior:** Items grouped under same category heading
+
+**Rendered:**
+```markdown
+### Security
+
+- [ ] Item 1
+
+- [ ] Item 3
+
+### Performance
+
+- [ ] Item 2
+```
+
+**Note:** Order preserved from first occurrence of each category
+
+#### 5. Mixed String and Object Criteria
+
+```typescript
+[
+  'Simple criterion',
+  { item: 'Object criterion', category: 'Security' },
+  'Another simple criterion'
+]
+```
+
+**Behavior:** Strings treated as uncategorized
+
+**Rendered:**
+```markdown
+- [ ] Simple criterion
+
+- [ ] Another simple criterion
+
+### Security
+
+- [ ] Object criterion
+```
+
+#### 6. Special Characters in Item Text
+
+```typescript
+{ item: 'Test `code` with **bold** and [link](url)' }
+```
+
+**Behavior:** No escaping (Markdown rendered as-is)
+
+**Rendered:**
+```markdown
+- [ ] Test `code` with **bold** and [link](url)
+```
+
+**Note:** If item has notes, the item is bolded, which may interact with embedded Markdown
+
+#### 7. Multi-line Notes
+
+```typescript
+{
+  item: 'Complex test scenario',
+  notes: [
+    `Test scenario:
+1. Step one
+2. Step two
+3. Step three`
+  ]
+}
+```
+
+**Behavior:** Newlines in notes preserved as-is
+
+**Rendered:**
+```markdown
+- [ ] **Complex test scenario**
+  - Test scenario:
+1. Step one
+2. Step two
+3. Step three
+```
+
+**Note:** Multi-line notes may break indentation (list items not properly nested)
+
+**Recommendation:** Use separate note strings instead of multi-line strings
+
+#### 8. Empty Criteria Array
+
+```typescript
+criteria: []
+```
+
+**Behavior:** Criteria section not rendered at all
+
+**Rendered:**
+```markdown
+[No Criteria section]
+```
+
+#### 9. Null or Undefined in Notes
+
+```typescript
+{ item: 'Test', notes: [null, undefined, 'Valid note'] }
+```
+
+**Behavior:** Implementation-dependent (TypeScript prevents this)
+
+**Expected:** TypeScript type system rejects `null` and `undefined` in `string[]`
+
+#### 10. Very Long Category Names
+
+```typescript
+{
+  item: 'Test',
+  category: 'This Is An Extremely Long Category Name That Goes On And On And On'
+}
+```
+
+**Behavior:** Rendered as-is (no truncation)
+
+**Rendered:**
+```markdown
+### This Is An Extremely Long Category Name That Goes On And On And On
+
+- [ ] Test
+```
+
+**Recommendation:** Validation should warn about category names > 50 characters
+
+### Rendering Order Guarantees
+
+1. **Uncategorized criteria always appear first**
+2. **Categorized criteria appear in order of first occurrence**
+3. **Within each category, criteria maintain original array order**
+4. **Items within same category are NOT reordered**
+
+**Example:**
+```typescript
+[
+  'Uncategorized 1',
+  { item: 'Perf 1', category: 'Performance' },
+  { item: 'Sec 1', category: 'Security' },
+  'Uncategorized 2',
+  { item: 'Perf 2', category: 'Performance' },
+  { item: 'Sec 2', category: 'Security' }
+]
+```
+
+**Rendered order:**
+```markdown
+- [ ] Uncategorized 1
+
+- [ ] Uncategorized 2
+
+### Performance
+
+- [ ] Perf 1
+
+- [ ] Perf 2
+
+### Security
+
+- [ ] Sec 1
+
+- [ ] Sec 2
+```
+
+### Validation Rules
+
+**Recommended validation (not enforced by renderer):**
+
+1. **Category names:**
+   - Should not be empty or whitespace-only
+   - Should be < 50 characters
+   - Should use Title Case
+   - Should not contain special characters: `#`, `*`, `[`, `]`
+
+2. **Item text:**
+   - Should not be empty
+   - Should not start/end with whitespace
+   - Should be < 200 characters (long items hard to scan)
+
+3. **Notes:**
+   - Should not contain empty strings
+   - Each note should be < 150 characters (readability)
+   - Should not use multi-line strings (breaks indentation)
+
+4. **Array size:**
+   - Total criteria should be < 50 (large sets hard to verify)
+   - Criteria per category should be < 20
+
+### Complete Rendering Example
+
+**Input:**
+```typescript
+criteria: [
+  'All tests pass',
+  'Documentation complete',
+  {
+    item: 'HTTPS enforced',
+    category: 'Security'
+  },
+  {
+    item: 'Rate limiting active',
+    category: 'Security',
+    notes: [
+      'Test: Send 100 req/min',
+      'Expected: 429 after limit'
+    ]
+  },
+  {
+    item: 'Response time < 100ms',
+    category: 'Performance',
+    notes: ['Measure with load testing tool']
+  }
+]
+```
+
+**Rendered output:**
+```markdown
+## Criteria
+
+- [ ] All tests pass
+
+- [ ] Documentation complete
+
+### Security
+
+- [ ] HTTPS enforced
+
+- [ ] **Rate limiting active**
+  - Test: Send 100 req/min
+  - Expected: 429 after limit
+
+### Performance
+
+- [ ] **Response time < 100ms**
+  - Measure with load testing tool
+```
+
+**Character count breakdown:**
+- Uncategorized section: 2 items, no notes
+- Security section: 2 items, 1 with notes (2 notes)
+- Performance section: 1 item with notes (1 note)
+- Blank lines: Between all items and sections
+- Heading level: `###` for categories
+- Indentation: 2 spaces for notes
+
+---
+
 ## Rationale
 
 **Summary of Changes:**
@@ -551,13 +1009,13 @@ Reply to this RFC document with inline comments
 | Phase | Timeline | Status |
 |-------|----------|--------|
 | RFC Published | 2025-01-15 | ✅ Complete |
-| Feedback Period | 2 weeks | ⏳ In Progress |
-| Decision | 2025-01-29 | ⏸️ Pending |
-| Implementation | 2025-02-01 | ⏸️ Pending |
-| Migration Tools | 2025-02-05 | ⏸️ Pending |
-| Documentation | 2025-02-08 | ⏸️ Pending |
+| Feedback Period | 2025-01-15 | ✅ Complete (Approved) |
+| Decision | 2025-01-15 | ✅ Accepted |
+| Implementation | 2025-01-15 | ✅ Complete (commit b774ef9) |
+| Migration Tools | TBD | ⏸️ Pending |
+| Documentation | 2025-01-15 | ✅ Complete (ADR 0007) |
 
-**Feedback deadline: January 29, 2025**
+**RFC Accepted and Implemented: January 15, 2025**
 
 ---
 
@@ -666,21 +1124,21 @@ This proposal is successful if:
 
 ---
 
-## Next Steps
+## Implementation Status
 
-**If Accepted:**
-1. Create ADR documenting decision
-2. Update UMS v2.1 spec (Criterion section)
-3. Update TypeScript types
-4. Implement renderer changes
-5. Create migration tooling
-6. Update documentation
-7. Update example modules
+**✅ Completed:**
+1. ✅ Created ADR 0007 documenting decision
+2. ✅ Updated UMS v2.1 spec (Criterion section with migration example)
+3. ✅ Updated TypeScript types (removed severity, kept category, added notes)
+4. ✅ Implemented renderer changes (category grouping, notes rendering)
+5. ✅ Added comprehensive tests for criteria rendering
+6. ✅ Updated documentation (ADR 0007, spec updates)
 
-**If Rejected:**
-1. Document why in this RFC
-2. Consider alternative approaches
-3. Implement rendering for current fields (Alternative 2)
+**⏸️ Pending:**
+7. ⏸️ Create migration tooling for auto-converting v2.0 → v2.1
+8. ⏸️ Update example modules to use new format
+
+**Implementation:** commit b774ef9
 
 ---
 
@@ -694,6 +1152,6 @@ This proposal is successful if:
 
 ---
 
-**Status:** AWAITING FEEDBACK
+**Status:** ACCEPTED AND IMPLEMENTED
 **Last Updated:** 2025-01-15
-**Feedback By:** 2025-01-29
+**Implementation:** ADR 0007, commit b774ef9

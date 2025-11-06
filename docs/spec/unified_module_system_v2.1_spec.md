@@ -1018,6 +1018,309 @@ _Why_: {rationale}
 
 ````
 
+### 6.3. Detailed Rendering Specifications
+
+This section provides precise rendering specifications for v2.1 simplified structures (ProcessStep, Constraint, Criterion with notes/categories).
+
+#### 6.3.1. ProcessStep Rendering
+
+**Format:**
+```
+{index}. {step}                    ← Simple string
+{index}. **{step}**                ← Object with notes (bolded)
+   - {note1}                       ← 3-space indent
+   - {note2}
+```
+
+**Indentation:** 3 spaces for notes under numbered steps
+**Blank lines:** No blank lines between steps
+**Bolding:** Bold step text when notes are present
+
+**Example:**
+```markdown
+1. Clone repository
+2. **Install dependencies**
+   - Run `npm install`
+   - Verify package-lock.json updated
+3. Run tests
+```
+
+#### 6.3.2. Constraint Rendering
+
+**Format:**
+```
+- {rule}                           ← Simple string
+- **{rule}**                       ← Object with notes (bolded)
+  - {note1}                        ← 2-space indent
+  - {note2}
+```
+
+**Indentation:** 2 spaces for notes under bullet items
+**Blank lines:** Single blank line between constraints
+**Bolding:** Bold rule text when notes are present
+
+**Example:**
+```markdown
+- MUST use HTTPS for all API endpoints
+
+- **URLs MUST use plural nouns for collections**
+  - Good: /users, /users/123, /orders
+  - Bad: /user, /getUser, /createOrder
+  - Rationale: REST conventions require resource-based URLs
+```
+
+#### 6.3.3. Criterion Rendering
+
+Criteria support optional category grouping and test elaboration through notes.
+
+##### Rendering Algorithm
+
+```typescript
+function renderCriteria(criteria: Criterion[]): string {
+  // 1. Group criteria by category
+  const uncategorized: Criterion[] = [];
+  const categorized = new Map<string, Criterion[]>();
+
+  for (const criterion of criteria) {
+    if (typeof criterion === 'string' || !criterion.category) {
+      uncategorized.push(criterion);
+    } else {
+      if (!categorized.has(criterion.category)) {
+        categorized.set(criterion.category, []);
+      }
+      categorized.get(criterion.category).push(criterion);
+    }
+  }
+
+  const sections: string[] = [];
+
+  // 2. Render uncategorized first
+  if (uncategorized.length > 0) {
+    sections.push(uncategorized.map(renderItem).join('\n\n'));
+  }
+
+  // 3. Render categorized groups with subheadings
+  for (const [category, items] of categorized.entries()) {
+    sections.push(`### ${category}\n`);
+    sections.push(items.map(renderItem).join('\n\n'));
+  }
+
+  return sections.join('\n\n');
+}
+
+function renderItem(criterion: Criterion): string {
+  if (typeof criterion === 'string') {
+    return `- [ ] ${criterion}`;
+  }
+
+  if (criterion.notes && criterion.notes.length > 0) {
+    let text = `- [ ] **${criterion.item}**`;
+    text += '\n' + criterion.notes.map(note => `  - ${note}`).join('\n');
+    return text;
+  }
+
+  return `- [ ] ${criterion.item}`;
+}
+```
+
+##### Format Rules
+
+**Heading levels:**
+- Category headings: `###` (level 3, one below `## Criteria`)
+- Format: `### ${category}\n`
+
+**Indentation:**
+- Checkbox items: No indentation
+- Notes: 2 spaces
+- Format: `  - ${note}`
+
+**Blank lines:**
+- Between uncategorized items: Single blank line (`\n\n`)
+- Before each category heading: Single blank line
+- Between items in same category: Single blank line
+
+**Bolding:**
+- Criteria with notes: Bold the item text
+- Format: `- [ ] **${item}**`
+
+##### Rendering Order
+
+**Guarantees:**
+1. Uncategorized criteria always appear first
+2. Categorized criteria appear in order of first occurrence
+3. Within each category, criteria maintain original array order
+4. Duplicate category names are grouped under same heading
+
+**Example:**
+```typescript
+[
+  'Uncategorized 1',
+  { item: 'Perf 1', category: 'Performance' },
+  { item: 'Sec 1', category: 'Security' },
+  'Uncategorized 2',
+  { item: 'Perf 2', category: 'Performance' }
+]
+```
+
+**Renders as:**
+```markdown
+## Criteria
+
+- [ ] Uncategorized 1
+
+- [ ] Uncategorized 2
+
+### Performance
+
+- [ ] Perf 1
+
+- [ ] Perf 2
+
+### Security
+
+- [ ] Sec 1
+```
+
+##### Edge Cases
+
+**1. Empty category name:**
+```typescript
+{ item: 'Test', category: '' }
+```
+**Behavior:** Treated as uncategorized (empty string is falsy)
+
+**2. Empty notes array:**
+```typescript
+{ item: 'Test', notes: [] }
+```
+**Behavior:** Rendered as regular item (no bold, no notes)
+
+**3. Whitespace-only category:**
+```typescript
+{ item: 'Test', category: '   ' }
+```
+**Behavior:** Rendered with whitespace heading (implementations SHOULD reject in validation)
+
+**4. Duplicate categories:**
+```typescript
+[
+  { item: 'Item 1', category: 'Security' },
+  { item: 'Item 2', category: 'Performance' },
+  { item: 'Item 3', category: 'Security' }
+]
+```
+**Behavior:** Items grouped under same category heading, order preserved from first occurrence
+
+**5. Mixed string and object criteria:**
+```typescript
+[
+  'Simple criterion',
+  { item: 'Object criterion', category: 'Security' },
+  'Another simple'
+]
+```
+**Behavior:** Strings treated as uncategorized
+
+##### Complete Example
+
+**Input:**
+```typescript
+criteria: [
+  'All tests pass',
+  'Documentation complete',
+  {
+    item: 'HTTPS enforced',
+    category: 'Security'
+  },
+  {
+    item: 'Rate limiting active',
+    category: 'Security',
+    notes: [
+      'Test: Send 100 req/min',
+      'Expected: 429 after limit'
+    ]
+  },
+  {
+    item: 'Response time < 100ms',
+    category: 'Performance',
+    notes: ['Measure with load testing tool']
+  }
+]
+```
+
+**Rendered output:**
+```markdown
+## Criteria
+
+- [ ] All tests pass
+
+- [ ] Documentation complete
+
+### Security
+
+- [ ] HTTPS enforced
+
+- [ ] **Rate limiting active**
+  - Test: Send 100 req/min
+  - Expected: 429 after limit
+
+### Performance
+
+- [ ] **Response time < 100ms**
+  - Measure with load testing tool
+```
+
+##### Validation Recommendations
+
+Implementations SHOULD validate:
+
+1. **Category names:**
+   - Not empty or whitespace-only
+   - Less than 50 characters
+   - No special characters: `#`, `*`, `[`, `]`
+
+2. **Item text:**
+   - Not empty
+   - No leading/trailing whitespace
+   - Less than 200 characters
+
+3. **Notes:**
+   - No empty strings
+   - Each note less than 150 characters
+   - No multi-line strings (breaks indentation)
+
+4. **Array size:**
+   - Total criteria less than 50
+   - Criteria per category less than 20
+
+##### Markdown Escaping
+
+**Current behavior:** No escaping applied
+
+**Rationale:** Authors write Markdown-safe text. Special characters in item text are preserved as-is, allowing intentional Markdown formatting.
+
+**Example with Markdown:**
+```typescript
+{
+  item: 'API endpoints follow REST conventions',
+  notes: [
+    'Good: `/users`, `/users/123`, `/orders`',
+    'Bad: `/getUser`, `/createOrder`',
+    'Use `snake_case` for query parameters'
+  ]
+}
+```
+
+**Rendered:**
+```markdown
+- [ ] **API endpoints follow REST conventions**
+  - Good: `/users`, `/users/123`, `/orders`
+  - Bad: `/getUser`, `/createOrder`
+  - Use `snake_case` for query parameters
+```
+
+---
+
 ## 7. The Build Report
 
 For every successful build operation, implementations MUST generate a `.build.json` file alongside the output prompt.
