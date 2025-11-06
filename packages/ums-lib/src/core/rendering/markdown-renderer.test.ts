@@ -392,6 +392,51 @@ describe('renderer', () => {
       expect(result).toContain('**Examples:**\n');
       expect(result).toContain('- Example 1');
     });
+
+    it('should render concept with tradeoffs', () => {
+      const concept: Concept = {
+        name: 'Caching Strategy',
+        description: 'Store frequently accessed data in memory',
+        tradeoffs: [
+          'Higher performance but increased memory usage',
+          'Faster reads but complexity in invalidation logic',
+        ],
+      };
+      const result = renderConcept(concept);
+
+      expect(result).toContain('### Caching Strategy\n');
+      expect(result).toContain('Store frequently accessed data in memory');
+      expect(result).toContain('**Trade-offs:**\n');
+      expect(result).toContain(
+        '- Higher performance but increased memory usage'
+      );
+      expect(result).toContain(
+        '- Faster reads but complexity in invalidation logic'
+      );
+    });
+
+    it('should render concept with tradeoffs, rationale, and examples', () => {
+      const concept: Concept = {
+        name: 'Microservices',
+        description: 'Decompose application into small services',
+        rationale: 'Enable independent scaling',
+        tradeoffs: [
+          'Independent deployment but operational complexity',
+          'Technology flexibility but distributed system challenges',
+        ],
+        examples: ['User service', 'Order service'],
+      };
+      const result = renderConcept(concept);
+
+      expect(result).toContain('### Microservices\n');
+      expect(result).toContain('**Rationale:** Enable independent scaling');
+      expect(result).toContain('**Trade-offs:**\n');
+      expect(result).toContain(
+        '- Independent deployment but operational complexity'
+      );
+      expect(result).toContain('**Examples:**\n');
+      expect(result).toContain('- User service');
+    });
   });
 
   describe('renderExample', () => {

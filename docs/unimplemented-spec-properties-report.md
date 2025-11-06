@@ -16,26 +16,28 @@
 - [4. Quality Metadata Utilization 🟡](#4-quality-metadata-utilization-)
   - [Current Status](#current-status-3)
   - [Implementation Strategy](#implementation-strategy-3)
-- [5. ProcessStep Enhanced Rendering ✅](#5-processstep-enhanced-rendering-)
-  - [Implementation Details](#implementation-details)
-- [6. Constraint Enhanced Rendering ✅](#6-constraint-enhanced-rendering-)
-  - [Implementation Details](#implementation-details-1)
+- [5. ProcessStep Enhanced Rendering 🟡](#5-processstep-enhanced-rendering-)
+  - [Current Status](#current-status-4)
+  - [Implementation Strategy](#implementation-strategy-4)
+- [6. Constraint Enhanced Rendering 🟡](#6-constraint-enhanced-rendering-)
+  - [Current Status](#current-status-5)
+  - [Implementation Strategy](#implementation-strategy-5)
 - [7. Criterion Enhanced Rendering ✅](#7-criterion-enhanced-rendering-)
-  - [Implementation Details](#implementation-details-2)
+  - [Implementation Details](#implementation-details)
 - [8. Component Metadata Rendering 🔴](#8-component-metadata-rendering-)
+  - [Current Status](#current-status-6)
+  - [Implementation Strategy](#implementation-strategy-6)
+- [9. Concept Tradeoffs Rendering 🟡](#9-concept-tradeoffs-rendering-)
   - [Current Status](#current-status-7)
   - [Implementation Strategy](#implementation-strategy-7)
-- [9. Concept Tradeoffs Rendering 🟡](#9-concept-tradeoffs-rendering-)
+- [10. Build Report Composition Events 🟡](#10-build-report-composition-events-)
   - [Current Status](#current-status-8)
   - [Implementation Strategy](#implementation-strategy-8)
-- [10. Build Report Composition Events 🟡](#10-build-report-composition-events-)
+- [11. Federation \& Remote Registries 🔴](#11-federation--remote-registries-)
   - [Current Status](#current-status-9)
   - [Implementation Strategy](#implementation-strategy-9)
-- [11. Federation \& Remote Registries 🔴](#11-federation--remote-registries-)
-  - [Current Status](#current-status-10)
-  - [Implementation Strategy](#implementation-strategy-10)
 - [12. Advanced Composition (import \& bindings) 🔴](#12-advanced-composition-import--bindings-)
-  - [Current Status](#current-status-11)
+  - [Current Status](#current-status-10)
   - [Proposed Design](#proposed-design)
 - [Summary \& Prioritization](#summary--prioritization)
   - [High Priority (Quick Wins)](#high-priority-quick-wins)
@@ -1233,13 +1235,15 @@ export function renderInstructionComponent(component: InstructionComponent): str
 
 ---
 
-## 9. Concept Tradeoffs Rendering 🟡
+## 9. Concept Tradeoffs Rendering ✅
 
 **Spec Reference:** Section 3.4 (lines 537-563)
 
-### Current Status
+**Status:** IMPLEMENTED (2025-11-05)
 
-`Concept` interface includes `tradeoffs` field but it's not rendered:
+### Implementation
+
+`Concept.tradeoffs` field is now rendered in `renderConcept()` function:
 ```typescript
 interface Concept {
   name: string;
@@ -1250,41 +1254,26 @@ interface Concept {
 }
 ```
 
-### Implementation Strategy
+### Changes Made
 
-**Enhanced Concept Rendering:**
+Added tradeoffs rendering to `renderConcept()` function in `packages/ums-lib/src/core/rendering/markdown-renderer.ts`:
 
 ```typescript
-export function renderConcept(concept: Concept): string {
-  const sections: string[] = [];
-
-  sections.push(`### ${concept.name}\n`);
-  sections.push(`${concept.description}\n`);
-
-  if (concept.rationale) {
-    sections.push(`**Rationale:** ${concept.rationale}\n`);
+// Added tradeoffs section rendering (lines 330-336)
+if (concept.tradeoffs && concept.tradeoffs.length > 0) {
+  sections.push('**Trade-offs:**\n');
+  for (const tradeoff of concept.tradeoffs) {
+    sections.push(`- ${tradeoff}`);
   }
-
-  // Add tradeoffs section
-  if (concept.tradeoffs && concept.tradeoffs.length > 0) {
-    sections.push('**Trade-offs:**\n');
-    for (const tradeoff of concept.tradeoffs) {
-      sections.push(`- ${tradeoff}`);
-    }
-    sections.push('');
-  }
-
-  if (concept.examples && concept.examples.length > 0) {
-    sections.push('**Examples:**\n');
-    for (const example of concept.examples) {
-      sections.push(`- ${example}`);
-    }
-    sections.push('');
-  }
-
-  return sections.join('\n');
+  sections.push('');
 }
 ```
+
+### Tests Added
+
+Added three test cases in `packages/ums-lib/src/core/rendering/markdown-renderer.test.ts`:
+1. Concept with tradeoffs only
+2. Concept with tradeoffs, rationale, and examples (full structure)
 
 **Example Output:**
 
@@ -1802,7 +1791,7 @@ export default {
 - ✅ Enhanced rendering for ProcessStep (ADR 0005, v2.1)
 - ✅ Enhanced rendering for Constraint (ADR 0006, v2.1)
 - ✅ Enhanced rendering for Criterion (ADR 0007, v2.1)
-- ⏸️ Enhanced rendering for Concept (pending)
+- ✅ Enhanced rendering for Concept tradeoffs (2025-11-05)
 - ⏸️ Component metadata rendering (pending)
 - ✅ Immediate documentation quality improvement achieved
 

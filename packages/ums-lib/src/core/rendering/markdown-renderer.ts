@@ -327,6 +327,14 @@ export function renderConcept(concept: Concept): string {
     sections.push(`**Rationale:** ${concept.rationale}\n`);
   }
 
+  if (concept.tradeoffs && concept.tradeoffs.length > 0) {
+    sections.push('**Trade-offs:**\n');
+    for (const tradeoff of concept.tradeoffs) {
+      sections.push(`- ${tradeoff}`);
+    }
+    sections.push('');
+  }
+
   if (concept.examples && concept.examples.length > 0) {
     sections.push('**Examples:**\n');
     for (const example of concept.examples) {
