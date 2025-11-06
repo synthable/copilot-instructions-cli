@@ -1,8 +1,96 @@
-# Specification: The Unified Module System (UMS) v2.0
+# Specification: The Unified Module System (UMS) v2.1
+
+## Migration from v2.0
+
+**Breaking Changes:**
+
+1. **`ProcessStep` simplified** - Removed `validate`, `when`, and `do` fields
+   - Use `notes` array for step elaboration instead of `detail`
+   - Express conditionals and validation naturally in step text
+   - Validation belongs in `criteria` array, not embedded in process steps
+
+2. **`Constraint` simplified** - Removed `severity`, `when`, `examples`, and `rationale` fields
+   - Use RFC 2119 keywords (MUST/SHOULD/MAY) for severity in rule text
+   - Use `notes` array for examples, rationale, and clarifications
+   - Format examples with `Good:` and `Bad:` prefixes (no emojis)
+
+3. **`Criterion` simplified** - Removed `severity` field, kept `category`, added `notes`
+   - Use RFC 2119 keywords (MUST/SHOULD/MAY) for priority in criterion text
+   - Use `category` for grouping (now rendered as subheadings)
+   - Use `notes` array for test instructions, expected results, and verification steps
+
+**Migration Path:**
+
+```typescript
+// ProcessStep: v2.0 (deprecated)
+{
+  step: 'Start service',
+  detail: 'Detailed explanation',
+  when: 'Service not running',
+  do: 'Execute systemctl start',
+  validate: { check: 'Status active', severity: 'error' }
+}
+
+// ProcessStep: v2.1 (recommended)
+{
+  step: 'Start service if not running',
+  notes: [
+    'Execute: `systemctl start myapp`',
+    'Verify: Service status shows active'
+  ]
+}
+
+// Constraint: v2.0 (deprecated)
+{
+  rule: 'Use HTTPS',
+  severity: 'error',
+  when: 'In production',
+  rationale: 'Security requirement',
+  examples: {
+    valid: ['https://api.example.com'],
+    invalid: ['http://api.example.com']
+  }
+}
+
+// Constraint: v2.1 (recommended)
+{
+  rule: 'MUST use HTTPS in production environments',
+  notes: [
+    'Security requirement for all production traffic',
+    'Good: https://api.example.com',
+    'Bad: http://api.example.com'
+  ]
+}
+
+// Criterion: v2.0 (deprecated)
+{
+  item: 'All endpoints return proper status codes',
+  category: 'API Quality',
+  severity: 'critical'
+}
+
+// Criterion: v2.1 (recommended)
+{
+  item: 'All endpoints MUST return proper status codes',
+  category: 'API Quality',  // Category now renders as subheading
+  notes: [
+    'Test: Send GET/POST requests to all endpoints',
+    'Expected: 2xx for success, 4xx for client errors, 5xx for server errors',
+    'Verify: Check response status codes match expected values'
+  ]
+}
+```
+
+**See:**
+- [ADR 0005](../architecture/adr/0005-simplify-processstep-structure.md) - ProcessStep rationale
+- [ADR 0006](../architecture/adr/0006-simplify-constraint-structure.md) - Constraint rationale
+- [ADR 0007](../architecture/adr/0007-simplify-criterion-structure.md) - Criterion rationale
+
+---
 
 ## 1. Overview & Core Principles
 
-The Unified Module System (UMS) v2.0 is a specification for a data-centric, modular, and composable ecosystem for AI instructions. It treats AI instructions as machine-readable source code, moving beyond the limitations of document-centric prompt files.
+The Unified Module System (UMS) v2.1 is a specification for a data-centric, modular, and composable ecosystem for AI instructions. It treats AI instructions as machine-readable source code, moving beyond the limitations of document-centric prompt files.
 
 ### 1.1. Key Features
 
@@ -22,7 +110,7 @@ The Unified Module System (UMS) v2.0 is a specification for a data-centric, modu
 ### 1.3. Standard Output Artifact
 
 - The canonical source format is TypeScript (`.module.ts`)
-- The v2.0 build process produces a single Markdown (`.md`) prompt as the final output
+- The v2.1 build process produces a single Markdown (`.md`) prompt as the final output
 - Markdown is a rendering of the typed components; it is not authoring source
 
 ## 2. The Module Definition File
@@ -37,7 +125,7 @@ A valid module for v2.0 MUST contain the following top-level keys:
 | :--------------- | :------------------- | :-------- | :------------------------------------------------ |
 | `id`             | String               | Yes       | Unique module identifier                          |
 | `version`        | String               | Yes       | Semantic version (SemVer 2.0.0)                   |
-| `schemaVersion`  | String               | Yes       | Must be `"2.0"`                                   |
+| `schemaVersion`  | String               | Yes       | Must be `"2.1"`                                   |
 | `capabilities`   | Array[String]        | Yes       | What functional capabilities this module provides |
 | `cognitiveLevel` | Integer              | Yes       | Cognitive abstraction level (0-6)                 |
 | `metadata`       | Object               | Yes       | Human-readable and AI-discoverable metadata       |
@@ -74,7 +162,7 @@ A valid module for v2.0 MUST contain the following top-level keys:
 
 - **Type**: `String`
 - **Required**: Yes
-- **Format**: MUST be `"2.0"` for v2.0 modules
+- **Format**: MUST be `"2.1"` for v2.1 modules
 - **Purpose**: Declare which UMS specification version this module conforms to
 - **Validation**: Build tools MUST validate this field and reject incompatible versions
 
@@ -452,87 +540,194 @@ components: [
 ### 3.1. ProcessStep
 
 ```typescript
-interface ProcessStep {
-  step: string; // The step description
-  detail?: string; // Detailed explanation
-  validate?: {
-    check: string;
-    severity?: 'error' | 'warning';
-  };
-  when?: string; // Conditional execution
-  do?: string; // Action to perform
-}
+type ProcessStep = string | {
+  step: string;       // The step description
+  notes?: string[];   // Optional sub-bullets for clarification
+};
 ```
+
+**Rationale**: Process steps are kept simple to reduce authoring friction. Most steps are self-explanatory strings. When elaboration is needed, the `notes` array provides sub-bullets without over-engineering. Conditionals and validation are expressed naturally in the step text or kept separate in the `criteria` array.
 
 **Example**:
 
 ```typescript
 process: [
+  'Identify resources (nouns, not verbs)',
   {
-    step: 'Identify resources (nouns, not verbs)',
-    detail: 'Resources should be things, not actions. Use plural nouns.',
-    validate: {
-      check: 'Endpoint URLs contain nouns only',
-      severity: 'error',
-    },
+    step: 'Run database migrations',
+    notes: [
+      'Use `npm run migrate` for development',
+      'Production migrations require admin approval',
+      'Verify migration status with `npm run migrate:status`',
+    ],
   },
   'Map HTTP methods to CRUD operations',
 ];
 ```
 
-### 3.2. Constraint
+**Natural Language for Complex Logic**:
 
 ```typescript
-interface Constraint {
-  rule: string; // The rule description
-  severity?: 'error' | 'warning' | 'info';
-  when?: string; // Conditional application
-  examples?: {
-    valid?: string[];
-    invalid?: string[];
-  };
-}
+process: [
+  'Run tests. If tests fail, fix issues before proceeding.',
+  'Deploy to staging environment',
+  'Run smoke tests and verify all endpoints return 200 OK',
+];
 ```
 
-**Example**:
+### 3.2. Constraint
+
+A constraint can be a simple string or an object with optional notes for elaboration.
+
+```typescript
+type Constraint = string | {
+  rule: string; // The constraint rule. Use RFC 2119 keywords (MUST, SHOULD, MAY) for severity.
+  notes?: string[]; // Optional notes for examples, rationale, or clarification.
+};
+```
+
+**Simple Example (90% of cases):**
+
+```typescript
+constraints: [
+  'URLs MUST use plural nouns for collections',
+  'All endpoints MUST return proper HTTP status codes',
+  'Never expose sensitive data in URLs'
+]
+```
+
+**Example with Notes (10% of cases):**
 
 ```typescript
 constraints: [
   {
     rule: 'URLs MUST use plural nouns for collections',
-    severity: 'error',
-    examples: {
-      valid: ['/users', '/users/123'],
-      invalid: ['/user', '/getUser'],
-    },
+    notes: [
+      'Good: /users, /users/123, /orders',
+      'Bad: /user, /getUser, /createOrder',
+      'Rationale: REST conventions require resource-based URLs'
+    ]
   },
-];
+  {
+    rule: 'All API responses MUST include proper HTTP status codes',
+    notes: [
+      '2xx for success (200 OK, 201 Created, 204 No Content)',
+      '4xx for client errors (400 Bad Request, 404 Not Found)',
+      '5xx for server errors (500 Internal Server Error)',
+      'See RFC 7231 for complete status code definitions'
+    ]
+  }
+]
 ```
+
+**Authoring Guidelines:**
+
+Use [RFC 2119](https://www.ietf.org/rfc/rfc2119.txt) keywords to indicate requirement levels:
+- **MUST** / **REQUIRED** / **SHALL** = Error severity (absolute requirement)
+- **MUST NOT** / **SHALL NOT** = Error severity (absolute prohibition)
+- **SHOULD** / **RECOMMENDED** = Warning severity (recommended but not required)
+- **SHOULD NOT** / **NOT RECOMMENDED** = Warning severity (recommended against)
+- **MAY** / **OPTIONAL** = Info severity (truly optional)
+
+For notes:
+- Use `Good:` and `Bad:` prefixes for examples (no emojis)
+- Use `Rationale:` prefix for explanations
+- Use template literals for multi-line content in a single entry
+- Include external references (RFCs, standards, guidelines)
+
+**See:** [ADR 0006](../architecture/adr/0006-simplify-constraint-structure.md) for detailed rationale.
 
 ### 3.3. Criterion
 
+A criterion can be a simple string or an object with optional category and notes for elaboration.
+
 ```typescript
-interface Criterion {
-  item: string; // The verification item
-  category?: string; // Category grouping
-  severity?: 'critical' | 'important' | 'nice-to-have';
-}
+type Criterion = string | {
+  item: string;       // The verification criterion
+  category?: string;  // Optional grouping (renders as subheadings)
+  notes?: string[];   // Optional test instructions, expected results, verification steps
+};
 ```
 
-**Example**:
+**Simple Example (90% of cases):**
+
+```typescript
+criteria: [
+  'All endpoints return proper HTTP status codes',
+  'API responses match documented schemas',
+  'Error handling covers common edge cases'
+]
+```
+
+**Example with Categories:**
+
+```typescript
+criteria: [
+  // Uncategorized
+  'All tests pass before deployment',
+  'Documentation is complete',
+
+  // Security category
+  {
+    item: 'All endpoints use HTTPS',
+    category: 'Security'
+  },
+  {
+    item: 'Authentication required for protected resources',
+    category: 'Security'
+  },
+
+  // Performance category
+  {
+    item: 'Response times under 100ms',
+    category: 'Performance'
+  }
+]
+```
+
+**Example with Test Details:**
 
 ```typescript
 criteria: [
   {
-    item: 'Are all endpoints resource-based (nouns)?',
-    severity: 'critical',
+    item: 'Rate limiting prevents abuse',
+    category: 'Security',
+    notes: [
+      'Test: Send 100 requests in 1 minute using same API key',
+      'Expected: Receive 429 Too Many Requests after limit',
+      'Verify: Rate limit headers present (X-RateLimit-Limit, X-RateLimit-Remaining)',
+      'See RFC 6585 section 4 for 429 status code specification'
+    ]
   },
   {
-    item: 'Is the API versioned?',
-    severity: 'important',
-  },
-];
+    item: 'Database queries optimized',
+    category: 'Performance',
+    notes: [
+      'Test: Run EXPLAIN on all queries',
+      'Verify: All queries use indexes',
+      'Verify: No N+1 query patterns'
+    ]
+  }
+]
 ```
+
+**Authoring Guidelines:**
+
+Use [RFC 2119](https://www.ietf.org/rfc/rfc2119.txt) keywords to indicate priority:
+- **MUST** / **REQUIRED** / **SHALL** = Critical (absolute requirement)
+- **SHOULD** / **RECOMMENDED** = Important (recommended)
+- **MAY** / **OPTIONAL** = Nice-to-have (truly optional)
+
+For notes:
+- Use `Test:` prefix for test instructions
+- Use `Expected:` prefix for expected results
+- Use `Verify:` prefix for verification steps
+- Include external references (RFCs, standards, guidelines)
+- Use template literals for multi-line test scenarios
+
+**Rendering:** Categories render as `### Category` subheadings. Criteria with notes are bolded, with notes as bulleted sub-items.
+
+**See:** [ADR 0007](../architecture/adr/0007-simplify-criterion-structure.md) for detailed rationale.
 
 ### 3.4. Concept
 
@@ -568,8 +763,8 @@ concepts: [
 interface Example {
   title: string; // Example title
   rationale: string; // What this demonstrates
+  snippet: string; // Code snippet
   language?: string; // Programming language
-  code?: string; // Code snippet
 }
 ```
 
@@ -581,7 +776,7 @@ examples: [
     title: 'Basic Error Handling',
     rationale: 'Shows try-catch with proper logging',
     language: 'typescript',
-    code: `
+    snippet: `
       try {
         await riskyOperation();
       } catch (error) {
@@ -628,15 +823,15 @@ Personas are TypeScript files (`.persona.ts`) that define AI agent configuration
 
 ```typescript
 interface Persona {
+  id: string; // Unique persona identifier
   name: string; // Human-readable persona name
   version: string; // Semantic version
-  schemaVersion: string; // Must be "2.0"
+  schemaVersion: string; // Must be "2.1"
   description: string; // Concise summary
   semantic: string; // Dense, keyword-rich description
   identity?: string; // Persona prologue (voice, traits, capabilities)
   tags?: string[]; // Keywords for filtering
   domains?: string[]; // Broader categories
-  attribution?: boolean; // Include module attribution in output
   modules: ModuleEntry[]; // Composition block
 }
 ```
@@ -823,13 +1018,308 @@ _Why_: {rationale}
 
 ````
 
-#### Attribution
+### 6.3. Detailed Rendering Specifications
 
-If `attribution: true` is set in persona, append after each module:
+This section provides precise rendering specifications for v2.1 simplified structures (ProcessStep, Constraint, Criterion with notes/categories).
 
+#### 6.3.1. ProcessStep Rendering
+
+**Format:**
+```
+{index}. {step}                    ← Simple string
+{index}. **{step}**                ← Object with notes (bolded)
+   - {note1}                       ← 3-space indent
+   - {note2}
+```
+
+**Indentation:** 3 spaces for notes under numbered steps
+**Blank lines:** No blank lines between steps
+**Bolding:** Bold step text when notes are present
+
+**Example:**
 ```markdown
-[Attribution: {module-id}]
-````
+1. Clone repository
+2. **Install dependencies**
+   - Run `npm install`
+   - Verify package-lock.json updated
+3. Run tests
+```
+
+#### 6.3.2. Constraint Rendering
+
+**Format:**
+```
+- {rule}                           ← Simple string
+- **{rule}**                       ← Object with notes (bolded)
+  - {note1}                        ← 2-space indent
+  - {note2}
+```
+
+**Indentation:** 2 spaces for notes under bullet items
+**Blank lines:** Single blank line between constraints
+**Bolding:** Bold rule text when notes are present
+
+**Example:**
+```markdown
+- MUST use HTTPS for all API endpoints
+
+- **URLs MUST use plural nouns for collections**
+  - Good: /users, /users/123, /orders
+  - Bad: /user, /getUser, /createOrder
+  - Rationale: REST conventions require resource-based URLs
+```
+
+#### 6.3.3. Criterion Rendering
+
+Criteria support optional category grouping and test elaboration through notes.
+
+##### Rendering Algorithm
+
+```typescript
+function renderCriteria(criteria: Criterion[]): string {
+  // 1. Group criteria by category
+  const uncategorized: Criterion[] = [];
+  const categorized = new Map<string, Criterion[]>();
+
+  for (const criterion of criteria) {
+    if (typeof criterion === 'string' || !criterion.category) {
+      uncategorized.push(criterion);
+    } else {
+      if (!categorized.has(criterion.category)) {
+        categorized.set(criterion.category, []);
+      }
+      categorized.get(criterion.category).push(criterion);
+    }
+  }
+
+  const sections: string[] = [];
+
+  // 2. Render uncategorized first
+  if (uncategorized.length > 0) {
+    sections.push(uncategorized.map(renderItem).join('\n\n'));
+  }
+
+  // 3. Render categorized groups with subheadings
+  for (const [category, items] of categorized.entries()) {
+    sections.push(`### ${category}\n`);
+    sections.push(items.map(renderItem).join('\n\n'));
+  }
+
+  return sections.join('\n\n');
+}
+
+function renderItem(criterion: Criterion): string {
+  if (typeof criterion === 'string') {
+    return `- [ ] ${criterion}`;
+  }
+
+  if (criterion.notes && criterion.notes.length > 0) {
+    let text = `- [ ] **${criterion.item}**`;
+    text += '\n' + criterion.notes.map(note => `  - ${note}`).join('\n');
+    return text;
+  }
+
+  return `- [ ] ${criterion.item}`;
+}
+```
+
+##### Format Rules
+
+**Heading levels:**
+- Category headings: `###` (level 3, one below `## Criteria`)
+- Format: `### ${category}\n`
+
+**Indentation:**
+- Checkbox items: No indentation
+- Notes: 2 spaces
+- Format: `  - ${note}`
+
+**Blank lines:**
+- Between uncategorized items: Single blank line (`\n\n`)
+- Before each category heading: Single blank line
+- Between items in same category: Single blank line
+
+**Bolding:**
+- Criteria with notes: Bold the item text
+- Format: `- [ ] **${item}**`
+
+##### Rendering Order
+
+**Guarantees:**
+1. Uncategorized criteria always appear first
+2. Categorized criteria appear in order of first occurrence
+3. Within each category, criteria maintain original array order
+4. Duplicate category names are grouped under same heading
+
+**Example:**
+```typescript
+[
+  'Uncategorized 1',
+  { item: 'Perf 1', category: 'Performance' },
+  { item: 'Sec 1', category: 'Security' },
+  'Uncategorized 2',
+  { item: 'Perf 2', category: 'Performance' }
+]
+```
+
+**Renders as:**
+```markdown
+## Criteria
+
+- [ ] Uncategorized 1
+
+- [ ] Uncategorized 2
+
+### Performance
+
+- [ ] Perf 1
+
+- [ ] Perf 2
+
+### Security
+
+- [ ] Sec 1
+```
+
+##### Edge Cases
+
+**1. Empty category name:**
+```typescript
+{ item: 'Test', category: '' }
+```
+**Behavior:** Treated as uncategorized (empty string is falsy)
+
+**2. Empty notes array:**
+```typescript
+{ item: 'Test', notes: [] }
+```
+**Behavior:** Rendered as regular item (no bold, no notes)
+
+**3. Whitespace-only category:**
+```typescript
+{ item: 'Test', category: '   ' }
+```
+**Behavior:** Rendered with whitespace heading (implementations SHOULD reject in validation)
+
+**4. Duplicate categories:**
+```typescript
+[
+  { item: 'Item 1', category: 'Security' },
+  { item: 'Item 2', category: 'Performance' },
+  { item: 'Item 3', category: 'Security' }
+]
+```
+**Behavior:** Items grouped under same category heading, order preserved from first occurrence
+
+**5. Mixed string and object criteria:**
+```typescript
+[
+  'Simple criterion',
+  { item: 'Object criterion', category: 'Security' },
+  'Another simple'
+]
+```
+**Behavior:** Strings treated as uncategorized
+
+##### Complete Example
+
+**Input:**
+```typescript
+criteria: [
+  'All tests pass',
+  'Documentation complete',
+  {
+    item: 'HTTPS enforced',
+    category: 'Security'
+  },
+  {
+    item: 'Rate limiting active',
+    category: 'Security',
+    notes: [
+      'Test: Send 100 req/min',
+      'Expected: 429 after limit'
+    ]
+  },
+  {
+    item: 'Response time < 100ms',
+    category: 'Performance',
+    notes: ['Measure with load testing tool']
+  }
+]
+```
+
+**Rendered output:**
+```markdown
+## Criteria
+
+- [ ] All tests pass
+
+- [ ] Documentation complete
+
+### Security
+
+- [ ] HTTPS enforced
+
+- [ ] **Rate limiting active**
+  - Test: Send 100 req/min
+  - Expected: 429 after limit
+
+### Performance
+
+- [ ] **Response time < 100ms**
+  - Measure with load testing tool
+```
+
+##### Validation Recommendations
+
+Implementations SHOULD validate:
+
+1. **Category names:**
+   - Not empty or whitespace-only
+   - Less than 50 characters
+   - No special characters: `#`, `*`, `[`, `]`
+
+2. **Item text:**
+   - Not empty
+   - No leading/trailing whitespace
+   - Less than 200 characters
+
+3. **Notes:**
+   - No empty strings
+   - Each note less than 150 characters
+   - No multi-line strings (breaks indentation)
+
+4. **Array size:**
+   - Total criteria less than 50
+   - Criteria per category less than 20
+
+##### Markdown Escaping
+
+**Current behavior:** No escaping applied
+
+**Rationale:** Authors write Markdown-safe text. Special characters in item text are preserved as-is, allowing intentional Markdown formatting.
+
+**Example with Markdown:**
+```typescript
+{
+  item: 'API endpoints follow REST conventions',
+  notes: [
+    'Good: `/users`, `/users/123`, `/orders`',
+    'Bad: `/getUser`, `/createOrder`',
+    'Use `snake_case` for query parameters'
+  ]
+}
+```
+
+**Rendered:**
+```markdown
+- [ ] **API endpoints follow REST conventions**
+  - Good: `/users`, `/users/123`, `/orders`
+  - Bad: `/getUser`, `/createOrder`
+  - Use `snake_case` for query parameters
+```
+
+---
 
 ## 7. The Build Report
 
@@ -1192,7 +1682,7 @@ export const apiDesign: Module = {
             language: 'typescript',
             rationale:
               'Shows a well-designed REST API with proper status codes',
-            code: `
+            snippet: `
 app.get('/v1/users', async (req, res) => {
   const users = await db.users.findAll();
   res.status(200).json({ users });
@@ -1262,6 +1752,7 @@ See `docs/typescript-minimal-implementation-roadmap.md` for implementation detai
 
 ---
 
-**Specification Version**: 2.0.0
+**Specification Version**: 2.1.0
 **Status**: Draft
-**Last Updated**: 2025-10-11
+**Last Updated**: 2025-01-15
+**Changes from v2.0**: Simplified ProcessStep interface (see ADR 0005)

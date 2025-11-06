@@ -48,7 +48,10 @@ export async function handleValidate(
     );
 
     // Persona validation results
-    if (report.totalPersonas !== undefined && report.validPersonas !== undefined) {
+    if (
+      report.totalPersonas !== undefined &&
+      report.validPersonas !== undefined
+    ) {
       console.log(chalk.cyan(`👤 Personas:`));
       console.log(
         `   Total: ${report.totalPersonas}, Valid: ${chalk.green(report.validPersonas)}, ` +
@@ -90,9 +93,7 @@ export async function handleValidate(
     }
 
     // Success message
-    console.log(
-      chalk.green.bold('✓ All modules and personas are valid!')
-    );
+    console.log(chalk.green.bold('✓ All modules and personas are valid!'));
   } catch (error) {
     handleError(error, {
       command: 'validate',

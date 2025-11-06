@@ -112,6 +112,32 @@ export function renderComponent(component: Component): string {
 }
 
 /**
+ * Renders a single process step (v2.1 simplified format)
+ * @param step - The process step (string or ProcessStep object)
+ * @param index - The step number (0-based)
+ * @returns Formatted markdown for the step
+ */
+export function renderProcessStep(
+  step: string | import('../../types/index.js').ProcessStep,
+  index: number
+): string {
+  // Handle simple string steps
+  if (typeof step === 'string') {
+    return `${index + 1}. ${step}`;
+  }
+
+  // Handle object with notes
+  let stepText = `${index + 1}. **${step.step}**`;
+
+  if (step.notes && step.notes.length > 0) {
+    const notesList = step.notes.map(note => `   - ${note}`).join('\n');
+    stepText += `\n${notesList}`;
+  }
+
+  return stepText;
+}
+
+/**
  * Renders an instruction component to Markdown
  * @param component - The instruction component
  * @returns Rendered instruction content
@@ -130,16 +156,9 @@ export function renderInstructionComponent(
   // Process
   if (instruction.process && instruction.process.length > 0) {
     sections.push('## Process\n');
-    const steps = instruction.process.map((step, index) => {
-      if (typeof step === 'string') {
-        return `${index + 1}. ${step}`;
-      }
-      let stepText = `${index + 1}. ${step.step}`;
-      if (step.detail) {
-        stepText += `\n   ${step.detail}`;
-      }
-      return stepText;
-    });
+    const steps = instruction.process.map((step, index) =>
+      renderProcessStep(step, index)
+    );
     sections.push(steps.join('\n') + '\n');
   }
 
@@ -150,7 +169,15 @@ export function renderInstructionComponent(
       if (typeof constraint === 'string') {
         return `- ${constraint}`;
       }
-      return `- ${constraint.rule}`;
+      // Constraint with notes
+      let text = `- **${constraint.rule}**`;
+      if (constraint.notes && constraint.notes.length > 0) {
+        const notesList = constraint.notes
+          .map(note => `  - ${note}`)
+          .join('\n');
+        text += `\n${notesList}`;
+      }
+      return text;
     });
     sections.push(constraints.join('\n') + '\n');
   }
@@ -162,19 +189,84 @@ export function renderInstructionComponent(
     sections.push(principles.join('\n') + '\n');
   }
 
-  // Criteria
+  // Criteria (v2.1 with category grouping and notes)
   if (instruction.criteria && instruction.criteria.length > 0) {
     sections.push('## Criteria\n');
-    const criteria = instruction.criteria.map(criterion => {
-      if (typeof criterion === 'string') {
-        return `- [ ] ${criterion}`;
-      }
-      return `- [ ] ${criterion.item}`;
-    });
-    sections.push(criteria.join('\n') + '\n');
+    sections.push(renderCriteria(instruction.criteria) + '\n');
   }
 
   return sections.join('\n');
+}
+
+/**
+ * Renders criteria with category grouping (v2.1)
+ * @param criteria - Array of criteria (strings or Criterion objects)
+ * @returns Formatted markdown for all criteria
+ */
+export function renderCriteria(
+  criteria: Array<string | import('../../types/index.js').Criterion>
+): string {
+  // Group criteria by category
+  const uncategorized: Array<
+    string | import('../../types/index.js').Criterion
+  > = [];
+  const categorized = new Map<
+    string,
+    Array<string | import('../../types/index.js').Criterion>
+  >();
+
+  for (const criterion of criteria) {
+    if (typeof criterion === 'string' || !criterion.category) {
+      uncategorized.push(criterion);
+    } else {
+      if (!categorized.has(criterion.category)) {
+        categorized.set(criterion.category, []);
+      }
+      categorized.get(criterion.category)!.push(criterion);
+    }
+  }
+
+  const sections: string[] = [];
+
+  // Render uncategorized criteria first
+  if (uncategorized.length > 0) {
+    const items = uncategorized.map(c => renderCriterionItem(c));
+    sections.push(items.join('\n\n'));
+  }
+
+  // Render categorized groups with subheadings
+  Array.from(categorized.entries()).forEach(([category, items]) => {
+    sections.push(`### ${category}\n`);
+    const renderedItems = items.map(c => renderCriterionItem(c));
+    sections.push(renderedItems.join('\n\n'));
+  });
+
+  return sections.join('\n\n');
+}
+
+/**
+ * Renders a single criterion item (v2.1 simplified format)
+ * @param criterion - The criterion (string or Criterion object)
+ * @returns Formatted markdown for the criterion
+ */
+export function renderCriterionItem(
+  criterion: string | import('../../types/index.js').Criterion
+): string {
+  // Handle simple string criteria
+  if (typeof criterion === 'string') {
+    return `- [ ] ${criterion}`;
+  }
+
+  // Handle object with notes
+  if (criterion.notes && criterion.notes.length > 0) {
+    let text = `- [ ] **${criterion.item}**`;
+    const notesList = criterion.notes.map(note => `  - ${note}`).join('\n');
+    text += `\n${notesList}`;
+    return text;
+  }
+
+  // Object without notes
+  return `- [ ] ${criterion.item}`;
 }
 
 /**
@@ -233,6 +325,14 @@ export function renderConcept(concept: Concept): string {
 
   if (concept.rationale) {
     sections.push(`**Rationale:** ${concept.rationale}\n`);
+  }
+
+  if (concept.tradeoffs && concept.tradeoffs.length > 0) {
+    sections.push('**Trade-offs:**\n');
+    for (const tradeoff of concept.tradeoffs) {
+      sections.push(`- ${tradeoff}`);
+    }
+    sections.push('');
   }
 
   if (concept.examples && concept.examples.length > 0) {

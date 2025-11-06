@@ -64,9 +64,7 @@ export async function discoverAllModules(): Promise<ModuleDiscoveryResult> {
 
       registry.add(module, {
         type: isStandard ? 'standard' : 'local',
-        path: isStandard
-          ? standardLibrary.getStandardLibraryPath()
-          : 'local',
+        path: isStandard ? standardLibrary.getStandardLibraryPath() : 'local',
       });
     } catch (error) {
       // If conflict strategy is 'warn', collect warnings

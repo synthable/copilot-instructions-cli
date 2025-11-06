@@ -63,7 +63,7 @@ export { CognitiveLevel, ComponentType } from 'ums-lib';
 export {
   UMSError,
   UMSValidationError,
-  ModuleLoadError as UMSModuleLoadError,  // Alias to avoid conflict with SDK's internal ModuleLoadError
+  ModuleLoadError as UMSModuleLoadError, // Alias to avoid conflict with SDK's internal ModuleLoadError
   PersonaLoadError,
   ConflictError,
   ModuleParseError,

@@ -187,15 +187,154 @@ describe('renderer', () => {
         instruction: {
           purpose: 'Test purpose',
           process: [
-            { step: 'First step', detail: 'Additional details' },
+            { step: 'First step', notes: ['Additional details'] },
             'Simple step',
           ],
         },
       };
       const result = renderInstructionComponent(component);
 
-      expect(result).toContain('1. First step\n   Additional details');
+      expect(result).toContain('1. **First step**\n   - Additional details');
       expect(result).toContain('2. Simple step');
+    });
+
+    it('should handle constraints with notes', () => {
+      const component: InstructionComponent = {
+        type: ComponentType.Instruction,
+        instruction: {
+          purpose: 'Test purpose',
+          constraints: [
+            {
+              rule: 'URLs MUST use plural nouns for collections',
+              notes: [
+                'Good: /users, /users/123, /orders',
+                'Bad: /user, /getUser, /createOrder',
+                'Rationale: REST conventions require resource-based URLs',
+              ],
+            },
+            'Simple constraint without notes',
+          ],
+        },
+      };
+      const result = renderInstructionComponent(component);
+
+      expect(result).toContain('## Constraints\n');
+      expect(result).toContain(
+        '- **URLs MUST use plural nouns for collections**'
+      );
+      expect(result).toContain('  - Good: /users, /users/123, /orders');
+      expect(result).toContain('  - Bad: /user, /getUser, /createOrder');
+      expect(result).toContain(
+        '  - Rationale: REST conventions require resource-based URLs'
+      );
+      expect(result).toContain('- Simple constraint without notes');
+    });
+
+    it('should handle criteria with categories', () => {
+      const component: InstructionComponent = {
+        type: ComponentType.Instruction,
+        instruction: {
+          purpose: 'Test purpose',
+          criteria: [
+            'All tests pass before deployment',
+            {
+              item: 'All endpoints MUST use HTTPS',
+              category: 'Security',
+            },
+            {
+              item: 'Authentication required for protected resources',
+              category: 'Security',
+            },
+            {
+              item: 'Response times under 100ms',
+              category: 'Performance',
+            },
+          ],
+        },
+      };
+      const result = renderInstructionComponent(component);
+
+      expect(result).toContain('## Criteria\n');
+      expect(result).toContain('- [ ] All tests pass before deployment');
+      expect(result).toContain('### Security\n');
+      expect(result).toContain('- [ ] All endpoints MUST use HTTPS');
+      expect(result).toContain(
+        '- [ ] Authentication required for protected resources'
+      );
+      expect(result).toContain('### Performance\n');
+      expect(result).toContain('- [ ] Response times under 100ms');
+    });
+
+    it('should handle criteria with notes', () => {
+      const component: InstructionComponent = {
+        type: ComponentType.Instruction,
+        instruction: {
+          purpose: 'Test purpose',
+          criteria: [
+            {
+              item: 'Rate limiting prevents abuse',
+              notes: [
+                'Test: Send 100 requests in 1 minute',
+                'Expected: Receive 429 Too Many Requests',
+                'Verify: Rate limit headers present (X-RateLimit-*)',
+              ],
+            },
+            'Simple criterion without notes',
+          ],
+        },
+      };
+      const result = renderInstructionComponent(component);
+
+      expect(result).toContain('## Criteria\n');
+      expect(result).toContain('- [ ] **Rate limiting prevents abuse**');
+      expect(result).toContain('  - Test: Send 100 requests in 1 minute');
+      expect(result).toContain('  - Expected: Receive 429 Too Many Requests');
+      expect(result).toContain(
+        '  - Verify: Rate limit headers present (X-RateLimit-*)'
+      );
+      expect(result).toContain('- [ ] Simple criterion without notes');
+    });
+
+    it('should handle criteria with categories and notes', () => {
+      const component: InstructionComponent = {
+        type: ComponentType.Instruction,
+        instruction: {
+          purpose: 'Test purpose',
+          criteria: [
+            'All tests pass',
+            {
+              item: 'Rate limiting prevents abuse',
+              category: 'Security',
+              notes: [
+                'Test: Send 100 requests in 1 minute',
+                'Expected: Receive 429 Too Many Requests',
+              ],
+            },
+            {
+              item: 'All endpoints use HTTPS',
+              category: 'Security',
+            },
+            {
+              item: 'Response times under 100ms',
+              category: 'Performance',
+              notes: ['Test: Measure average response time over 100 requests'],
+            },
+          ],
+        },
+      };
+      const result = renderInstructionComponent(component);
+
+      expect(result).toContain('## Criteria\n');
+      expect(result).toContain('- [ ] All tests pass');
+      expect(result).toContain('### Security\n');
+      expect(result).toContain('- [ ] **Rate limiting prevents abuse**');
+      expect(result).toContain('  - Test: Send 100 requests in 1 minute');
+      expect(result).toContain('- [ ] All endpoints use HTTPS');
+      expect(result).toContain('### Performance\n');
+      expect(result).toContain('- [ ] **Response times under 100ms**');
+      expect(result).toContain(
+        '  - Test: Measure average response time over 100 requests'
+      );
     });
   });
 
@@ -252,6 +391,51 @@ describe('renderer', () => {
       expect(result).toContain('**Rationale:** Why this matters');
       expect(result).toContain('**Examples:**\n');
       expect(result).toContain('- Example 1');
+    });
+
+    it('should render concept with tradeoffs', () => {
+      const concept: Concept = {
+        name: 'Caching Strategy',
+        description: 'Store frequently accessed data in memory',
+        tradeoffs: [
+          'Higher performance but increased memory usage',
+          'Faster reads but complexity in invalidation logic',
+        ],
+      };
+      const result = renderConcept(concept);
+
+      expect(result).toContain('### Caching Strategy\n');
+      expect(result).toContain('Store frequently accessed data in memory');
+      expect(result).toContain('**Trade-offs:**\n');
+      expect(result).toContain(
+        '- Higher performance but increased memory usage'
+      );
+      expect(result).toContain(
+        '- Faster reads but complexity in invalidation logic'
+      );
+    });
+
+    it('should render concept with tradeoffs, rationale, and examples', () => {
+      const concept: Concept = {
+        name: 'Microservices',
+        description: 'Decompose application into small services',
+        rationale: 'Enable independent scaling',
+        tradeoffs: [
+          'Independent deployment but operational complexity',
+          'Technology flexibility but distributed system challenges',
+        ],
+        examples: ['User service', 'Order service'],
+      };
+      const result = renderConcept(concept);
+
+      expect(result).toContain('### Microservices\n');
+      expect(result).toContain('**Rationale:** Enable independent scaling');
+      expect(result).toContain('**Trade-offs:**\n');
+      expect(result).toContain(
+        '- Independent deployment but operational complexity'
+      );
+      expect(result).toContain('**Examples:**\n');
+      expect(result).toContain('- User service');
     });
   });
 

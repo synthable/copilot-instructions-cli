@@ -44,7 +44,7 @@ export function getCognitiveLevelName(
     [CognitiveLevel.SPECIFICATIONS_AND_STANDARDS]: 'Specifications & Standards',
     [CognitiveLevel.META_COGNITION]: 'Meta-Cognition',
   };
-  return names[level as number];
+  return names[level];
 }
 
 /**
@@ -71,7 +71,7 @@ export function getCognitiveLevelDescription(
     [CognitiveLevel.META_COGNITION]:
       'Self-reflection, process improvement, learning from experience',
   };
-  return descriptions[level as number];
+  return descriptions[level];
 }
 
 /**
@@ -262,56 +262,103 @@ export interface InstructionComponent {
 }
 
 /**
- * A detailed, structured process step.
+ * A process step in an instruction.
+ * Can be a simple string or an object with optional notes for elaboration.
  */
 export interface ProcessStep {
-  /** The title of the step. */
+  /** The step description. */
   step: string;
-  /** A detailed description of the step. */
-  detail?: string;
-  /** A check to validate the step's completion. */
-  validate?: {
-    check: string;
-    severity?: 'error' | 'warning';
-  };
-  /** A condition for when the step should be performed. */
-  when?: string;
-  /** The action to be performed. */
-  do?: string;
+  /** Optional sub-bullets for clarification. */
+  notes?: string[];
 }
 
 /**
- * A detailed, structured constraint.
+ * A constraint in an instruction.
+ * Can be a simple string or an object with optional notes for elaboration.
+ *
+ * Use RFC 2119 keywords (MUST, SHOULD, MAY) in the rule text to indicate severity:
+ * - MUST / REQUIRED / SHALL = Error severity (absolute requirement)
+ * - MUST NOT / SHALL NOT = Error severity (absolute prohibition)
+ * - SHOULD / RECOMMENDED = Warning severity (recommended but not required)
+ * - SHOULD NOT / NOT RECOMMENDED = Warning severity (recommended against)
+ * - MAY / OPTIONAL = Info severity (truly optional)
+ *
+ * @example
+ * ```typescript
+ * // Simple constraint (90% of cases)
+ * constraints: [
+ *   'URLs MUST use plural nouns for collections',
+ *   'All endpoints MUST return proper HTTP status codes'
+ * ]
+ *
+ * // Constraint with notes (10% of cases)
+ * constraints: [
+ *   {
+ *     rule: 'URLs MUST use plural nouns for collections',
+ *     notes: [
+ *       'Good: /users, /users/123, /orders',
+ *       'Bad: /user, /getUser, /createOrder',
+ *       'Rationale: REST conventions require resource-based URLs'
+ *     ]
+ *   }
+ * ]
+ * ```
  */
-export interface Constraint {
-  /** The text of the constraint. */
-  rule: string;
-  /** The severity level of the constraint. */
-  severity?: 'error' | 'warning' | 'info';
-  /** A condition for when the constraint applies. */
-  when?: string;
-  /** Examples of valid and invalid cases. */
-  examples?: {
-    valid?: string[];
-    invalid?: string[];
-  };
-  /** The rationale for the constraint. */
-  rationale?: string;
-}
+export type Constraint =
+  | string
+  | {
+      /** The constraint rule. Use RFC 2119 keywords (MUST, SHOULD, MAY) for severity. */
+      rule: string;
+      /** Optional notes for examples, rationale, or clarification. */
+      notes?: string[];
+    };
 
 /**
- * A detailed, structured criterion for verification.
+ * A criterion for verification and success checking.
+ * Can be a simple string or an object with optional category and notes.
+ *
+ * Use RFC 2119 keywords (MUST, SHOULD, MAY) in the criterion text to indicate priority:
+ * - MUST / REQUIRED / SHALL = Critical (absolute requirement)
+ * - SHOULD / RECOMMENDED = Important (recommended)
+ * - MAY / OPTIONAL = Nice-to-have (truly optional)
+ *
+ * @example
+ * ```typescript
+ * // Simple criteria (90% of cases)
+ * criteria: [
+ *   'All endpoints MUST use HTTPS',
+ *   'Response times SHOULD be under 100ms',
+ *   'Error messages MAY include help links'
+ * ]
+ *
+ * // With categories and test details
+ * criteria: [
+ *   {
+ *     item: 'Rate limiting prevents abuse',
+ *     category: 'Security',
+ *     notes: [
+ *       'Test: Send 100 requests in 1 minute',
+ *       'Expected: Receive 429 Too Many Requests',
+ *       'Verify: Rate limit headers present (X-RateLimit-*)'
+ *     ]
+ *   },
+ *   {
+ *     item: 'Response times under 100ms',
+ *     category: 'Performance'
+ *   }
+ * ]
+ * ```
  */
-export interface Criterion {
-  /** The text of the criterion. */
-  item: string;
-  /** The category of the criterion. */
-  category?: string;
-  /** The severity level of the criterion. */
-  severity?: 'critical' | 'important' | 'nice-to-have';
-  /** The weight or importance of the criterion. */
-  weight?: 'required' | 'recommended' | 'optional';
-}
+export type Criterion =
+  | string
+  | {
+      /** The verification criterion. Use RFC 2119 keywords (MUST, SHOULD, MAY) for priority. */
+      item: string;
+      /** Optional category for grouping (renders as subheading). */
+      category?: string;
+      /** Optional notes for test instructions, expected results, or verification steps. */
+      notes?: string[];
+    };
 
 /**
  * A component that provides knowledge, concepts, and context.
@@ -427,6 +474,8 @@ export type Component =
  * Defines an AI persona by composing a set of UMS modules.
  */
 export interface Persona {
+  /** The unique identifier for the persona. */
+  id: string;
   /** The unique name of the persona. */
   name: string;
   /** The semantic version of the persona. */
@@ -577,6 +626,22 @@ export interface BuildReportGroup {
 }
 
 /**
+ * A composition event representing a module replacement or merge operation.
+ */
+export interface CompositionEvent {
+  /** The ID of the module. */
+  id: string;
+  /** The version of the module. */
+  version: string;
+  /** The source of the module. */
+  source: string;
+  /** The SHA-256 digest of the module content. */
+  digest: string;
+  /** The composition strategy used (base or replace). */
+  strategy: 'base' | 'replace';
+}
+
+/**
  * A report for a single module within the build.
  */
 export interface BuildReportModule {
@@ -594,6 +659,8 @@ export interface BuildReportModule {
   deprecated: boolean;
   /** The ID of a successor module, if this module is deprecated. */
   replacedBy?: string;
+  /** Optional composition history if this module was replaced or merged. */
+  composedFrom?: CompositionEvent[];
 }
 
 // #endregion

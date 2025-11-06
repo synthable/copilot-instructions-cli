@@ -1,4 +1,4 @@
-import type { Module, ComponentType, CognitiveLevel } from 'ums-sdk';
+import { ComponentType, CognitiveLevel, type Module } from 'ums-sdk';
 
 export const advancedApiSecurity: Module = {
   /**

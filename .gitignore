@@ -139,6 +139,7 @@ vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 
 .DS_Store
+archive/
 docs/archive/
 !docs/archive/unified-module-system-v1/
 !docs/archive/unified-module-system-v1/**
@@ -148,5 +149,7 @@ docs/todo.md
 docs/old/
 #GEMINI.md
 untracked/
-#.gemini/
-instruct-modules-v2/
+.gemini/
+.genkit/
+docs/implementation-plans/
+#instruct-modules-v2/
