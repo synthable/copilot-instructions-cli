@@ -496,19 +496,22 @@ describe('UMS v2.0 Module Validation', () => {
               'Write unit tests',
               {
                 step: 'Write integration tests',
-                detail: 'Focus on API contracts',
+                notes: ['Focus on API contracts'],
               },
             ],
             constraints: [
-              'All tests must pass before deployment',
-              { rule: 'Coverage must exceed 80%', severity: 'error' as const },
+              'All tests MUST pass before deployment',
+              {
+                rule: 'Coverage MUST exceed 80%',
+                notes: ['Use nyc or vitest coverage tools'],
+              },
             ],
             principles: ['Test early and often', 'Write tests first'],
             criteria: [
               'All critical paths covered',
               {
-                item: 'Performance tests included',
-                severity: 'critical' as const,
+                item: 'Performance tests MUST be included',
+                category: 'Testing',
               },
             ],
           },
