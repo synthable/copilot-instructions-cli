@@ -151,5 +151,5 @@ docs/old/
 untracked/
 .gemini/
 .genkit/
-docs/implementation-plans/
+docs/planning/
 #instruct-modules-v2/

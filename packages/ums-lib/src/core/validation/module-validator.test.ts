@@ -115,7 +115,8 @@ describe('validateModule - edge cases', () => {
     });
 
     it('should warn when both components array and shorthand knowledge exist', () => {
-      const { instruction, ...baseWithoutInstruction } = baseModule;
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { instruction: _instruction, ...baseWithoutInstruction } = baseModule;
       const module: Module = {
         ...baseWithoutInstruction,
         components: [
@@ -138,7 +139,8 @@ describe('validateModule - edge cases', () => {
     });
 
     it('should warn when both components array and shorthand data exist', () => {
-      const { instruction, ...baseWithoutInstruction } = baseModule;
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { instruction: _instruction, ...baseWithoutInstruction } = baseModule;
       const module: Module = {
         ...baseWithoutInstruction,
         components: [

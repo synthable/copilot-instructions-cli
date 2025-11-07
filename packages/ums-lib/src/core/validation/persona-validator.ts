@@ -15,16 +15,12 @@ const SEMVER_REGEX =
   /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/;
 
 /**
- * Validates a parsed UMS v2.0 persona object.
- *
- * @param persona - The persona object to validate.
- * @returns A validation result object containing errors and warnings.
+ * Validates basic persona fields (id, name, version, schemaVersion)
  */
-// eslint-disable-next-line max-lines-per-function
-export function validatePersona(persona: Persona): ValidationResult {
-  const errors: ValidationError[] = [];
-  const warnings: ValidationWarning[] = [];
-
+function validatePersonaFields(
+  persona: Persona,
+  errors: ValidationError[]
+): void {
   // Validate id field exists and is non-empty
   if (!persona.id || typeof persona.id !== 'string' || persona.id.trim() === '') {
     errors.push(
@@ -68,6 +64,83 @@ export function validatePersona(persona: Persona): ValidationResult {
       )
     );
   }
+}
+
+/**
+ * Validates a module group entry
+ */
+function validateModuleGroup(
+  entry: unknown,
+  index: number,
+  allModuleIds: Set<string>,
+  errors: ValidationError[]
+): void {
+  // Runtime validation required: persona data comes from external files (YAML/JSON)
+  // which may not conform to TypeScript types. TypeScript provides compile-time safety
+  // only - we must validate at runtime to catch malformed input data.
+  if (!entry || typeof entry !== 'object') {
+    errors.push(
+      new ValidationErrorClass(
+        `Module entry at index ${index} must be a string or object`,
+        `modules[${index}]`,
+        'Section 4.2'
+      )
+    );
+    return;
+  }
+
+  // Get module IDs from 'ids' array
+  const moduleGroup = entry as { ids?: unknown };
+  const moduleIds = moduleGroup.ids;
+
+  if (!Array.isArray(moduleIds) || moduleIds.length === 0) {
+    errors.push(
+      new ValidationErrorClass(
+        `Module group ${index} must have a non-empty 'ids' array`,
+        `modules[${index}].ids`,
+        'Section 4.2'
+      )
+    );
+  } else {
+    // Check for duplicate module IDs
+    for (const id of moduleIds) {
+      if (typeof id !== 'string') {
+        errors.push(
+          new ValidationErrorClass(
+            `Module ID must be a string, found ${typeof id}`,
+            `modules[${index}].ids`,
+            'Section 4.2'
+          )
+        );
+        continue;
+      }
+
+      if (allModuleIds.has(id)) {
+        errors.push(
+          new ValidationErrorClass(
+            `Duplicate module ID found across groups: ${id}`,
+            `modules[${index}].ids`,
+            'Section 4.2'
+          )
+        );
+      }
+      allModuleIds.add(id);
+    }
+  }
+}
+
+/**
+ * Validates a parsed UMS v2.0 persona object.
+ *
+ * @param persona - The persona object to validate.
+ * @returns A validation result object containing errors and warnings.
+ */
+export function validatePersona(persona: Persona): ValidationResult {
+  const errors: ValidationError[] = [];
+  const warnings: ValidationWarning[] = [];
+
+  // Validate basic persona fields
+  validatePersonaFields(persona, errors);
 
   // Validate modules array exists and has content
   if (!Array.isArray(persona.modules) || persona.modules.length === 0) {
@@ -108,55 +181,7 @@ export function validatePersona(persona: Persona): ValidationResult {
     }
 
     // Handle ModuleGroup object
-    // Runtime validation required: persona data comes from external files (YAML/JSON)
-    // which may not conform to TypeScript types. TypeScript provides compile-time safety
-    // only - we must validate at runtime to catch malformed input data.
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- Runtime check for external data
-    if (!entry || typeof entry !== 'object') {
-      errors.push(
-        new ValidationErrorClass(
-          `Module entry at index ${i} must be a string or object`,
-          `modules[${i}]`,
-          'Section 4.2'
-        )
-      );
-      continue;
-    }
-
-    // Get module IDs from 'ids' array
-    const moduleIds = entry.ids;
-
-    if (!Array.isArray(moduleIds) || moduleIds.length === 0) {
-      errors.push(
-        new ValidationErrorClass(
-          `Module group ${i} must have a non-empty 'ids' array`,
-          `modules[${i}].ids`,
-          'Section 4.2'
-        )
-      );
-    } else {
-      // Check for duplicate module IDs
-      for (const id of moduleIds) {
-        if (typeof id !== 'string') {
-          errors.push(
-            new ValidationErrorClass(
-              `Module ID must be a string, found ${typeof id}`,
-              `modules[${i}].ids`,
-              'Section 4.2'
-            )
-          );
-        } else if (allModuleIds.has(id)) {
-          errors.push(
-            new ValidationErrorClass(
-              `Duplicate module ID found across groups: ${id}`,
-              `modules[${i}].ids`,
-              'Section 4.2'
-            )
-          );
-        }
-        allModuleIds.add(id);
-      }
-    }
+    validateModuleGroup(entry, i, allModuleIds, errors);
   }
 
   return {
