@@ -1,7 +1,10 @@
-@.claude/AGENTS.md
-@.claude/COMMANDS.md
-
 # CLAUDE.md
+
+## Sub-Agents
+
+@.claude/SUB-AGENTS.md
+
+## Purpose
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
@@ -165,38 +168,69 @@ npm run pre-push
 - **Constants**: `src/constants.ts` - CLI configuration constants
 - **Dependencies**: ums-sdk (uses SDK for all operations)
 
-### Module System (UMS v2.0)
+### Module System (UMS v2.1)
 
-The `instruct-modules-v2/` directory contains a four-tier hierarchy:
+The `instruct-modules-v2/` directory contains modules organized by a cognitive hierarchy (levels 0-6):
 
-- **foundation/**: Core cognitive frameworks, logic, ethics, problem-solving
-- **principle/**: Software engineering principles, patterns, methodologies
-- **technology/**: Technology-specific guidance (languages, frameworks, tools)
-- **execution/**: Playbooks and procedures for specific tasks
+- **Level 0**: Axioms and Ethics - Universal truths, ethical bedrock, non-negotiable principles
+- **Level 1**: Reasoning Frameworks - How to think, analyze, and form judgments
+- **Level 2**: Universal Patterns - Cross-domain patterns and principles that apply broadly
+- **Level 3**: Domain-Specific Guidance - Field-specific but technology-agnostic best practices
+- **Level 4**: Procedures and Playbooks - Step-by-step instructions and actionable guides
+- **Level 5**: Specifications and Standards - Precise requirements, validation criteria, compliance rules
+- **Level 6**: Meta-Cognition - Self-reflection, process improvement, learning from experience
 
 **Note**: The project uses `instruct-modules-v2/` as the primary module directory (configured in `modules.config.yml`).
 
-#### UMS v2.0 Module Structure
+#### UMS v2.1 Module Structure
 
 Modules are TypeScript files (`.module.ts`) with the following structure:
 
 ```typescript
 import type { Module } from 'ums-lib';
+import { CognitiveLevel, ComponentType } from 'ums-lib';
 
 export const moduleName: Module = {
   id: 'module-id',
   version: '1.0.0',
-  schemaVersion: '2.0',
+  schemaVersion: '2.1',
   capabilities: ['capability1', 'capability2'],
+  cognitiveLevel: CognitiveLevel.UNIVERSAL_PATTERNS, // 0-6
+  domain: 'language-agnostic', // Optional: where it applies
   metadata: {
     name: 'Human-Readable Name',
     description: 'Brief description',
     semantic: 'Dense, keyword-rich description for AI search',
+    tags: ['pattern', 'best-practice'], // Optional: additional keywords
   },
-  // Components: instruction, knowledge, or data
-  instruction?: { purpose, process, constraints, principles, criteria },
-  knowledge?: { explanation, concepts, examples, patterns },
-  data?: { format, value, description },
+  // Component-based content structure
+  instruction?: {
+    type: ComponentType.Instruction,
+    instruction: {
+      purpose: 'What to accomplish',
+      process?: ['step1', { step: 'step2', notes: ['detail'] }],
+      constraints?: ['MUST follow rule', { rule: 'SHOULD do this', notes: ['example'] }],
+      principles?: ['High-level guideline'],
+      criteria?: ['Success metric', { item: 'MUST verify', category: 'Quality', notes: ['test step'] }]
+    }
+  },
+  knowledge?: {
+    type: ComponentType.Knowledge,
+    knowledge: {
+      explanation: 'Conceptual overview',
+      concepts?: [{ name: 'Concept', description: 'Explanation', rationale: 'Why' }],
+      examples?: [{ title: 'Example', rationale: 'What it shows', snippet: 'code', language: 'typescript' }],
+      patterns?: [{ name: 'Pattern', useCase: 'When to use', description: 'How it works' }]
+    }
+  },
+  data?: {
+    type: ComponentType.Data,
+    data: {
+      format: 'json',
+      value: { /* data */ },
+      description: 'What this represents'
+    }
+  }
 };
 ```
 
@@ -204,13 +238,24 @@ export const moduleName: Module = {
 
 - TypeScript-first with full type safety
 - Named exports using camelCase transformation of module ID
-- Rich metadata for AI discoverability
-- Component-based content structure (instruction, knowledge, data)
-- Capabilities array for semantic search
+- Component-based architecture (Instruction, Knowledge, Data)
+- Cognitive hierarchy classification (0-6 levels)
+- Capabilities array for functional classification
+- Domain field for technology/field specificity
+- Simplified directive structures (ProcessStep, Constraint, Criterion with optional notes)
+
+**Breaking Changes from v2.0:**
+
+- Removed `ModuleRelationships` (replaced by external graph tool)
+- Removed `QualityMetadata` component
+- Removed `ProblemSolution` component
+- Simplified `ProcessStep` (removed `detail`, `validate`, `when`, `do`)
+- Simplified `Constraint` (removed `severity`, `when`, `examples`, `rationale`)
+- Simplified `Criterion` (removed `severity`, added `category` and `notes`)
 
 ### Persona Configuration
 
-Personas are defined in `.persona.ts` files (UMS v2.0 format):
+Personas are defined in `.persona.ts` files (UMS v2.1 format):
 
 ```typescript
 import type { Persona } from 'ums-lib';
@@ -219,12 +264,20 @@ export default {
   id: 'persona-id',
   name: 'Persona Name',
   version: '1.0.0',
-  schemaVersion: '2.0',
+  schemaVersion: '2.1',
   description: 'Brief description',
   semantic: 'Dense, keyword-rich description',
-  modules: ['module-id-1', 'module-id-2'],
-  // Or with groups:
-  modules: [{ group: 'Group Name', ids: ['module-1', 'module-2'] }],
+  identity: 'Persona voice, traits, and capabilities',
+  tags: ['keyword1', 'keyword2'],
+  domains: ['backend', 'api'],
+  modules: [
+    'module-id-1',
+    'module-id-2',
+    {
+      group: 'Group Name',
+      ids: ['module-3', 'module-4'],
+    },
+  ],
 } satisfies Persona;
 ```
 
@@ -234,6 +287,8 @@ export default {
 - Supports both flat module arrays and grouped modules
 - Default or named exports supported
 - Full IDE autocomplete and validation
+- Optional `identity` field for persona prologue
+- Optional `tags` and `domains` for classification
 
 ## Testing
 
@@ -248,34 +303,34 @@ export default {
 
 ```bash
 # Build a persona from configuration (UMS v2.0)
-copilot-instructions build --persona ./personas/my-persona.persona.ts
+ums build --persona ./personas/my-persona.persona.ts
 
 # Build with custom output
-copilot-instructions build --persona ./personas/my-persona.persona.ts --output ./dist/my-persona.md
+ums build --persona ./personas/my-persona.persona.ts --output ./dist/my-persona.md
 
 # List all modules
-copilot-instructions list
+ums list
 
 # List modules by tier
-copilot-instructions list --tier foundation
+ums list --tier foundation
 
 # Search for modules
-copilot-instructions search "logic"
+ums search "logic"
 
 # Search with tier filtering
-copilot-instructions search "reasoning" --tier foundation
+ums search "reasoning" --tier foundation
 
 # Validate all modules and personas
-copilot-instructions validate
+ums validate
 
 # Validate specific path
-copilot-instructions validate ./instructions-modules
+ums validate ./instructions-modules
 
 # MCP server commands
-copilot-instructions mcp start --transport stdio
-copilot-instructions mcp test
-copilot-instructions mcp validate-config
-copilot-instructions mcp list-tools
+ums mcp start --transport stdio
+ums mcp test
+ums mcp validate-config
+ums mcp list-tools
 ```
 
 ### Development Usage
@@ -296,7 +351,7 @@ node packages/ums-cli/dist/index.js mcp start --transport stdio
 - **TypeScript**: Compilation includes `.js` extensions for imports
 - **TypeScript Module Loading**: SDK uses `tsx` for on-the-fly TypeScript execution
 - **Git Hooks**: Configured with husky for pre-commit and pre-push checks
-- **CLI Binary**: Published as `copilot-instructions` with binary at `packages/ums-cli/dist/index.js`
+- **CLI Binary**: Published as `ums` (alias `copilot-instructions`) with binary at `packages/ums-cli/dist/index.js`
 - **Node.js**: Requires version 22.0.0 or higher
 - **Lint-staged**: Pre-commit formatting and linting across all packages
 - **Architecture**: Three-tier architecture (ums-lib → ums-sdk → CLI)
@@ -318,119 +373,25 @@ The system enforces strict layering during compilation:
 
 This creates a logical hierarchy moving from abstract concepts to concrete actions, ensuring consistent AI reasoning patterns.
 
-## UMS v2.0 Development Toolkit
-
-The project includes a comprehensive plugin-based toolkit for developing and maintaining UMS v2.0 modules and personas. All toolkit commands are available under the `ums:` namespace.
-
-### Available Commands
-
-```bash
-# Create a new module interactively
-/ums:create
-
-# Validate modules
-/ums:validate-module [path]              # Single file or directory
-/ums:validate-module --tier foundation   # Validate entire tier
-/ums:validate-module --all              # Validate all modules
-
-# Validate personas
-/ums:validate-persona [path]            # Single persona or directory
-/ums:validate-persona --all             # Validate all personas
-
-# Run comprehensive quality audit
-/ums:audit                              # Parallel validation of all modules and personas
-
-# Library management
-/ums:curate add [path]                  # Add module to library
-/ums:curate remove [module-id]          # Remove from library
-/ums:curate metrics                     # Show library statistics
-/ums:curate organize                    # Reorganize library structure
-
-# Build system development
-/ums:build [task]                       # Work on build system features
-```
-
-### Specialized Agents
-
-The toolkit includes 5 specialized agents for different aspects of UMS development:
-
-1. **module-validator**: Validates modules for UMS v2.0 spec compliance
-   - Checks required fields, types, and structure
-   - Validates component schemas
-   - Verifies export naming conventions
-
-2. **persona-validator**: Validates persona composition and quality
-   - Checks module references
-   - Validates persona structure
-   - Assesses composition quality
-
-3. **module-generator**: Interactively creates new modules
-   - Guides through module structure
-   - Provides tier-appropriate templates
-   - Ensures spec compliance
-
-4. **build-developer**: Develops build system functionality
-   - Implements persona compilation
-   - Creates markdown output generators
-   - Handles module resolution
-
-5. **library-curator**: Manages the standard library
-   - Organizes modules by tier
-   - Maintains module relationships
-   - Tracks library metrics
-
-### Common Workflows
-
-**Creating a New Module:**
-
-```bash
-/ums:create
-# Launches interactive creation wizard
-# Automatically validates upon completion
-# Offers to add to library
-```
-
-**Quality Audit:**
-
-```bash
-/ums:audit
-# Validates all modules and personas in parallel
-# Generates comprehensive report
-# Identifies issues by severity
-```
-
-**Library Management:**
-
-```bash
-/ums:curate metrics        # View library statistics
-/ums:curate add ./my-module.ts  # Add new module
-/ums:curate organize       # Reorganize by tier
-```
-
-### Reusable Procedures
-
-The toolkit includes three reusable procedure workflows:
-
-1. **complete-module-workflow**: End-to-end module creation (create → validate → curate)
-2. **quality-audit-workflow**: Comprehensive quality assessment with parallel validation
-3. **library-addition-workflow**: Validate and add existing modules to library
-
-For detailed documentation, see `.claude/plugins/ums-v2-toolkit/README.md` and `.claude/AGENTS.md`.
-
 ## Important Instructions
 
 ### Behavioral Guidelines
 
 - **Avoid Sycophantic Behavior**: Do not engage in excessive praise or flattery toward users. Maintain a neutral and professional tone, focusing on accuracy and usefulness over compliments. Prioritize clarity and helpfulness without resorting to flattery or overly complimentary language.
-- **UMS v2.0 Migration**: The project has migrated to UMS v2.0 (TypeScript-first). All new modules and personas should use TypeScript format (.module.ts and .persona.ts).
-- **Breaking Changes**: UMS v2.0 introduces breaking changes from v1.0. File formats, module structure, and APIs have changed significantly.
+- **UMS v2.1 Migration**: The project has migrated to UMS v2.1 (TypeScript-first). All new modules and personas should use TypeScript format (.module.ts and .persona.ts).
+- **Breaking Changes**: UMS v2.1 introduces breaking changes from v2.0. File formats, module structure, and APIs have changed significantly.
 
 ### Module Configuration
 
 - **Primary Module Directory**: `instruct-modules-v2/` (configured in `modules.config.yml`)
-- **Module File Format**: `.module.ts` (TypeScript, UMS v2.0)
-- **Persona File Format**: `.persona.ts` (TypeScript, UMS v2.0)
+- **Module File Format**: `.module.ts` (TypeScript, UMS v2.1)
+- **Persona File Format**: `.persona.ts` (TypeScript, UMS v2.1)
 - **Conflict Resolution**: Configurable (error, warn, replace strategies)
 - **Module ID Pattern**: Kebab-case format (e.g., `error-handling`, `foundation/ethics/do-no-harm`)
 - **Export Convention**: Named exports using camelCase transformation of module ID
 - **Coverage Requirements**: Tests maintain 80% coverage across branches, functions, lines, and statements
+
+## Resources
+
+- **UMS v2.1 Specification**: `docs/spec/unified_module_system_v2_spec.md`
+- **Commands Documentation**: `.claude/COMMANDS.md`
