@@ -42,11 +42,6 @@ export const tsxExecution: Module = {
         'dependency-management',
       ],
     },
-    quality: {
-      maturity: 'stable',
-      confidence: 0.95,
-      lastVerified: '2025-10-17',
-    },
     license: 'MIT',
   },
 

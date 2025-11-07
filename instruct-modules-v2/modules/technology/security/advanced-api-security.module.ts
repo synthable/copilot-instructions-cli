@@ -64,26 +64,6 @@ export const advancedApiSecurity: Module = {
      */
     tags: ['security', 'owasp', 'jwt', 'oauth2', 'authentication', 'authorization', 'best-practices'],
     /**
-     * @property {object[]} solves - Maps user-facing problems to the solutions this module provides.
-     * @description This allows a user or AI to find a module by asking a question in natural language (e.g., "How do I secure my API?").
-     */
-    solves: [
-      {
-        /**
-         * @property {string} problem - A user-facing problem statement, phrased as a question or a need.
-         */
-        problem: 'How do I properly secure my REST or GraphQL API?',
-        /**
-         * @property {string[]} keywords - Search keywords associated with the problem to improve search recall.
-         */
-        keywords: ['api', 'security', 'best practices', 'secure'],
-      },
-      {
-        problem: 'What are the most common API vulnerabilities?',
-        keywords: ['vulnerability', 'owasp', 'top 10', 'hack'],
-      },
-    ],
-    /**
      * @property {object} relationships - Declares dependencies and relationships with other modules.
      * @description This information is used by build tools to validate personas, suggest companion modules, or warn about conflicts.
      */
@@ -108,32 +88,6 @@ export const advancedApiSecurity: Module = {
        * @description This provides a semantic link between a base module and a more specific one.
        */
       extends: 'rest-api-design',
-    },
-    /**
-     * @property {object} quality - Indicates the module's quality and maturity.
-     * @description Provides signals to users and tools about the reliability and readiness of the module.
-     */
-    quality: {
-      /**
-       * @property {string} maturity - The development stage of the module ('alpha', 'beta', 'stable').
-       * @description Used to filter out experimental modules or to signal to users that a module is production-ready.
-       */
-      maturity: 'beta',
-      /**
-       * @property {number} confidence - A 0-1 score indicating the author's confidence in the module's effectiveness.
-       * @description Used as a quality signal for sorting and filtering during discovery.
-       */
-      confidence: 0.9,
-      /**
-       * @property {string} lastVerified - The ISO 8601 date when the module was last verified for quality.
-       * @description Helps users understand how recent and relevant the quality assessment is.
-       */
-      lastVerified: '2025-11-04',
-      /**
-       * @property {boolean} experimental - A flag to indicate that the module is experimental and may change.
-       * @description Used to warn users that the module is not yet stable.
-       */
-      experimental: true,
     },
     /**
      * @property {string} license - The SPDX license identifier for the module's content.

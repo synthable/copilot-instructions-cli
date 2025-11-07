@@ -169,12 +169,8 @@ export interface ModuleMetadata {
   semantic: string;
   /** Optional keywords for filtering and search boosting. */
   tags?: string[];
-  /** Describes problems this module is designed to solve. */
-  solves?: ProblemSolution[];
   /** Defines relationships between this module and others. */
   relationships?: ModuleRelationships;
-  /** Optional quality and maintenance metrics. */
-  quality?: QualityMetadata;
   /** The SPDX license identifier for the module's content. */
   license?: string;
   /** A list of the primary authors or maintainers. */
@@ -185,16 +181,6 @@ export interface ModuleMetadata {
   deprecated?: boolean;
   /** The ID of a successor module, if this module is deprecated. */
   replacedBy?: string;
-}
-
-/**
- * Describes a problem that a module is designed to solve.
- */
-export interface ProblemSolution {
-  /** A description of the problem. */
-  problem: string;
-  /** Keywords related to the problem. */
-  keywords: string[];
 }
 
 /**
@@ -209,20 +195,6 @@ export interface ModuleRelationships {
   conflictsWith?: string[];
   /** The ID of a module that this module extends. */
   extends?: string;
-}
-
-/**
- * Optional metadata for assessing the quality, maturity, and maintenance status of a module.
- */
-export interface QualityMetadata {
-  /** The module's development status. */
-  maturity: 'alpha' | 'beta' | 'stable' | 'deprecated';
-  /** A score from 0.0 to 1.0 indicating the author's confidence in the module. */
-  confidence: number;
-  /** The date the module was last verified, in ISO 8601 format. */
-  lastVerified?: string;
-  /** Flag indicating if the module is experimental. */
-  experimental?: boolean;
 }
 
 // #endregion

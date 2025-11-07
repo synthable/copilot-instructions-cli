@@ -82,6 +82,7 @@
 ```
 
 **See:**
+
 - [ADR 0005](../architecture/adr/0005-simplify-processstep-structure.md) - ProcessStep rationale
 - [ADR 0006](../architecture/adr/0006-simplify-constraint-structure.md) - Constraint rationale
 - [ADR 0007](../architecture/adr/0007-simplify-criterion-structure.md) - Criterion rationale
@@ -177,10 +178,18 @@ A valid module for v2.0 MUST contain the following top-level keys:
   - Capabilities SHOULD be concrete, functional, and searchable
   - Focus on **what** the module helps accomplish (not the domain or pattern)
 - **Examples**:
-  - `["testing", "quality-assurance"]` - helps with testing and quality
-  - `["api-design", "rest-api"]` - helps design REST APIs
-  - `["error-handling", "logging", "debugging"]` - helps handle errors and debug
-  - `["performance-optimization", "caching"]` - helps optimize performance
+  - `["testing", "quality-assurance", "unit-testing", "integration-testing", "test-automation"]` - helps with testing and quality assurance through comprehensive testing strategies, including unit tests, integration tests, and automated test suites to ensure code reliability and prevent regressions
+  - `["api-design", "rest-api", "http-methods", "resource-modeling", "api-versioning"]` - helps design REST APIs by defining resource-based endpoints, mapping HTTP methods to CRUD operations, modeling resources effectively, and implementing versioning for backward compatibility
+  - `["error-handling", "logging", "debugging", "fault-tolerance", "exception-management"]` - helps handle errors and debug issues by implementing robust error handling patterns, structured logging for observability, debugging techniques, fault tolerance mechanisms, and proper exception propagation
+  - `["performance-optimization", "caching", "query-optimization", "resource-management", "scalability"]` - helps optimize performance through caching strategies, database query optimization, efficient resource management, and scalability patterns to handle increased load
+  - `["type-safety", "compile-time-checking", "static-analysis", "type-inference", "generic-programming"]` - helps achieve type safety by leveraging compile-time checking, static analysis tools, type inference systems, and generic programming to catch errors early and improve code maintainability (vs. `domain: "typescript"`)
+  - `["component-composition", "state-management", "reactive-programming", "component-lifecycle", "data-flow"]` - helps compose UI components by managing state effectively, implementing reactive programming patterns, handling component lifecycles, and ensuring proper data flow in user interfaces (vs. `domain: "react"`)
+  - `["architecture", "maintainability", "modular-design", "dependency-injection", "design-patterns"]` - helps design maintainable systems through architectural principles, modular design approaches, dependency injection, and application of proven design patterns for long-term code health (vs. `tags: ["solid", "ddd"]`)
+  - `["data-modeling", "schema-design", "normalization", "relationships", "data-validation"]` - helps design data structures by creating effective schemas, applying normalization techniques, defining relationships between entities, and implementing data validation rules (vs. `domain: "database"`)
+  - `["security", "authentication", "authorization", "encryption", "access-control"]` - helps implement security measures including authentication mechanisms, authorization policies, data encryption, and access control systems to protect against threats
+  - `["documentation", "api-specification", "code-comments", "readme-writing", "api-documentation"]` - helps create clear documentation through API specifications, comprehensive code comments, well-structured README files, and detailed API documentation for better developer experience
+  - `["deployment", "ci-cd", "automation", "infrastructure-as-code", "release-management"]` - helps automate deployment processes with CI/CD pipelines, infrastructure as code practices, automated testing in pipelines, and effective release management strategies
+  - `["monitoring", "observability", "metrics", "logging", "alerting"]` - helps track system health through monitoring dashboards, observability practices, key metrics collection, centralized logging, and proactive alerting for issues
 - **Distinction**: Use `capabilities` for **what the module helps accomplish**, `domain` for **where it applies**, and `metadata.tags` for **patterns/keywords**
 
 #### `metadata`
@@ -315,7 +324,7 @@ Tells the AI **what to do**.
 
 ```typescript
 interface InstructionComponent {
-  type: 'instruction';
+  type: "instruction";
   metadata?: ComponentMetadata;
   instruction: {
     purpose: string; // Primary objective
@@ -341,7 +350,7 @@ Teaches the AI **concepts and patterns**.
 
 ```typescript
 interface KnowledgeComponent {
-  type: 'knowledge';
+  type: "knowledge";
   metadata?: ComponentMetadata;
   knowledge: {
     explanation: string; // High-level overview
@@ -365,7 +374,7 @@ Provides **reference information**.
 
 ```typescript
 interface DataComponent {
-  type: 'data';
+  type: "data";
   metadata?: ComponentMetadata;
   data: {
     format: string; // Media type (json, yaml, xml, etc.)
@@ -389,9 +398,7 @@ interface DataComponent {
 | `description`   | String        | Yes       | Concise, single-sentence summary            |
 | `semantic`      | String        | Yes       | Dense, keyword-rich paragraph for AI search |
 | `tags`          | Array[String] | No        | Lowercase keywords for filtering            |
-| `solves`        | Array[Object] | No        | Problem-solution mapping for discovery      |
 | `relationships` | Object        | No        | Module dependencies and relationships       |
-| `quality`       | Object        | No        | Quality indicators (maturity, confidence)   |
 | `license`       | String        | No        | SPDX license identifier                     |
 | `authors`       | Array[String] | No        | Primary authors or maintainers              |
 | `homepage`      | String        | No        | URL to source repository or docs            |
@@ -449,19 +456,6 @@ interface DataComponent {
   - Use `cognitiveLevel` for **abstraction level** (0-6 hierarchy)
   - Use `tags` for **patterns, keywords, and additional descriptors**
 
-#### `solves`
-
-- **Type**: `Array<{ problem: string; keywords: string[] }>`
-- **Required**: No
-- **Purpose**: Map user problems to solutions for discovery
-
-```typescript
-interface ProblemSolution {
-  problem: string; // User-facing problem statement
-  keywords: string[]; // Search keywords
-}
-```
-
 #### `relationships`
 
 - **Type**: `Object`
@@ -474,21 +468,6 @@ interface ModuleRelationships {
   recommends?: string[]; // Recommended companions
   conflictsWith?: string[]; // Conflicting modules
   extends?: string; // Module this extends
-}
-```
-
-#### `quality`
-
-- **Type**: `Object`
-- **Required**: No
-- **Purpose**: Indicate module quality and maturity
-
-```typescript
-interface QualityMetadata {
-  maturity: 'alpha' | 'beta' | 'stable' | 'deprecated';
-  confidence: number; // 0-1 score
-  lastVerified?: string; // ISO 8601 date
-  experimental?: boolean;
 }
 ```
 
@@ -524,11 +503,11 @@ components: [
   {
     type: ComponentType.Instruction,
     metadata: {
-      purpose: 'Core TDD workflow',
-      context: ['unit-testing', 'development'],
+      purpose: "Core TDD workflow",
+      context: ["unit-testing", "development"],
     },
     instruction: {
-      purpose: 'Apply TDD rigorously',
+      purpose: "Apply TDD rigorously",
       // ...
     },
   },
@@ -540,10 +519,12 @@ components: [
 ### 3.1. ProcessStep
 
 ```typescript
-type ProcessStep = string | {
-  step: string;       // The step description
-  notes?: string[];   // Optional sub-bullets for clarification
-};
+type ProcessStep =
+  | string
+  | {
+      step: string; // The step description
+      notes?: string[]; // Optional sub-bullets for clarification
+    };
 ```
 
 **Rationale**: Process steps are kept simple to reduce authoring friction. Most steps are self-explanatory strings. When elaboration is needed, the `notes` array provides sub-bullets without over-engineering. Conditionals and validation are expressed naturally in the step text or kept separate in the `criteria` array.
@@ -552,16 +533,16 @@ type ProcessStep = string | {
 
 ```typescript
 process: [
-  'Identify resources (nouns, not verbs)',
+  "Identify resources (nouns, not verbs)",
   {
-    step: 'Run database migrations',
+    step: "Run database migrations",
     notes: [
-      'Use `npm run migrate` for development',
-      'Production migrations require admin approval',
-      'Verify migration status with `npm run migrate:status`',
+      "Use `npm run migrate` for development",
+      "Production migrations require admin approval",
+      "Verify migration status with `npm run migrate:status`",
     ],
   },
-  'Map HTTP methods to CRUD operations',
+  "Map HTTP methods to CRUD operations",
 ];
 ```
 
@@ -569,9 +550,9 @@ process: [
 
 ```typescript
 process: [
-  'Run tests. If tests fail, fix issues before proceeding.',
-  'Deploy to staging environment',
-  'Run smoke tests and verify all endpoints return 200 OK',
+  "Run tests. If tests fail, fix issues before proceeding.",
+  "Deploy to staging environment",
+  "Run smoke tests and verify all endpoints return 200 OK",
 ];
 ```
 
@@ -580,20 +561,22 @@ process: [
 A constraint can be a simple string or an object with optional notes for elaboration.
 
 ```typescript
-type Constraint = string | {
-  rule: string; // The constraint rule. Use RFC 2119 keywords (MUST, SHOULD, MAY) for severity.
-  notes?: string[]; // Optional notes for examples, rationale, or clarification.
-};
+type Constraint =
+  | string
+  | {
+      rule: string; // The constraint rule. Use RFC 2119 keywords (MUST, SHOULD, MAY) for severity.
+      notes?: string[]; // Optional notes for examples, rationale, or clarification.
+    };
 ```
 
 **Simple Example (90% of cases):**
 
 ```typescript
 constraints: [
-  'URLs MUST use plural nouns for collections',
-  'All endpoints MUST return proper HTTP status codes',
-  'Never expose sensitive data in URLs'
-]
+  "URLs MUST use plural nouns for collections",
+  "All endpoints MUST return proper HTTP status codes",
+  "Never expose sensitive data in URLs",
+];
 ```
 
 **Example with Notes (10% of cases):**
@@ -601,28 +584,29 @@ constraints: [
 ```typescript
 constraints: [
   {
-    rule: 'URLs MUST use plural nouns for collections',
+    rule: "URLs MUST use plural nouns for collections",
     notes: [
-      'Good: /users, /users/123, /orders',
-      'Bad: /user, /getUser, /createOrder',
-      'Rationale: REST conventions require resource-based URLs'
-    ]
+      "Good: /users, /users/123, /orders",
+      "Bad: /user, /getUser, /createOrder",
+      "Rationale: REST conventions require resource-based URLs",
+    ],
   },
   {
-    rule: 'All API responses MUST include proper HTTP status codes',
+    rule: "All API responses MUST include proper HTTP status codes",
     notes: [
-      '2xx for success (200 OK, 201 Created, 204 No Content)',
-      '4xx for client errors (400 Bad Request, 404 Not Found)',
-      '5xx for server errors (500 Internal Server Error)',
-      'See RFC 7231 for complete status code definitions'
-    ]
-  }
-]
+      "2xx for success (200 OK, 201 Created, 204 No Content)",
+      "4xx for client errors (400 Bad Request, 404 Not Found)",
+      "5xx for server errors (500 Internal Server Error)",
+      "See RFC 7231 for complete status code definitions",
+    ],
+  },
+];
 ```
 
 **Authoring Guidelines:**
 
 Use [RFC 2119](https://www.ietf.org/rfc/rfc2119.txt) keywords to indicate requirement levels:
+
 - **MUST** / **REQUIRED** / **SHALL** = Error severity (absolute requirement)
 - **MUST NOT** / **SHALL NOT** = Error severity (absolute prohibition)
 - **SHOULD** / **RECOMMENDED** = Warning severity (recommended but not required)
@@ -630,6 +614,7 @@ Use [RFC 2119](https://www.ietf.org/rfc/rfc2119.txt) keywords to indicate requir
 - **MAY** / **OPTIONAL** = Info severity (truly optional)
 
 For notes:
+
 - Use `Good:` and `Bad:` prefixes for examples (no emojis)
 - Use `Rationale:` prefix for explanations
 - Use template literals for multi-line content in a single entry
@@ -642,21 +627,23 @@ For notes:
 A criterion can be a simple string or an object with optional category and notes for elaboration.
 
 ```typescript
-type Criterion = string | {
-  item: string;       // The verification criterion
-  category?: string;  // Optional grouping (renders as subheadings)
-  notes?: string[];   // Optional test instructions, expected results, verification steps
-};
+type Criterion =
+  | string
+  | {
+      item: string; // The verification criterion
+      category?: string; // Optional grouping (renders as subheadings)
+      notes?: string[]; // Optional test instructions, expected results, verification steps
+    };
 ```
 
 **Simple Example (90% of cases):**
 
 ```typescript
 criteria: [
-  'All endpoints return proper HTTP status codes',
-  'API responses match documented schemas',
-  'Error handling covers common edge cases'
-]
+  "All endpoints return proper status codes",
+  "API responses match documented schemas",
+  "Error handling covers common edge cases",
+];
 ```
 
 **Example with Categories:**
@@ -664,25 +651,25 @@ criteria: [
 ```typescript
 criteria: [
   // Uncategorized
-  'All tests pass before deployment',
-  'Documentation is complete',
+  "All tests pass before deployment",
+  "Documentation is complete",
 
   // Security category
   {
-    item: 'All endpoints use HTTPS',
-    category: 'Security'
+    item: "All endpoints use HTTPS",
+    category: "Security",
   },
   {
-    item: 'Authentication required for protected resources',
-    category: 'Security'
+    item: "Authentication required for protected resources",
+    category: "Security",
   },
 
   // Performance category
   {
-    item: 'Response times under 100ms',
-    category: 'Performance'
-  }
-]
+    item: "Response times under 100ms",
+    category: "Performance",
+  },
+];
 ```
 
 **Example with Test Details:**
@@ -690,35 +677,37 @@ criteria: [
 ```typescript
 criteria: [
   {
-    item: 'Rate limiting prevents abuse',
-    category: 'Security',
+    item: "Rate limiting prevents abuse",
+    category: "Security",
     notes: [
-      'Test: Send 100 requests in 1 minute using same API key',
-      'Expected: Receive 429 Too Many Requests after limit',
-      'Verify: Rate limit headers present (X-RateLimit-Limit, X-RateLimit-Remaining)',
-      'See RFC 6585 section 4 for 429 status code specification'
-    ]
+      "Test: Send 100 requests in 1 minute using same API key",
+      "Expected: Receive 429 Too Many Requests after limit",
+      "Verify: Rate limit headers present (X-RateLimit-Limit, X-RateLimit-Remaining)",
+      "See RFC 6585 section 4 for 429 status code specification",
+    ],
   },
   {
-    item: 'Database queries optimized',
-    category: 'Performance',
+    item: "Database queries optimized",
+    category: "Performance",
     notes: [
-      'Test: Run EXPLAIN on all queries',
-      'Verify: All queries use indexes',
-      'Verify: No N+1 query patterns'
-    ]
-  }
-]
+      "Test: Run EXPLAIN on all queries",
+      "Verify: All queries use indexes",
+      "Verify: No N+1 query patterns",
+    ],
+  },
+];
 ```
 
 **Authoring Guidelines:**
 
 Use [RFC 2119](https://www.ietf.org/rfc/rfc2119.txt) keywords to indicate priority:
+
 - **MUST** / **REQUIRED** / **SHALL** = Critical (absolute requirement)
 - **SHOULD** / **RECOMMENDED** = Important (recommended)
 - **MAY** / **OPTIONAL** = Nice-to-have (truly optional)
 
 For notes:
+
 - Use `Test:` prefix for test instructions
 - Use `Expected:` prefix for expected results
 - Use `Verify:` prefix for verification steps
@@ -746,12 +735,12 @@ interface Concept {
 ```typescript
 concepts: [
   {
-    name: 'Resource-Based URLs',
-    description: 'URLs represent resources (things), not actions',
-    rationale: 'Resources are stable; operations change',
+    name: "Resource-Based URLs",
+    description: "URLs represent resources (things), not actions",
+    rationale: "Resources are stable; operations change",
     examples: [
-      ' GET /users/123 (resource: user)',
-      ' GET /getUser?id=123 (action: get)',
+      " GET /users/123 (resource: user)",
+      " GET /getUser?id=123 (action: get)",
     ],
   },
 ];
@@ -773,9 +762,9 @@ interface Example {
 ```typescript
 examples: [
   {
-    title: 'Basic Error Handling',
-    rationale: 'Shows try-catch with proper logging',
-    language: 'typescript',
+    title: "Basic Error Handling",
+    rationale: "Shows try-catch with proper logging",
+    language: "typescript",
     snippet: `
       try {
         await riskyOperation();
@@ -806,11 +795,11 @@ interface Pattern {
 ```typescript
 patterns: [
   {
-    name: 'Repository Pattern',
-    useCase: 'Abstract data access layer',
-    description: 'Encapsulate data access logic in repository classes',
-    advantages: ['Testable in isolation', 'Centralized data access logic'],
-    disadvantages: ['Additional abstraction layer'],
+    name: "Repository Pattern",
+    useCase: "Abstract data access layer",
+    description: "Encapsulate data access logic in repository classes",
+    advantages: ["Testable in isolation", "Centralized data access logic"],
+    disadvantages: ["Additional abstraction layer"],
   },
 ];
 ```
@@ -858,15 +847,15 @@ interface ModuleGroup {
 
 ```typescript
 modules: [
-  'foundation/ethics/do-no-harm',
+  "foundation/ethics/do-no-harm",
   {
-    group: 'Professional Standards',
+    group: "Professional Standards",
     ids: [
-      'principle/testing/test-driven-development',
-      'principle/architecture/separation-of-concerns',
+      "principle/testing/test-driven-development",
+      "principle/architecture/separation-of-concerns",
     ],
   },
-  'error-handling',
+  "error-handling",
 ];
 ```
 
@@ -916,12 +905,12 @@ The **Standard Library** is a curated collection of reusable modules that provid
 
 ```yaml
 localModulePaths:
-  - path: './company-standards'
-    onConflict: 'error' # Fail on collision
-  - path: './project-overrides'
-    onConflict: 'replace' # Override existing
-  - path: './experimental'
-    onConflict: 'warn' # Warn and keep original
+  - path: "./company-standards"
+    onConflict: "error" # Fail on collision
+  - path: "./project-overrides"
+    onConflict: "replace" # Override existing
+  - path: "./experimental"
+    onConflict: "warn" # Warn and keep original
 ```
 
 ### 5.3. Conflict Resolution Strategies
@@ -1502,10 +1491,6 @@ export const tddModule: Module = {
     semantic:
       'TDD, test-driven-development, red-green-refactor, unit testing, test-first development, quality assurance, regression prevention',
     tags: ['tdd', 'red-green-refactor', 'test-first'],
-    quality: {
-      maturity: 'stable',
-      confidence: 0.9,
-    },
   },
 
   components: [
@@ -1528,8 +1513,8 @@ export const tddModule: Module = {
     {
       type: ComponentType.Knowledge,
       knowledge: {
-        explanation:
-          'TDD is a development process where tests drive the design and implementation of code through short, iterative cycles.',
+        explanation: `
+          TDD is a development process where tests drive the design and implementation of code through short, iterative cycles.`,
         concepts: [
           {
             name: 'Red-Green-Refactor',
@@ -1574,25 +1559,8 @@ export const apiDesign: Module = {
     `,
     tags: ['rest', 'restful', 'resource-based', 'http-methods'],
 
-    solves: [
-      {
-        problem: 'How should I structure my API endpoints?',
-        keywords: ['endpoint', 'url', 'resource', 'naming'],
-      },
-      {
-        problem: 'What HTTP methods should I use?',
-        keywords: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
-      },
-    ],
-
     relationships: {
       recommends: ['error-handling', 'api-documentation'],
-    },
-
-    quality: {
-      maturity: 'stable',
-      confidence: 0.95,
-      lastVerified: '2025-01-15',
     },
 
     license: 'MIT',
@@ -1745,7 +1713,7 @@ Complete TypeScript type definitions are maintained in the implementation reposi
 - `InstructionComponent`, `KnowledgeComponent`, `DataComponent`: Component types
 - `ProcessStep`, `Constraint`, `Criterion`: Instruction directive types
 - `Concept`, `Example`, `Pattern`: Knowledge directive types
-- `ModuleMetadata`, `QualityMetadata`, `ModuleRelationships`: Metadata types
+- `ModuleMetadata`, `ModuleRelationships`: Metadata types
 - `Persona`, `ModuleGroup`: Persona types
 
 See `docs/typescript-minimal-implementation-roadmap.md` for implementation details.
@@ -1756,3 +1724,4 @@ See `docs/typescript-minimal-implementation-roadmap.md` for implementation detai
 **Status**: Draft
 **Last Updated**: 2025-01-15
 **Changes from v2.0**: Simplified ProcessStep interface (see ADR 0005)
+````

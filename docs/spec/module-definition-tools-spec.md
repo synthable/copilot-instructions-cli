@@ -489,7 +489,6 @@ export function validateKnowledgeComponent(
     concepts: comp.concepts,
     examples: comp.examples,
     patterns: comp.patterns,
-    problemSolution: comp.problemSolution,
   };
 }
 
@@ -547,7 +546,6 @@ export function defineModule(config: {
 
   // Optional advanced fields
   relationships?: ModuleRelationships;
-  quality?: QualityMetadata;
 }): Module {
   // Apply smart defaults (SDK's job)
   const version = config.version || defaults.defaultVersion();
@@ -572,7 +570,6 @@ export function defineModule(config: {
     },
     // Component will be added below
     relationships: config.relationships,
-    quality: config.quality,
   };
 
   // Add validated component using ums-lib public validators
