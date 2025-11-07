@@ -64,32 +64,6 @@ export const advancedApiSecurity: Module = {
      */
     tags: ['security', 'owasp', 'jwt', 'oauth2', 'authentication', 'authorization', 'best-practices'],
     /**
-     * @property {object} relationships - Declares dependencies and relationships with other modules.
-     * @description This information is used by build tools to validate personas, suggest companion modules, or warn about conflicts.
-     */
-    relationships: {
-      /**
-       * @property {string[]} requires - A list of module IDs that are hard dependencies.
-       * @description A build tool should fail if these modules are not also included in the persona.
-       */
-      requires: ['principle/architecture/separation-of-concerns'],
-      /**
-       * @property {string[]} recommends - A list of module IDs that are recommended as companions.
-       * @description A build tool can use this to suggest adding these modules to a persona that already includes this one.
-       */
-      recommends: ['technology/security/threat-modeling-for-developers', 'execution/testing/security-testing-playbook'],
-      /**
-       * @property {string[]} conflictsWith - A list of module IDs that are incompatible with this one.
-       * @description A build tool should warn or fail if this module is used alongside a conflicting one.
-       */
-      conflictsWith: ['legacy/insecure-defaults', 'pattern/basic-auth-only'],
-      /**
-       * @property {string} extends - The ID of a module that this module logically extends or specializes.
-       * @description This provides a semantic link between a base module and a more specific one.
-       */
-      extends: 'rest-api-design',
-    },
-    /**
      * @property {string} license - The SPDX license identifier for the module's content.
      * @description Clarifies the legal terms under which the module can be used and distributed.
      */

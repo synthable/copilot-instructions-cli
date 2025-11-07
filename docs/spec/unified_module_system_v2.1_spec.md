@@ -392,18 +392,17 @@ interface DataComponent {
 
 ### 2.3. The `metadata` Block
 
-| Key             | Type          | Required? | Description                                 |
-| :-------------- | :------------ | :-------- | :------------------------------------------ |
-| `name`          | String        | Yes       | Human-readable, Title Case name             |
-| `description`   | String        | Yes       | Concise, single-sentence summary            |
-| `semantic`      | String        | Yes       | Dense, keyword-rich paragraph for AI search |
-| `tags`          | Array[String] | No        | Lowercase keywords for filtering            |
-| `relationships` | Object        | No        | Module dependencies and relationships       |
-| `license`       | String        | No        | SPDX license identifier                     |
-| `authors`       | Array[String] | No        | Primary authors or maintainers              |
-| `homepage`      | String        | No        | URL to source repository or docs            |
-| `deprecated`    | Boolean       | No        | Deprecation flag                            |
-| `replacedBy`    | String        | No        | ID of successor module                      |
+| Key           | Type          | Required? | Description                                 |
+| :------------ | :------------ | :-------- | :------------------------------------------ |
+| `name`        | String        | Yes       | Human-readable, Title Case name             |
+| `description` | String        | Yes       | Concise, single-sentence summary            |
+| `semantic`    | String        | Yes       | Dense, keyword-rich paragraph for AI search |
+| `tags`        | Array[String] | No        | Lowercase keywords for filtering            |
+| `license`     | String        | No        | SPDX license identifier                     |
+| `authors`     | Array[String] | No        | Primary authors or maintainers              |
+| `homepage`    | String        | No        | URL to source repository or docs            |
+| `deprecated`  | Boolean       | No        | Deprecation flag                            |
+| `replacedBy`  | String        | No        | ID of successor module                      |
 
 #### `name`
 
@@ -455,21 +454,6 @@ interface DataComponent {
   - Use `domain` for **where** it applies (technology/field)
   - Use `cognitiveLevel` for **abstraction level** (0-6 hierarchy)
   - Use `tags` for **patterns, keywords, and additional descriptors**
-
-#### `relationships`
-
-- **Type**: `Object`
-- **Required**: No
-- **Purpose**: Declare module dependencies and relationships
-
-```typescript
-interface ModuleRelationships {
-  requires?: string[]; // Required dependencies
-  recommends?: string[]; // Recommended companions
-  conflictsWith?: string[]; // Conflicting modules
-  extends?: string; // Module this extends
-}
-```
 
 #### `license`, `authors`, `homepage`
 
@@ -1559,10 +1543,6 @@ export const apiDesign: Module = {
     `,
     tags: ['rest', 'restful', 'resource-based', 'http-methods'],
 
-    relationships: {
-      recommends: ['error-handling', 'api-documentation'],
-    },
-
     license: 'MIT',
   },
 
@@ -1713,7 +1693,7 @@ Complete TypeScript type definitions are maintained in the implementation reposi
 - `InstructionComponent`, `KnowledgeComponent`, `DataComponent`: Component types
 - `ProcessStep`, `Constraint`, `Criterion`: Instruction directive types
 - `Concept`, `Example`, `Pattern`: Knowledge directive types
-- `ModuleMetadata`, `ModuleRelationships`: Metadata types
+- `ModuleMetadata`: Metadata types
 - `Persona`, `ModuleGroup`: Persona types
 
 See `docs/typescript-minimal-implementation-roadmap.md` for implementation details.

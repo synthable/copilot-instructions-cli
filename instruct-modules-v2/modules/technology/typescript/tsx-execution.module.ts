@@ -34,14 +34,6 @@ export const tsxExecution: Module = {
       'dynamic-loading',
       'development',
     ],
-    relationships: {
-      requires: ['principle/architecture/separation-of-concerns'],
-      recommends: [
-        'typescript-best-practices',
-        'esm-modules',
-        'dependency-management',
-      ],
-    },
     license: 'MIT',
   },
 

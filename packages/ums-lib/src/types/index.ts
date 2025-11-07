@@ -169,8 +169,6 @@ export interface ModuleMetadata {
   semantic: string;
   /** Optional keywords for filtering and search boosting. */
   tags?: string[];
-  /** Defines relationships between this module and others. */
-  relationships?: ModuleRelationships;
   /** The SPDX license identifier for the module's content. */
   license?: string;
   /** A list of the primary authors or maintainers. */
@@ -181,20 +179,6 @@ export interface ModuleMetadata {
   deprecated?: boolean;
   /** The ID of a successor module, if this module is deprecated. */
   replacedBy?: string;
-}
-
-/**
- * Defines relationships between this module and others.
- */
-export interface ModuleRelationships {
-  /** A list of module IDs that this module requires to function correctly. */
-  requires?: string[];
-  /** A list of module IDs that are recommended for use with this module. */
-  recommends?: string[];
-  /** A list of module IDs that this module conflicts with. */
-  conflictsWith?: string[];
-  /** The ID of a module that this module extends. */
-  extends?: string;
 }
 
 // #endregion

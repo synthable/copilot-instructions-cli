@@ -38,7 +38,6 @@ export type {
   Example,
   Pattern,
   ComponentMetadata,
-  ModuleRelationships,
   // Persona structure
   ModuleGroup,
   ModuleEntry,
