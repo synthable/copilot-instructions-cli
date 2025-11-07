@@ -152,4 +152,5 @@ untracked/
 .gemini/
 .genkit/
 docs/planning/
+docs/implementation-plans/
 #instruct-modules-v2/
