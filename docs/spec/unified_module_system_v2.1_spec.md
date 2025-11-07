@@ -930,6 +930,22 @@ localModulePaths:
 2. Process `localModulePaths` in order
 3. Resolve persona modules from final registry
 
+### 5.5. External Dependency Management (Future)
+
+Module relationships and dependencies (such as `requires`, `conflictsWith`, `enhances`) are managed by an external graphing tool and registry, as defined in [ADR-0008: External Graph Tool for Module Dependency Management](../../architecture/adr/0008-external-graph-tool.md).
+
+**Purpose**: This external system is responsible for:
+- Validating the integrity and compatibility of a persona's module composition
+- Detecting conflicts, missing dependencies, and circular references
+- Providing rich querying and visualization of module relationships
+- Leveraging the Cognitive Hierarchy for implicit dependency inference
+
+**Integration**: The external graph tool will integrate with the UMS SDK build orchestration to validate persona compositions before the build process begins.
+
+**Status**: Design in progress. See ADR-0008 for architectural details and implementation timeline.
+
+**Note**: In UMS v2.0, dependency information was embedded in module definitions via `ModuleRelationships`. This was removed in v2.1 to enable centralized dependency management with better validation and tooling capabilities.
+
 ## 6. Build and Synthesis Processes
 
 ### 6.1. Static Compilation
@@ -1362,6 +1378,28 @@ URLs represent resources (things), not actions.
 - Provides a clearer, more consistent API surface
 ```
 
+**Validation Recommendations:**
+
+1. **Required fields:**
+   - `name` MUST be non-empty string
+   - At least one of `description`, `rationale`, `examples`, or `tradeoffs` MUST be present
+
+2. **Character limits:**
+   - `name`: 1-80 characters
+   - `description`: 1-500 characters
+   - `rationale`: 1-300 characters
+   - Individual items in `examples` or `tradeoffs`: 1-200 characters each
+
+3. **Array constraints:**
+   - `examples` array: 1-10 items
+   - `tradeoffs` array: 1-10 items
+   - No empty strings in arrays
+
+4. **Content quality:**
+   - `name` should be a clear, concise concept title
+   - `description` should be a complete sentence or paragraph
+   - Avoid duplicate items in `examples` and `tradeoffs` arrays
+
 #### 6.3.5. Example Rendering
 
 **Format:**
@@ -1405,6 +1443,32 @@ try {
 }
 ```
 ```
+
+**Validation Recommendations:**
+
+1. **Required fields:**
+   - `title` MUST be non-empty string
+   - At least one of `rationale` or `snippet` MUST be present
+
+2. **Character limits:**
+   - `title`: 1-100 characters
+   - `rationale`: 1-300 characters
+   - `snippet`: 1-2000 characters (code snippets can be longer)
+
+3. **Language field:**
+   - If present, `language` should be a valid code language identifier (e.g., `typescript`, `python`, `javascript`)
+   - Common values: `typescript`, `javascript`, `python`, `go`, `rust`, `java`, `csharp`, `bash`, `sql`, `json`, `yaml`
+   - Empty string treated as missing (use plain fence)
+
+4. **Code snippet quality:**
+   - `snippet` should be syntactically valid code for the specified language
+   - Avoid snippets longer than 100 lines (split into multiple examples if needed)
+   - Prefer complete, runnable examples over fragments
+   - Include necessary imports/context for clarity
+
+5. **Special characters:**
+   - If snippet contains triple backticks (```), renderer MUST use longer fence (````)
+   - No validation errors for special characters in code (preserve as-is)
 
 #### 6.3.6. Pattern Rendering
 
@@ -1473,6 +1537,35 @@ interface UserRepository {
 }
 ```
 ```
+
+**Validation Recommendations:**
+
+1. **Required fields:**
+   - `name` MUST be non-empty string
+   - At least one of `useCase`, `description`, `advantages`, `disadvantages`, or `example` MUST be present
+
+2. **Character limits:**
+   - `name`: 1-100 characters
+   - `useCase`: 1-200 characters
+   - `description`: 1-500 characters
+   - Individual items in `advantages` or `disadvantages`: 1-200 characters each
+
+3. **Array constraints:**
+   - `advantages` array: 1-10 items
+   - `disadvantages` array: 1-10 items
+   - No empty strings in arrays
+
+4. **Content quality:**
+   - `name` should be a recognized design pattern name
+   - `useCase` should clearly state when/why to use the pattern
+   - `description` should explain how the pattern works
+   - Balance advantages vs disadvantages (avoid patterns with only advantages)
+   - Avoid duplicate items in advantages and disadvantages arrays
+
+5. **Nested Example:**
+   - If `example` field is present, it MUST follow Example Rendering rules (Section 6.3.5)
+   - Nested example provides concrete illustration of the pattern
+   - Example should be complete enough to demonstrate the pattern's key characteristics
 
 ---
 
