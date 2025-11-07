@@ -1313,6 +1313,167 @@ Implementations SHOULD validate:
   - Use `snake_case` for query parameters
 ```
 
+#### 6.3.4. Concept Rendering
+
+**Format:**
+
+```markdown
+#### Concept: {concept.name}
+
+{concept.description}
+
+**Rationale**: {concept.rationale}
+
+**Examples**:
+- {example1}
+- {example2}
+
+**Trade-offs**:
+- {tradeoff1}
+- {tradeoff2}
+```
+
+**Heading Level:** Concept names SHOULD be rendered as H4 headings.
+**Indentation:** 2 spaces for bulleted lists (`examples`, `tradeoffs`).
+**Blank lines:**
+*   A single blank line (`\n\n`) between the heading and description.
+*   A single blank line (`\n\n`) between the description and "Rationale" (if present).
+*   A single blank line (`\n\n`) between "Rationale" and "Examples" (if present).
+*   A single blank line (`\n\n`) between "Examples" and "Trade-offs" (if present).
+*   No blank lines within bulleted lists.
+**Bolding:** Field labels like "Rationale", "Examples", "Trade-offs" are bolded.
+**Optional Fields:** If `description`, `rationale`, `examples`, or `tradeoffs` are empty or not present, their corresponding sections (including headings/labels) MUST be omitted entirely.
+
+**Example:**
+
+```markdown
+#### Concept: Resource-Based URLs
+
+URLs represent resources (things), not actions.
+
+**Rationale**: Resources are stable; operations change. Resource-based design is more maintainable.
+
+**Examples**:
+- `GET /users/123` (resource: user)
+- `GET /getUser?id=123` (action: get)
+
+**Trade-offs**:
+- Initial design might require more thought
+- Provides a clearer, more consistent API surface
+```
+
+#### 6.3.5. Example Rendering
+
+**Format:**
+
+```markdown
+#### Example: {example.title}
+
+**Rationale**: {example.rationale}
+
+```{example.language}
+{example.snippet}
+```
+```
+
+**Heading Level:** Example titles SHOULD be rendered as H4 headings.
+**Indentation:** None for the main content. Code snippets are naturally indented by the fenced code block.
+**Blank lines:**
+*   A single blank line (`\n\n`) between the heading and "Rationale" (if present).
+*   A single blank line (`\n\n`) between "Rationale" and the code snippet (if present).
+*   A single blank line (`\n`) before and after the fenced code block.
+**Bolding:** The "Rationale" label is bolded.
+**Optional Fields:** If `rationale` is empty or not present, its corresponding section (including label) MUST be omitted. If `snippet` is empty or not present, the code block MUST be omitted. If `language` is not present, the code block MUST use plain fences (``````).
+**Code Snippets:**
+*   `snippet` content is rendered within a fenced code block.
+*   The `language` field, if present, is used as the language identifier for the code block.
+*   Snippets containing triple backticks (```) MUST be rendered using a longer fence (e.g., four backticks ````).
+
+**Example:**
+
+```markdown
+#### Example: Basic Error Handling
+
+**Rationale**: Shows try-catch with proper logging and custom error throwing.
+
+```typescript
+try {
+  await riskyOperation();
+} catch (error) {
+  logger.error('Operation failed', { error, context });
+  throw new CustomError('Failed to complete operation', error);
+}
+```
+```
+
+#### 6.3.6. Pattern Rendering
+
+**Format:**
+
+```markdown
+#### Pattern: {pattern.name}
+
+**Use Case**: {pattern.useCase}
+
+{pattern.description}
+
+**Advantages**:
+- {advantage1}
+- {advantage2}
+
+**Disadvantages**:
+- {disadvantage1}
+- {disadvantage2}
+
+**Example**:
+<!-- Rendered Example (as per 6.3.5) -->
+```
+
+**Heading Level:** Pattern names SHOULD be rendered as H4 headings.
+**Indentation:** 2 spaces for bulleted lists (`advantages`, `disadvantages`).
+**Blank lines:**
+*   A single blank line (`\n\n`) between the heading and "Use Case" (if present).
+*   A single blank line (`\n\n`) between "Use Case" and `description` (if present).
+*   A single blank line (`\n\n`) between `description` and "Advantages" (if present).
+*   A single blank line (`\n\n`) between "Advantages" and "Disadvantages" (if present).
+*   A single blank line (`\n\n`) between "Disadvantages" and "Example" (if present).
+*   No blank lines within bulleted lists.
+**Bolding:** Field labels like "Use Case", "Advantages", "Disadvantages", "Example" are bolded.
+**Optional Fields:** If `useCase`, `description`, `advantages`, `disadvantages`, or `example` are empty or not present, their corresponding sections (including headings/labels) MUST be omitted. The nested `example` field is rendered according to the `Example Rendering` rules (Section 6.3.5).
+
+**Example:**
+
+```markdown
+#### Pattern: Repository Pattern
+
+**Use Case**: Abstract data access layer to decouple business logic from data sources.
+
+Encapsulate data access logic in repository classes, providing a clear interface for data operations.
+
+**Advantages**:
+- Testable in isolation
+- Centralized data access logic
+- Easier to swap data sources
+
+**Disadvantages**:
+- Additional abstraction layer
+- Can introduce overhead for simple CRUD operations
+
+**Example**:
+#### Example: User Repository Interface
+
+**Rationale**: Defines the contract for user data access.
+
+```typescript
+interface UserRepository {
+  findById(id: string): Promise<User | null>;
+  findAll(): Promise<User[]>;
+  save(user: User): Promise<User>;
+  delete(id: string): Promise<void>;
+}
+```
+```
+
 ---
 
 ## 7. The Build Report
