@@ -55,6 +55,7 @@ const mockModule3: Module = {
 };
 
 const mockPersona: Persona = {
+  id: 'test-persona',
   name: 'Test Persona',
   version: '1.0',
   schemaVersion: '2.0',

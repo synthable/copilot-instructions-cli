@@ -130,6 +130,7 @@ const mockDataModule: Module = {
 };
 
 const mockPersona: Persona = {
+  id: 'test-persona',
   name: 'Test Persona',
   version: '1.0',
   schemaVersion: '2.0',
@@ -145,6 +146,7 @@ const mockPersona: Persona = {
 };
 
 const mockPersonaWithGroups: Persona = {
+  id: 'grouped-persona',
   name: 'Grouped Persona',
   version: '1.0',
   schemaVersion: '2.0',

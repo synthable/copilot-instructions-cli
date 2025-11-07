@@ -13,6 +13,8 @@ import type {
   Example,
   Pattern,
   Concept,
+  ProcessStep,
+  Criterion,
 } from '../../types/index.js';
 import { ComponentType } from '../../types/index.js';
 
@@ -118,7 +120,7 @@ export function renderComponent(component: Component): string {
  * @returns Formatted markdown for the step
  */
 export function renderProcessStep(
-  step: string | import('../../types/index.js').ProcessStep,
+  step: string | ProcessStep,
   index: number
 ): string {
   // Handle simple string steps
@@ -203,26 +205,21 @@ export function renderInstructionComponent(
  * @param criteria - Array of criteria (strings or Criterion objects)
  * @returns Formatted markdown for all criteria
  */
-export function renderCriteria(
-  criteria: Array<string | import('../../types/index.js').Criterion>
-): string {
+export function renderCriteria(criteria: (string | Criterion)[]): string {
   // Group criteria by category
-  const uncategorized: Array<
-    string | import('../../types/index.js').Criterion
-  > = [];
-  const categorized = new Map<
-    string,
-    Array<string | import('../../types/index.js').Criterion>
-  >();
+  const uncategorized: (string | Criterion)[] = [];
+  const categorized = new Map<string, (string | Criterion)[]>();
 
   for (const criterion of criteria) {
     if (typeof criterion === 'string' || !criterion.category) {
       uncategorized.push(criterion);
     } else {
-      if (!categorized.has(criterion.category)) {
-        categorized.set(criterion.category, []);
+      let categoryArray = categorized.get(criterion.category);
+      if (!categoryArray) {
+        categoryArray = [];
+        categorized.set(criterion.category, categoryArray);
       }
-      categorized.get(criterion.category)!.push(criterion);
+      categoryArray.push(criterion);
     }
   }
 
@@ -249,9 +246,7 @@ export function renderCriteria(
  * @param criterion - The criterion (string or Criterion object)
  * @returns Formatted markdown for the criterion
  */
-export function renderCriterionItem(
-  criterion: string | import('../../types/index.js').Criterion
-): string {
+export function renderCriterionItem(criterion: string | Criterion): string {
   // Handle simple string criteria
   if (typeof criterion === 'string') {
     return `- [ ] ${criterion}`;

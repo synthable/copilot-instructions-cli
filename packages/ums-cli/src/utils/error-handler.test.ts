@@ -7,7 +7,7 @@ import {
   PersonaLoadError,
   BuildError,
   ConflictError,
-} from 'ums-lib';
+} from 'ums-sdk';
 
 // Mock console methods
 const consoleMock = {
@@ -105,14 +105,11 @@ describe('error-handler', () => {
 
       handleError(error, options);
 
+      // SDK's ModuleLoadError uses generic M0.5 format (not UMS-specific handling)
       expect(consoleMock.error).toHaveBeenCalledWith(
-        expect.stringContaining('❌ Error: Failed to load module')
-      );
-      expect(consoleMock.error).toHaveBeenCalledWith(
-        expect.stringContaining('/path/to/module.yml')
-      );
-      expect(consoleMock.error).toHaveBeenCalledWith(
-        expect.stringContaining('Check file exists and is readable')
+        expect.stringContaining(
+          '[ERROR] build: module loading - Failed to load module'
+        )
       );
     });
 

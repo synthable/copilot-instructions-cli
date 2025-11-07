@@ -2,6 +2,12 @@
 
 @OPENCODE.md
 
+---
+
+@.gemini/CLAUDE-mcp.md
+
+---
+
 ## Gemini Added Memories
 
 - Use Agent Feedback Protocol v1.2 (via OpenCode CLI) as a peer to brainstorm with, validate ideas, and get feedback from.

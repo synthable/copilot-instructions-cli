@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { writeOutputFile } from '../utils/file-operations.js';
 import { handleBuild } from './build.js';
+import type * as UmsSdk from 'ums-sdk';
 import {
   buildPersona,
   type BuildResult,
@@ -36,7 +37,7 @@ vi.mock('ora', () => {
 
 // Mock SDK's buildPersona function
 vi.mock('ums-sdk', async () => {
-  const actual = await vi.importActual<typeof import('ums-sdk')>('ums-sdk');
+  const actual = await vi.importActual<typeof UmsSdk>('ums-sdk');
   return {
     ...actual,
     buildPersona: vi.fn(),
@@ -63,6 +64,7 @@ describe('build command', () => {
   const mockWriteOutputFile = vi.mocked(writeOutputFile);
 
   const mockPersona: Persona = {
+    id: 'test-persona',
     name: 'Test Persona',
     version: '1.0',
     schemaVersion: '2.0',

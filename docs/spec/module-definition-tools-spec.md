@@ -489,7 +489,6 @@ export function validateKnowledgeComponent(
     concepts: comp.concepts,
     examples: comp.examples,
     patterns: comp.patterns,
-    problemSolution: comp.problemSolution,
   };
 }
 
@@ -544,10 +543,6 @@ export function defineModule(config: {
   instruction?: Partial<InstructionComponent>;
   knowledge?: Partial<KnowledgeComponent>;
   data?: Partial<DataComponent>;
-
-  // Optional advanced fields
-  relationships?: ModuleRelationships;
-  quality?: QualityMetadata;
 }): Module {
   // Apply smart defaults (SDK's job)
   const version = config.version || defaults.defaultVersion();
@@ -571,8 +566,6 @@ export function defineModule(config: {
       semantic,
     },
     // Component will be added below
-    relationships: config.relationships,
-    quality: config.quality,
   };
 
   // Add validated component using ums-lib public validators
@@ -835,43 +828,6 @@ export const errorHandling = new ModuleBuilder(__filename, __dirname)
 // Fluent API with IDE autocomplete
 ```
 
-### Example 4: Module with Relationships
-
-```typescript
-import { defineModule } from "ums-sdk/authoring";
-
-// Module that depends on other modules
-export const advancedErrorHandling = defineModule({
-  id: "advanced-error-handling",
-  capabilities: ["error-handling", "resilience", "monitoring"],
-  name: "Advanced Error Handling",
-  description:
-    "Advanced patterns for error handling including retry logic, circuit breakers, and monitoring",
-
-  // Module relationships
-  relationships: {
-    requires: ["error-handling"], // Must have basic error handling first
-    extends: ["foundation/logic/reasoning"], // Builds on reasoning principles
-    recommends: ["monitoring/observability"], // Works well with observability
-  },
-
-  instruction: {
-    purpose: "Guide implementation of advanced error handling patterns",
-    process: [
-      "Implement retry logic with exponential backoff",
-      "Add circuit breakers for failing dependencies",
-      "Set up error monitoring and alerting",
-      "Create graceful degradation strategies",
-    ],
-    principles: [
-      "Fail fast, recover gracefully",
-      "Design for failure from the start",
-    ],
-  },
-});
-
-// defineModule validates everything automatically including relationships
-```
 
 ---
 

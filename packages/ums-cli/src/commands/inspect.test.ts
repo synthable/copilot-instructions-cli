@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { handleInspect } from './inspect.js';
-import type { Module, ModuleRegistry } from 'ums-lib';
+import type { Module, ModuleRegistry } from 'ums-sdk';
 
 // Mock dependencies
 vi.mock('../utils/error-handler.js', () => ({

@@ -37,10 +37,7 @@ export type {
   Concept,
   Example,
   Pattern,
-  ProblemSolution,
   ComponentMetadata,
-  ModuleRelationships,
-  QualityMetadata,
   // Persona structure
   ModuleGroup,
   ModuleEntry,

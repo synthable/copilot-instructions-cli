@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { handleSearch, searchModules, filterAndSortModules } from './search.js';
 import { discoverAllModules } from '../utils/module-discovery.js';
-import { ModuleRegistry, CognitiveLevel } from 'ums-lib';
+import { ModuleRegistry, CognitiveLevel } from 'ums-sdk';
 import { deductiveReasoning } from '../__fixtures__/modules/deductive-reasoning.module.js';
 import { testingPrinciples } from '../__fixtures__/modules/testing-principles.module.js';
 import { errorHandling } from '../__fixtures__/modules/error-handling.module.js';

@@ -1,5 +1,26 @@
 # Specification: The Unified Module System (UMS) v2.1
 
+## Changes from v2.0
+
+### Removed Features
+
+- **ModuleRelationships**: Removed. Will be replaced by Cognitive Hierarchy system and External Graph tool for dependency management.
+- **QualityMetadata component**: Removed. Will be replaced by external registry (design in progress).
+- **ProblemSolution component**: Removed.
+- **ProcessStep fields**: Removed `detail`, `validate`, `when`, `do` fields.
+- **Constraint fields**: Removed `severity`, `when`, `examples`, `rationale` fields.
+- **Criterion fields**: Removed `severity` field.
+
+### Simplified Structures
+
+- **ProcessStep**: Now `string | {step: string, notes?: string[]}` (removed complex validation/conditional fields).
+- **Constraint**: Now `string | {rule: string, notes?: string[]}` (use RFC 2119 keywords in rule text for severity).
+- **Criterion**: Now `string | {item: string, category?: string, notes?: string[]}` (use RFC 2119 keywords in item text for priority).
+
+See Architecture Decision Records (ADRs) in `docs/architecture/adr/` for detailed rationale and migration guidance.
+
+---
+
 ## Migration from v2.0
 
 **Breaking Changes:**
@@ -82,6 +103,7 @@
 ```
 
 **See:**
+
 - [ADR 0005](../architecture/adr/0005-simplify-processstep-structure.md) - ProcessStep rationale
 - [ADR 0006](../architecture/adr/0006-simplify-constraint-structure.md) - Constraint rationale
 - [ADR 0007](../architecture/adr/0007-simplify-criterion-structure.md) - Criterion rationale
@@ -177,10 +199,18 @@ A valid module for v2.0 MUST contain the following top-level keys:
   - Capabilities SHOULD be concrete, functional, and searchable
   - Focus on **what** the module helps accomplish (not the domain or pattern)
 - **Examples**:
-  - `["testing", "quality-assurance"]` - helps with testing and quality
-  - `["api-design", "rest-api"]` - helps design REST APIs
-  - `["error-handling", "logging", "debugging"]` - helps handle errors and debug
-  - `["performance-optimization", "caching"]` - helps optimize performance
+  - `["testing", "quality-assurance", "unit-testing", "integration-testing", "test-automation"]` - helps with testing and quality assurance through comprehensive testing strategies, including unit tests, integration tests, and automated test suites to ensure code reliability and prevent regressions
+  - `["api-design", "rest-api", "http-methods", "resource-modeling", "api-versioning"]` - helps design REST APIs by defining resource-based endpoints, mapping HTTP methods to CRUD operations, modeling resources effectively, and implementing versioning for backward compatibility
+  - `["error-handling", "logging", "debugging", "fault-tolerance", "exception-management"]` - helps handle errors and debug issues by implementing robust error handling patterns, structured logging for observability, debugging techniques, fault tolerance mechanisms, and proper exception propagation
+  - `["performance-optimization", "caching", "query-optimization", "resource-management", "scalability"]` - helps optimize performance through caching strategies, database query optimization, efficient resource management, and scalability patterns to handle increased load
+  - `["type-safety", "compile-time-checking", "static-analysis", "type-inference", "generic-programming"]` - helps achieve type safety by leveraging compile-time checking, static analysis tools, type inference systems, and generic programming to catch errors early and improve code maintainability (vs. `domain: "typescript"`)
+  - `["component-composition", "state-management", "reactive-programming", "component-lifecycle", "data-flow"]` - helps compose UI components by managing state effectively, implementing reactive programming patterns, handling component lifecycles, and ensuring proper data flow in user interfaces (vs. `domain: "react"`)
+  - `["architecture", "maintainability", "modular-design", "dependency-injection", "design-patterns"]` - helps design maintainable systems through architectural principles, modular design approaches, dependency injection, and application of proven design patterns for long-term code health (vs. `tags: ["solid", "ddd"]`)
+  - `["data-modeling", "schema-design", "normalization", "relationships", "data-validation"]` - helps design data structures by creating effective schemas, applying normalization techniques, defining relationships between entities, and implementing data validation rules (vs. `domain: "database"`)
+  - `["security", "authentication", "authorization", "encryption", "access-control"]` - helps implement security measures including authentication mechanisms, authorization policies, data encryption, and access control systems to protect against threats
+  - `["documentation", "api-specification", "code-comments", "readme-writing", "api-documentation"]` - helps create clear documentation through API specifications, comprehensive code comments, well-structured README files, and detailed API documentation for better developer experience
+  - `["deployment", "ci-cd", "automation", "infrastructure-as-code", "release-management"]` - helps automate deployment processes with CI/CD pipelines, infrastructure as code practices, automated testing in pipelines, and effective release management strategies
+  - `["monitoring", "observability", "metrics", "logging", "alerting"]` - helps track system health through monitoring dashboards, observability practices, key metrics collection, centralized logging, and proactive alerting for issues
 - **Distinction**: Use `capabilities` for **what the module helps accomplish**, `domain` for **where it applies**, and `metadata.tags` for **patterns/keywords**
 
 #### `metadata`
@@ -315,7 +345,7 @@ Tells the AI **what to do**.
 
 ```typescript
 interface InstructionComponent {
-  type: 'instruction';
+  type: "instruction";
   metadata?: ComponentMetadata;
   instruction: {
     purpose: string; // Primary objective
@@ -341,7 +371,7 @@ Teaches the AI **concepts and patterns**.
 
 ```typescript
 interface KnowledgeComponent {
-  type: 'knowledge';
+  type: "knowledge";
   metadata?: ComponentMetadata;
   knowledge: {
     explanation: string; // High-level overview
@@ -365,7 +395,7 @@ Provides **reference information**.
 
 ```typescript
 interface DataComponent {
-  type: 'data';
+  type: "data";
   metadata?: ComponentMetadata;
   data: {
     format: string; // Media type (json, yaml, xml, etc.)
@@ -383,20 +413,17 @@ interface DataComponent {
 
 ### 2.3. The `metadata` Block
 
-| Key             | Type          | Required? | Description                                 |
-| :-------------- | :------------ | :-------- | :------------------------------------------ |
-| `name`          | String        | Yes       | Human-readable, Title Case name             |
-| `description`   | String        | Yes       | Concise, single-sentence summary            |
-| `semantic`      | String        | Yes       | Dense, keyword-rich paragraph for AI search |
-| `tags`          | Array[String] | No        | Lowercase keywords for filtering            |
-| `solves`        | Array[Object] | No        | Problem-solution mapping for discovery      |
-| `relationships` | Object        | No        | Module dependencies and relationships       |
-| `quality`       | Object        | No        | Quality indicators (maturity, confidence)   |
-| `license`       | String        | No        | SPDX license identifier                     |
-| `authors`       | Array[String] | No        | Primary authors or maintainers              |
-| `homepage`      | String        | No        | URL to source repository or docs            |
-| `deprecated`    | Boolean       | No        | Deprecation flag                            |
-| `replacedBy`    | String        | No        | ID of successor module                      |
+| Key           | Type          | Required? | Description                                 |
+| :------------ | :------------ | :-------- | :------------------------------------------ |
+| `name`        | String        | Yes       | Human-readable, Title Case name             |
+| `description` | String        | Yes       | Concise, single-sentence summary            |
+| `semantic`    | String        | Yes       | Dense, keyword-rich paragraph for AI search |
+| `tags`        | Array[String] | No        | Lowercase keywords for filtering            |
+| `license`     | String        | No        | SPDX license identifier                     |
+| `authors`     | Array[String] | No        | Primary authors or maintainers              |
+| `homepage`    | String        | No        | URL to source repository or docs            |
+| `deprecated`  | Boolean       | No        | Deprecation flag                            |
+| `replacedBy`  | String        | No        | ID of successor module                      |
 
 #### `name`
 
@@ -449,49 +476,6 @@ interface DataComponent {
   - Use `cognitiveLevel` for **abstraction level** (0-6 hierarchy)
   - Use `tags` for **patterns, keywords, and additional descriptors**
 
-#### `solves`
-
-- **Type**: `Array<{ problem: string; keywords: string[] }>`
-- **Required**: No
-- **Purpose**: Map user problems to solutions for discovery
-
-```typescript
-interface ProblemSolution {
-  problem: string; // User-facing problem statement
-  keywords: string[]; // Search keywords
-}
-```
-
-#### `relationships`
-
-- **Type**: `Object`
-- **Required**: No
-- **Purpose**: Declare module dependencies and relationships
-
-```typescript
-interface ModuleRelationships {
-  requires?: string[]; // Required dependencies
-  recommends?: string[]; // Recommended companions
-  conflictsWith?: string[]; // Conflicting modules
-  extends?: string; // Module this extends
-}
-```
-
-#### `quality`
-
-- **Type**: `Object`
-- **Required**: No
-- **Purpose**: Indicate module quality and maturity
-
-```typescript
-interface QualityMetadata {
-  maturity: 'alpha' | 'beta' | 'stable' | 'deprecated';
-  confidence: number; // 0-1 score
-  lastVerified?: string; // ISO 8601 date
-  experimental?: boolean;
-}
-```
-
 #### `license`, `authors`, `homepage`
 
 Standard metadata fields for attribution and legal clarity.
@@ -524,11 +508,11 @@ components: [
   {
     type: ComponentType.Instruction,
     metadata: {
-      purpose: 'Core TDD workflow',
-      context: ['unit-testing', 'development'],
+      purpose: "Core TDD workflow",
+      context: ["unit-testing", "development"],
     },
     instruction: {
-      purpose: 'Apply TDD rigorously',
+      purpose: "Apply TDD rigorously",
       // ...
     },
   },
@@ -540,10 +524,12 @@ components: [
 ### 3.1. ProcessStep
 
 ```typescript
-type ProcessStep = string | {
-  step: string;       // The step description
-  notes?: string[];   // Optional sub-bullets for clarification
-};
+type ProcessStep =
+  | string
+  | {
+      step: string; // The step description
+      notes?: string[]; // Optional sub-bullets for clarification
+    };
 ```
 
 **Rationale**: Process steps are kept simple to reduce authoring friction. Most steps are self-explanatory strings. When elaboration is needed, the `notes` array provides sub-bullets without over-engineering. Conditionals and validation are expressed naturally in the step text or kept separate in the `criteria` array.
@@ -552,16 +538,16 @@ type ProcessStep = string | {
 
 ```typescript
 process: [
-  'Identify resources (nouns, not verbs)',
+  "Identify resources (nouns, not verbs)",
   {
-    step: 'Run database migrations',
+    step: "Run database migrations",
     notes: [
-      'Use `npm run migrate` for development',
-      'Production migrations require admin approval',
-      'Verify migration status with `npm run migrate:status`',
+      "Use `npm run migrate` for development",
+      "Production migrations require admin approval",
+      "Verify migration status with `npm run migrate:status`",
     ],
   },
-  'Map HTTP methods to CRUD operations',
+  "Map HTTP methods to CRUD operations",
 ];
 ```
 
@@ -569,9 +555,9 @@ process: [
 
 ```typescript
 process: [
-  'Run tests. If tests fail, fix issues before proceeding.',
-  'Deploy to staging environment',
-  'Run smoke tests and verify all endpoints return 200 OK',
+  "Run tests. If tests fail, fix issues before proceeding.",
+  "Deploy to staging environment",
+  "Run smoke tests and verify all endpoints return 200 OK",
 ];
 ```
 
@@ -580,20 +566,22 @@ process: [
 A constraint can be a simple string or an object with optional notes for elaboration.
 
 ```typescript
-type Constraint = string | {
-  rule: string; // The constraint rule. Use RFC 2119 keywords (MUST, SHOULD, MAY) for severity.
-  notes?: string[]; // Optional notes for examples, rationale, or clarification.
-};
+type Constraint =
+  | string
+  | {
+      rule: string; // The constraint rule. Use RFC 2119 keywords (MUST, SHOULD, MAY) for severity.
+      notes?: string[]; // Optional notes for examples, rationale, or clarification.
+    };
 ```
 
 **Simple Example (90% of cases):**
 
 ```typescript
 constraints: [
-  'URLs MUST use plural nouns for collections',
-  'All endpoints MUST return proper HTTP status codes',
-  'Never expose sensitive data in URLs'
-]
+  "URLs MUST use plural nouns for collections",
+  "All endpoints MUST return proper HTTP status codes",
+  "Never expose sensitive data in URLs",
+];
 ```
 
 **Example with Notes (10% of cases):**
@@ -601,28 +589,29 @@ constraints: [
 ```typescript
 constraints: [
   {
-    rule: 'URLs MUST use plural nouns for collections',
+    rule: "URLs MUST use plural nouns for collections",
     notes: [
-      'Good: /users, /users/123, /orders',
-      'Bad: /user, /getUser, /createOrder',
-      'Rationale: REST conventions require resource-based URLs'
-    ]
+      "Good: /users, /users/123, /orders",
+      "Bad: /user, /getUser, /createOrder",
+      "Rationale: REST conventions require resource-based URLs",
+    ],
   },
   {
-    rule: 'All API responses MUST include proper HTTP status codes',
+    rule: "All API responses MUST include proper HTTP status codes",
     notes: [
-      '2xx for success (200 OK, 201 Created, 204 No Content)',
-      '4xx for client errors (400 Bad Request, 404 Not Found)',
-      '5xx for server errors (500 Internal Server Error)',
-      'See RFC 7231 for complete status code definitions'
-    ]
-  }
-]
+      "2xx for success (200 OK, 201 Created, 204 No Content)",
+      "4xx for client errors (400 Bad Request, 404 Not Found)",
+      "5xx for server errors (500 Internal Server Error)",
+      "See RFC 7231 for complete status code definitions",
+    ],
+  },
+];
 ```
 
 **Authoring Guidelines:**
 
 Use [RFC 2119](https://www.ietf.org/rfc/rfc2119.txt) keywords to indicate requirement levels:
+
 - **MUST** / **REQUIRED** / **SHALL** = Error severity (absolute requirement)
 - **MUST NOT** / **SHALL NOT** = Error severity (absolute prohibition)
 - **SHOULD** / **RECOMMENDED** = Warning severity (recommended but not required)
@@ -630,6 +619,7 @@ Use [RFC 2119](https://www.ietf.org/rfc/rfc2119.txt) keywords to indicate requir
 - **MAY** / **OPTIONAL** = Info severity (truly optional)
 
 For notes:
+
 - Use `Good:` and `Bad:` prefixes for examples (no emojis)
 - Use `Rationale:` prefix for explanations
 - Use template literals for multi-line content in a single entry
@@ -642,21 +632,23 @@ For notes:
 A criterion can be a simple string or an object with optional category and notes for elaboration.
 
 ```typescript
-type Criterion = string | {
-  item: string;       // The verification criterion
-  category?: string;  // Optional grouping (renders as subheadings)
-  notes?: string[];   // Optional test instructions, expected results, verification steps
-};
+type Criterion =
+  | string
+  | {
+      item: string; // The verification criterion
+      category?: string; // Optional grouping (renders as subheadings)
+      notes?: string[]; // Optional test instructions, expected results, verification steps
+    };
 ```
 
 **Simple Example (90% of cases):**
 
 ```typescript
 criteria: [
-  'All endpoints return proper HTTP status codes',
-  'API responses match documented schemas',
-  'Error handling covers common edge cases'
-]
+  "All endpoints return proper status codes",
+  "API responses match documented schemas",
+  "Error handling covers common edge cases",
+];
 ```
 
 **Example with Categories:**
@@ -664,25 +656,25 @@ criteria: [
 ```typescript
 criteria: [
   // Uncategorized
-  'All tests pass before deployment',
-  'Documentation is complete',
+  "All tests pass before deployment",
+  "Documentation is complete",
 
   // Security category
   {
-    item: 'All endpoints use HTTPS',
-    category: 'Security'
+    item: "All endpoints use HTTPS",
+    category: "Security",
   },
   {
-    item: 'Authentication required for protected resources',
-    category: 'Security'
+    item: "Authentication required for protected resources",
+    category: "Security",
   },
 
   // Performance category
   {
-    item: 'Response times under 100ms',
-    category: 'Performance'
-  }
-]
+    item: "Response times under 100ms",
+    category: "Performance",
+  },
+];
 ```
 
 **Example with Test Details:**
@@ -690,35 +682,37 @@ criteria: [
 ```typescript
 criteria: [
   {
-    item: 'Rate limiting prevents abuse',
-    category: 'Security',
+    item: "Rate limiting prevents abuse",
+    category: "Security",
     notes: [
-      'Test: Send 100 requests in 1 minute using same API key',
-      'Expected: Receive 429 Too Many Requests after limit',
-      'Verify: Rate limit headers present (X-RateLimit-Limit, X-RateLimit-Remaining)',
-      'See RFC 6585 section 4 for 429 status code specification'
-    ]
+      "Test: Send 100 requests in 1 minute using same API key",
+      "Expected: Receive 429 Too Many Requests after limit",
+      "Verify: Rate limit headers present (X-RateLimit-Limit, X-RateLimit-Remaining)",
+      "See RFC 6585 section 4 for 429 status code specification",
+    ],
   },
   {
-    item: 'Database queries optimized',
-    category: 'Performance',
+    item: "Database queries optimized",
+    category: "Performance",
     notes: [
-      'Test: Run EXPLAIN on all queries',
-      'Verify: All queries use indexes',
-      'Verify: No N+1 query patterns'
-    ]
-  }
-]
+      "Test: Run EXPLAIN on all queries",
+      "Verify: All queries use indexes",
+      "Verify: No N+1 query patterns",
+    ],
+  },
+];
 ```
 
 **Authoring Guidelines:**
 
 Use [RFC 2119](https://www.ietf.org/rfc/rfc2119.txt) keywords to indicate priority:
+
 - **MUST** / **REQUIRED** / **SHALL** = Critical (absolute requirement)
 - **SHOULD** / **RECOMMENDED** = Important (recommended)
 - **MAY** / **OPTIONAL** = Nice-to-have (truly optional)
 
 For notes:
+
 - Use `Test:` prefix for test instructions
 - Use `Expected:` prefix for expected results
 - Use `Verify:` prefix for verification steps
@@ -746,12 +740,12 @@ interface Concept {
 ```typescript
 concepts: [
   {
-    name: 'Resource-Based URLs',
-    description: 'URLs represent resources (things), not actions',
-    rationale: 'Resources are stable; operations change',
+    name: "Resource-Based URLs",
+    description: "URLs represent resources (things), not actions",
+    rationale: "Resources are stable; operations change",
     examples: [
-      ' GET /users/123 (resource: user)',
-      ' GET /getUser?id=123 (action: get)',
+      " GET /users/123 (resource: user)",
+      " GET /getUser?id=123 (action: get)",
     ],
   },
 ];
@@ -773,9 +767,9 @@ interface Example {
 ```typescript
 examples: [
   {
-    title: 'Basic Error Handling',
-    rationale: 'Shows try-catch with proper logging',
-    language: 'typescript',
+    title: "Basic Error Handling",
+    rationale: "Shows try-catch with proper logging",
+    language: "typescript",
     snippet: `
       try {
         await riskyOperation();
@@ -806,11 +800,11 @@ interface Pattern {
 ```typescript
 patterns: [
   {
-    name: 'Repository Pattern',
-    useCase: 'Abstract data access layer',
-    description: 'Encapsulate data access logic in repository classes',
-    advantages: ['Testable in isolation', 'Centralized data access logic'],
-    disadvantages: ['Additional abstraction layer'],
+    name: "Repository Pattern",
+    useCase: "Abstract data access layer",
+    description: "Encapsulate data access logic in repository classes",
+    advantages: ["Testable in isolation", "Centralized data access logic"],
+    disadvantages: ["Additional abstraction layer"],
   },
 ];
 ```
@@ -858,15 +852,15 @@ interface ModuleGroup {
 
 ```typescript
 modules: [
-  'foundation/ethics/do-no-harm',
+  "foundation/ethics/do-no-harm",
   {
-    group: 'Professional Standards',
+    group: "Professional Standards",
     ids: [
-      'principle/testing/test-driven-development',
-      'principle/architecture/separation-of-concerns',
+      "principle/testing/test-driven-development",
+      "principle/architecture/separation-of-concerns",
     ],
   },
-  'error-handling',
+  "error-handling",
 ];
 ```
 
@@ -916,12 +910,12 @@ The **Standard Library** is a curated collection of reusable modules that provid
 
 ```yaml
 localModulePaths:
-  - path: './company-standards'
-    onConflict: 'error' # Fail on collision
-  - path: './project-overrides'
-    onConflict: 'replace' # Override existing
-  - path: './experimental'
-    onConflict: 'warn' # Warn and keep original
+  - path: "./company-standards"
+    onConflict: "error" # Fail on collision
+  - path: "./project-overrides"
+    onConflict: "replace" # Override existing
+  - path: "./experimental"
+    onConflict: "warn" # Warn and keep original
 ```
 
 ### 5.3. Conflict Resolution Strategies
@@ -935,6 +929,22 @@ localModulePaths:
 1. Initialize with Standard Library
 2. Process `localModulePaths` in order
 3. Resolve persona modules from final registry
+
+### 5.5. External Dependency Management (Future)
+
+Module relationships and dependencies (such as `requires`, `conflictsWith`, `enhances`) are managed by an external graphing tool and registry, as defined in [ADR-0008: External Graph Tool for Module Dependency Management](../../architecture/adr/0008-external-graph-tool.md).
+
+**Purpose**: This external system is responsible for:
+- Validating the integrity and compatibility of a persona's module composition
+- Detecting conflicts, missing dependencies, and circular references
+- Providing rich querying and visualization of module relationships
+- Leveraging the Cognitive Hierarchy for implicit dependency inference
+
+**Integration**: The external graph tool will integrate with the UMS SDK build orchestration to validate persona compositions before the build process begins.
+
+**Status**: Design in progress. See ADR-0008 for architectural details and implementation timeline.
+
+**Note**: In UMS v2.0, dependency information was embedded in module definitions via `ModuleRelationships`. This was removed in v2.1 to enable centralized dependency management with better validation and tooling capabilities.
 
 ## 6. Build and Synthesis Processes
 
@@ -1319,6 +1329,244 @@ Implementations SHOULD validate:
   - Use `snake_case` for query parameters
 ```
 
+#### 6.3.4. Concept Rendering
+
+**Format:**
+
+```markdown
+#### Concept: {concept.name}
+
+{concept.description}
+
+**Rationale**: {concept.rationale}
+
+**Examples**:
+- {example1}
+- {example2}
+
+**Trade-offs**:
+- {tradeoff1}
+- {tradeoff2}
+```
+
+**Heading Level:** Concept names SHOULD be rendered as H4 headings.
+**Indentation:** 2 spaces for bulleted lists (`examples`, `tradeoffs`).
+**Blank lines:**
+*   A single blank line (`\n\n`) between the heading and description.
+*   A single blank line (`\n\n`) between the description and "Rationale" (if present).
+*   A single blank line (`\n\n`) between "Rationale" and "Examples" (if present).
+*   A single blank line (`\n\n`) between "Examples" and "Trade-offs" (if present).
+*   No blank lines within bulleted lists.
+**Bolding:** Field labels like "Rationale", "Examples", "Trade-offs" are bolded.
+**Optional Fields:** If `description`, `rationale`, `examples`, or `tradeoffs` are empty or not present, their corresponding sections (including headings/labels) MUST be omitted entirely.
+
+**Example:**
+
+```markdown
+#### Concept: Resource-Based URLs
+
+URLs represent resources (things), not actions.
+
+**Rationale**: Resources are stable; operations change. Resource-based design is more maintainable.
+
+**Examples**:
+- `GET /users/123` (resource: user)
+- `GET /getUser?id=123` (action: get)
+
+**Trade-offs**:
+- Initial design might require more thought
+- Provides a clearer, more consistent API surface
+```
+
+**Validation Recommendations:**
+
+1. **Required fields:**
+   - `name` MUST be non-empty string
+   - At least one of `description`, `rationale`, `examples`, or `tradeoffs` MUST be present
+
+2. **Character limits:**
+   - `name`: 1-80 characters
+   - `description`: 1-500 characters
+   - `rationale`: 1-300 characters
+   - Individual items in `examples` or `tradeoffs`: 1-200 characters each
+
+3. **Array constraints:**
+   - `examples` array: 1-10 items
+   - `tradeoffs` array: 1-10 items
+   - No empty strings in arrays
+
+4. **Content quality:**
+   - `name` should be a clear, concise concept title
+   - `description` should be a complete sentence or paragraph
+   - Avoid duplicate items in `examples` and `tradeoffs` arrays
+
+#### 6.3.5. Example Rendering
+
+**Format:**
+
+```markdown
+#### Example: {example.title}
+
+**Rationale**: {example.rationale}
+
+```{example.language}
+{example.snippet}
+```
+```
+
+**Heading Level:** Example titles SHOULD be rendered as H4 headings.
+**Indentation:** None for the main content. Code snippets are naturally indented by the fenced code block.
+**Blank lines:**
+*   A single blank line (`\n\n`) between the heading and "Rationale" (if present).
+*   A single blank line (`\n\n`) between "Rationale" and the code snippet (if present).
+*   A single blank line (`\n`) before and after the fenced code block.
+**Bolding:** The "Rationale" label is bolded.
+**Optional Fields:** If `rationale` is empty or not present, its corresponding section (including label) MUST be omitted. If `snippet` is empty or not present, the code block MUST be omitted. If `language` is not present, the code block MUST use plain fences (``````).
+**Code Snippets:**
+*   `snippet` content is rendered within a fenced code block.
+*   The `language` field, if present, is used as the language identifier for the code block.
+*   Snippets containing triple backticks (```) MUST be rendered using a longer fence (e.g., four backticks ````).
+
+**Example:**
+
+```markdown
+#### Example: Basic Error Handling
+
+**Rationale**: Shows try-catch with proper logging and custom error throwing.
+
+```typescript
+try {
+  await riskyOperation();
+} catch (error) {
+  logger.error('Operation failed', { error, context });
+  throw new CustomError('Failed to complete operation', error);
+}
+```
+```
+
+**Validation Recommendations:**
+
+1. **Required fields:**
+   - `title` MUST be non-empty string
+   - At least one of `rationale` or `snippet` MUST be present
+
+2. **Character limits:**
+   - `title`: 1-100 characters
+   - `rationale`: 1-300 characters
+   - `snippet`: 1-2000 characters (code snippets can be longer)
+
+3. **Language field:**
+   - If present, `language` should be a valid code language identifier (e.g., `typescript`, `python`, `javascript`)
+   - Common values: `typescript`, `javascript`, `python`, `go`, `rust`, `java`, `csharp`, `bash`, `sql`, `json`, `yaml`
+   - Empty string treated as missing (use plain fence)
+
+4. **Code snippet quality:**
+   - `snippet` should be syntactically valid code for the specified language
+   - Avoid snippets longer than 100 lines (split into multiple examples if needed)
+   - Prefer complete, runnable examples over fragments
+   - Include necessary imports/context for clarity
+
+5. **Special characters:**
+   - If snippet contains triple backticks (```), renderer MUST use longer fence (````)
+   - No validation errors for special characters in code (preserve as-is)
+
+#### 6.3.6. Pattern Rendering
+
+**Format:**
+
+```markdown
+#### Pattern: {pattern.name}
+
+**Use Case**: {pattern.useCase}
+
+{pattern.description}
+
+**Advantages**:
+- {advantage1}
+- {advantage2}
+
+**Disadvantages**:
+- {disadvantage1}
+- {disadvantage2}
+
+**Example**:
+<!-- Rendered Example (as per 6.3.5) -->
+```
+
+**Heading Level:** Pattern names SHOULD be rendered as H4 headings.
+**Indentation:** 2 spaces for bulleted lists (`advantages`, `disadvantages`).
+**Blank lines:**
+*   A single blank line (`\n\n`) between the heading and "Use Case" (if present).
+*   A single blank line (`\n\n`) between "Use Case" and `description` (if present).
+*   A single blank line (`\n\n`) between `description` and "Advantages" (if present).
+*   A single blank line (`\n\n`) between "Advantages" and "Disadvantages" (if present).
+*   A single blank line (`\n\n`) between "Disadvantages" and "Example" (if present).
+*   No blank lines within bulleted lists.
+**Bolding:** Field labels like "Use Case", "Advantages", "Disadvantages", "Example" are bolded.
+**Optional Fields:** If `useCase`, `description`, `advantages`, `disadvantages`, or `example` are empty or not present, their corresponding sections (including headings/labels) MUST be omitted. The nested `example` field is rendered according to the `Example Rendering` rules (Section 6.3.5).
+
+**Example:**
+
+```markdown
+#### Pattern: Repository Pattern
+
+**Use Case**: Abstract data access layer to decouple business logic from data sources.
+
+Encapsulate data access logic in repository classes, providing a clear interface for data operations.
+
+**Advantages**:
+- Testable in isolation
+- Centralized data access logic
+- Easier to swap data sources
+
+**Disadvantages**:
+- Additional abstraction layer
+- Can introduce overhead for simple CRUD operations
+
+**Example**:
+#### Example: User Repository Interface
+
+**Rationale**: Defines the contract for user data access.
+
+```typescript
+interface UserRepository {
+  findById(id: string): Promise<User | null>;
+  findAll(): Promise<User[]>;
+  save(user: User): Promise<User>;
+  delete(id: string): Promise<void>;
+}
+```
+```
+
+**Validation Recommendations:**
+
+1. **Required fields:**
+   - `name` MUST be non-empty string
+   - At least one of `useCase`, `description`, `advantages`, `disadvantages`, or `example` MUST be present
+
+2. **Character limits:**
+   - `name`: 1-100 characters
+   - `useCase`: 1-200 characters
+   - `description`: 1-500 characters
+   - Individual items in `advantages` or `disadvantages`: 1-200 characters each
+
+3. **Array constraints:**
+   - `advantages` array: 1-10 items
+   - `disadvantages` array: 1-10 items
+   - No empty strings in arrays
+
+4. **Content quality:**
+   - `name` should be a recognized design pattern name
+   - `useCase` should clearly state when/why to use the pattern
+   - `description` should explain how the pattern works
+   - Balance advantages vs disadvantages (avoid patterns with only advantages)
+   - Avoid duplicate items in advantages and disadvantages arrays
+
+5. **Nested Example:**
+   - If `example` field is present, it MUST follow Example Rendering rules (Section 6.3.5)
+   - Nested example provides concrete illustration of the pattern
+   - Example should be complete enough to demonstrate the pattern's key characteristics
+
 ---
 
 ## 7. The Build Report
@@ -1502,10 +1750,6 @@ export const tddModule: Module = {
     semantic:
       'TDD, test-driven-development, red-green-refactor, unit testing, test-first development, quality assurance, regression prevention',
     tags: ['tdd', 'red-green-refactor', 'test-first'],
-    quality: {
-      maturity: 'stable',
-      confidence: 0.9,
-    },
   },
 
   components: [
@@ -1528,8 +1772,8 @@ export const tddModule: Module = {
     {
       type: ComponentType.Knowledge,
       knowledge: {
-        explanation:
-          'TDD is a development process where tests drive the design and implementation of code through short, iterative cycles.',
+        explanation: `
+          TDD is a development process where tests drive the design and implementation of code through short, iterative cycles.`,
         concepts: [
           {
             name: 'Red-Green-Refactor',
@@ -1573,27 +1817,6 @@ export const apiDesign: Module = {
       Maturity Model, API documentation, OpenAPI, Swagger
     `,
     tags: ['rest', 'restful', 'resource-based', 'http-methods'],
-
-    solves: [
-      {
-        problem: 'How should I structure my API endpoints?',
-        keywords: ['endpoint', 'url', 'resource', 'naming'],
-      },
-      {
-        problem: 'What HTTP methods should I use?',
-        keywords: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
-      },
-    ],
-
-    relationships: {
-      recommends: ['error-handling', 'api-documentation'],
-    },
-
-    quality: {
-      maturity: 'stable',
-      confidence: 0.95,
-      lastVerified: '2025-01-15',
-    },
 
     license: 'MIT',
   },
@@ -1745,7 +1968,7 @@ Complete TypeScript type definitions are maintained in the implementation reposi
 - `InstructionComponent`, `KnowledgeComponent`, `DataComponent`: Component types
 - `ProcessStep`, `Constraint`, `Criterion`: Instruction directive types
 - `Concept`, `Example`, `Pattern`: Knowledge directive types
-- `ModuleMetadata`, `QualityMetadata`, `ModuleRelationships`: Metadata types
+- `ModuleMetadata`: Metadata types
 - `Persona`, `ModuleGroup`: Persona types
 
 See `docs/typescript-minimal-implementation-roadmap.md` for implementation details.
@@ -1756,3 +1979,4 @@ See `docs/typescript-minimal-implementation-roadmap.md` for implementation detai
 **Status**: Draft
 **Last Updated**: 2025-01-15
 **Changes from v2.0**: Simplified ProcessStep interface (see ADR 0005)
+````
