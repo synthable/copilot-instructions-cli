@@ -1,5 +1,26 @@
 # Specification: The Unified Module System (UMS) v2.1
 
+## Changes from v2.0
+
+### Removed Features
+
+- **ModuleRelationships**: Removed. Will be replaced by Cognitive Hierarchy system and External Graph tool for dependency management.
+- **QualityMetadata component**: Removed. Will be replaced by external registry (design in progress).
+- **ProblemSolution component**: Removed.
+- **ProcessStep fields**: Removed `detail`, `validate`, `when`, `do` fields.
+- **Constraint fields**: Removed `severity`, `when`, `examples`, `rationale` fields.
+- **Criterion fields**: Removed `severity` field.
+
+### Simplified Structures
+
+- **ProcessStep**: Now `string | {step: string, notes?: string[]}` (removed complex validation/conditional fields).
+- **Constraint**: Now `string | {rule: string, notes?: string[]}` (use RFC 2119 keywords in rule text for severity).
+- **Criterion**: Now `string | {item: string, category?: string, notes?: string[]}` (use RFC 2119 keywords in item text for priority).
+
+See Architecture Decision Records (ADRs) in `docs/architecture/adr/` for detailed rationale and migration guidance.
+
+---
+
 ## Migration from v2.0
 
 **Breaking Changes:**

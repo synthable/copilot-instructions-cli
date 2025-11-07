@@ -393,7 +393,7 @@ function renderCriteria(criteria: Criterion[]): string {
 
   // Render uncategorized
   if (uncategorized.length > 0) {
-    sections.push(uncategorized.map(renderItem).join('\n'));
+    sections.push(uncategorized.map(renderItem).join('\n\n'));
   }
 
   // Render categorized groups
