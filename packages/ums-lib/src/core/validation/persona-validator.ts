@@ -22,7 +22,11 @@ function validatePersonaFields(
   errors: ValidationError[]
 ): void {
   // Validate id field exists and is non-empty
-  if (!persona.id || typeof persona.id !== 'string' || persona.id.trim() === '') {
+  if (
+    !persona.id ||
+    typeof persona.id !== 'string' ||
+    persona.id.trim() === ''
+  ) {
     errors.push(
       new ValidationErrorClass(
         'Persona must have a non-empty id field',
@@ -33,7 +37,11 @@ function validatePersonaFields(
   }
 
   // Validate name field exists and is non-empty
-  if (!persona.name || typeof persona.name !== 'string' || persona.name.trim() === '') {
+  if (
+    !persona.name ||
+    typeof persona.name !== 'string' ||
+    persona.name.trim() === ''
+  ) {
     errors.push(
       new ValidationErrorClass(
         'Persona must have a non-empty name field',

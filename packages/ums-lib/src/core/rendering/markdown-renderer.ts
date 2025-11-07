@@ -205,15 +205,10 @@ export function renderInstructionComponent(
  * @param criteria - Array of criteria (strings or Criterion objects)
  * @returns Formatted markdown for all criteria
  */
-export function renderCriteria(
-  criteria: (string | Criterion)[]
-): string {
+export function renderCriteria(criteria: (string | Criterion)[]): string {
   // Group criteria by category
   const uncategorized: (string | Criterion)[] = [];
-  const categorized = new Map<
-    string,
-    (string | Criterion)[]
-  >();
+  const categorized = new Map<string, (string | Criterion)[]>();
 
   for (const criterion of criteria) {
     if (typeof criterion === 'string' || !criterion.category) {
@@ -251,9 +246,7 @@ export function renderCriteria(
  * @param criterion - The criterion (string or Criterion object)
  * @returns Formatted markdown for the criterion
  */
-export function renderCriterionItem(
-  criterion: string | Criterion
-): string {
+export function renderCriterionItem(criterion: string | Criterion): string {
   // Handle simple string criteria
   if (typeof criterion === 'string') {
     return `- [ ] ${criterion}`;

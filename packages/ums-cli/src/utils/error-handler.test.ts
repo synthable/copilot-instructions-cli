@@ -107,7 +107,9 @@ describe('error-handler', () => {
 
       // SDK's ModuleLoadError uses generic M0.5 format (not UMS-specific handling)
       expect(consoleMock.error).toHaveBeenCalledWith(
-        expect.stringContaining('[ERROR] build: module loading - Failed to load module')
+        expect.stringContaining(
+          '[ERROR] build: module loading - Failed to load module'
+        )
       );
     });
 
