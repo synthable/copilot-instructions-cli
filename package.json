@@ -28,7 +28,7 @@
     "node": ">=22.0.0"
   },
   "scripts": {
-    "postinstall": "npm run build",
+    "prepare": "npm run build",
     "build:tsc": "tsc --build --pretty",
     "build:tsc:clean": "tsc --build --clean",
     "build:tsc:force": "tsc --build --force --pretty",
@@ -75,8 +75,7 @@
     "typecheck": "npm run typecheck --workspaces --if-present",
     "quality-check": "npm run quality-check --workspaces --if-present",
     "pre-commit": "npm run typecheck && npx lint-staged",
-    "pre-push": "npm run typecheck && npm test && npm run lint && npm run build",
-    "demo:rag-cot": "node examples/rag-cot-demo/main.js"
+    "pre-push": "npm run typecheck && npm test && npm run lint && npm run build"
   },
   "lint-staged": {
     "packages/*/src/**/*.ts": [
