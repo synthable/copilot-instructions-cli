@@ -11,9 +11,8 @@
   "license": "GPL-3.0-or-later",
   "description": "MCP server for UMS v2.0 - AI assistant integration",
   "scripts": {
-    "build": "tsc --build --pretty",
-    "clean": "rm -rf dist",
-    "prebuild": "npm run clean"
+    "build": "tsc --build --incremental --pretty",
+    "clean": "rm -rf dist"
   },
   "dependencies": {
     "ums-sdk": "^1.0.0"

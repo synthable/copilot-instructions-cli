@@ -2,6 +2,10 @@
 
 echo "🔍 Running pre-commit checks..."
 
+# Build packages first to ensure .d.ts files are up to date
+echo "🏗️  Building packages (incremental)..."
+npm run build
+
 # Run TypeScript type checking
 echo "📝 Type checking..."
 npm run typecheck

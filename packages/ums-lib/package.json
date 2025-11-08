@@ -65,7 +65,7 @@
     "library"
   ],
   "scripts": {
-    "build": "tsc --build --pretty",
+    "build": "tsc --build --incremental --pretty",
     "test": "vitest run --run",
     "test:coverage": "vitest run --coverage",
     "lint": "eslint 'src/**/*.ts'",
@@ -76,7 +76,6 @@
     "clean": "rm -rf dist",
     "prepublishOnly": "npm run clean && npm run build",
     "pretest": "npm run typecheck",
-    "prebuild": "npm run clean",
     "benchmark": "npm run build && node dist/test/benchmark.js",
     "quality-check": "npm run typecheck && npm run lint && npm run format:check && npm run test"
   },

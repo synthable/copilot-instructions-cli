@@ -16,7 +16,7 @@
   "exclude": ["node_modules", "dist"],
   "references": [
     {
-      "path": "../ums-lib"
+      "path": "../ums-sdk"
     }
   ]
 }
