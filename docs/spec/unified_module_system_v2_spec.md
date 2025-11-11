@@ -227,7 +227,7 @@ Tells the AI **what to do**.
 
 ```typescript
 interface InstructionComponent {
-  type: 'instruction';
+  type: "instruction";
   metadata?: ComponentMetadata;
   instruction: {
     purpose: string; // Primary objective
@@ -253,7 +253,7 @@ Teaches the AI **concepts and patterns**.
 
 ```typescript
 interface KnowledgeComponent {
-  type: 'knowledge';
+  type: "knowledge";
   metadata?: ComponentMetadata;
   knowledge: {
     explanation: string; // High-level overview
@@ -277,7 +277,7 @@ Provides **reference information**.
 
 ```typescript
 interface DataComponent {
-  type: 'data';
+  type: "data";
   metadata?: ComponentMetadata;
   data: {
     format: string; // Media type (json, yaml, xml, etc.)
@@ -397,7 +397,7 @@ interface ModuleRelationships {
 
 ```typescript
 interface QualityMetadata {
-  maturity: 'alpha' | 'beta' | 'stable' | 'deprecated';
+  maturity: "alpha" | "beta" | "stable" | "deprecated";
   confidence: number; // 0-1 score
   lastVerified?: string; // ISO 8601 date
   experimental?: boolean;
@@ -436,11 +436,11 @@ components: [
   {
     type: ComponentType.Instruction,
     metadata: {
-      purpose: 'Core TDD workflow',
-      context: ['unit-testing', 'development'],
+      purpose: "Core TDD workflow",
+      context: ["unit-testing", "development"],
     },
     instruction: {
-      purpose: 'Apply TDD rigorously',
+      purpose: "Apply TDD rigorously",
       // ...
     },
   },
@@ -457,7 +457,7 @@ interface ProcessStep {
   detail?: string; // Detailed explanation
   validate?: {
     check: string;
-    severity?: 'error' | 'warning';
+    severity?: "error" | "warning";
   };
   when?: string; // Conditional execution
   do?: string; // Action to perform
@@ -469,14 +469,14 @@ interface ProcessStep {
 ```typescript
 process: [
   {
-    step: 'Identify resources (nouns, not verbs)',
-    detail: 'Resources should be things, not actions. Use plural nouns.',
+    step: "Identify resources (nouns, not verbs)",
+    detail: "Resources should be things, not actions. Use plural nouns.",
     validate: {
-      check: 'Endpoint URLs contain nouns only',
-      severity: 'error',
+      check: "Endpoint URLs contain nouns only",
+      severity: "error",
     },
   },
-  'Map HTTP methods to CRUD operations',
+  "Map HTTP methods to CRUD operations",
 ];
 ```
 
@@ -485,7 +485,7 @@ process: [
 ```typescript
 interface Constraint {
   rule: string; // The rule description
-  severity?: 'error' | 'warning' | 'info';
+  severity?: "error" | "warning" | "info";
   when?: string; // Conditional application
   examples?: {
     valid?: string[];
@@ -499,11 +499,11 @@ interface Constraint {
 ```typescript
 constraints: [
   {
-    rule: 'URLs MUST use plural nouns for collections',
-    severity: 'error',
+    rule: "URLs MUST use plural nouns for collections",
+    severity: "error",
     examples: {
-      valid: ['/users', '/users/123'],
-      invalid: ['/user', '/getUser'],
+      valid: ["/users", "/users/123"],
+      invalid: ["/user", "/getUser"],
     },
   },
 ];
@@ -515,7 +515,7 @@ constraints: [
 interface Criterion {
   item: string; // The verification item
   category?: string; // Category grouping
-  severity?: 'critical' | 'important' | 'nice-to-have';
+  severity?: "critical" | "important" | "nice-to-have";
 }
 ```
 
@@ -524,12 +524,12 @@ interface Criterion {
 ```typescript
 criteria: [
   {
-    item: 'Are all endpoints resource-based (nouns)?',
-    severity: 'critical',
+    item: "Are all endpoints resource-based (nouns)?",
+    severity: "critical",
   },
   {
-    item: 'Is the API versioned?',
-    severity: 'important',
+    item: "Is the API versioned?",
+    severity: "important",
   },
 ];
 ```
@@ -551,12 +551,12 @@ interface Concept {
 ```typescript
 concepts: [
   {
-    name: 'Resource-Based URLs',
-    description: 'URLs represent resources (things), not actions',
-    rationale: 'Resources are stable; operations change',
+    name: "Resource-Based URLs",
+    description: "URLs represent resources (things), not actions",
+    rationale: "Resources are stable; operations change",
     examples: [
-      ' GET /users/123 (resource: user)',
-      ' GET /getUser?id=123 (action: get)',
+      " GET /users/123 (resource: user)",
+      " GET /getUser?id=123 (action: get)",
     ],
   },
 ];
@@ -578,9 +578,9 @@ interface Example {
 ```typescript
 examples: [
   {
-    title: 'Basic Error Handling',
-    rationale: 'Shows try-catch with proper logging',
-    language: 'typescript',
+    title: "Basic Error Handling",
+    rationale: "Shows try-catch with proper logging",
+    language: "typescript",
     snippet: `
       try {
         await riskyOperation();
@@ -611,11 +611,11 @@ interface Pattern {
 ```typescript
 patterns: [
   {
-    name: 'Repository Pattern',
-    useCase: 'Abstract data access layer',
-    description: 'Encapsulate data access logic in repository classes',
-    advantages: ['Testable in isolation', 'Centralized data access logic'],
-    disadvantages: ['Additional abstraction layer'],
+    name: "Repository Pattern",
+    useCase: "Abstract data access layer",
+    description: "Encapsulate data access logic in repository classes",
+    advantages: ["Testable in isolation", "Centralized data access logic"],
+    disadvantages: ["Additional abstraction layer"],
   },
 ];
 ```
@@ -663,15 +663,15 @@ interface ModuleGroup {
 
 ```typescript
 modules: [
-  'foundation/ethics/do-no-harm',
+  "foundation/ethics/do-no-harm",
   {
-    group: 'Professional Standards',
+    group: "Professional Standards",
     ids: [
-      'principle/testing/test-driven-development',
-      'principle/architecture/separation-of-concerns',
+      "principle/testing/test-driven-development",
+      "principle/architecture/separation-of-concerns",
     ],
   },
-  'error-handling',
+  "error-handling",
 ];
 ```
 
@@ -721,12 +721,12 @@ The **Standard Library** is a curated collection of reusable modules that provid
 
 ```yaml
 localModulePaths:
-  - path: './company-standards'
-    onConflict: 'error' # Fail on collision
-  - path: './project-overrides'
-    onConflict: 'replace' # Override existing
-  - path: './experimental'
-    onConflict: 'warn' # Warn and keep original
+  - path: "./company-standards"
+    onConflict: "error" # Fail on collision
+  - path: "./project-overrides"
+    onConflict: "replace" # Override existing
+  - path: "./experimental"
+    onConflict: "warn" # Warn and keep original
 ```
 
 ### 5.3. Conflict Resolution Strategies
@@ -1257,3 +1257,4 @@ See `docs/typescript-minimal-implementation-roadmap.md` for implementation detai
 **Specification Version**: 2.0.0
 **Status**: Draft
 **Last Updated**: 2025-10-11
+````

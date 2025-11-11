@@ -141,7 +141,7 @@ All modules MUST be defined as TypeScript files with the `.module.ts` extension.
 
 ### 2.1. Top-Level Keys
 
-A valid module for v2.0 MUST contain the following top-level keys:
+A valid module for v2.1 MUST contain the following top-level keys:
 
 | Key              | Type                 | Required? | Description                                       |
 | :--------------- | :------------------- | :-------- | :------------------------------------------------ |
@@ -307,7 +307,7 @@ export const systemsThinking: Module = { ... };
 
 ### 2.2. Component Architecture
 
-UMS v2.0 uses a **component-based architecture** where modules are composed of three types of components:
+UMS v2.1 uses a **component-based architecture** where modules are composed of three types of components:
 
 1. **Instruction Component**: Tells the AI what to do
 2. **Knowledge Component**: Teaches the AI concepts and patterns
@@ -744,8 +744,8 @@ concepts: [
     description: "URLs represent resources (things), not actions",
     rationale: "Resources are stable; operations change",
     examples: [
-      " GET /users/123 (resource: user)",
-      " GET /getUser?id=123 (action: get)",
+      "GET /users/123 (resource: user)",
+      "GET /getUser?id=123 (action: get)",
     ],
   },
 ];
@@ -935,6 +935,7 @@ localModulePaths:
 Module relationships and dependencies (such as `requires`, `conflictsWith`, `enhances`) are managed by an external graphing tool and registry, as defined in [ADR-0008: External Graph Tool for Module Dependency Management](../../architecture/adr/0008-external-graph-tool.md).
 
 **Purpose**: This external system is responsible for:
+
 - Validating the integrity and compatibility of a persona's module composition
 - Detecting conflicts, missing dependencies, and circular references
 - Providing rich querying and visualization of module relationships
@@ -1026,7 +1027,7 @@ _Why_: {rationale}
 {value}
 ````
 
-````
+```````
 
 ### 6.3. Detailed Rendering Specifications
 
@@ -1694,7 +1695,7 @@ import { Module, ComponentType, CognitiveLevel } from './types/index.js';
 export const errorHandling: Module = {
   id: 'error-handling',
   version: '1.0.0',
-  schemaVersion: '2.0',
+  schemaVersion: '2.1',
   capabilities: ['error-handling', 'resilience'],
   cognitiveLevel: CognitiveLevel.UNIVERSAL_PATTERNS,
   domain: 'language-agnostic',
@@ -1712,18 +1713,9 @@ export const errorHandling: Module = {
     instruction: {
       purpose: 'Implement robust error handling',
       constraints: [
-        {
-          rule: 'Never swallow errors silently',
-          severity: 'error',
-        },
-        {
-          rule: 'Log errors with context',
-          severity: 'error',
-        },
-        {
-          rule: 'Use typed error classes',
-          severity: 'warning',
-        },
+        'MUST NOT swallow errors silently',
+        'MUST log errors with context',
+        'SHOULD use typed error classes',
       ],
     },
   },
@@ -1739,7 +1731,7 @@ import { Module, ComponentType, CognitiveLevel } from './types/index.js';
 export const tddModule: Module = {
   id: 'test-driven-development',
   version: '2.0.0',
-  schemaVersion: '2.0',
+  schemaVersion: '2.1',
   capabilities: ['testing', 'quality-assurance'],
   cognitiveLevel: CognitiveLevel.UNIVERSAL_PATTERNS,
   domain: 'language-agnostic',
@@ -1802,7 +1794,7 @@ import { Module, ComponentType, CognitiveLevel } from './types/index.js';
 export const apiDesign: Module = {
   id: 'rest-api-design',
   version: '1.0.0',
-  schemaVersion: '2.0',
+  schemaVersion: '2.1',
   capabilities: ['api-design', 'rest-api'],
   cognitiveLevel: CognitiveLevel.DOMAIN_SPECIFIC_GUIDANCE,
   domain: 'language-agnostic',
@@ -1831,13 +1823,10 @@ export const apiDesign: Module = {
         process: [
           {
             step: 'Identify resources (nouns, not verbs)',
-            detail:
+            notes: [
               'Resources should be things, not actions. Use plural nouns.',
-            validate: {
-              check:
-                'Endpoint URLs contain nouns only (e.g., /users, not /getUsers)',
-              severity: 'error',
-            },
+              'Endpoint URLs contain nouns only (e.g., /users, not /getUsers)',
+            ],
           },
           'Map HTTP methods to CRUD operations',
           'Design URL hierarchy reflecting relationships',
@@ -1848,28 +1837,18 @@ export const apiDesign: Module = {
         constraints: [
           {
             rule: 'URLs MUST use plural nouns for collections',
-            severity: 'error',
-            examples: {
-              valid: ['/users', '/users/123', '/users/123/orders'],
-              invalid: ['/user', '/getUser', '/createUser'],
-            },
+            notes: [
+              'Good: /users, /users/123, /users/123/orders',
+              'Bad: /user, /getUser, /createUser',
+            ],
           },
-          {
-            rule: 'URLs MUST NOT contain verbs',
-            severity: 'error',
-          },
+          'URLs MUST NOT contain verbs',
         ],
 
         criteria: [
-          {
-            item: 'Are all endpoints resource-based (nouns)?',
-            severity: 'critical',
-          },
-          {
-            item: 'Do responses use correct HTTP status codes?',
-            severity: 'critical',
-          },
-          { item: 'Is the API versioned?', severity: 'important' },
+          'Are all endpoints resource-based (nouns)?',
+          'Do responses use correct HTTP status codes?',
+          'Is the API versioned?',
         ],
       },
     },
@@ -1891,10 +1870,10 @@ export const apiDesign: Module = {
             rationale:
               'Resources are stable; operations change. Resource-based design is more maintainable.',
             examples: [
-              ' GET /users/123 (resource: user)',
-              ' GET /getUser?id=123 (action: get)',
-              ' POST /orders (create order)',
-              ' POST /createOrder (redundant verb)',
+              'GET /users/123 (resource: user)',
+              'GET /getUser?id=123 (action: get)',
+              'POST /orders (create order)',
+              'POST /createOrder (redundant verb)',
             ],
           },
         ],
@@ -1960,7 +1939,7 @@ app.post('/v1/users', async (req, res) => {
 
 ## Appendix B: TypeScript Type Definitions Reference
 
-Complete TypeScript type definitions are maintained in the implementation repository at `src/types/` and serve as normative references for v2.0 structure.
+Complete TypeScript type definitions are maintained in the implementation repository at `src/types/` and serve as normative references for v2.1 structure.
 
 **Key Types**:
 
@@ -1979,4 +1958,4 @@ See `docs/typescript-minimal-implementation-roadmap.md` for implementation detai
 **Status**: Draft
 **Last Updated**: 2025-01-15
 **Changes from v2.0**: Simplified ProcessStep interface (see ADR 0005)
-````
+```````

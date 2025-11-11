@@ -14,21 +14,25 @@
 Propose simplifying the `Criterion` interface from 3 fields to 2 fields, following the same pattern used for ProcessStep and Constraint simplification.
 
 **Current (v2.1):**
+
 ```typescript
 interface Criterion {
   item: string;
   category?: string;
-  severity?: 'critical' | 'important' | 'nice-to-have';
+  severity?: "critical" | "important" | "nice-to-have";
 }
 ```
 
 **Proposed:**
+
 ```typescript
-type Criterion = string | {
-  item: string;
-  category?: string;  // Optional grouping (renders as subheadings)
-  notes?: string[];   // Optional elaboration
-};
+type Criterion =
+  | string
+  | {
+      item: string;
+      category?: string; // Optional grouping (renders as subheadings)
+      notes?: string[]; // Optional elaboration
+    };
 ```
 
 ---
@@ -38,13 +42,14 @@ type Criterion = string | {
 ### 1. Severity Field Not Rendered
 
 Current implementation only renders `item`:
+
 ```typescript
 // Current renderer (markdown-renderer.ts:191-200)
 const criteria = instruction.criteria.map(criterion => {
-  if (typeof criterion === 'string') {
+  if (typeof criterion === "string") {
     return `- [ ] ${criterion}`;
   }
-  return `- [ ] ${criterion.item}`;  // Only this! category and severity ignored
+  return `- [ ] ${criterion.item}`; // Only this! category and severity ignored
 });
 ```
 
@@ -57,10 +62,10 @@ Authors already write criteria naturally without using structured fields:
 ```typescript
 // What people actually write today:
 criteria: [
-  'All endpoints return proper HTTP status codes',
-  'API documentation is complete and accurate',
-  'Rate limiting is implemented and tested'
-]
+  "All endpoints return proper HTTP status codes",
+  "API documentation is complete and accurate",
+  "Rate limiting is implemented and tested",
+];
 ```
 
 This is clear, concise, and works perfectly.
@@ -68,6 +73,7 @@ This is clear, concise, and works perfectly.
 ### 3. Severity Ambiguity
 
 When authors try to use the `severity` field, they face questions:
+
 - Should I express severity with "Critical:" or the `severity` field?
 - Use RFC 2119 keywords (MUST) or severity enum ('critical')?
 - How do severity levels map to actual verification priority?
@@ -81,66 +87,71 @@ The `category` field, however, serves a clear purpose: organizing criteria into 
 ### Simplified Structure
 
 ```typescript
-type Criterion = string | {
-  item: string;
-  category?: string;  // For grouping (renders as subheadings)
-  notes?: string[];   // For elaboration, test instructions, references
-};
+type Criterion =
+  | string
+  | {
+      item: string;
+      category?: string; // For grouping (renders as subheadings)
+      notes?: string[]; // For elaboration, test instructions, references
+    };
 ```
 
 ### Example Usage
 
 **Simple criteria (90% of cases):**
+
 ```typescript
 criteria: [
-  'All endpoints return proper HTTP status codes',
-  'API responses match documented schemas',
-  'Error handling covers edge cases'
-]
+  "All endpoints return proper HTTP status codes",
+  "API responses match documented schemas",
+  "Error handling covers edge cases",
+];
 ```
 
 **Criteria with categories and elaboration:**
+
 ```typescript
 criteria: [
   // Uncategorized (general criteria)
-  'All tests pass before deployment',
-  'Documentation is complete and up-to-date',
+  "All tests pass before deployment",
+  "Documentation is complete and up-to-date",
 
   // Security category
   {
-    item: 'All endpoints use HTTPS',
-    category: 'Security'
+    item: "All endpoints use HTTPS",
+    category: "Security",
   },
   {
-    item: 'Rate limiting prevents abuse',
-    category: 'Security',
+    item: "Rate limiting prevents abuse",
+    category: "Security",
     notes: [
-      'Test: Send 100 requests in 1 minute',
-      'Expected: Receive 429 Too Many Requests after limit',
-      'Verify: Rate limit headers present (X-RateLimit-*)'
-    ]
+      "Test: Send 100 requests in 1 minute",
+      "Expected: Receive 429 Too Many Requests after limit",
+      "Verify: Rate limit headers present (X-RateLimit-*)",
+    ],
   },
 
   // Performance category
   {
-    item: 'Response times under 100ms',
-    category: 'Performance'
+    item: "Response times under 100ms",
+    category: "Performance",
   },
   {
-    item: 'Database queries optimized',
-    category: 'Performance',
+    item: "Database queries optimized",
+    category: "Performance",
     notes: [
-      'Test: Run EXPLAIN on all queries',
-      'Verify: All queries use indexes',
-      'Verify: No N+1 query patterns'
-    ]
-  }
-]
+      "Test: Run EXPLAIN on all queries",
+      "Verify: All queries use indexes",
+      "Verify: No N+1 query patterns",
+    ],
+  },
+];
 ```
 
 ### Rendered Output
 
 **Before (current - no categories, no notes):**
+
 ```markdown
 ## Criteria
 
@@ -151,6 +162,7 @@ criteria: [
 ```
 
 **After (with categories and notes):**
+
 ```markdown
 ## Criteria
 
@@ -164,7 +176,7 @@ criteria: [
 - [ ] **Rate limiting prevents abuse**
   - Test: Send 100 requests in 1 minute
   - Expected: Receive 429 Too Many Requests after limit
-  - Verify: Rate limit headers present (X-RateLimit-*)
+  - Verify: Rate limit headers present (X-RateLimit-\*)
 
 ### Performance
 
@@ -187,20 +199,20 @@ Use natural language prefixes or RFC 2119 keywords to indicate priority:
 ```typescript
 criteria: [
   // Option 1: RFC 2119 keywords
-  'MUST verify all endpoints return proper status codes',
-  'SHOULD check for comprehensive error handling',
-  'MAY include performance benchmarks',
+  "MUST verify all endpoints return proper status codes",
+  "SHOULD check for comprehensive error handling",
+  "MAY include performance benchmarks",
 
   // Option 2: Natural language prefixes
-  'Critical: All endpoints return proper status codes',
-  'Important: Error handling covers edge cases',
-  'Nice-to-have: Response times under 100ms',
+  "Critical: All endpoints return proper status codes",
+  "Important: Error handling covers edge cases",
+  "Nice-to-have: Response times under 100ms",
 
   // Option 3: Implicit from context (most common)
-  'All endpoints return proper status codes',
-  'Error handling covers edge cases',
-  'Response times under 100ms'
-]
+  "All endpoints return proper status codes",
+  "Error handling covers edge cases",
+  "Response times under 100ms",
+];
 ```
 
 ### Notes Formatting Conventions
@@ -213,10 +225,10 @@ Use `Test:` prefix for what to do:
 
 ```typescript
 notes: [
-  'Test: Send 100 requests in 1 minute',
-  'Test: Verify rate limit headers present',
-  'Test: Check error response format'
-]
+  "Test: Send 100 requests in 1 minute",
+  "Test: Verify rate limit headers present",
+  "Test: Check error response format",
+];
 ```
 
 #### 2. Expected Results
@@ -225,10 +237,10 @@ Use `Expected:` prefix for what should happen:
 
 ```typescript
 notes: [
-  'Expected: Receive 429 Too Many Requests',
-  'Expected: Headers include X-RateLimit-Remaining',
-  'Expected: Error message explains limit exceeded'
-]
+  "Expected: Receive 429 Too Many Requests",
+  "Expected: Headers include X-RateLimit-Remaining",
+  "Expected: Error message explains limit exceeded",
+];
 ```
 
 #### 3. Verification Steps
@@ -237,10 +249,10 @@ Use `Verify:` prefix for how to check:
 
 ```typescript
 notes: [
-  'Verify: Check response status code',
-  'Verify: Inspect rate limit headers',
-  'Verify: Test with multiple API keys'
-]
+  "Verify: Check response status code",
+  "Verify: Inspect rate limit headers",
+  "Verify: Test with multiple API keys",
+];
 ```
 
 #### 4. References
@@ -249,10 +261,10 @@ Include external references for standards/specifications:
 
 ```typescript
 notes: [
-  'See RFC 7231 for HTTP status code definitions',
-  'Refer to OWASP API Security Top 10',
-  'Based on REST API Design Guidelines v2.0'
-]
+  "See RFC 7231 for HTTP status code definitions",
+  "Refer to OWASP API Security Top 10",
+  "Based on REST API Design Guidelines v2.0",
+];
 ```
 
 #### 5. Multi-line Test Scenarios
@@ -266,35 +278,35 @@ notes: [
 2. Verify 429 response after rate limit
 3. Wait 1 minute for limit reset
 4. Verify requests succeed again`,
-  'Expected: Rate limit enforced consistently'
-]
+  "Expected: Rate limit enforced consistently",
+];
 ```
 
 #### Complete Example
 
 ```typescript
 criteria: [
-  'All API endpoints return proper HTTP status codes',
+  "All API endpoints return proper HTTP status codes",
   {
-    item: 'Rate limiting prevents abuse',
+    item: "Rate limiting prevents abuse",
     notes: [
-      'Test: Send 100 requests in 1 minute using same API key',
-      'Expected: Receive 429 Too Many Requests after limit reached',
-      'Verify: Rate limit headers present (X-RateLimit-Limit, X-RateLimit-Remaining)',
-      'Verify: Error response includes retry-after information',
-      'See RFC 6585 section 4 for 429 status code specification'
-    ]
+      "Test: Send 100 requests in 1 minute using same API key",
+      "Expected: Receive 429 Too Many Requests after limit reached",
+      "Verify: Rate limit headers present (X-RateLimit-Limit, X-RateLimit-Remaining)",
+      "Verify: Error response includes retry-after information",
+      "See RFC 6585 section 4 for 429 status code specification",
+    ],
   },
   {
-    item: 'Authentication tokens expire appropriately',
+    item: "Authentication tokens expire appropriately",
     notes: [
-      'Test: Generate token and wait for expiration',
-      'Expected: Token rejected after expiration time',
-      'Verify: Expiration time matches configuration',
-      'Verify: Refresh token flow works correctly'
-    ]
-  }
-]
+      "Test: Generate token and wait for expiration",
+      "Expected: Token rejected after expiration time",
+      "Verify: Expiration time matches configuration",
+      "Verify: Refresh token flow works correctly",
+    ],
+  },
+];
 ```
 
 ---
@@ -312,7 +324,7 @@ function renderCriteria(criteria: Criterion[]): string {
   const categorized = new Map<string, Criterion[]>();
 
   for (const criterion of criteria) {
-    if (typeof criterion === 'string' || !criterion.category) {
+    if (typeof criterion === "string" || !criterion.category) {
       uncategorized.push(criterion);
     } else {
       if (!categorized.has(criterion.category)) {
@@ -326,26 +338,26 @@ function renderCriteria(criteria: Criterion[]): string {
 
   // 2. Render uncategorized first
   if (uncategorized.length > 0) {
-    sections.push(uncategorized.map(renderItem).join('\n\n'));
+    sections.push(uncategorized.map(renderItem).join("\n\n"));
   }
 
   // 3. Render categorized groups
   for (const [category, items] of categorized.entries()) {
     sections.push(`### ${category}\n`);
-    sections.push(items.map(renderItem).join('\n\n'));
+    sections.push(items.map(renderItem).join("\n\n"));
   }
 
-  return sections.join('\n\n');
+  return sections.join("\n\n");
 }
 
 function renderItem(criterion: Criterion): string {
-  if (typeof criterion === 'string') {
+  if (typeof criterion === "string") {
     return `- [ ] ${criterion}`;
   }
 
   if (criterion.notes && criterion.notes.length > 0) {
     let text = `- [ ] **${criterion.item}**`;
-    text += '\n' + criterion.notes.map(note => `  - ${note}`).join('\n');
+    text += "\n" + criterion.notes.map(note => `  - ${note}`).join("\n");
     return text;
   }
 
@@ -356,50 +368,60 @@ function renderItem(criterion: Criterion): string {
 ### Heading Levels
 
 **Category headings:**
+
 - **Level:** `###` (heading level 3)
 - **Rationale:** Criteria section uses `##` (level 2), so categories are one level below
 - **Format:** `### ${category}\n` (heading + newline)
 
 **Example:**
-```markdown
-## Criteria    ← Level 2 (section heading)
 
-### Security   ← Level 3 (category)
+```markdown
+## Criteria ← Level 2 (section heading)
+
+### Security ← Level 3 (category)
+
 ### Performance ← Level 3 (category)
 ```
 
 ### Indentation Rules
 
 **Checkbox items:**
+
 - No indentation (aligned to left margin)
 - Format: `- [ ] ${text}`
 
 **Notes under criteria:**
+
 - **Indentation:** 2 spaces
 - **Format:** `  - ${note}` (2 spaces + dash + space + note text)
 - **Rationale:** Standard Markdown nested list indentation
 
 **Example:**
+
 ```markdown
 - [ ] **Rate limiting prevents abuse**
-  - Test: Send 100 requests       ← 2-space indent
-  - Expected: Receive 429          ← 2-space indent
+  - Test: Send 100 requests ← 2-space indent
+  - Expected: Receive 429 ← 2-space indent
 ```
 
 ### Blank Line Handling
 
 **Between uncategorized items:**
+
 - One blank line between items (rendered as `\n\n`)
 - **Rationale:** Improves readability when notes are present
 
 **Between categories:**
+
 - One blank line before each category heading
 - One blank line after category heading (provided by the `\n` after heading)
 
 **Between items in same category:**
+
 - One blank line between items
 
 **Example:**
+
 ```markdown
 - [ ] Uncategorized item 1
 
@@ -419,20 +441,24 @@ function renderItem(criterion: Criterion): string {
 ### Markdown Escaping
 
 **Item text:**
+
 - Escape Markdown special characters in `criterion.item`
 - Special characters: `*`, `_`, `[`, `]`, `(`, `)`, `#`, `\`
 - **However:** Current implementation does NOT escape (assumes authors write Markdown-safe text)
 - **Future consideration:** Add escaping function if needed
 
 **Category names:**
+
 - No escaping applied (assumes valid heading text)
 - Invalid characters in category names are author's responsibility
 
 **Note text:**
+
 - No escaping applied to notes
 - Authors may use Markdown formatting within notes (e.g., `\`code\``, `**bold**`)
 
 **Example with Markdown in notes:**
+
 ```typescript
 {
   item: 'API endpoints follow REST conventions',
@@ -445,6 +471,7 @@ function renderItem(criterion: Criterion): string {
 ```
 
 **Rendered:**
+
 ```markdown
 - [ ] **API endpoints follow REST conventions**
   - Good: `/users`, `/users/123`, `/orders`
@@ -463,6 +490,7 @@ function renderItem(criterion: Criterion): string {
 **Behavior:** Treated as uncategorized (empty string is falsy)
 
 **Rendered:**
+
 ```markdown
 - [ ] Test item
 ```
@@ -476,6 +504,7 @@ function renderItem(criterion: Criterion): string {
 **Behavior:** Rendered as regular item (no bold, no notes)
 
 **Rendered:**
+
 ```markdown
 - [ ] Test item
 ```
@@ -489,6 +518,7 @@ function renderItem(criterion: Criterion): string {
 **Behavior:** Rendered with whitespace category heading (spec does not trim)
 
 **Rendered:**
+
 ```markdown
 ###
 
@@ -501,15 +531,16 @@ function renderItem(criterion: Criterion): string {
 
 ```typescript
 [
-  { item: 'Item 1', category: 'Security' },
-  { item: 'Item 2', category: 'Performance' },
-  { item: 'Item 3', category: 'Security' }  // Duplicate
-]
+  { item: "Item 1", category: "Security" },
+  { item: "Item 2", category: "Performance" },
+  { item: "Item 3", category: "Security" }, // Duplicate
+];
 ```
 
 **Behavior:** Items grouped under same category heading
 
 **Rendered:**
+
 ```markdown
 ### Security
 
@@ -528,15 +559,16 @@ function renderItem(criterion: Criterion): string {
 
 ```typescript
 [
-  'Simple criterion',
-  { item: 'Object criterion', category: 'Security' },
-  'Another simple criterion'
-]
+  "Simple criterion",
+  { item: "Object criterion", category: "Security" },
+  "Another simple criterion",
+];
 ```
 
 **Behavior:** Strings treated as uncategorized
 
 **Rendered:**
+
 ```markdown
 - [ ] Simple criterion
 
@@ -550,12 +582,15 @@ function renderItem(criterion: Criterion): string {
 #### 6. Special Characters in Item Text
 
 ```typescript
-{ item: 'Test `code` with **bold** and [link](url)' }
+{
+  item: "Test `code` with **bold** and [link](url)";
+}
 ```
 
 **Behavior:** No escaping (Markdown rendered as-is)
 
 **Rendered:**
+
 ```markdown
 - [ ] Test `code` with **bold** and [link](url)
 ```
@@ -579,9 +614,11 @@ function renderItem(criterion: Criterion): string {
 **Behavior:** Newlines in notes preserved as-is
 
 **Rendered:**
+
 ```markdown
 - [ ] **Complex test scenario**
   - Test scenario:
+
 1. Step one
 2. Step two
 3. Step three
@@ -594,12 +631,13 @@ function renderItem(criterion: Criterion): string {
 #### 8. Empty Criteria Array
 
 ```typescript
-criteria: []
+criteria: [];
 ```
 
 **Behavior:** Criteria section not rendered at all
 
 **Rendered:**
+
 ```markdown
 [No Criteria section]
 ```
@@ -626,6 +664,7 @@ criteria: []
 **Behavior:** Rendered as-is (no truncation)
 
 **Rendered:**
+
 ```markdown
 ### This Is An Extremely Long Category Name That Goes On And On And On
 
@@ -642,18 +681,20 @@ criteria: []
 4. **Items within same category are NOT reordered**
 
 **Example:**
+
 ```typescript
 [
-  'Uncategorized 1',
-  { item: 'Perf 1', category: 'Performance' },
-  { item: 'Sec 1', category: 'Security' },
-  'Uncategorized 2',
-  { item: 'Perf 2', category: 'Performance' },
-  { item: 'Sec 2', category: 'Security' }
-]
+  "Uncategorized 1",
+  { item: "Perf 1", category: "Performance" },
+  { item: "Sec 1", category: "Security" },
+  "Uncategorized 2",
+  { item: "Perf 2", category: "Performance" },
+  { item: "Sec 2", category: "Security" },
+];
 ```
 
 **Rendered order:**
+
 ```markdown
 - [ ] Uncategorized 1
 
@@ -699,31 +740,30 @@ criteria: []
 ### Complete Rendering Example
 
 **Input:**
+
 ```typescript
 criteria: [
-  'All tests pass',
-  'Documentation complete',
+  "All tests pass",
+  "Documentation complete",
   {
-    item: 'HTTPS enforced',
-    category: 'Security'
+    item: "HTTPS enforced",
+    category: "Security",
   },
   {
-    item: 'Rate limiting active',
-    category: 'Security',
-    notes: [
-      'Test: Send 100 req/min',
-      'Expected: 429 after limit'
-    ]
+    item: "Rate limiting active",
+    category: "Security",
+    notes: ["Test: Send 100 req/min", "Expected: 429 after limit"],
   },
   {
-    item: 'Response time < 100ms',
-    category: 'Performance',
-    notes: ['Measure with load testing tool']
-  }
-]
+    item: "Response time < 100ms",
+    category: "Performance",
+    notes: ["Measure with load testing tool"],
+  },
+];
 ```
 
 **Rendered output:**
+
 ```markdown
 ## Criteria
 
@@ -746,6 +786,7 @@ criteria: [
 ```
 
 **Character count breakdown:**
+
 - Uncategorized section: 2 items, no notes
 - Security section: 2 items, 1 with notes (2 notes)
 - Performance section: 1 item with notes (1 note)
@@ -758,6 +799,7 @@ criteria: [
 ## Rationale
 
 **Summary of Changes:**
+
 - ❌ **Remove:** `severity` field (use RFC 2119 keywords in natural language)
 - ✅ **Keep:** `category` field (implement rendering as subheadings)
 - ✅ **Add:** `notes` field (flexible elaboration)
@@ -765,6 +807,7 @@ criteria: [
 ### 1. Consistency with ProcessStep and Constraint
 
 We simplified both using a similar pattern:
+
 - **ProcessStep:** `step` + `notes` (2 fields, was 5)
 - **Constraint:** `rule` + `notes` (2 fields, was 5)
 - **Criterion:** `item` + `category` + `notes` (3 fields, was 3, but now with proper rendering)
@@ -774,11 +817,13 @@ We simplified both using a similar pattern:
 ### 2. Natural Language Handles Severity
 
 Severity can be expressed naturally:
+
 - **Critical:** "All endpoints MUST return proper status codes"
 - **Important:** "Error handling SHOULD cover edge cases"
 - **Nice-to-have:** "Response times MAY be benchmarked"
 
 Or even simpler:
+
 - "Verify all endpoints return proper status codes" (implicit critical)
 - "Check for error handling" (implicit important)
 - "Benchmark response times" (implicit nice-to-have)
@@ -793,22 +838,26 @@ Unlike `severity`, the `category` field serves a clear organizational purpose. W
 ## Criteria
 
 ### Security
+
 - [ ] All endpoints use HTTPS
 - [ ] Authentication required
 - [ ] Rate limiting implemented
 
 ### Performance
+
 - [ ] Response times under 100ms
 - [ ] Database queries optimized
 ```
 
 **Alternatives like comments don't render:**
+
 ```typescript
 // Security (this comment won't appear in rendered output)
 'All endpoints use HTTPS',
 ```
 
 **Text prefixes are repetitive:**
+
 ```typescript
 'Security: All endpoints use HTTPS',
 'Security: Authentication required',  // "Security:" repeated each time
@@ -819,6 +868,7 @@ Unlike `severity`, the `category` field serves a clear organizational purpose. W
 ### 4. Notes Provide Flexibility for Testing
 
 Instead of rigid structure, `notes` allows:
+
 - Test instructions ("Test: Send 100 requests")
 - Expected results ("Expected: Receive 429 status")
 - Verification steps ("Verify: Check headers")
@@ -830,6 +880,7 @@ Instead of rigid structure, `notes` allows:
 ### 5. Reduced Cognitive Load
 
 **Before:** Authors must decide:
+
 1. What goes in `item` vs as a separate note?
 2. Use `severity` field or express it in text?
 3. Use `category` field or natural grouping?
@@ -842,15 +893,15 @@ Instead of rigid structure, `notes` allows:
 
 ## Trade-offs Analysis
 
-| Aspect | Current (3 fields) | Proposed (3 fields) | Winner |
-|--------|-------------------|---------------------|---------|
-| **Authoring ease** | Severity ambiguity | Natural language | ✅ Proposed |
-| **Machine parsing** | Structured severity | Natural language | ⚠️ Current |
-| **Rendered output** | Only `item` shown | `item` + `category` + `notes` shown | ✅ Proposed |
-| **Flexibility** | Rigid severity enum | Author chooses format | ✅ Proposed |
-| **Grouping** | Category (not rendered) | Category (rendered as subheadings) | ✅ Proposed |
-| **Consistency** | Differs from Pattern | Follows pattern (removes severity) | ✅ Proposed |
-| **Migration cost** | None (no change) | Low (auto-convert severity) | ⚠️ Current |
+| Aspect              | Current (3 fields)      | Proposed (3 fields)                 | Winner      |
+| ------------------- | ----------------------- | ----------------------------------- | ----------- |
+| **Authoring ease**  | Severity ambiguity      | Natural language                    | ✅ Proposed |
+| **Machine parsing** | Structured severity     | Natural language                    | ⚠️ Current  |
+| **Rendered output** | Only `item` shown       | `item` + `category` + `notes` shown | ✅ Proposed |
+| **Flexibility**     | Rigid severity enum     | Author chooses format               | ✅ Proposed |
+| **Grouping**        | Category (not rendered) | Category (rendered as subheadings)  | ✅ Proposed |
+| **Consistency**     | Differs from Pattern    | Follows pattern (removes severity)  | ✅ Proposed |
+| **Migration cost**  | None (no change)        | Low (auto-convert severity)         | ⚠️ Current  |
 
 **Question for reviewers:** Do the benefits outweigh the migration cost?
 
@@ -894,10 +945,12 @@ ums-migrate criteria --from=v2.1-old --to=v2.1-simplified ./modules/
 ### Alternative 1: Keep Current Structure
 
 **Pros:**
+
 - No breaking change
 - Explicit severity and category fields
 
 **Cons:**
+
 - Fields not rendered (wasted effort)
 - Authoring complexity remains
 - Inconsistent with ProcessStep and Constraint
@@ -907,10 +960,12 @@ ums-migrate criteria --from=v2.1-old --to=v2.1-simplified ./modules/
 Implement rendering for `category` and `severity` without changing structure.
 
 **Pros:**
+
 - No breaking change
 - Authors who use fields get value
 
 **Cons:**
+
 - Doesn't address authoring friction
 - Maintains complexity
 - Encourages inconsistent patterns
@@ -918,20 +973,24 @@ Implement rendering for `category` and `severity` without changing structure.
 ### Alternative 3: Keep both severity and category
 
 ```typescript
-type Criterion = string | {
-  item: string;
-  category?: string;
-  severity?: 'critical' | 'important' | 'nice-to-have';
-  notes?: string[];
-};
+type Criterion =
+  | string
+  | {
+      item: string;
+      category?: string;
+      severity?: "critical" | "important" | "nice-to-have";
+      notes?: string[];
+    };
 ```
 
 **Pros:**
+
 - Explicit severity for tooling
 - Category for grouping
 - Most complete structure
 
 **Cons:**
+
 - Severity works fine in natural language
 - More complex authoring decisions
 - Partially inconsistent with ProcessStep/Constraint pattern
@@ -958,7 +1017,7 @@ We need your feedback on:
 
 3. **Category Rendering:** Should `category` field render as subheadings?
    - [x] Yes, render as `### Category Name`
-   - [ ] No, render differently: _________________
+   - [ ] No, render differently: **\*\*\*\***\_**\*\*\*\***
    - [ ] Don't render at all
 
 4. **Migration Timing:** When should this change happen?
@@ -968,11 +1027,11 @@ We need your feedback on:
 
 5. **Use Cases:** Are there scenarios where explicit `severity` field is critical?
    - [ ] No, natural language (MUST/SHOULD/MAY) covers everything
-   - [ ] Yes: _________________ (please describe)
+   - [ ] Yes: **\*\*\*\***\_**\*\*\*\*** (please describe)
 
 6. **Rendering Preferences:** How should criteria with notes be rendered?
    - [ ] Proposed format (bold item + bulleted notes)
-   - [ ] Alternative format: _________________ (please describe)
+   - [ ] Alternative format: **\*\*\*\***\_**\*\*\*\*** (please describe)
 
 ---
 
@@ -981,11 +1040,13 @@ We need your feedback on:
 Please provide input on:
 
 ### Required Feedback
+
 - [ ] Overall approach (simplify vs keep current)
 - [ ] Specific field concerns (which fields are essential?)
 - [ ] Migration concerns (breaking change acceptable?)
 
 ### Optional Feedback
+
 - [ ] Alternative designs
 - [ ] Example modules that would be affected
 - [ ] Rendering format preferences
@@ -1006,14 +1067,14 @@ Reply to this RFC document with inline comments
 
 ## Timeline
 
-| Phase | Timeline | Status |
-|-------|----------|--------|
-| RFC Published | 2025-01-15 | ✅ Complete |
-| Feedback Period | 2025-01-15 | ✅ Complete (Approved) |
-| Decision | 2025-01-15 | ✅ Accepted |
-| Implementation | 2025-01-15 | ✅ Complete (commit b774ef9) |
-| Migration Tools | TBD | ⏸️ Pending |
-| Documentation | 2025-01-15 | ✅ Complete (ADR 0007) |
+| Phase           | Timeline   | Status                       |
+| --------------- | ---------- | ---------------------------- |
+| RFC Published   | 2025-01-15 | ✅ Complete                  |
+| Feedback Period | 2025-01-15 | ✅ Complete (Approved)       |
+| Decision        | 2025-01-15 | ✅ Accepted                  |
+| Implementation  | 2025-01-15 | ✅ Complete (commit b774ef9) |
+| Migration Tools | TBD        | ⏸️ Pending                   |
+| Documentation   | 2025-01-15 | ✅ Complete (ADR 0007)       |
 
 **RFC Accepted and Implemented: January 15, 2025**
 
@@ -1025,28 +1086,28 @@ Reply to this RFC document with inline comments
 
 ```typescript
 export const apiTesting: Module = {
-  id: 'api-testing',
-  version: '1.0.0',
-  schemaVersion: '2.1',
-  capabilities: ['testing', 'api-quality'],
+  id: "api-testing",
+  version: "1.0.0",
+  schemaVersion: "2.1",
+  capabilities: ["testing", "api-quality"],
   cognitiveLevel: CognitiveLevel.PROCEDURES_AND_PLAYBOOKS,
   metadata: {
-    name: 'API Testing Criteria',
-    description: 'Essential verification criteria for API testing',
-    semantic: 'API testing, verification, quality assurance, REST endpoints'
+    name: "API Testing Criteria",
+    description: "Essential verification criteria for API testing",
+    semantic: "API testing, verification, quality assurance, REST endpoints",
   },
   instruction: {
     type: ComponentType.Instruction,
     instruction: {
-      purpose: 'Verify API implementation quality',
+      purpose: "Verify API implementation quality",
       criteria: [
-        'All endpoints return proper HTTP status codes',
-        'Response schemas match API documentation',
-        'Error handling covers common edge cases',
-        'Rate limiting is implemented and effective'
-      ]
-    }
-  }
+        "All endpoints return proper HTTP status codes",
+        "Response schemas match API documentation",
+        "Error handling covers common edge cases",
+        "Rate limiting is implemented and effective",
+      ],
+    },
+  },
 };
 ```
 
@@ -1054,58 +1115,59 @@ export const apiTesting: Module = {
 
 ```typescript
 export const apiSecurityTesting: Module = {
-  id: 'api-security-testing',
-  version: '1.0.0',
-  schemaVersion: '2.1',
-  capabilities: ['security', 'testing', 'api-quality'],
+  id: "api-security-testing",
+  version: "1.0.0",
+  schemaVersion: "2.1",
+  capabilities: ["security", "testing", "api-quality"],
   cognitiveLevel: CognitiveLevel.SPECIFICATIONS_AND_STANDARDS,
   metadata: {
-    name: 'API Security Testing Criteria',
-    description: 'Security verification criteria for public APIs',
-    semantic: 'API security, authentication, authorization, OWASP, penetration testing'
+    name: "API Security Testing Criteria",
+    description: "Security verification criteria for public APIs",
+    semantic:
+      "API security, authentication, authorization, OWASP, penetration testing",
   },
   instruction: {
     type: ComponentType.Instruction,
     instruction: {
-      purpose: 'Verify API security implementation',
+      purpose: "Verify API security implementation",
       criteria: [
         {
-          item: 'All endpoints require valid authentication',
+          item: "All endpoints require valid authentication",
           notes: [
-            'Test: Access endpoints without authentication token',
-            'Expected: Receive 401 Unauthorized response',
-            'Test: Use expired authentication token',
-            'Expected: Receive 401 Unauthorized with token_expired error',
-            'Verify: Response includes WWW-Authenticate header'
-          ]
+            "Test: Access endpoints without authentication token",
+            "Expected: Receive 401 Unauthorized response",
+            "Test: Use expired authentication token",
+            "Expected: Receive 401 Unauthorized with token_expired error",
+            "Verify: Response includes WWW-Authenticate header",
+          ],
         },
         {
-          item: 'Rate limiting prevents abuse',
+          item: "Rate limiting prevents abuse",
           notes: [
-            'Test: Send 100 requests in 1 minute using same API key',
-            'Expected: Receive 429 Too Many Requests after limit',
-            'Verify: Rate limit headers present (X-RateLimit-*)',
-            'Test: Verify rate limit resets after time window',
-            'See RFC 6585 section 4 for 429 status code'
-          ]
+            "Test: Send 100 requests in 1 minute using same API key",
+            "Expected: Receive 429 Too Many Requests after limit",
+            "Verify: Rate limit headers present (X-RateLimit-*)",
+            "Test: Verify rate limit resets after time window",
+            "See RFC 6585 section 4 for 429 status code",
+          ],
         },
         {
-          item: 'SQL injection attacks are prevented',
+          item: "SQL injection attacks are prevented",
           notes: [
             `Test: Send malicious SQL in query parameters:
 GET /users?id=1' OR '1'='1
 GET /search?q="; DROP TABLE users; --`,
-            'Expected: Input properly sanitized or rejected',
-            'Expected: No database errors exposed to client',
-            'Verify: Use parameterized queries or ORM',
-            'See OWASP Top 10 - A03:2021 Injection'
-          ]
+            "Expected: Input properly sanitized or rejected",
+            "Expected: No database errors exposed to client",
+            "Verify: Use parameterized queries or ORM",
+            "See OWASP Top 10 - A03:2021 Injection",
+          ],
         },
-        'HTTPS is enforced for all endpoints',
-        'Sensitive data is not logged or exposed'
-      ]
-    }
-  }
+        "HTTPS is enforced for all endpoints",
+        "Sensitive data is not logged or exposed",
+      ],
+    },
+  },
 };
 ```
 
@@ -1127,6 +1189,7 @@ This proposal is successful if:
 ## Implementation Status
 
 **✅ Completed:**
+
 1. ✅ Created ADR 0007 documenting decision
 2. ✅ Updated UMS v2.1 spec (Criterion section with migration example)
 3. ✅ Updated TypeScript types (removed severity, kept category, added notes)
@@ -1134,9 +1197,7 @@ This proposal is successful if:
 5. ✅ Added comprehensive tests for criteria rendering
 6. ✅ Updated documentation (ADR 0007, spec updates)
 
-**⏸️ Pending:**
-7. ⏸️ Create migration tooling for auto-converting v2.0 → v2.1
-8. ⏸️ Update example modules to use new format
+**⏸️ Pending:** 7. ⏸️ Create migration tooling for auto-converting v2.0 → v2.1 8. ⏸️ Update example modules to use new format
 
 **Implementation:** commit b774ef9
 

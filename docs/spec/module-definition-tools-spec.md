@@ -828,7 +828,6 @@ export const errorHandling = new ModuleBuilder(__filename, __dirname)
 // Fluent API with IDE autocomplete
 ```
 
-
 ---
 
 ## API Reference
