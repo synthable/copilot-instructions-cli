@@ -36,12 +36,12 @@ Tool implementations `SHOULD` use newline-delimited JSON (NDJSON): each complete
 
 **Wrapper Message Structure:**
 
-| Field       | Type   | Presence   | Description                                                      |
-| :---------- | :----- | :--------- | :--------------------------------------------------------------- |
-| `type`      | string | `REQUIRED` | Message type: `step_start`, `text`, or `step_finish`             |
-| `timestamp` | number | `REQUIRED` | Unix milliseconds                                                |
-| `sessionID` | string | `REQUIRED` | Session identifier                                               |
-| `part`      | object | `REQUIRED` | Type-specific payload                                            |
+| Field       | Type   | Presence   | Description                                          |
+| :---------- | :----- | :--------- | :--------------------------------------------------- |
+| `type`      | string | `REQUIRED` | Message type: `step_start`, `text`, or `step_finish` |
+| `timestamp` | number | `REQUIRED` | Unix milliseconds                                    |
+| `sessionID` | string | `REQUIRED` | Session identifier                                   |
+| `part`      | object | `REQUIRED` | Type-specific payload                                |
 
 **Typical Message Sequence:**
 
@@ -96,6 +96,7 @@ This object communicates Agent A's decisions regarding the feedback from the pre
 - `partial`: The feedback item was implemented with modifications, or only some aspects of the recommendation were applied. This status indicates the agent took action informed by the feedback but did not follow the recommendation exactly. An `explanation` describing what was changed and why is `RECOMMENDED`.
 
 **Example partial status scenarios:**
+
 - A recommendation to "add detailed documentation for all 10 functions" where only 5 functions were documented
 - A suggestion to "use async/await syntax" where the agent used Promises instead for compatibility reasons
 - A recommendation with multiple sub-points where only some were applicable or implemented
