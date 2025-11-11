@@ -1,0 +1,22 @@
+[
+  {
+    "id": "cot",
+    "title": "Chain-of-Thought (CoT) Overview",
+    "text": "Chain-of-Thought prompting encourages language models to generate intermediate reasoning steps before the final answer. It often improves performance on arithmetic, logic, and multi-step tasks but increases verbosity and can expose unreliable internal reasoning."
+  },
+  {
+    "id": "tot",
+    "title": "Tree of Thoughts (ToT) Summary",
+    "text": "Tree of Thoughts performs a search over reasoning trajectories: the model proposes candidate thoughts, a controller scores and expands promising branches, and the process prunes or backtracks. It can solve harder problems at higher cost and complexity."
+  },
+  {
+    "id": "rag",
+    "title": "Retrieval-Augmented Generation (RAG)",
+    "text": "RAG retrieves relevant passages from an external index and conditions generation on that context. It improves factual grounding and supports up-to-date knowledge, at the expense of a more complex pipeline and retrieval tuning."
+  },
+  {
+    "id": "react",
+    "title": "ReAct Pattern",
+    "text": "ReAct interleaves reasoning and acting: the model emits thoughts, selects tools to call, observes results, and iterates. This enables planning and tool use, but requires reliable output parsing and safety controls."
+  }
+]
