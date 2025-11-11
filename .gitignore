@@ -141,8 +141,6 @@ vite.config.ts.timestamp-*
 .DS_Store
 archive/
 docs/archive/
-!docs/archive/unified-module-system-v1/
-!docs/archive/unified-module-system-v1/**
 docs/todo.md
 #CLAUDE.md
 .geminiignore
