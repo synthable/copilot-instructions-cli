@@ -235,3 +235,52 @@ If the agent cannot process your request, it will return an error response:
 - `INVALID_REQUEST`: Malformed JSON or missing required fields
 - `UNSUPPORTED_MEDIA_TYPE`: The artifact media type is not supported
 - `INTERNAL_ERROR`: An unrecoverable error occurred
+
+---
+
+# Agent Brainstorming Protocol v1.2 (via OpenCode CLI)
+
+This document provides instructions for an AI agent on how to use a peer "brainstormer" agent to generate a structured set of ideas, alternatives, and risks related to a given concept.
+
+## 1. Core Concept
+
+This protocol enables a single-turn brainstorming session. The calling agent provides an `artifact` (an initial idea or concept), and the brainstormer agent returns a structured `brainstorm` object containing a diverse set of related ideas.
+
+For the full specification, please see [docs/spec/agent_brainstorming_protocol_v1.md](./docs/spec/agent_brainstorming_protocol_v1.md).
+
+## 2. How to Use This Protocol
+
+### Step 1: Construct the Brainstorm Request
+
+Your request must be a JSON object containing the `protocol_version` and the `artifact` to brainstorm about.
+
+**Request JSON Structure:**
+
+```json
+{
+  "protocol_version": "brainstorming-v1.2",
+  "artifact": {
+    "media_type": "text/plain",
+    "content": "Initial idea: A knowledge activation component for UMS."
+  },
+  "context": [
+    {
+      "type": "constraint",
+      "description": "The solution must not require a new top-level UMS component.",
+      "content": "The user prefers extending existing components over adding new ones."
+    }
+  ]
+}
+```
+
+### Step 2: Execute the `opencode` Command
+
+Pass the JSON request object via stdin to the `opencode` tool, specifying the `brainstormer` agent.
+
+```bash
+cat request.json | opencode run --agent brainstormer --format json
+```
+
+### Step 3: Interpret the Brainstorm Response
+
+The tool will return a response containing the structured brainstorm output, which includes arrays of `related_ideas`, `alternative_approaches`, `potential_risks`, `out_of_the_box_ideas`, and `next_steps`. See the full specification for the detailed response schema.
