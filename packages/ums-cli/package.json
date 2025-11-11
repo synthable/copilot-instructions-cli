@@ -34,7 +34,7 @@
     "cli"
   ],
   "scripts": {
-    "build": "tsc --build --pretty",
+    "build": "tsc --build --incremental --pretty",
     "test": "vitest run --run",
     "test:coverage": "vitest run --coverage",
     "lint": "eslint 'src/**/*.ts'",
@@ -45,7 +45,6 @@
     "clean": "rm -rf dist",
     "prepublishOnly": "npm run clean && npm run build",
     "pretest": "npm run typecheck",
-    "prebuild": "npm run clean",
     "quality-check": "npm run typecheck && npm run lint && npm run format:check && npm test"
   },
   "dependencies": {
@@ -54,7 +53,7 @@
     "commander": "^14.0.0",
     "ora": "^8.2.0",
     "tsx": "^4.20.6",
-    "ums-lib": "^1.0.0"
+    "ums-sdk": "^1.0.0"
   },
   "files": [
     "dist",
