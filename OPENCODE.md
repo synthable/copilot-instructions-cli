@@ -1,4 +1,4 @@
-# Agent Feedback Protocol v1.2 (via OpenCode CLI)
+# Agent Feedback Protocol v1.3 (via OpenCode CLI)
 
 This document provides instructions for an AI agent (Agent A) on how to get qualitative feedback on its work from a peer agent (Agent B) and how to report back on the feedback it applies.
 
@@ -10,21 +10,41 @@ This protocol enables a multi-turn, closed-loop feedback process. You (Agent A) 
 
 ### Step 1: Construct the Initial Feedback Request (`iteration: 1`)
 
-Your first request in a conversation must be a JSON object with `protocol_version`, `iteration: 1`, and the `artifact` you want reviewed.
+Your first request in a conversation must be a JSON object with `protocol_version`, `iteration: 1`, and the `artifact` you want reviewed. Optionally, you can include a `context` object to provide additional information.
 
 **Request JSON Structure (First Request):**
 
 ```json
 {
-  "protocol_version": "1.2",
+  "protocol_version": "1.3",
   "iteration": 1,
   "artifact": {
     "media_type": "text/markdown",
     "content": "The document, idea, or code snippet to be reviewed.",
     "artifact_ref": "optional-sha256-or-version-string"
-  }
+  },
+  "context": [
+    {
+      "description": "The original proposal this RFC is an alternative to.",
+      "media_type": "text/markdown",
+      "content": "..."
+    },
+    {
+      "description": "Related user feedback thread.",
+      "media_type": "text/plain",
+      "content": "User 'X' was concerned about the complexity of adding a new component type..."
+    }
+  ]
 }
 ```
+
+#### The `context` Field (Optional)
+
+The `context` field is an array of objects, each providing a piece of supporting information for the reviewer. This is useful for linking to related documents, previous versions, or specific user feedback. Each object in the array should contain:
+
+- `description` (string): An explanation of what the context item is.
+- `media_type` (string): The IANA MIME type of the content.
+- `content` (any): The actual contextual data.
 
 ### Step 2: Execute the `opencode` Command
 
@@ -42,7 +62,7 @@ The tool's response is an NDJSON stream (newline-delimited JSON) with three mess
 
 ```json
 {"type":"step_start","timestamp":1761021546015,"sessionID":"ses_abc123","part":{"id":"prt_001","sessionID":"ses_abc123","messageID":"msg_001","type":"step-start","snapshot":"abc123"}}
-{"type":"text","timestamp":1761021546835,"sessionID":"ses_abc123","part":{"id":"prt_002","sessionID":"ses_abc123","messageID":"msg_001","type":"text","text":"{\"protocol_version\":\"1.2\",\"iteration\":1,\"status\":\"success\",\"feedback\":{...}}","time":{"start":1761021546834,"end":1761021546834}}}
+{"type":"text","timestamp":1761021546835,"sessionID":"ses_abc123","part":{"id":"prt_002","sessionID":"ses_abc123","messageID":"msg_001","type":"text","text":"{\"protocol_version\":\"1.3\",\"iteration\":1,\"status\":\"success\",\"feedback\":{...}}","time":{"start":1761021546834,"end":1761021546834}}}
 {"type":"step_finish","timestamp":1761021546887,"sessionID":"ses_abc123","part":{"id":"prt_003","sessionID":"ses_abc123","messageID":"msg_001","type":"step-finish","snapshot":"abc123","cost":0,"tokens":{"input":100,"output":200}}}
 ```
 
@@ -57,7 +77,7 @@ The tool's response is an NDJSON stream (newline-delimited JSON) with three mess
 
 ```json
 {
-  "protocol_version": "1.2",
+  "protocol_version": "1.3",
   "iteration": 1,
   "status": "success",
   "feedback": {
@@ -104,7 +124,7 @@ After you have updated your artifact based on the feedback, construct a new requ
 
 ```json
 {
-  "protocol_version": "1.2",
+  "protocol_version": "1.3",
   "iteration": 2,
   "artifact": {
     "media_type": "text/markdown",
@@ -148,7 +168,7 @@ The follow-up response will acknowledge your reported decisions within the agent
 
 ```json
 {
-  "protocol_version": "1.2",
+  "protocol_version": "1.3",
   "iteration": 2,
   "status": "success",
   "feedback": {
@@ -200,7 +220,7 @@ If the agent cannot process your request, it will return an error response:
 
 ```json
 {
-  "protocol_version": "1.2",
+  "protocol_version": "1.3",
   "iteration": 1,
   "status": "error",
   "error": {
