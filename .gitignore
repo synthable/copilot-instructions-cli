@@ -152,3 +152,7 @@ untracked/
 docs/planning/
 docs/implementation-plans/
 #instruct-modules-v2/
+
+# Temporary files and scratch notes
+.tmp/
+SCRATCHPAD.md
