@@ -1,0 +1,405 @@
+{
+  "version": "2025-11-08",
+  "title": "AI Prompting Frameworks Catalogue",
+  "sections": [
+    {
+      "id": "I",
+      "title": "Instruction-Following & Task Framing",
+      "frameworks": [
+        {
+          "level": "Beginner",
+          "name": "Simple Instruction Prompting",
+          "description": "Direct natural-language instructions telling the model what to do.",
+          "strengths": ["Easy to write", "Accessible", "Works for straightforward tasks"],
+          "weaknesses": ["Sensitive to wording", "May be incomplete for complex tasks"],
+          "example": "Summarize the following paragraph in one sentence."
+        },
+        {
+          "level": "Beginner",
+          "name": "Role-Based Prompting",
+          "description": "Prefix instructions with a role/persona (e.g., 'You are an expert historian').",
+          "strengths": ["Improves style and domain behavior", "Simple to combine"],
+          "weaknesses": ["Can be superficial", "Inconsistent persona adoption"],
+          "example": "You are a friendly customer support agent. Answer the question below."
+        },
+        {
+          "level": "Intermediate",
+          "name": "Chain-of-Thought (CoT) Prompting (few-shot)",
+          "description": "Demonstrate step-by-step reasoning by providing one or more examples.",
+          "strengths": ["Improves reasoning on many tasks"],
+          "weaknesses": ["Increases verbosity", "Reasoning can be unreliable", "Model-size dependent"],
+          "example": "Provide worked examples of arithmetic problems showing each step.",
+          "references": ["Wei et al., 2022"]
+        },
+        {
+          "level": "Intermediate",
+          "name": "Instruction Templating / Prompt Engineering Patterns",
+          "description": "Reusable templates with placeholders for task, input, constraints.",
+          "strengths": ["Reusable", "Programmatic", "Improves consistency"],
+          "weaknesses": ["Template brittleness", "Requires maintenance"],
+          "example": "Task: {task}\nInput: {input}\nConstraints: {constraints}\nAnswer:"
+        },
+        {
+          "level": "Advanced",
+          "name": "Instruction Chaining / Decomposition Prompts",
+          "description": "Break complex tasks into sub-tasks executed sequentially.",
+          "strengths": ["Improves reliability on complex workflows", "Modular", "Easier to debug"],
+          "weaknesses": ["Requires orchestration", "Error accumulation", "Higher latency/cost"],
+          "example": "Decompose research and write a report into (1) find sources, (2) extract facts, (3) outline, (4) write."
+        },
+        {
+          "level": "Advanced",
+          "name": "Self-Consistency (with CoT)",
+          "description": "Run multiple CoT generations and aggregate final answers to reduce errors.",
+          "strengths": ["Better accuracy on reasoning tasks", "Reduces single-chain variance"],
+          "weaknesses": ["Costly", "Requires aggregation/validation logic"],
+          "references": ["Wang et al., 2022"]
+        }
+      ]
+    },
+    {
+      "id": "II",
+      "title": "Few-Shot & Demonstration-Based Frameworks",
+      "frameworks": [
+        {
+          "level": "Beginner",
+          "name": "Zero-shot & One-shot Prompting",
+          "description": "No examples (zero-shot) or a single example (one-shot) with instruction.",
+          "strengths": ["Low effort", "Useful when examples are unavailable"],
+          "weaknesses": ["Lower performance than few-shot for complex tasks"]
+        },
+        {
+          "level": "Intermediate",
+          "name": "Few-Shot Prompting (Classic)",
+          "description": "Provide several input-output examples showing desired mapping.",
+          "strengths": ["Often yields improvements", "Intuitive"],
+          "weaknesses": ["Context window limits", "Sensitive to example order"]
+        },
+        {
+          "level": "Intermediate",
+          "name": "Example Selection / Retrieval-Augmented Example Selection",
+          "description": "Use similarity search to pick most relevant few-shot examples.",
+          "strengths": ["Scales beyond context window", "More relevant examples"],
+          "weaknesses": ["Requires embeddings/indexing", "Retrieval quality matters"],
+          "tools": ["semantic search", "FAISS", "Milvus"]
+        },
+        {
+          "level": "Advanced",
+          "name": "In-Context Learning Optimization (Automated Example Selection)",
+          "description": "Optimize which examples to include via evaluation-driven selection.",
+          "strengths": ["Near fine-tuning performance without weight updates"],
+          "weaknesses": ["Computational overhead", "May overfit to validation distribution"]
+        },
+        {
+          "level": "Advanced",
+          "name": "Meta-Prompting / Example Synthesis",
+          "description": "Generate synthetic examples to expand few-shot set.",
+          "strengths": ["Increases diversity and coverage", "Useful when labeled data is scarce"],
+          "weaknesses": ["Risk of bias or noise from synthetic data"]
+        }
+      ]
+    },
+    {
+      "id": "III",
+      "title": "Reasoning & Chain-of-Thought Variants",
+      "frameworks": [
+        {
+          "level": "Beginner",
+          "name": "Stepwise Instruction (explicit steps)",
+          "description": "Ask the model to produce steps explicitly.",
+          "strengths": ["Simple", "Effective for planning/troubleshooting"],
+          "weaknesses": ["May produce generic/superficial steps"]
+        },
+        {
+          "level": "Intermediate",
+          "name": "Chain-of-Thought (CoT) prompting (zero/few-shot)",
+          "description": "Encourage step-by-step reasoning via instructions or examples.",
+          "strengths": ["Improved performance on reasoning tasks"],
+          "weaknesses": ["Reliability varies across models and tasks"]
+        },
+        {
+          "level": "Intermediate",
+          "name": "Program-of-Thoughts / Tree-of-Thoughts (conceptual)",
+          "description": "Encourage branching reasoning trajectories before selecting an answer.",
+          "strengths": ["Captures diverse solution paths"],
+          "weaknesses": ["Hard to implement purely in prompt", "Requires search strategies"],
+          "references": ["Tree of Thoughts (2023)"]
+        },
+        {
+          "level": "Advanced",
+          "name": "Tree of Thoughts (ToT) (implemented)",
+          "description": "Search-based approach: generate candidate reasoning steps, expand branches, prune/backtrack.",
+          "strengths": ["Improvements on hard reasoning tasks", "Principled search"],
+          "weaknesses": ["Needs external controller and many calls"],
+          "references": ["Sun et al., 2023"]
+        },
+        {
+          "level": "Advanced",
+          "name": "Programmatic Reasoning (LLM + External Execution)",
+          "description": "Generate code/symbolic steps executed by a runtime (calculator, interpreter).",
+          "strengths": ["Precise computation", "Deterministic checks", "Debuggability"],
+          "weaknesses": ["Sandboxing/security", "Prompt-to-code robustness"],
+          "tools": ["ReAct", "Toolformer", "LLM-to-API patterns"]
+        }
+      ]
+    },
+    {
+      "id": "IV",
+      "title": "Retrieval & Knowledge Integration",
+      "frameworks": [
+        {
+          "level": "Beginner",
+          "name": "Contextual Retrieval (manual)",
+          "description": "Append retrieved context (documents/facts) to the prompt.",
+          "strengths": ["Reduces hallucination", "Brings external facts"],
+          "weaknesses": ["Increases prompt length", "Needs retrieval pipeline"]
+        },
+        {
+          "level": "Intermediate",
+          "name": "Retrieval-Augmented Generation (RAG)",
+          "description": "Retrieve relevant passages then condition generation on those passages.",
+          "strengths": ["Scales knowledge beyond context", "Up-to-date info"],
+          "weaknesses": ["Complex pipeline", "Embeddings infra and tuning required"],
+          "tools": ["Haystack", "LlamaIndex", "LangChain", "OpenSearch/Elastic", "FAISS"]
+        },
+        {
+          "level": "Intermediate",
+          "name": "Citation and Attribution Prompts",
+          "description": "Instruct the model to cite retrieved passages or provide sources inline.",
+          "strengths": ["Traceability", "Auditability"],
+          "weaknesses": ["May hallucinate citations", "Needs verification"]
+        },
+        {
+          "level": "Advanced",
+          "name": "Closed-Loop Retrieval (Retriever-Generator Feedback)",
+          "description": "Iteratively refine retrieval with generator feedback until confidence threshold.",
+          "strengths": ["Focused context", "Higher factuality"],
+          "weaknesses": ["More calls", "Orchestration complexity"]
+        },
+        {
+          "level": "Advanced",
+          "name": "Retrieval + Reasoning Hybrid (RAG + CoT)",
+          "description": "Combine retrieval with chain-of-thought reasoning using evidence.",
+          "strengths": ["Handles complex queries requiring facts and reasoning"],
+          "weaknesses": ["Heavy compute", "Careful prompt design needed"]
+        }
+      ]
+    },
+    {
+      "id": "V",
+      "title": "Tool Use, Action & Interaction",
+      "frameworks": [
+        {
+          "level": "Beginner",
+          "name": "Tool-Call Prompts (explicit)",
+          "description": "Instruct the model when and how to call external tools; orchestration is manual.",
+          "strengths": ["Simple to adopt", "Immediate improvements for grounded tasks"],
+          "weaknesses": ["Requires external code for tool invocation and handling"]
+        },
+        {
+          "level": "Intermediate",
+          "name": "ReAct (Reasoning + Acting)",
+          "description": "Interleave reasoning traces with explicit actions and observations.",
+          "strengths": ["Enables planning and acting", "Good for multi-step tool tasks"],
+          "weaknesses": ["Parsing outputs", "Safety concerns for side-effects"],
+          "references": ["Yao et al., 2022"]
+        },
+        {
+          "level": "Intermediate",
+          "name": "Toolformer / Self-supervised Tool-Use",
+          "description": "Train or prompt LLMs to decide when to call tools via self-supervised signals.",
+          "strengths": ["Automates tool-use decisions", "Reduces prompt engineering"],
+          "weaknesses": ["Often requires fine-tuning or specialized prompts"],
+          "references": ["Schick et al., 2023"]
+        },
+        {
+          "level": "Advanced",
+          "name": "Agent Frameworks / Multi-Agent Orchestration",
+          "description": "Multiple agents coordinate, call tools, and negotiate responsibilities.",
+          "strengths": ["Models complex workflows", "Modular and extensible"],
+          "weaknesses": ["High engineering complexity", "State management and failure modes"]
+        }
+      ]
+    },
+    {
+      "id": "VI",
+      "title": "Optimization, Calibration & Robustness",
+      "frameworks": [
+        {
+          "level": "Beginner",
+          "name": "Prompt Calibration (temperature, instructions)",
+          "description": "Adjust generation parameters and explicit constraints for determinism.",
+          "strengths": ["Low-cost tweaks", "Improves reliability"],
+          "weaknesses": ["Limited ability to fix logical errors"]
+        },
+        {
+          "level": "Intermediate",
+          "name": "Prompt Tuning (soft prompts) — Interface-level",
+          "description": "Use continuous prompt vectors optimized via gradients without weight updates.",
+          "strengths": ["Parameter-efficient", "Good for domain adaptation"],
+          "weaknesses": ["Requires gradients or specialized APIs", "Less interpretable"]
+        },
+        {
+          "level": "Intermediate",
+          "name": "Prefix Tuning / Adapter Prompts",
+          "description": "Train small prefix layers or adapters that steer model behavior.",
+          "strengths": ["Efficient fine-tuning alternative"],
+          "weaknesses": ["Requires more infra and model access"]
+        },
+        {
+          "level": "Advanced",
+          "name": "Prompt Engineering + Fine-Tuning Hybrid",
+          "description": "Combine prompt design with (few-shot/full) fine-tuning for best performance.",
+          "strengths": ["Best performance for many tasks", "Control and reliability"],
+          "weaknesses": ["Expensive", "Requires dataset curation and access"]
+        },
+        {
+          "level": "Advanced",
+          "name": "Automatic Prompt Optimization (APO)",
+          "description": "Algorithmic search over prompts to maximize task metrics.",
+          "strengths": ["Finds high-performing prompts automatically"],
+          "weaknesses": ["Computationally expensive", "Risk of overfitting"]
+        }
+      ]
+    },
+    {
+      "id": "VII",
+      "title": "Evaluation, Safety & Alignment Prompts",
+      "frameworks": [
+        {
+          "level": "Beginner",
+          "name": "Output Constraints and Templates",
+          "description": "Force output formats via explicit instructions and examples.",
+          "strengths": ["Easier parsing and post-processing", "Reduces malformed outputs"],
+          "weaknesses": ["Models may still violate constraints", "Requires validation"]
+        },
+        {
+          "level": "Beginner",
+          "name": "Red-Teaming Prompting (manual)",
+          "description": "Adversarial prompts to probe model failure modes.",
+          "strengths": ["Reveals weaknesses early"],
+          "weaknesses": ["Labor-intensive", "Needs skilled adversaries"]
+        },
+        {
+          "level": "Intermediate",
+          "name": "Self-Evaluation / Chain-of-Thought Verification",
+          "description": "Ask the model to critique, verify, or rate its own answer.",
+          "strengths": ["Often catches mistakes", "Reduces hallucinations"],
+          "weaknesses": ["Overconfidence", "May miss subtle errors"]
+        },
+        {
+          "level": "Intermediate",
+          "name": "Contrastive & Counterfactual Prompting",
+          "description": "Generate counterfactual answers or compare options to detect inconsistencies.",
+          "strengths": ["Improves robustness", "Exposes contradictions"],
+          "weaknesses": ["More compute", "Requires aggregation"]
+        },
+        {
+          "level": "Advanced",
+          "name": "Ensemble & Cross-Checking Prompts",
+          "description": "Use multiple LLMs or prompt styles and reconcile outputs via a verifier.",
+          "strengths": ["Higher reliability", "Reduced single-model bias"],
+          "weaknesses": ["Costly", "Requires reconciliation policies"]
+        },
+        {
+          "level": "Advanced",
+          "name": "Formal Verification via LLMs + Symbolic Tools",
+          "description": "Combine LLM outputs with symbolic verification (type checkers, unit tests).",
+          "strengths": ["Strong correctness guarantees when applicable"],
+          "weaknesses": ["Limited scope", "Engineering overhead"]
+        }
+      ]
+    },
+    {
+      "id": "VIII",
+      "title": "Creativity & Content-Generation Frameworks",
+      "frameworks": [
+        {
+          "level": "Beginner",
+          "name": "Style & Tone Prompts",
+          "description": "Provide explicit style guides or examples to shape voice.",
+          "strengths": ["Immediate stylistic control"],
+          "weaknesses": ["Subjective", "May over-constrain creativity"]
+        },
+        {
+          "level": "Intermediate",
+          "name": "Iterative Refinement / Revision Prompts",
+          "description": "Produce a draft, then request revisions with specific feedback.",
+          "strengths": ["Structured editing workflows", "Improves output quality"],
+          "weaknesses": ["Multi-pass increases cost and complexity"]
+        },
+        {
+          "level": "Intermediate",
+          "name": "Prompted Template Filling (story skeletons)",
+          "description": "Provide narrative scaffolds and ask the model to fill in scenes.",
+          "strengths": ["Efficient generation with controllable structure"],
+          "weaknesses": ["May produce clichés if scaffolding is narrow"]
+        },
+        {
+          "level": "Advanced",
+          "name": "Co-Creation & Collaborative Prompts",
+          "description": "Define roles for model and human for iterative collaboration with checkpoints.",
+          "strengths": ["Powerful for creative teams and large projects"],
+          "weaknesses": ["Requires process design and tooling"]
+        }
+      ]
+    },
+    {
+      "id": "IX",
+      "title": "Specialized & Emerging Frameworks",
+      "frameworks": [
+        {
+          "level": "Beginner/Intermediate",
+          "name": "Prompting for Multimodal Models",
+          "description": "Include or reference images, audio, or video with instructions.",
+          "strengths": ["Expands capabilities across modalities"],
+          "weaknesses": ["Tooling evolving", "Formats vary by provider"]
+        },
+        {
+          "level": "Beginner/Intermediate",
+          "name": "Few-Shot Program Synthesis Prompts",
+          "description": "Provide code input-output pairs to synthesize similar code.",
+          "strengths": ["Fast code prototyping"],
+          "weaknesses": ["Risk of insecure code and subtle bugs"]
+        },
+        {
+          "level": "Advanced/Emerging",
+          "name": "Latent Space Steering & Activation Engineering",
+          "description": "Manipulate internal activations to produce desired behaviors.",
+          "strengths": ["Deep control over model behavior"],
+          "weaknesses": ["Experimental", "Requires model internals"]
+        },
+        {
+          "level": "Advanced/Emerging",
+          "name": "Instruction Distillation & Modular Persona Composition",
+          "description": "Distill large instruction sets into compact modules and compose them.",
+          "strengths": ["Reusable modules", "Maintainability and governance"],
+          "weaknesses": ["Requires systematic module design and testing"]
+        },
+        {
+          "level": "Advanced/Emerging",
+          "name": "Prompt-as-Policy (for RL/Decision tasks)",
+          "description": "Treat prompts as policies optimized via RL or policy gradient.",
+          "strengths": ["Formal framework for optimizing interactive prompts"],
+          "weaknesses": ["Complex implementation", "Requires simulation and rewards"]
+        }
+      ]
+    }
+  ],
+  "notes": {
+    "coverage": "Emphasizes widely used frameworks as of late 2025; not exhaustive.",
+    "bestPractices": [
+      "Start simple, iterate with few-shot, CoT, and retrieval",
+      "Use templates and automated selection",
+      "Add verification and evaluation steps",
+      "Keep prompts small and modular; orchestrate multi-step flows"
+    ],
+    "references": [
+      "Chain of Thought (Wei et al., 2022)",
+      "Tree of Thoughts (Sun et al., 2023)",
+      "ReAct (Yao et al., 2022)",
+      "Toolformer (Schick et al., 2023)",
+      "RAG and LlamaIndex / LangChain documentation"
+    ]
+  }
+}
