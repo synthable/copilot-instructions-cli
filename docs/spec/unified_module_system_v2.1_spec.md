@@ -13,9 +13,17 @@
 
 ### Simplified Structures
 
+- **Component interfaces**: Removed nested duplication and `ComponentMetadata`. Components now have a flat structure with direct property access.
+  - Before: `instruction: { type: ..., instruction: { purpose: ... } }`
+  - After: `instruction: { type?: ..., purpose: ... }`
+  - Applies to all three component types: Instruction, Knowledge, Data
 - **ProcessStep**: Now `string | {step: string, notes?: string[]}` (removed complex validation/conditional fields).
 - **Constraint**: Now `string | {rule: string, notes?: string[]}` (use RFC 2119 keywords in rule text for severity).
 - **Criterion**: Now `string | {item: string, category?: string, notes?: string[]}` (use RFC 2119 keywords in item text for priority).
+
+### Clarifications
+
+- **Component `type` field**: When using shorthand properties (`instruction`, `knowledge`, `data`), the `type` field is **not required** and should be omitted. The property name provides implicit type discrimination. The `type` field is only required when components are defined in the `components` array.
 
 See Architecture Decision Records (ADRs) in `docs/architecture/adr/` for detailed rationale and migration guidance.
 
@@ -153,11 +161,11 @@ A valid module for v2.1 MUST contain the following top-level keys:
 | `metadata`       | Object               | Yes       | Human-readable and AI-discoverable metadata       |
 | `domain`         | String/Array         | No        | Technology or field this module applies to        |
 | `components`     | Array[Component]     | No\*      | Component blocks (see 2.2)                        |
-| `instruction`    | InstructionComponent | No\*      | Shorthand for single instruction component        |
-| `knowledge`      | KnowledgeComponent   | No\*      | Shorthand for single knowledge component          |
-| `data`           | DataComponent        | No\*      | Shorthand for single data component               |
+| `instruction`    | InstructionComponent | No\*      | Shorthand for instruction component               |
+| `knowledge`      | KnowledgeComponent   | No\*      | Shorthand for knowledge component                 |
+| `data`           | DataComponent        | No\*      | Shorthand for data component                      |
 
-\* At least one of `components`, `instruction`, `knowledge`, or `data` MUST be present.
+\* At least one of `components`, `instruction`, `knowledge`, or `data` MUST be present. Shorthand properties can be combined (e.g., both `instruction` and `knowledge`).
 
 #### `id`
 
@@ -315,29 +323,58 @@ UMS v2.1 uses a **component-based architecture** where modules are composed of t
 
 Modules can include components in two ways:
 
-**Option A: Multiple Components (Array)**
+**Option A: Components Array**
+
+Use the `components` array when you need fine-grained control or have multiple components of the same type:
 
 ```typescript
 components: [
   {
     type: ComponentType.Instruction,
-    instruction: { purpose: "...", process: [...] }
+    purpose: "...",
+    process: [...]
   },
   {
     type: ComponentType.Knowledge,
-    knowledge: { explanation: "...", concepts: [...] }
+    explanation: "...",
+    concepts: [...]
   }
 ]
 ```
 
-**Option B: Single Component (Shorthand)**
+**Option B: Shorthand Properties**
+
+For cleaner syntax, use shorthand properties. The `type` field is **not required** when using shorthand syntax—the property name provides type discrimination. You can combine different types:
 
 ```typescript
+// Single component (no type field needed)
 instruction: {
-  type: ComponentType.Instruction,
-  instruction: { purpose: "...", constraints: [...] }
+  purpose: "...",
+  constraints: [...]
+}
+
+// Multiple different types (common pattern)
+instruction: {
+  purpose: "...",
+  process: [...]
+},
+knowledge: {
+  explanation: "...",
+  concepts: [...]
+},
+data: {
+  format: "json",
+  value: { ... }
 }
 ```
+
+**Rules:**
+
+- Shorthand properties (`instruction`, `knowledge`, `data`) can be combined
+- The `type` field is **implicit** from the property name and should be omitted
+- If `components` array is used, the `type` field is **required** for discrimination
+- If `components` array is present, it takes precedence over shorthand properties
+- Cannot have multiple components of the same type using shorthand (use `components` array instead)
 
 #### Component Type: Instruction
 
@@ -345,20 +382,18 @@ Tells the AI **what to do**.
 
 ```typescript
 interface InstructionComponent {
-  type: "instruction";
-  metadata?: ComponentMetadata;
-  instruction: {
-    purpose: string; // Primary objective
-    process?: Array<string | ProcessStep>; // Sequential steps
-    constraints?: Constraint[]; // Non-negotiable rules
-    principles?: string[]; // High-level guidelines
-    criteria?: Criterion[]; // Success criteria
-  };
+  type?: "instruction"; // Required in components array, omitted in shorthand
+  purpose: string; // Primary objective
+  process?: Array<string | ProcessStep>; // Sequential steps
+  constraints?: Constraint[]; // Non-negotiable rules
+  principles?: string[]; // High-level guidelines
+  criteria?: Criterion[]; // Success criteria
 }
 ```
 
 **Fields**:
 
+- `type` (conditional): Required when used in `components` array, omitted when using shorthand `instruction` property
 - `purpose` (required): The primary objective or goal of this instruction set
 - `process` (optional): Step-by-step procedural instructions
 - `constraints` (optional): Non-negotiable rules that MUST be followed
@@ -371,19 +406,17 @@ Teaches the AI **concepts and patterns**.
 
 ```typescript
 interface KnowledgeComponent {
-  type: "knowledge";
-  metadata?: ComponentMetadata;
-  knowledge: {
-    explanation: string; // High-level overview
-    concepts?: Concept[]; // Core concepts
-    examples?: Example[]; // Illustrative examples
-    patterns?: Pattern[]; // Design patterns
-  };
+  type?: "knowledge"; // Required in components array, omitted in shorthand
+  explanation: string; // High-level overview
+  concepts?: Concept[]; // Core concepts
+  examples?: Example[]; // Illustrative examples
+  patterns?: Pattern[]; // Design patterns
 }
 ```
 
 **Fields**:
 
+- `type` (conditional): Required when used in `components` array, omitted when using shorthand `knowledge` property
 - `explanation` (required): High-level conceptual overview
 - `concepts` (optional): Core concepts to understand
 - `examples` (optional): Concrete code/text examples
@@ -395,18 +428,16 @@ Provides **reference information**.
 
 ```typescript
 interface DataComponent {
-  type: "data";
-  metadata?: ComponentMetadata;
-  data: {
-    format: string; // Media type (json, yaml, xml, etc.)
-    description?: string; // What this data represents
-    value: unknown; // The actual data
-  };
+  type?: "data"; // Required in components array, omitted in shorthand
+  format: string; // Media type (json, yaml, xml, etc.)
+  description?: string; // What this data represents
+  value: unknown; // The actual data
 }
 ```
 
 **Fields**:
 
+- `type` (conditional): Required when used in `components` array, omitted when using shorthand `data` property
 - `format` (required): Data format/media type (e.g., `"json"`, `"yaml"`, `"xml"`)
 - `description` (optional): Human-readable description
 - `value` (required): The actual data content
@@ -491,33 +522,6 @@ Lifecycle management fields.
 - `deprecated`: Boolean flag indicating deprecation
 - `replacedBy`: MUST be a valid module ID
 - `replacedBy` MUST NOT be present unless `deprecated: true`
-
-### 2.4. Component Metadata
-
-```typescript
-interface ComponentMetadata {
-  purpose?: string; // Purpose of this component
-  context?: string[]; // Where this component is most useful
-}
-```
-
-**Example**:
-
-```typescript
-components: [
-  {
-    type: ComponentType.Instruction,
-    metadata: {
-      purpose: "Core TDD workflow",
-      context: ["unit-testing", "development"],
-    },
-    instruction: {
-      purpose: "Apply TDD rigorously",
-      // ...
-    },
-  },
-];
-```
 
 ## 3. Directive Types
 
@@ -1709,15 +1713,12 @@ export const errorHandling: Module = {
   },
 
   instruction: {
-    type: ComponentType.Instruction,
-    instruction: {
-      purpose: 'Implement robust error handling',
-      constraints: [
-        'MUST NOT swallow errors silently',
-        'MUST log errors with context',
-        'SHOULD use typed error classes',
-      ],
-    },
+    purpose: 'Implement robust error handling',
+    constraints: [
+      'MUST NOT swallow errors silently',
+      'MUST log errors with context',
+      'SHOULD use typed error classes',
+    ],
   },
 };
 ```
@@ -1747,39 +1748,35 @@ export const tddModule: Module = {
   components: [
     {
       type: ComponentType.Instruction,
-      instruction: {
-        purpose: 'Apply TDD methodology rigorously',
-        process: [
-          'Write a failing test that defines desired behavior',
-          'Write minimal code to make the test pass',
-          'Refactor code while keeping tests green',
-        ],
-        principles: [
-          'Test first, code second',
-          'Write only enough code to pass the test',
-          'Refactor mercilessly',
-        ],
-      },
+      purpose: 'Apply TDD methodology rigorously',
+      process: [
+        'Write a failing test that defines desired behavior',
+        'Write minimal code to make the test pass',
+        'Refactor code while keeping tests green',
+      ],
+      principles: [
+        'Test first, code second',
+        'Write only enough code to pass the test',
+        'Refactor mercilessly',
+      ],
     },
     {
       type: ComponentType.Knowledge,
-      knowledge: {
-        explanation: `
-          TDD is a development process where tests drive the design and implementation of code through short, iterative cycles.`,
-        concepts: [
-          {
-            name: 'Red-Green-Refactor',
-            description: 'The core TDD cycle',
-            rationale:
-              'Ensures tests fail first (red), pass with minimal code (green), then improve design (refactor)',
-            examples: [
-              'Red: Write test, see it fail',
-              'Green: Write minimal code to pass',
-              'Refactor: Improve design without changing behavior',
-            ],
-          },
-        ],
-      },
+      explanation: `
+        TDD is a development process where tests drive the design and implementation of code through short, iterative cycles.`,
+      concepts: [
+        {
+          name: 'Red-Green-Refactor',
+          description: 'The core TDD cycle',
+          rationale:
+            'Ensures tests fail first (red), pass with minimal code (green), then improve design (refactor)',
+          examples: [
+            'Red: Write test, see it fail',
+            'Green: Write minimal code to pass',
+            'Refactor: Improve design without changing behavior',
+          ],
+        },
+      ],
     },
   ],
 };
@@ -1816,75 +1813,72 @@ export const apiDesign: Module = {
   components: [
     {
       type: ComponentType.Instruction,
-      instruction: {
-        purpose:
-          'Design RESTful APIs that are intuitive, consistent, and follow industry standards',
+      purpose:
+        'Design RESTful APIs that are intuitive, consistent, and follow industry standards',
 
-        process: [
-          {
-            step: 'Identify resources (nouns, not verbs)',
-            notes: [
-              'Resources should be things, not actions. Use plural nouns.',
-              'Endpoint URLs contain nouns only (e.g., /users, not /getUsers)',
-            ],
-          },
-          'Map HTTP methods to CRUD operations',
-          'Design URL hierarchy reflecting relationships',
-          'Choose appropriate status codes',
-          'Version your API from day one',
-        ],
+      process: [
+        {
+          step: 'Identify resources (nouns, not verbs)',
+          notes: [
+            'Resources should be things, not actions. Use plural nouns.',
+            'Endpoint URLs contain nouns only (e.g., /users, not /getUsers)',
+          ],
+        },
+        'Map HTTP methods to CRUD operations',
+        'Design URL hierarchy reflecting relationships',
+        'Choose appropriate status codes',
+        'Version your API from day one',
+      ],
 
-        constraints: [
-          {
-            rule: 'URLs MUST use plural nouns for collections',
-            notes: [
-              'Good: /users, /users/123, /users/123/orders',
-              'Bad: /user, /getUser, /createUser',
-            ],
-          },
-          'URLs MUST NOT contain verbs',
-        ],
+      constraints: [
+        {
+          rule: 'URLs MUST use plural nouns for collections',
+          notes: [
+            'Good: /users, /users/123, /users/123/orders',
+            'Bad: /user, /getUser, /createUser',
+          ],
+        },
+        'URLs MUST NOT contain verbs',
+      ],
 
-        criteria: [
-          'Are all endpoints resource-based (nouns)?',
-          'Do responses use correct HTTP status codes?',
-          'Is the API versioned?',
-        ],
-      },
+      criteria: [
+        'Are all endpoints resource-based (nouns)?',
+        'Do responses use correct HTTP status codes?',
+        'Is the API versioned?',
+      ],
     },
 
     {
       type: ComponentType.Knowledge,
-      knowledge: {
-        explanation: `
-          REST (Representational State Transfer) is an architectural style
-          for designing networked applications. RESTful APIs use HTTP methods
-          explicitly and leverage standard status codes, making them intuitive
-          and easy to understand.
-        `,
+      explanation: `
+        REST (Representational State Transfer) is an architectural style
+        for designing networked applications. RESTful APIs use HTTP methods
+        explicitly and leverage standard status codes, making them intuitive
+        and easy to understand.
+      `,
 
-        concepts: [
-          {
-            name: 'Resource-Based URLs',
-            description: 'URLs represent resources (things), not actions',
-            rationale:
-              'Resources are stable; operations change. Resource-based design is more maintainable.',
-            examples: [
-              'GET /users/123 (resource: user)',
-              'GET /getUser?id=123 (action: get)',
-              'POST /orders (create order)',
-              'POST /createOrder (redundant verb)',
-            ],
-          },
-        ],
+      concepts: [
+        {
+          name: 'Resource-Based URLs',
+          description: 'URLs represent resources (things), not actions',
+          rationale:
+            'Resources are stable; operations change. Resource-based design is more maintainable.',
+          examples: [
+            'GET /users/123 (resource: user)',
+            'GET /getUser?id=123 (action: get)',
+            'POST /orders (create order)',
+            'POST /createOrder (redundant verb)',
+          ],
+        },
+      ],
 
-        examples: [
-          {
-            title: 'Complete User API',
-            language: 'typescript',
-            rationale:
-              'Shows a well-designed REST API with proper status codes',
-            snippet: `
+      examples: [
+        {
+          title: 'Complete User API',
+          language: 'typescript',
+          rationale:
+            'Shows a well-designed REST API with proper status codes',
+          snippet: `
 app.get('/v1/users', async (req, res) => {
   const users = await db.users.findAll();
   res.status(200).json({ users });
@@ -1902,34 +1896,31 @@ app.post('/v1/users', async (req, res) => {
     }
   }
 });
-            `,
-          },
-        ],
-      },
+          `,
+        },
+      ],
     },
 
     {
       type: ComponentType.Data,
-      data: {
-        format: 'json',
-        description: 'HTTP Status Code Quick Reference',
-        value: {
-          success: {
-            200: 'OK - Request succeeded',
-            201: 'Created - Resource created',
-            204: 'No Content - Success, no body',
-          },
-          client_errors: {
-            400: 'Bad Request - Validation error',
-            401: 'Unauthorized - Authentication required',
-            403: 'Forbidden - Not authorized',
-            404: "Not Found - Resource doesn't exist",
-          },
-          server_errors: {
-            500: 'Internal Server Error - Server error',
-            502: 'Bad Gateway - Upstream error',
-            503: 'Service Unavailable - Temporary unavailability',
-          },
+      format: 'json',
+      description: 'HTTP Status Code Quick Reference',
+      value: {
+        success: {
+          200: 'OK - Request succeeded',
+          201: 'Created - Resource created',
+          204: 'No Content - Success, no body',
+        },
+        client_errors: {
+          400: 'Bad Request - Validation error',
+          401: 'Unauthorized - Authentication required',
+          403: 'Forbidden - Not authorized',
+          404: "Not Found - Resource doesn't exist",
+        },
+        server_errors: {
+          500: 'Internal Server Error - Server error',
+          502: 'Bad Gateway - Upstream error',
+          503: 'Service Unavailable - Temporary unavailability',
         },
       },
     },
