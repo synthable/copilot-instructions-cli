@@ -13,7 +13,7 @@
 
 ### Simplified Structures
 
-- **Component interfaces**: Removed nested duplication. Components now have flat structure with direct property access.
+- **Component interfaces**: Removed nested duplication and `ComponentMetadata`. Components now have a flat structure with direct property access.
   - Before: `instruction: { type: ..., instruction: { purpose: ... } }`
   - After: `instruction: { type?: ..., purpose: ... }`
   - Applies to all three component types: Instruction, Knowledge, Data
