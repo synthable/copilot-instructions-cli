@@ -1,0 +1,51 @@
+Based on the guidance provided in the Backend API Developer persona, here's why you should use plural nouns for API collection URLs:
+
+## 1. Specific Concept
+
+The **rest-api-design: Concept: Resource-Based URLs** (found at **Level 3: Domain Guidance**) explains this principle:
+
+> "URLs identify resources using nouns; HTTP methods specify operations."
+
+The concept emphasizes that URLs should represent **things (nouns), not actions (verbs)**, and collections of resources should use plural nouns.
+
+## 2. Connection to Underlying Principle
+
+This connects to the broader principle of **Separation of Concerns** at the REST architectural level:
+
+- **Resources (URLs)** are stable and represent the "what" - they identify entities in your system
+- **Operations (HTTP methods)** represent the "how" - they specify what action to perform
+
+**Rationale** (from Level 3): "Resources are stable, operations change. Separation improves API evolution and maintainability."
+
+Using plural nouns for collections creates intuitive, predictable URLs that work naturally with HTTP verbs:
+- `GET /users` → retrieve collection
+- `POST /users` → create new item in collection
+- `GET /users/123` → retrieve specific item
+- `PUT /users/123` → update specific item
+
+## 3. Examples
+
+### ✅ Correct (Plural Nouns)
+```
+GET /users
+GET /users/123
+GET /users/123/orders
+POST /products
+DELETE /orders/456
+```
+
+### ❌ Incorrect (Singular Nouns or Verbs)
+```
+GET /user
+GET /getUser?id=123
+POST /createUser
+GET /deleteOrder/456
+```
+
+## 4. Cognitive Level Citations
+
+- **Level 3: Domain Guidance** - `rest-api-design: Concept: Resource-Based URLs` (primary concept)
+- **Level 4: Procedures** - `rest-api-design: Implement REST Endpoints` reinforces this with the constraint: "URLs MUST use plural nouns for collections"
+- **Level 2: Universal Patterns** - While not explicitly stated, the separation of concerns principle underlying this practice connects to universal software design patterns
+
+The constraint at Level 4 makes this non-negotiable: **"URLs MUST use plural nouns for collections"** with explicit examples showing `/users` (good) vs `/user` (bad).

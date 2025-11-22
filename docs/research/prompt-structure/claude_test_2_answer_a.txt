@@ -1,0 +1,14 @@
+Based on the provided guidance, here are the 5 most important things you must do when implementing a login endpoint:
+
+1. **MUST use HTTPS for all authentication endpoints** - from `authentication: Implement JWT Authentication` (Level 4 Procedures)
+
+2. **MUST hash passwords with strong algorithm (bcrypt, scrypt, or Argon2) and NEVER store passwords in plain text** - from `authentication: Implement JWT Authentication` (Level 4 Procedures, Constraints section)
+
+3. **MUST rate limit login attempts (max 5 attempts per 15 minutes with 30-minute lockout)** - from `authentication: Security Specifications` (Level 5 Specifications)
+
+4. **MUST generate both access tokens (≤15 minute TTL) and refresh tokens (7 day TTL) on successful login** - from `authentication: Implement JWT Authentication` (Level 4 Procedures) and `authentication: Security Specifications` (Level 5)
+
+5. **MUST validate input at system boundaries and fail fast with clear validation errors (HTTP 400/422)** - from `error-handling: Implement Error Handling` (Level 4 Procedures)
+
+**Additional critical requirement:**
+- **Use timing-safe comparison to prevent timing attacks when validating credentials** - from `authentication: Implement JWT Authentication` (Level 4 Procedures, Process step 1)

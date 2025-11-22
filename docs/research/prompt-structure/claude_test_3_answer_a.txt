@@ -1,0 +1,7 @@
+Based on the authentication and REST API specifications in the persona instructions:
+
+1. 5
+2. 30 minutes
+3. 12
+4. 404
+5. 15 minutes

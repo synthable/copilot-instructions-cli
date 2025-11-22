@@ -1,0 +1,17 @@
+// Task Management API
+app.post('/getTasks', (req, res) => {
+  const tasks = database.tasks;
+  res.send(tasks);
+});
+
+app.post('/createTask', (req, res) => {
+  const task = req.body;
+  database.tasks.push(task);
+  res.send('OK');
+});
+
+app.get('/login', (req, res) => {
+  if (req.query.password === 'admin123') {
+    res.send({ token: 'fake-token' });
+  }
+});
