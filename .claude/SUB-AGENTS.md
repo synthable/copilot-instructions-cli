@@ -1,156 +1,201 @@
-# Claude Code Agents for UMS
+# Claude Code Sub-Agents for UMS
 
-This directory contains specialized agents for working with the Unified Module System in Claude Code. Each agent is an expert in a specific domain of UMS development.
-
-## What are Agents?
-
-Agents are specialized AI assistants with deep expertise in specific domains. They can be invoked using Claude Code's Task tool to perform complex, multi-step operations autonomously.
-
-## Agent Types
-
-This project has access to two types of agents:
-
-1. **Built-in Agents**: Provided by Claude Code for common development tasks
-2. **Project-Specific Agents**: Custom agents for UMS development
-
-## Built-in Agents
-
-### 🔧 gh-cli-expert
-
-**Purpose**: GitHub CLI operations and repository management expert
-
-**Expertise**:
-- GitHub CLI (`gh`) command execution
-- Pull request management
-- Issue tracking and management
-- GitHub Actions workflow operations
-- Repository operations
-- GitHub API interactions
-
-**When to use**:
-- When user invokes `gh` commands
-- Creating, viewing, or managing pull requests
-- Working with GitHub issues
-- Checking CI/CD workflow status
-- Any GitHub repository operations
-- Analyzing PR comments or reviews
-
-**Key capabilities**:
-- Execute `gh` commands with proper error handling
-- Create and manage pull requests
-- List and filter issues
-- Check workflow run status
-- Clone repositories
-- Manage PR comments and reviews
-- Query GitHub GraphQL API
-
-**Examples**:
-
-```bash
-# User: "Create a PR for this feature"
-# Agent launches gh-cli-expert to handle PR creation
-
-# User: "Check the CI status"
-# Agent launches gh-cli-expert to query workflows
-
-# User: "gh pr list --state open"
-# Agent launches gh-cli-expert to execute command
-```
-
-**Note**: This agent is automatically triggered when `gh` commands are detected in user requests.
+**Critical Rules:**
+1. Use the Task tool to invoke sub-agents - never perform their tasks directly
+2. **Multiple sequential git/gh commands MUST use git-github-operator agent** (single commands OK via Bash)
+3. Provide complete, self-contained prompts - agents cannot ask follow-ups
+4. Check for existing claude-code-guide agents to resume before spawning new ones
+5. Use proactively for security-auditor and architect-reviewer when applicable
 
 ---
 
-## Using Agents
+## Built-in Sub-Agents
 
-### Basic Usage
+### 🔍 general-purpose
 
-Agents are invoked using the Task tool in Claude Code:
+**Use when:**
+- Searching for a keyword/file and NOT confident you'll find it in first few tries
+- Complex multi-step research requiring multiple search rounds
 
-```typescript
-Task(
-  subagent_type: "agent-name",
-  description: "Brief description of task",
-  prompt: `Detailed instructions for the agent...`
-)
+**Don't use when:**
+- Searching for specific class/file you know exists (use Glob/Read)
+- Searching within 2-3 specific files (use Read)
+
+**Example:**
+```
+User: "How does authentication work across the entire application?"
+Assistant: I'll use the Task tool with subagent_type=general-purpose to research the
+authentication flow comprehensively across multiple components.
 ```
 
-**Built-in vs. Project-Specific Agents**:
-- **Built-in agents** (like `gh-cli-expert`) are often triggered automatically when Claude detects relevant commands or contexts
-- **Project-specific agents** (UMS agents) should be explicitly invoked for UMS-related tasks
+---
 
-## Agent Autonomy Levels
+### 📚 claude-code-guide
 
-All agents operate at **high autonomy**, meaning they:
-- Make decisions independently
-- Use tools without asking permission
-- Follow best practices automatically
-- Provide complete solutions
-- Include tests and documentation
+**Use when user asks:**
+- "Can Claude Code..." or "Does Claude Code have..."
+- How to use features (hooks, slash commands, MCP servers)
+- Claude Agent SDK questions
 
-## Best Practices
+**IMPORTANT:** Check if existing claude-code-guide agent can be resumed before spawning new one.
 
-### When to Use Agents
+**Example:**
+```
+User: "How do I create a custom slash command?"
+Assistant: I'll use Task tool to launch claude-code-guide agent to get accurate info
+from official documentation.
+```
 
-✅ **Use agents for**:
-- Complex, multi-step operations
-- Spec-compliant code generation
-- Comprehensive validation
-- System-wide analysis
-- Automated workflows
+---
 
-❌ **Don't use agents for**:
-- Simple file edits
-- Quick questions
-- One-line changes
-- Exploratory tasks
+### 🗂️ Explore
 
-### Working with Agent Output
+**Use when:**
+- User asks WHERE or HOW something works (not specific file/class)
+- Need to understand codebase structure: "how do API endpoints work?"
+- Exploring unfamiliar code areas
 
-1. **Review carefully**: Agents are powerful but not infallible
-2. **Validate results**: Use validation agents to check generated code
-3. **Test thoroughly**: Run tests on agent-generated code
-4. **Document changes**: Update docs when agents modify architecture
-5. **Iterate**: Refine agent prompts based on output quality
+**Don't use when:**
+- Have specific file path (use Read)
+- Planning implementation (use Plan or ExitPlanMode)
 
-## Extending Agents
+**Thoroughness levels:** `quick`, `medium` (default), `very thorough`
 
-To add a new agent:
+**Example:**
+```
+User: "Where are client errors handled?"
+Assistant: I'll use Task tool with subagent_type=Explore to find client error handling.
+Prompt: "Find where client errors are handled. Thoroughness: medium"
+```
 
-1. Create `.claude/agents/agent-name.md`
-2. Define agent metadata (name, description, tools, autonomy)
-3. Document expertise and capabilities
-4. Provide usage guidelines and examples
-5. Update this AGENTS.md file
+---
 
-## Troubleshooting
+### 📋 Plan
 
-### Agent doesn't understand requirements
+**Use when:**
+- Need to plan implementation approach for a feature
+- User asks to plan/design how to implement something
 
-- Provide more context in the prompt
-- Reference specific sections of the spec
-- Include examples of desired output
+**Don't use when:**
+- Purely research/info gathering (use Explore)
 
-### Agent output needs refinement
+---
 
-- Be more specific in requirements
-- Provide examples of edge cases
-- Request validation after generation
+### 🏛️ architect-reviewer
 
-### Agent seems stuck
+**Use when:**
+- Pull requests with significant structural changes
+- Adding new services to the system
+- Need to validate design against SOLID principles
 
-- Check if required files exist
-- Verify spec is accessible
-- Simplify the task into smaller steps
+**Use proactively** for major architectural changes.
 
-## Available Agent Summary
+**Example:**
+```
+User: "Can you check if this new service is designed correctly?"
+Assistant: I'll use Task tool to launch architect-reviewer to analyze service
+boundaries and dependencies.
+```
 
-**Built-in Agents** (1):
-- `gh-cli-expert` - GitHub CLI and repository operations
+---
 
-**Project-Specific Agents** (0):
+### 🐙 git-github-operator
 
-## Resources
+**Use when:**
+- **Multiple sequential git/gh commands** needed (e.g., branch + commit + push)
+- **Creating/reviewing pull requests**
+- **Complex git workflows** (merges, rebases, conflict resolution)
+- **GitHub-specific tasks** (issues, workflows, gh CLI operations)
 
-- **UMS v2.1 Specification**: `docs/spec/unified_module_system_v2_spec.md`
-- **Commands Documentation**: `.claude/COMMANDS.md`
+**Don't use when:**
+- Single, simple git command (e.g., `git status`, `git log`, `git diff`)
+- Single commit or push operation
+- Direct Bash execution is faster and sufficient
+
+**Example - Multiple commands:**
+```
+User: "Create a new branch called feature/user-auth and push it"
+Assistant: I'll use Task tool to launch git-github-operator to create and push the branch.
+Prompt: "Create branch feature/user-auth, switch to it, and push to origin"
+```
+
+**Example - PR creation:**
+```
+User: "Show me the diff and create a PR"
+Assistant: I'll use Task tool to launch git-github-operator to analyze the diff and create a PR.
+```
+
+---
+
+### 🔒 security-auditor
+
+**Use when:**
+- After implementing security-sensitive code (auth, DB, JWT)
+- Before merging feature branches
+- Checking for secrets or vulnerabilities
+
+**Use proactively** after security-related changes.
+
+**Example:**
+```
+User: "I've finished implementing JWT authentication"
+Assistant: Let me use Task tool to launch security-auditor to perform a security audit.
+```
+
+---
+
+## Decision Tree
+
+```
+START
+│
+├─ Multiple sequential git/gh commands OR creating PR?
+│  └─ YES → MUST use git-github-operator
+│  └─ NO (single command) → OK to use Bash directly
+│
+├─ Search for specific file/class I know exists?
+│  └─ YES → Use Glob/Read directly
+│  └─ NO → Use Explore or general-purpose
+│
+├─ User asks about Claude Code features?
+│  └─ YES → Use claude-code-guide (check if can resume existing)
+│
+├─ Security-sensitive code or before merge?
+│  └─ YES → Use security-auditor (proactive)
+│
+├─ Major structural changes?
+│  └─ YES → Use architect-reviewer (proactive)
+│
+└─ Need to understand HOW something works?
+   └─ Use Explore (with thoroughness level)
+```
+
+---
+
+## Common Mistakes
+
+❌ **Running multiple git commands directly** → ✅ **Use git-github-operator for sequential operations**
+
+❌ Using Explore to read a specific file you know exists → ✅ Use Read directly
+
+❌ Using general-purpose for simple searches → ✅ Use Glob/Grep
+
+❌ Spawning new claude-code-guide without checking → ✅ Resume existing agent
+
+❌ Vague agent prompts → ✅ Provide complete context with exact files/scope
+
+❌ Forgetting thoroughness level for Explore → ✅ Always specify: quick/medium/very thorough
+
+---
+
+## Quick Reference
+
+| Agent               | Use For                     | Proactive?          |
+| ------------------- | --------------------------- | ------------------- |
+| general-purpose     | Complex multi-step research | No                  |
+| claude-code-guide   | Claude Code docs/features   | No                  |
+| Explore             | "How/where does X work?"    | No                  |
+| Plan                | Implementation planning     | No                  |
+| architect-reviewer  | Architecture review         | Yes (major changes) |
+| git-github-operator | Git/GitHub operations       | Yes                 |
+| security-auditor    | Security audits             | Yes (security code) |

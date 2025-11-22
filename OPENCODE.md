@@ -246,7 +246,7 @@ This document provides instructions for an AI agent on how to use a peer "brains
 
 This protocol enables a single-turn brainstorming session. The calling agent provides an `artifact` (an initial idea or concept), and the brainstormer agent returns a structured `brainstorm` object containing a diverse set of related ideas.
 
-For the full specification, please see [docs/spec/agent_brainstorming_protocol_v1.md](./docs/spec/agent_brainstorming_protocol_v1.md).
+For the full specification, please see [docs/spec/agent_brainstorming_protocol_v1.md](./docs/spec/agent-brainstorming-protocol-v1.md).
 
 ## 2. How to Use This Protocol
 
