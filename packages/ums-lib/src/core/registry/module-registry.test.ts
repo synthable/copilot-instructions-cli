@@ -2,7 +2,15 @@
  * Tests for ModuleRegistry
  */
 
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import {
+  describe,
+  it,
+  expect,
+  vi,
+  beforeEach,
+  afterEach,
+  type MockInstance,
+} from 'vitest';
 import { ModuleRegistry } from './module-registry.js';
 import { ConflictError } from '../../utils/errors.js';
 import type {
@@ -13,7 +21,7 @@ import type {
 
 describe('ModuleRegistry', () => {
   let registry: ModuleRegistry;
-  let consoleWarnSpy: ReturnType<typeof vi.spyOn>;
+  let consoleWarnSpy: MockInstance;
 
   // Mock modules for testing
   const mockModule1: Module = {
