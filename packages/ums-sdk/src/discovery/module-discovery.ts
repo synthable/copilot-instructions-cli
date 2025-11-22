@@ -63,8 +63,13 @@ export class ModuleDiscovery {
    */
   private async discoverInPath(basePath: string): Promise<Module[]> {
     try {
+      // Check if there's a 'modules/' subdirectory and use that as the search path
+      const { existsSync } = await import('node:fs');
+      const modulesSubdir = join(basePath, 'modules');
+      const searchPath = existsSync(modulesSubdir) ? modulesSubdir : basePath;
+
       // Find all module files in this path
-      const filePaths = await this.findModuleFiles([basePath]);
+      const filePaths = await this.findModuleFiles([searchPath]);
 
       // Load each module (skip failures with warnings)
       const modules: Module[] = [];
@@ -72,7 +77,7 @@ export class ModuleDiscovery {
 
       for (const filePath of filePaths) {
         try {
-          const moduleId = this.extractModuleId(filePath, basePath);
+          const moduleId = this.extractModuleId(filePath, searchPath);
           const module = await this.loader.loadModule(filePath, moduleId);
           modules.push(module);
         } catch (error) {
