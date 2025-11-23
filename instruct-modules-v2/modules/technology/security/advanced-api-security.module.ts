@@ -1,4 +1,5 @@
-import { ComponentType, CognitiveLevel, type Module } from 'ums-sdk';
+import type { Module } from 'ums-sdk';
+import { ComponentType, CognitiveLevel } from 'ums-sdk';
 
 export const advancedApiSecurity: Module = {
   /**
@@ -52,17 +53,27 @@ export const advancedApiSecurity: Module = {
      * @property {string} description - A clear, single-sentence summary of the module's function.
      * @description Used in tooltips, list views, and other places where a brief summary is required.
      */
-    description: 'A comprehensive guide to designing, implementing, and testing advanced security measures for modern APIs, based on OWASP Top 10 and industry best practices.',
+    description:
+      'A comprehensive guide to designing, implementing, and testing advanced security measures for modern APIs, based on OWASP Top 10 and industry best practices.',
     /**
      * @property {string} semantic - A detailed, semantically rich paragraph for vector embedding and semantic search.
      * @description This content is fed into embedding models to create a vector representation of the module, allowing discovery tools to find modules based on conceptual similarity to a user's query.
      */
-    semantic: 'API security, authentication (AuthN), authorization (AuthZ), JWT, OAuth2, OpenID Connect, rate limiting, input validation, output encoding, threat modeling, penetration testing, secure headers, content security policy (CSP), cross-site scripting (XSS), SQL injection (SQLi), broken object level authorization (BOLA), OWASP API Security Top 10.',
+    semantic:
+      'API security, authentication (AuthN), authorization (AuthZ), JWT, OAuth2, OpenID Connect, rate limiting, input validation, output encoding, threat modeling, penetration testing, secure headers, content security policy (CSP), cross-site scripting (XSS), SQL injection (SQLi), broken object level authorization (BOLA), OWASP API Security Top 10.',
     /**
      * @property {string[]} tags - Additional lowercase keywords for search and filtering.
      * @description Tags provide another dimension for discovery, often capturing methodologies (`owasp`), patterns (`jwt`), or characteristics not covered by `capabilities` or `domain`.
      */
-    tags: ['security', 'owasp', 'jwt', 'oauth2', 'authentication', 'authorization', 'best-practices'],
+    tags: [
+      'security',
+      'owasp',
+      'jwt',
+      'oauth2',
+      'authentication',
+      'authorization',
+      'best-practices',
+    ],
     /**
      * @property {string} license - The SPDX license identifier for the module's content.
      * @description Clarifies the legal terms under which the module can be used and distributed.
@@ -109,7 +120,8 @@ export const advancedApiSecurity: Module = {
          * @property {string} purpose - The specific purpose of this component within the module.
          * @description Explains why this component exists, e.g., to provide the core workflow.
          */
-        purpose: 'Provide a step-by-step process for implementing a secure API development lifecycle.',
+        purpose:
+          'Provide a step-by-step process for implementing a secure API development lifecycle.',
         /**
          * @property {string[]} context - Describes the situations or workflows where this component is most useful.
          * @description Helps tools or AIs understand when to apply this specific block of instructions.
@@ -124,99 +136,64 @@ export const advancedApiSecurity: Module = {
          * @property {string} purpose - The primary objective or goal of this instruction set.
          * @description Rendered as a high-level summary of the instructions to follow.
          */
-        purpose: 'To systematically apply security controls at every stage of the API lifecycle, from design to deployment.',
+        purpose:
+          'To systematically apply security controls at every stage of the API lifecycle, from design to deployment.',
         /**
          * @property {Array<string | object>} process - A sequence of step-by-step procedural instructions.
-         * @description Rendered as a numbered list for the AI to follow sequentially. Can contain simple strings or complex step objects.
+         * @description Rendered as a numbered list for the AI to follow sequentially. Can contain simple strings or objects with a `step` and optional `notes`.
          */
         process: [
           {
             /**
-             * @property {string} step - The main description of the action to perform in this step.
+             * @property {string} step - The main description of the action to perform in this step. Conditionals (e.g., "if X, then Y") should be included here.
              */
-            step: 'Establish Strong Authentication',
+            step: 'Establish Strong Authentication during the initial design and authentication layer implementation',
             /**
-             * @property {string} detail - A more detailed explanation of the step, providing context or clarification.
+             * @property {string[]} notes - Optional sub-bullets for clarification, examples, or verification steps.
              */
-            detail: 'Implement a robust mechanism to verify the identity of clients and users. Prefer token-based standards like OAuth2 and OIDC over static API keys.',
-            /**
-             * @property {string} when - A condition describing when this step should be performed.
-             */
-            when: 'During the initial design and authentication layer implementation.',
-            /**
-             * @property {object} validate - A post-condition check to verify the step was completed correctly.
-             */
-            validate: {
-              /**
-               * @property {string} check - The condition to be verified. Rendered as a checklist item for the AI.
-               */
-              check: 'Authentication mechanism uses a standard, well-vetted protocol (e.g., OAuth2 with PKCE).',
-              /**
-               * @property {string} severity - The importance of the check. 'error' means it is critical.
-               */
-              severity: 'error',
-            },
+            notes: [
+              'Implement a robust mechanism to verify the identity of clients and users. Prefer token-based standards like OAuth2 and OIDC over static API keys.',
+              'Verify: Authentication mechanism uses a standard, well-vetted protocol (e.g., OAuth2 with PKCE).',
+            ],
           },
           {
             step: 'Enforce Granular Authorization',
-            detail: 'Implement authorization checks at the beginning of every request handler to ensure the authenticated principal has the required permissions to perform the requested action on the specific resource.',
-            /**
-             * @property {string} do - A specific, actionable instruction within a step.
-             */
-            do: 'Check permissions against a role or attribute-based access control (RBAC/ABAC) system.',
-            validate: {
-              check: 'Every endpoint that modifies or accesses sensitive data performs an explicit authorization check.',
-              severity: 'critical',
-            },
+            notes: [
+              'Implement authorization checks at the beginning of every request handler to ensure the authenticated principal has the required permissions to perform the requested action on the specific resource.',
+              'Execute: Check permissions against a role or attribute-based access control (RBAC/ABAC) system.',
+              'Verify: Every endpoint that modifies or accesses sensitive data performs an explicit authorization check.',
+            ],
           },
           'Apply Rate Limiting and Resource Quotas',
           {
-            step: 'Validate All Incoming Data',
-            detail: 'Rigorously validate all incoming data from clients, including path parameters, query strings, headers, and request bodies. Use a schema-based validation library.',
-            when: 'At the edge, before any business logic is executed.',
-            validate: {
-              check: 'A validation schema is defined and enforced for every API endpoint.',
-              severity: 'error',
-            },
+            step: 'Validate All Incoming Data at the edge, before any business logic is executed',
+            notes: [
+              'Rigorously validate all incoming data from clients, including path parameters, query strings, headers, and request bodies. Use a schema-based validation library.',
+              'Verify: A validation schema is defined and enforced for every API endpoint.',
+            ],
           },
         ],
         /**
          * @property {object[]} constraints - Non-negotiable rules that the AI must follow.
-         * @description Rendered as a list of strict rules, often with a `NEVER` or `ALWAYS` prefix.
+         * @description Rendered as a list of strict rules. Severity is indicated using RFC 2119 keywords (e.g., MUST, SHOULD NOT) in the rule text.
          */
         constraints: [
           {
             /**
-             * @property {string} rule - The description of the rule to be followed.
+             * @property {string} rule - The constraint rule. MUST use RFC 2119 keywords (MUST, SHOULD, MAY) for severity.
              */
-            rule: 'NEVER trust user-supplied data.',
+            rule: 'MUST NOT trust user-supplied data.',
             /**
-             * @property {string} severity - The consequence of violating the rule.
+             * @property {string[]} notes - Optional notes for examples, rationale, or clarification.
              */
-            severity: 'error',
-            when: 'Always',
-            /**
-             * @property {object} examples - Concrete examples of valid and invalid patterns related to the constraint.
-             * @description Used to provide clear, actionable guidance to the AI.
-             */
-            examples: {
-              /**
-               * @property {string[]} valid - Examples of code or patterns that adhere to the rule.
-               */
-              valid: ["const userId = schema.validate(req.params.id);"],
-              /**
-               * @property {string[]} invalid - Examples of code or patterns that violate the rule.
-               */
-              invalid: ["const userId = req.params.id;"],
-            },
+            notes: [
+              'Good: const userId = schema.validate(req.params.id);',
+              'Bad: const userId = req.params.id;',
+            ],
           },
           {
-            rule: 'NEVER expose internal identifiers in URLs or responses.',
-            severity: 'warning',
-            examples: {
-              valid: ["/users/a7b2c-d9e1f"],
-              invalid: ["/users/12345"],
-            },
+            rule: 'SHOULD NOT expose internal identifiers in URLs or responses.',
+            notes: ['Good: /users/a7b2c-d9e1f', 'Bad: /users/12345'],
           },
         ],
         /**
@@ -230,35 +207,31 @@ export const advancedApiSecurity: Module = {
         ],
         /**
          * @property {object[]} criteria - A list of verification criteria to determine the success of the final output.
-         * @description Rendered as a final checklist for the AI to review its work against.
+         * @description Rendered as a final checklist for the AI to review its work against. Priority is indicated using RFC 2119 keywords.
          */
         criteria: [
           {
             /**
-             * @property {string} item - The verification item to be checked.
+             * @property {string} item - The verification criterion. MUST use RFC 2119 keywords (MUST, SHOULD, MAY) for priority.
              */
-            item: 'Are all data access endpoints protected by authentication?',
+            item: 'All data access endpoints MUST be protected by authentication.',
             /**
              * @property {string} category - A string used to group related criteria together.
              * @description This can be used by rendering tools to organize criteria into sections.
              */
             category: 'Authentication',
-            severity: 'critical',
           },
           {
-            item: 'Does the API implement object-level authorization checks?',
+            item: 'The API MUST implement object-level authorization checks.',
             category: 'Authorization',
-            severity: 'critical',
           },
           {
-            item: 'Is all user input validated against a strict schema?',
+            item: 'All user input SHOULD be validated against a strict schema.',
             category: 'Input Validation',
-            severity: 'important',
           },
           {
-            item: 'Are secure HTTP headers (e.g., CSP, HSTS) implemented?',
+            item: 'Secure HTTP headers (e.g., CSP, HSTS) MAY be implemented.',
             category: 'Transport Security',
-            severity: 'nice-to-have',
           },
         ],
       },
@@ -266,7 +239,8 @@ export const advancedApiSecurity: Module = {
     {
       type: ComponentType.Knowledge,
       metadata: {
-        purpose: 'To educate on the theoretical foundations and common patterns of API security.',
+        purpose:
+          'To educate on the theoretical foundations and common patterns of API security.',
         context: ['learning', 'security-architecture', 'threat-awareness'],
       },
       /**
@@ -277,7 +251,8 @@ export const advancedApiSecurity: Module = {
          * @property {string} explanation - A high-level conceptual overview of the knowledge being imparted.
          * @description Rendered as an introductory paragraph in the knowledge section.
          */
-        explanation: 'Modern API security is a multi-layered discipline that goes beyond simple authentication. It involves understanding common threats, applying architectural patterns, and adopting a security-first mindset.',
+        explanation:
+          'Modern API security is a multi-layered discipline that goes beyond simple authentication. It involves understanding common threats, applying architectural patterns, and adopting a security-first mindset.',
         /**
          * @property {object[]} concepts - A list of core concepts to teach the AI.
          * @description Used to explain foundational ideas, terminology, and theories.
@@ -291,19 +266,27 @@ export const advancedApiSecurity: Module = {
             /**
              * @property {string} description - A detailed explanation of the concept.
              */
-            description: 'A compact, URL-safe means of representing claims to be transferred between two parties. It is commonly used for stateless authentication sessions.',
+            description:
+              'A compact, URL-safe means of representing claims to be transferred between two parties. It is commonly used for stateless authentication sessions.',
             /**
              * @property {string} rationale - An explanation of why this concept is important.
              */
-            rationale: 'JWTs allow services to verify identity and claims without needing to contact an identity provider on every request, improving scalability.',
+            rationale:
+              'JWTs allow services to verify identity and claims without needing to contact an identity provider on every request, improving scalability.',
             /**
              * @property {string[]} examples - Simple, illustrative examples of the concept.
              */
-            examples: ['Header: {"alg": "HS256", "typ": "JWT"}', 'Payload: {"sub": "12345", "name": "John Doe", "iat": 1516239022}'],
+            examples: [
+              'Header: {"alg": "HS256", "typ": "JWT"}',
+              'Payload: {"sub": "12345", "name": "John Doe", "iat": 1516239022}',
+            ],
             /**
              * @property {string[]} tradeoffs - A list of pros and cons or other trade-offs associated with the concept.
              */
-            tradeoffs: ['Stateless nature makes immediate revocation difficult without a blacklist.', 'Can become large if too many claims are included.'],
+            tradeoffs: [
+              'Stateless nature makes immediate revocation difficult without a blacklist.',
+              'Can become large if too many claims are included.',
+            ],
           },
         ],
         /**
@@ -319,7 +302,8 @@ export const advancedApiSecurity: Module = {
             /**
              * @property {string} rationale - Explains what the code example demonstrates.
              */
-            rationale: 'Demonstrates a typical middleware pattern for validating a JWT bearer token in an Express.js application.',
+            rationale:
+              'Demonstrates a typical middleware pattern for validating a JWT bearer token in an Express.js application.',
             /**
              * @property {string} language - The programming language of the snippet, used for syntax highlighting.
              */
@@ -368,25 +352,34 @@ function validateToken(req, res, next) {
             /**
              * @property {string} useCase - Describes the specific situations or contexts where this pattern is applicable.
              */
-            useCase: 'To prevent denial-of-service (DoS) attacks and brute-force attempts on authentication endpoints.',
+            useCase:
+              'To prevent denial-of-service (DoS) attacks and brute-force attempts on authentication endpoints.',
             /**
              * @property {string} description - Explains the mechanics of the pattern: how it works.
              */
-            description: 'Track the number of requests from a specific IP address or user account within a given time window. If the count exceeds a threshold, temporarily block further requests.',
+            description:
+              'Track the number of requests from a specific IP address or user account within a given time window. If the count exceeds a threshold, temporarily block further requests.',
             /**
              * @property {string[]} advantages - Lists the benefits of applying the pattern.
              */
-            advantages: ['Protects downstream services from being overwhelmed.', 'Increases resilience against simple DoS attacks.'],
+            advantages: [
+              'Protects downstream services from being overwhelmed.',
+              'Increases resilience against simple DoS attacks.',
+            ],
             /**
              * @property {string[]} disadvantages - Lists the drawbacks or trade-offs of using the pattern.
              */
-            disadvantages: ['Can inadvertently block legitimate high-volume users if not configured carefully.', 'Distributed rate limiting can be complex to implement.'],
+            disadvantages: [
+              'Can inadvertently block legitimate high-volume users if not configured carefully.',
+              'Distributed rate limiting can be complex to implement.',
+            ],
             /**
              * @property {object} example - A concrete illustration of the pattern in action.
              */
             example: {
               title: 'IP-based Rate Limiter in Express.js',
-              rationale: 'A simple in-memory rate limiter for an Express.js application.',
+              rationale:
+                'A simple in-memory rate limiter for an Express.js application.',
               language: 'typescript',
               snippet: `
 import rateLimit from 'express-rate-limit';
@@ -408,7 +401,8 @@ app.use('/api/', apiLimiter);
     {
       type: ComponentType.Data,
       metadata: {
-        purpose: 'To provide structured, machine-readable data for reference, such as checklists and configurations.',
+        purpose:
+          'To provide structured, machine-readable data for reference, such as checklists and configurations.',
         context: ['security-auditing', 'configuration-as-code'],
       },
       /**
@@ -430,18 +424,54 @@ app.use('/api/', apiLimiter);
          * @description This value is serialized (e.g., to a JSON string) and placed inside a formatted code block for the AI to reference as a structured checklist.
          */
         value: {
-          "owaspApiTop10_2023": [
-            { "id": "API1:2023", "name": "Broken Object Level Authorization", "checked": false },
-            { "id": "API2:2023", "name": "Broken Authentication", "checked": false },
-            { "id": "API3:2023", "name": "Broken Object Property Level Authorization", "checked": false },
-            { "id": "API4:2023", "name": "Unrestricted Resource Consumption", "checked": false },
-            { "id": "API5:2023", "name": "Broken Function Level Authorization", "checked": false },
-            { "id": "API6:2023", "name": "Unrestricted Access to Sensitive Business Flows", "checked": false },
-            { "id": "API7:2023", "name": "Server Side Request Forgery", "checked": false },
-            { "id": "API8:2023", "name": "Security Misconfiguration", "checked": false },
-            { "id": "API9:2023", "name": "Improper Inventory Management", "checked": false },
-            { "id": "API10:2023", "name": "Unsafe Consumption of APIs", "checked": false }
-          ]
+          owaspApiTop10_2023: [
+            {
+              id: 'API1:2023',
+              name: 'Broken Object Level Authorization',
+              checked: false,
+            },
+            { id: 'API2:2023', name: 'Broken Authentication', checked: false },
+            {
+              id: 'API3:2023',
+              name: 'Broken Object Property Level Authorization',
+              checked: false,
+            },
+            {
+              id: 'API4:2023',
+              name: 'Unrestricted Resource Consumption',
+              checked: false,
+            },
+            {
+              id: 'API5:2023',
+              name: 'Broken Function Level Authorization',
+              checked: false,
+            },
+            {
+              id: 'API6:2023',
+              name: 'Unrestricted Access to Sensitive Business Flows',
+              checked: false,
+            },
+            {
+              id: 'API7:2023',
+              name: 'Server Side Request Forgery',
+              checked: false,
+            },
+            {
+              id: 'API8:2023',
+              name: 'Security Misconfiguration',
+              checked: false,
+            },
+            {
+              id: 'API9:2023',
+              name: 'Improper Inventory Management',
+              checked: false,
+            },
+            {
+              id: 'API10:2023',
+              name: 'Unsafe Consumption of APIs',
+              checked: false,
+            },
+          ],
         },
       },
     },
