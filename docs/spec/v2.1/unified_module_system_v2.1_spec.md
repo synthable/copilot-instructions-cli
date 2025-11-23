@@ -200,26 +200,14 @@ A valid module for v2.1 MUST contain the following top-level keys:
 
 - **Type**: `Array<string>`
 - **Required**: Yes
-- **Purpose**: Declare what functional capabilities this module provides (what it helps you do)
+- **Purpose**: Declare what functional capabilities this module provides (what it helps you do). This field accepts multiple values.
 - **Constraints**:
-  - MUST be a non-empty array
-  - Each capability SHOULD be lowercase kebab-case
-  - Capabilities SHOULD be concrete, functional, and searchable
-  - Focus on **what** the module helps accomplish (not the domain or pattern)
-- **Examples**:
-  - `["testing", "quality-assurance", "unit-testing", "integration-testing", "test-automation"]` - helps with testing and quality assurance through comprehensive testing strategies, including unit tests, integration tests, and automated test suites to ensure code reliability and prevent regressions
-  - `["api-design", "rest-api", "http-methods", "resource-modeling", "api-versioning"]` - helps design REST APIs by defining resource-based endpoints, mapping HTTP methods to CRUD operations, modeling resources effectively, and implementing versioning for backward compatibility
-  - `["error-handling", "logging", "debugging", "fault-tolerance", "exception-management"]` - helps handle errors and debug issues by implementing robust error handling patterns, structured logging for observability, debugging techniques, fault tolerance mechanisms, and proper exception propagation
-  - `["performance-optimization", "caching", "query-optimization", "resource-management", "scalability"]` - helps optimize performance through caching strategies, database query optimization, efficient resource management, and scalability patterns to handle increased load
-  - `["type-safety", "compile-time-checking", "static-analysis", "type-inference", "generic-programming"]` - helps achieve type safety by leveraging compile-time checking, static analysis tools, type inference systems, and generic programming to catch errors early and improve code maintainability (vs. `domain: "typescript"`)
-  - `["component-composition", "state-management", "reactive-programming", "component-lifecycle", "data-flow"]` - helps compose UI components by managing state effectively, implementing reactive programming patterns, handling component lifecycles, and ensuring proper data flow in user interfaces (vs. `domain: "react"`)
-  - `["architecture", "maintainability", "modular-design", "dependency-injection", "design-patterns"]` - helps design maintainable systems through architectural principles, modular design approaches, dependency injection, and application of proven design patterns for long-term code health (vs. `tags: ["solid", "ddd"]`)
-  - `["data-modeling", "schema-design", "normalization", "relationships", "data-validation"]` - helps design data structures by creating effective schemas, applying normalization techniques, defining relationships between entities, and implementing data validation rules (vs. `domain: "database"`)
-  - `["security", "authentication", "authorization", "encryption", "access-control"]` - helps implement security measures including authentication mechanisms, authorization policies, data encryption, and access control systems to protect against threats
-  - `["documentation", "api-specification", "code-comments", "readme-writing", "api-documentation"]` - helps create clear documentation through API specifications, comprehensive code comments, well-structured README files, and detailed API documentation for better developer experience
-  - `["deployment", "ci-cd", "automation", "infrastructure-as-code", "release-management"]` - helps automate deployment processes with CI/CD pipelines, infrastructure as code practices, automated testing in pipelines, and effective release management strategies
-  - `["monitoring", "observability", "metrics", "logging", "alerting"]` - helps track system health through monitoring dashboards, observability practices, key metrics collection, centralized logging, and proactive alerting for issues
-- **Distinction**: Use `capabilities` for **what the module helps accomplish**, `domain` for **where it applies**, and `metadata.tags` for **patterns/keywords**
+  - MUST be a non-empty array of strings.
+  - Each capability SHOULD be lowercase kebab-case.
+  - While authors can use any string, prioritizing values from the pre-defined list is recommended for discoverability.
+  - Focus on **what** the module helps accomplish (not the domain or pattern).
+- **See**: For a comprehensive list of recommended capabilities, see the [Pre-defined Taxonomies](./ums_v2.1_taxonomies.md#recommended-capabilities) document.
+- **Distinction**: Use `capabilities` for **what the module helps accomplish**, `domain` for **where it applies**, and `metadata.tags` for **patterns/keywords**.
 
 #### `metadata`
 
@@ -260,19 +248,13 @@ A valid module for v2.1 MUST contain the following top-level keys:
 
 - **Type**: `String` or `Array<string>`
 - **Required**: No
-- **Purpose**: Declare the technology, language, or field this module applies to (where it's used)
+- **Purpose**: Declare the technology, language, or field this module applies to (where it's used). This field accepts a single value or multiple values.
 - **Constraints**:
-  - Use for technology/language specificity (e.g., `"typescript"`, `"python"`)
-  - Use for technical domains (e.g., `"backend"`, `"frontend"`, `"database"`)
-  - Use `"language-agnostic"` for universal applicability
-  - Can be a single string or array of strings
-- **Examples**:
-  - `"python"` - Python-specific module
-  - `"language-agnostic"` - Applies to all languages
-  - `["backend", "api"]` - Backend API development
-  - `["frontend", "react", "typescript"]` - React + TypeScript frontend
-  - `["database", "postgresql"]` - PostgreSQL database specific
-- **Distinction**: Use `domain` for **where the module applies** (technology/field), `capabilities` for **what it helps accomplish**, and `metadata.tags` for **additional keywords/patterns**
+  - Can be a single string or an array of strings.
+  - While authors can use any string, prioritizing values from the pre-defined list is recommended for discoverability.
+  - Use `"language-agnostic"` for universal applicability.
+- **See**: For a comprehensive list of recommended domains, see the [Pre-defined Taxonomies](./ums_v2.1_taxonomies.md#recommended-domains) document.
+- **Distinction**: Use `domain` for **where the module applies** (technology/field), `capabilities` for **what it helps accomplish**, and `metadata.tags` for **additional keywords/patterns**.
 
 ### 2.1.1. TypeScript Module Export Requirements
 
@@ -487,25 +469,18 @@ interface DataComponent {
 
 - **Type**: `Array<string>`
 - **Required**: No
-- **Purpose**: Additional keywords, patterns, and descriptive labels for search and filtering
+- **Purpose**: Additional keywords, patterns, and descriptive labels for search and filtering. This field accepts multiple values.
 - **Constraints**:
-  - All tags MUST be lowercase, SHOULD be kebab-case
-  - Use for patterns, methodologies, and keywords not captured by `capabilities` or `domain`
-- **Common Tag Types**:
-  - **Patterns**: `"solid"`, `"ddd"`, `"tdd"`, `"mvc"`, `"factory-pattern"`
-  - **Methodologies**: `"agile"`, `"devops"`, `"ci-cd"`
-  - **Characteristics**: `"async"`, `"reactive"`, `"functional"`, `"imperative"`
-  - **Keywords**: `"best-practices"`, `"anti-patterns"`, `"refactoring"`
-- **Examples**:
-  - `["tdd", "red-green-refactor"]` - TDD pattern keywords
-  - `["solid", "single-responsibility"]` - SOLID principle tags
-  - `["async", "promises", "event-loop"]` - Async programming keywords
-  - `["best-practices", "clean-code"]` - General quality tags
+  - MUST be an array of strings.
+  - All tags MUST be lowercase and SHOULD be kebab-case.
+  - While authors can use any string, prioritizing values from the pre-defined list is recommended for discoverability.
+  - Use for patterns, methodologies, and keywords not captured by `capabilities` or `domain`.
+- **See**: For a comprehensive list of recommended tags, see the [Pre-defined Taxonomies](./ums_v2.1_taxonomies.md#recommended-tags) document.
 - **Distinction**:
   - Use `capabilities` for **what** the module helps accomplish (functional capabilities)
   - Use `domain` for **where** it applies (technology/field)
   - Use `cognitiveLevel` for **abstraction level** (0-6 hierarchy)
-  - Use `tags` for **patterns, keywords, and additional descriptors**
+  - Use `tags` for **patterns, keywords, and additional descriptors**.
 
 #### `license`, `authors`, `homepage`
 
@@ -1687,6 +1662,12 @@ interface CompositionEvent {
   - `import` directive for direct module composition
   - `bindings` block for dynamic composition
 - **Schema Evolution**: Support for v2.1+ with backward compatibility
+
+## 9. Pre-defined Taxonomies
+
+To promote consistency and discoverability across the UMS ecosystem, we provide a comprehensive, non-exhaustive list of recommended values for `domain`, `capabilities`, and `metadata.tags`. Module authors are strongly encouraged to use these taxonomies to improve module searchability and composition.
+
+For the complete list, see the **[UMS v2.1 Pre-defined Taxonomies](./ums_v2.1_taxonomies.md)** document.
 
 ## Appendix A: Complete Module Examples
 
