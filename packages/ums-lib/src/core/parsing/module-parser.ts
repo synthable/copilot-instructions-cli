@@ -1,17 +1,20 @@
 /**
- * UMS v2.0 Module Parser
+ * UMS v2.0/v2.1 Module Parser
  * Handles parsing and basic validation of module data structures.
+ * Supports both v2.0 and v2.1 schema versions for backward compatibility.
  */
 
 import type { Module } from '../../types/index.js';
 import { ModuleParseError } from '../../utils/errors.js';
 
 /**
- * Parses and validates a raw object as a UMS v2.0 module.
+ * Parses and validates a raw object as a UMS v2.0 or v2.1 module.
  *
  * This function performs initial structural validation to ensure the object
  * has the required fields to be considered a module. It does not perform
  * a full validation against the UMS specification.
+ *
+ * Supports both v2.0 and v2.1 schema versions for backward compatibility.
  *
  * @param obj - The raw object to parse as a module.
  * @returns The validated module object.
@@ -28,9 +31,9 @@ export function parseModule(obj: unknown): Module {
   if (typeof module.id !== 'string') {
     throw new ModuleParseError('Module missing or invalid required field: id');
   }
-  if (module.schemaVersion !== '2.0') {
+  if (module.schemaVersion !== '2.0' && module.schemaVersion !== '2.1') {
     throw new ModuleParseError(
-      `Module schemaVersion must be "2.0", but found "${module.schemaVersion}"`
+      `Module schemaVersion must be "2.0" or "2.1", but found "${module.schemaVersion}"`
     );
   }
   if (typeof module.version !== 'string') {

@@ -17,8 +17,8 @@ describe('generateModuleDigest', () => {
     const digest = generateModuleDigest(content);
 
     expect(digest).toBeTruthy();
-    expect(digest).toHaveLength(64); // SHA-256 produces 64 hex characters
-    expect(digest).toMatch(/^[a-f0-9]{64}$/); // Hex string
+    expect(digest).toHaveLength(71); // sha256: prefix (7) + 64 hex characters
+    expect(digest).toMatch(/^sha256:[a-f0-9]{64}$/); // Prefixed hex string
   });
 
   it('should generate consistent digests for same content', () => {
@@ -42,7 +42,7 @@ describe('generateModuleDigest', () => {
     const digest = generateModuleDigest('');
 
     expect(digest).toBeTruthy();
-    expect(digest).toHaveLength(64);
+    expect(digest).toHaveLength(71); // sha256: prefix (7) + 64 hex characters
   });
 
   it('should handle special characters and unicode', () => {
@@ -50,7 +50,7 @@ describe('generateModuleDigest', () => {
     const digest = generateModuleDigest(content);
 
     expect(digest).toBeTruthy();
-    expect(digest).toHaveLength(64);
+    expect(digest).toHaveLength(71); // sha256: prefix (7) + 64 hex characters
   });
 });
 
@@ -69,8 +69,8 @@ describe('generatePersonaDigest', () => {
     const digest = generatePersonaDigest(basePersona);
 
     expect(digest).toBeTruthy();
-    expect(digest).toHaveLength(64);
-    expect(digest).toMatch(/^[a-f0-9]{64}$/);
+    expect(digest).toHaveLength(71); // sha256: prefix (7) + 64 hex characters
+    expect(digest).toMatch(/^sha256:[a-f0-9]{64}$/); // Prefixed hex string
   });
 
   it('should generate consistent digests for same persona', () => {
@@ -122,7 +122,7 @@ describe('generatePersonaDigest', () => {
     const digest = generatePersonaDigest(persona);
 
     expect(digest).toBeTruthy();
-    expect(digest).toHaveLength(64);
+    expect(digest).toHaveLength(71); // sha256: prefix (7) + 64 hex characters
   });
 });
 
@@ -164,7 +164,7 @@ describe('generateBuildReport', () => {
       schemaVersion: '2.0',
     });
     expect(report.toolVersion).toBeTruthy();
-    expect(report.personaDigest).toHaveLength(64);
+    expect(report.personaDigest).toHaveLength(71); // sha256: prefix (7) + 64 hex characters
     expect(report.buildTimestamp).toMatch(/^\d{4}-\d{2}-\d{2}T/); // ISO 8601
     expect(report.moduleGroups).toHaveLength(1);
   });

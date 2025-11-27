@@ -1,17 +1,20 @@
 /**
- * UMS v2.0 Persona Parser
+ * UMS v2.0/v2.1 Persona Parser
  * Handles parsing and basic validation of persona data structures.
+ * Supports both v2.0 and v2.1 schema versions for backward compatibility.
  */
 
 import type { Persona } from '../../types/index.js';
 import { PersonaParseError } from '../../utils/errors.js';
 
 /**
- * Parses and validates a raw object as a UMS v2.0 persona.
+ * Parses and validates a raw object as a UMS v2.0 or v2.1 persona.
  *
  * This function performs initial structural validation to ensure the object
  * has the required fields to be considered a persona. It does not perform
  * a full validation against the UMS specification.
+ *
+ * Supports both v2.0 and v2.1 schema versions for backward compatibility.
  *
  * @param obj - The raw object to parse as a persona.
  * @returns The validated persona object.
@@ -30,9 +33,9 @@ export function parsePersona(obj: unknown): Persona {
       'Persona missing or invalid required field: name'
     );
   }
-  if (persona.schemaVersion !== '2.0') {
+  if (persona.schemaVersion !== '2.0' && persona.schemaVersion !== '2.1') {
     throw new PersonaParseError(
-      `Persona schemaVersion must be "2.0", but found "${persona.schemaVersion}"`
+      `Persona schemaVersion must be "2.0" or "2.1", but found "${persona.schemaVersion}"`
     );
   }
   if (typeof persona.version !== 'string') {

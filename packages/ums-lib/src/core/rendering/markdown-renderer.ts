@@ -1,6 +1,6 @@
 /**
- * UMS v2.0 Markdown Renderer - Pure Functions
- * Implements Markdown rendering according to UMS v2.0 specification Section 7.1
+ * UMS v2.1 Markdown Renderer - Pure Functions
+ * Implements Markdown rendering according to UMS v2.1 specification Section 7.1
  */
 
 import type {
@@ -181,7 +181,7 @@ export function renderInstructionComponent(
       }
       return text;
     });
-    sections.push(constraints.join('\n') + '\n');
+    sections.push(constraints.join('\n\n') + '\n');
   }
 
   // Principles
@@ -315,11 +315,20 @@ export function renderKnowledgeComponent(
 export function renderConcept(concept: Concept): string {
   const sections: string[] = [];
 
-  sections.push(`### ${concept.name}\n`);
+  sections.push(`#### Concept: ${concept.name}\n`);
   sections.push(`${concept.description}\n`);
 
   if (concept.rationale) {
     sections.push(`**Rationale:** ${concept.rationale}\n`);
+  }
+
+  // Per spec 6.3.4: examples come before trade-offs
+  if (concept.examples && concept.examples.length > 0) {
+    sections.push('**Examples:**\n');
+    for (const example of concept.examples) {
+      sections.push(`- ${example}`);
+    }
+    sections.push('');
   }
 
   if (concept.tradeoffs && concept.tradeoffs.length > 0) {
@@ -330,48 +339,58 @@ export function renderConcept(concept: Concept): string {
     sections.push('');
   }
 
-  if (concept.examples && concept.examples.length > 0) {
-    sections.push('**Examples:**\n');
-    for (const example of concept.examples) {
-      sections.push(`- ${example}`);
-    }
-    sections.push('');
-  }
-
   return sections.join('\n');
 }
 
 /**
  * Renders an example to Markdown
+ * Per spec 6.3.5: If rationale or snippet is empty/not present, omit that section
  * @param example - The example to render
  * @returns Rendered example content
  */
 export function renderExample(example: Example): string {
   const sections: string[] = [];
 
-  sections.push(`### ${example.title}\n`);
-  sections.push(`${example.rationale}\n`);
+  sections.push(`#### Example: ${example.title}\n`);
 
-  const language = example.language ?? '';
-  const codeBlock = language
-    ? `\`\`\`${language}\n${example.snippet}\n\`\`\``
-    : `\`\`\`\n${example.snippet}\n\`\`\``;
-  sections.push(`${codeBlock}\n`);
+  // Per spec 6.3.5: Only render rationale if non-empty
+  if (example.rationale.trim()) {
+    sections.push(`**Rationale:** ${example.rationale}\n`);
+  }
+
+  // Per spec 6.3.5: Only render code block if snippet is non-empty
+  if (example.snippet.trim()) {
+    const language = example.language ?? '';
+    const codeBlock = language
+      ? `\`\`\`${language}\n${example.snippet}\n\`\`\``
+      : `\`\`\`\n${example.snippet}\n\`\`\``;
+    sections.push(`${codeBlock}\n`);
+  }
 
   return sections.join('\n');
 }
 
 /**
  * Renders a pattern to Markdown
+ * Per spec 6.3.6: If useCase, description, advantages, disadvantages, or example
+ * are empty/not present, omit their corresponding sections
  * @param pattern - The pattern to render
  * @returns Rendered pattern content
  */
 export function renderPattern(pattern: Pattern): string {
   const sections: string[] = [];
 
-  sections.push(`### ${pattern.name}\n`);
-  sections.push(`**Use Case:** ${pattern.useCase}\n`);
-  sections.push(`${pattern.description}\n`);
+  sections.push(`#### Pattern: ${pattern.name}\n`);
+
+  // Per spec 6.3.6: Only render useCase if non-empty
+  if (pattern.useCase.trim()) {
+    sections.push(`**Use Case:** ${pattern.useCase}\n`);
+  }
+
+  // Per spec 6.3.6: Only render description if non-empty
+  if (pattern.description.trim()) {
+    sections.push(`${pattern.description}\n`);
+  }
 
   if (pattern.advantages && pattern.advantages.length > 0) {
     sections.push('**Advantages:**\n');

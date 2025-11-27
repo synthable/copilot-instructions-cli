@@ -346,11 +346,12 @@ describe('renderer', () => {
 
       expect(result).toContain('## Explanation\n\nThe Observer pattern');
       expect(result).toContain('## Concepts\n');
-      expect(result).toContain('### Subject\n');
+      expect(result).toContain('#### Concept: Subject\n');
       expect(result).toContain('## Examples\n');
-      expect(result).toContain('### Basic Observer\n');
+      expect(result).toContain('#### Example: Basic Observer\n');
+      expect(result).toContain('**Rationale:** Simple implementation');
       expect(result).toContain('## Patterns\n');
-      expect(result).toContain('### Push vs Pull\n');
+      expect(result).toContain('#### Pattern: Push vs Pull\n');
     });
   });
 
@@ -388,7 +389,7 @@ describe('renderer', () => {
       };
       const result = renderConcept(concept);
 
-      expect(result).toContain('### Test Concept\n');
+      expect(result).toContain('#### Concept: Test Concept\n');
       expect(result).toContain('A test description');
       expect(result).toContain('**Rationale:** Why this matters');
       expect(result).toContain('**Examples:**\n');
@@ -406,7 +407,7 @@ describe('renderer', () => {
       };
       const result = renderConcept(concept);
 
-      expect(result).toContain('### Caching Strategy\n');
+      expect(result).toContain('#### Concept: Caching Strategy\n');
       expect(result).toContain('Store frequently accessed data in memory');
       expect(result).toContain('**Trade-offs:**\n');
       expect(result).toContain(
@@ -430,7 +431,7 @@ describe('renderer', () => {
       };
       const result = renderConcept(concept);
 
-      expect(result).toContain('### Microservices\n');
+      expect(result).toContain('#### Concept: Microservices\n');
       expect(result).toContain('**Rationale:** Enable independent scaling');
       expect(result).toContain('**Trade-offs:**\n');
       expect(result).toContain(
@@ -451,8 +452,8 @@ describe('renderer', () => {
       };
       const result = renderExample(example);
 
-      expect(result).toContain('### Test Example\n');
-      expect(result).toContain('Shows a pattern');
+      expect(result).toContain('#### Example: Test Example\n');
+      expect(result).toContain('**Rationale:** Shows a pattern');
       expect(result).toContain('```javascript\nconst x = 1;\n```');
     });
   });
@@ -468,7 +469,7 @@ describe('renderer', () => {
       };
       const result = renderPattern(pattern);
 
-      expect(result).toContain('### Test Pattern\n');
+      expect(result).toContain('#### Pattern: Test Pattern\n');
       expect(result).toContain('**Use Case:** When to use it');
       expect(result).toContain('**Advantages:**\n');
       expect(result).toContain('- Pro 1');
