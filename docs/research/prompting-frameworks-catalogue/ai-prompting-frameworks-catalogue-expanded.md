@@ -2,6 +2,42 @@
 
 This expanded version adds concrete prompt templates and runnable examples you can adapt. Templates use placeholder syntax like `{INPUT}` or `{EXAMPLES}` for programmatic insertion.
 
+- [1. Instruction-Following \& Task Framing](#1-instruction-following--task-framing)
+  - [Role-Based Prompting](#role-based-prompting)
+  - [Instruction Templating](#instruction-templating)
+  - [Instruction Chaining / Decomposition](#instruction-chaining--decomposition)
+  - [Self-Consistency (Aggregation Controller Pseudocode)](#self-consistency-aggregation-controller-pseudocode)
+- [2. Few-Shot \& Demonstration-Based](#2-few-shot--demonstration-based)
+  - [Few-Shot Classification Template](#few-shot-classification-template)
+  - [Retrieval-Augmented Example Selection (Controller Logic)](#retrieval-augmented-example-selection-controller-logic)
+- [3. Reasoning Variants](#3-reasoning-variants)
+  - [Chain-of-Thought Prompt](#chain-of-thought-prompt)
+  - [Tree-of-Thought (Controller Outline)](#tree-of-thought-controller-outline)
+- [4. Retrieval \& Knowledge Integration](#4-retrieval--knowledge-integration)
+  - [Simple RAG Prompt](#simple-rag-prompt)
+  - [RAG + CoT Hybrid](#rag--cot-hybrid)
+- [5. Tool Use \& Interaction](#5-tool-use--interaction)
+  - [ReAct Pattern](#react-pattern)
+  - [Tool-Call Guardrails](#tool-call-guardrails)
+- [6. Optimization \& Robustness](#6-optimization--robustness)
+  - [Output Constraints Template](#output-constraints-template)
+  - [Automatic Prompt Optimization Loop (Pseudo)](#automatic-prompt-optimization-loop-pseudo)
+- [7. Evaluation \& Safety](#7-evaluation--safety)
+  - [Self-Evaluation Prompt](#self-evaluation-prompt)
+  - [Counterfactual Prompt](#counterfactual-prompt)
+- [8. Creativity \& Content Generation](#8-creativity--content-generation)
+  - [Iterative Revision Workflow](#iterative-revision-workflow)
+  - [Prompted Template Filling](#prompted-template-filling)
+- [9. Specialized \& Emerging](#9-specialized--emerging)
+  - [Multimodal (Image + Text)](#multimodal-image--text)
+  - [Instruction Distillation Template](#instruction-distillation-template)
+- [Sample Controller Snippets (Language-Agnostic Pseudocode)](#sample-controller-snippets-language-agnostic-pseudocode)
+  - [Majority Vote Self-Consistency](#majority-vote-self-consistency)
+  - [Simple TF-IDF Retrieval (JS Outline)](#simple-tf-idf-retrieval-js-outline)
+- [Notes](#notes)
+- [Next Ideas](#next-ideas)
+
+
 ## 1. Instruction-Following & Task Framing
 
 ### Role-Based Prompting
