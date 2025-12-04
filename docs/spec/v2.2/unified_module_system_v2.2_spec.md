@@ -1,126 +1,83 @@
-# Specification: The Unified Module System (UMS) v2.1
+# Specification: The Unified Module System (UMS) v2.2
 
-## Changes from v2.0
+## Changes from v2.1
 
-### Removed Features
+### Non-Breaking Enhancements
 
-- **ModuleRelationships**: Removed. Will be replaced by Cognitive Hierarchy system and External Graph tool for dependency management.
-- **QualityMetadata component**: Removed. Will be replaced by external registry (design in progress).
-- **ProblemSolution component**: Removed.
-- **ProcessStep fields**: Removed `detail`, `validate`, `when`, `do` fields.
-- **Constraint fields**: Removed `severity`, `when`, `examples`, `rationale` fields.
-- **Criterion fields**: Removed `severity` field.
+1. **Component Metadata**
+   - Added optional `id` field to components for stable addressing
+   - Added optional `tags` field to components for fine-grained categorization
+   - Enables component-level identification without changing module structure
 
-### Simplified Structures
+2. **Runtime Preparation** (Optional Features)
+   - Build tools MAY compile modules into 6 atomic primitive types
+   - Primitives: `Procedure`, `Policy`, `Evaluation`, `Concept`, `Demonstration`, `Reference`
+   - URI addressing scheme prepared for forward compatibility
+   - Enables advanced tooling like vector search and RAG retrieval
 
-- **Component interfaces**: Removed nested duplication and `ComponentMetadata`. Components now have a flat structure with direct property access.
-  - Before: `instruction: { type: ..., instruction: { purpose: ... } }`
-  - After: `instruction: { type?: ..., purpose: ... }`
-  - Applies to both component types: Instruction and Knowledge
-- **ProcessStep**: Now `string | {step: string, notes?: string[]}` (removed complex validation/conditional fields).
-- **Constraint**: Now `string | {rule: string, notes?: string[]}` (use RFC 2119 keywords in rule text for severity).
-- **Criterion**: Now `string | {item: string, category?: string, notes?: string[]}` (use RFC 2119 keywords in item text for priority).
+3. **Tooling Enhancements**
+   - Build tools SHOULD generate `.d.ts` type definitions for published modules
+   - Improves IDE autocomplete and type checking for persona composition
+   - Better developer experience when importing and composing modules
 
-### Clarifications
+### Philosophy
 
-- **Component `type` field**: When using shorthand properties (`instruction`, `knowledge`), the `type` field is **not required** and should be omitted. The property name provides implicit type discrimination. The `type` field is only required when components are defined in the `components` array.
+v2.2 is a **preparation release** that maintains 100% backward compatibility while adding optional features that:
 
-See Architecture Decision Records (ADRs) in `docs/architecture/adr/` for detailed rationale and migration guidance.
+- Enable advanced tooling and IDE support
+- Prepare the runtime for RAG-optimized retrieval (see v3.0)
+- Provide a smooth migration path to future architectural improvements
+
+All new features are **optional and additive** - existing v2.1 modules work without modification.
 
 ---
 
-## Migration from v2.0
+## Migration from v2.1
 
-**Breaking Changes:**
+**Authoring Format:** v2.2 introduces **no breaking changes** to the authoring format. All v2.1 modules remain valid in v2.2.
 
-1. **`ProcessStep` simplified** - Removed `validate`, `when`, and `do` fields
-   - Use `notes` array for step elaboration instead of `detail`
-   - Express conditionals and validation naturally in step text
-   - Validation belongs in `criteria` array, not embedded in process steps
+**Runtime Changes:** v2.2 is primarily a **compiler/runtime upgrade**:
 
-2. **`Constraint` simplified** - Removed `severity`, `when`, `examples`, and `rationale` fields
-   - Use RFC 2119 keywords (MUST/SHOULD/MAY) for severity in rule text
-   - Use `notes` array for examples, rationale, and clarifications
-   - Format examples with `Good:` and `Bad:` prefixes (no emojis)
-
-3. **`Criterion` simplified** - Removed `severity` field, kept `category`, added `notes`
-   - Use RFC 2119 keywords (MUST/SHOULD/MAY) for priority in criterion text
-   - Use `category` for grouping (now rendered as subheadings)
-   - Use `notes` array for test instructions, expected results, and verification steps
+- Modules are now compiled into 6 atomic primitives for vector search
+- URI addressing scheme for referencing primitives
+- Shared component files (`.component.ts`) for reusability
 
 **Migration Path:**
 
+Simply update `schemaVersion` from `"2.1"` to `"2.2"` in your modules. All other changes are optional:
+
 ```typescript
-// ProcessStep: v2.0 (deprecated)
-{
-  step: 'Start service',
-  detail: 'Detailed explanation',
-  when: 'Service not running',
-  do: 'Execute systemctl start',
-  validate: { check: 'Status active', severity: 'error' }
-}
+// v2.1 module - still works in v2.2
+export const myModule: Module = {
+  id: 'my-module',
+  version: '1.0.0',
+  schemaVersion: '2.2', // Only change required
+  // ... rest unchanged
+};
 
-// ProcessStep: v2.1 (recommended)
-{
-  step: 'Start service if not running',
-  notes: [
-    'Execute: `systemctl start myapp`',
-    'Verify: Service status shows active'
-  ]
-}
+// v2.2 module - with new features
+export const myModule: Module = {
+  id: 'my-module',
+  version: '1.0.0',
+  schemaVersion: '2.2',
+  // ... metadata etc.
 
-// Constraint: v2.0 (deprecated)
-{
-  rule: 'Use HTTPS',
-  severity: 'error',
-  when: 'In production',
-  rationale: 'Security requirement',
-  examples: {
-    valid: ['https://api.example.com'],
-    invalid: ['http://api.example.com']
+  instruction: {
+    id: 'deployment',        // Optional: component ID
+    tags: ['production'],    // Optional: component tags
+    purpose: '...',
+    process: [...]
   }
-}
-
-// Constraint: v2.1 (recommended)
-{
-  rule: 'MUST use HTTPS in production environments',
-  notes: [
-    'Security requirement for all production traffic',
-    'Good: https://api.example.com',
-    'Bad: http://api.example.com'
-  ]
-}
-
-// Criterion: v2.0 (deprecated)
-{
-  item: 'All endpoints return proper status codes',
-  category: 'API Quality',
-  severity: 'critical'
-}
-
-// Criterion: v2.1 (recommended)
-{
-  item: 'All endpoints MUST return proper status codes',
-  category: 'API Quality',  // Category now renders as subheading
-  notes: [
-    'Test: Send GET/POST requests to all endpoints',
-    'Expected: 2xx for success, 4xx for client errors, 5xx for server errors',
-    'Verify: Check response status codes match expected values'
-  ]
-}
+};
 ```
 
-**See:**
-
-- [ADR 0005](../architecture/adr/0005-simplify-processstep-structure.md) - ProcessStep rationale
-- [ADR 0006](../architecture/adr/0006-simplify-constraint-structure.md) - Constraint rationale
-- [ADR 0007](../architecture/adr/0007-simplify-criterion-structure.md) - Criterion rationale
+No breaking changes. All new features are opt-in.
 
 ---
 
 ## 1. Overview & Core Principles
 
-The Unified Module System (UMS) v2.1 is a specification for a data-centric, modular, and composable ecosystem for AI instructions. It treats AI instructions as machine-readable source code, moving beyond the limitations of document-centric prompt files.
+The Unified Module System (UMS) v2.2 is a specification for a data-centric, modular, and composable ecosystem for AI instructions. It treats AI instructions as machine-readable source code, moving beyond the limitations of document-centric prompt files.
 
 ### 1.1. Key Features
 
@@ -136,11 +93,12 @@ The Unified Module System (UMS) v2.1 is a specification for a data-centric, modu
 2. **Atomicity**: Each module represents a single, cohesive instructional concept
 3. **Composability**: Modules are composed of reusable component blocks
 4. **Static Composition**: Sophisticated AI behaviors are created by explicitly sequencing modules in a persona file
+5. **Compiler/Linker Architecture**: Modules are authored as cohesive files but compiled into atomic primitives for vector retrieval.
 
 ### 1.3. Standard Output Artifact
 
 - The canonical source format is TypeScript (`.module.ts`)
-- The v2.1 build process produces a single Markdown (`.md`) prompt as the final output
+- The v2.2 build process produces a single Markdown (`.md`) prompt as the final output
 - Markdown is a rendering of the typed components; it is not authoring source
 
 ## 2. The Module Definition File
@@ -149,13 +107,13 @@ All modules MUST be defined as TypeScript files with the `.module.ts` extension.
 
 ### 2.1. Top-Level Keys
 
-A valid module for v2.1 MUST contain the following top-level keys:
+A valid module for v2.2 MUST contain the following top-level keys:
 
 | Key              | Type                 | Required? | Description                                       |
 | :--------------- | :------------------- | :-------- | :------------------------------------------------ |
 | `id`             | String               | Yes       | Unique module identifier                          |
 | `version`        | String               | Yes       | Semantic version (SemVer 2.0.0)                   |
-| `schemaVersion`  | String               | Yes       | Must be `"2.1"`                                   |
+| `schemaVersion`  | String               | Yes       | Must be `"2.2"`                                   |
 | `capabilities`   | Array[String]        | Yes       | What functional capabilities this module provides |
 | `cognitiveLevel` | Integer              | Yes       | Cognitive abstraction level (0-6)                 |
 | `metadata`       | Object               | Yes       | Human-readable and AI-discoverable metadata       |
@@ -191,7 +149,7 @@ A valid module for v2.1 MUST contain the following top-level keys:
 
 - **Type**: `String`
 - **Required**: Yes
-- **Format**: MUST be `"2.1"` for v2.1 modules
+- **Format**: MUST be `"2.2"` for v2.2 modules
 - **Purpose**: Declare which UMS specification version this module conforms to
 - **Validation**: Build tools MUST validate this field and reject incompatible versions
 
@@ -257,9 +215,9 @@ A valid module for v2.1 MUST contain the following top-level keys:
 
 ### 2.1.1. TypeScript Module Export Requirements
 
-Module files MUST export exactly one Module object. The export name is a **convention**, not a requirement—the module's `id` field is the source of truth for identification.
+All module files MUST export exactly one `Module` object using a **named export**. The export name is a **convention** (not a requirement)—the module's `id` field is the source of truth for identification.
 
-**Export Naming Convention** (recommended):
+**Export Naming Convention** (Recommended):
 
 - Take the final segment of the module ID (after the last `/`)
 - Transform kebab-case to camelCase
@@ -268,17 +226,29 @@ Module files MUST export exactly one Module object. The export name is a **conve
 **Examples**:
 
 ```typescript
-// All valid for module ID "error-handling"
-export const errorHandling: Module = { id: "error-handling", ... };
-export const errorHandlingModule: Module = { id: "error-handling", ... };
+// error-handling.module.ts
+// Module ID: "error-handling"
+export const errorHandling: Module = { ... };
 
-// Valid: co-export shared arrays alongside the module
+// test-driven-development.module.ts
+// Module ID: "principle/testing/test-driven-development"
+export const testDrivenDevelopment: Module = { ... };
+
+// systems-thinking.module.ts
+// Module ID: "foundation/reasoning/systems-thinking"
+export const systemsThinking: Module = { ... };
+
+// Also valid: alternative naming styles
+export const errorHandlingModule: Module = { id: "error-handling", ... };
+export const myErrorHandler: Module = { id: "error-handling", ... };
+
+// Valid: co-export shared arrays and helpers
 export const SECURITY_CONSTRAINTS: ConstraintGroup = { ... };
 export const myModule: Module = { id: "my-module", ... };
 
 // INVALID: multiple Module exports (use separate files)
 export const v1: Module = { ... };
-export const v2: Module = { ... };  // ❌ Use separate files
+export const v2: Module = { ... };  // ❌ Each file MUST export exactly one Module
 ```
 
 **Rationale**: Named exports enable:
@@ -290,9 +260,9 @@ export const v2: Module = { ... };  // ❌ Use separate files
 
 **Validation**: Build tools MUST verify that:
 
-1. The module file exports exactly one Module object
+1. The module file exports exactly one `Module` object (additional non-Module exports are permitted)
 2. The export conforms to the `Module` interface
-3. Additional exports (shared arrays, types, helpers) are permitted
+3. The exported object's `id` field is used for identification (not the export name)
 
 ### 2.2. Component Architecture
 
@@ -359,10 +329,11 @@ Tells the AI **what to do**.
 ```typescript
 interface InstructionComponent {
   type?: "instruction"; // Required in components array, omitted in shorthand
+  id?: string; // Optional component ID for URI addressing
+  tags?: string[]; // Optional component-level tags for categorization
   purpose: string; // Primary objective
   process?: Array<string | ProcessStep>; // Sequential steps
   constraints?: Constraint[]; // Non-negotiable rules
-  principles?: string[]; // High-level guidelines
   criteria?: Criterion[]; // Success criteria
 }
 ```
@@ -370,10 +341,11 @@ interface InstructionComponent {
 **Fields**:
 
 - `type` (conditional): Required when used in `components` array, omitted when using shorthand `instruction` property
+- `id` (optional): Component identifier for URI addressing (e.g., `"deploy"`, `"validation"`)
+- `tags` (optional): Array of lowercase keywords for component-level categorization (e.g., `["production", "critical"]`)
 - `purpose` (required): The primary objective or goal of this instruction set
 - `process` (optional): Step-by-step procedural instructions
 - `constraints` (optional): Non-negotiable rules that MUST be followed
-- `principles` (optional): High-level guiding principles
 - `criteria` (optional): Verification criteria for success
 
 #### Component Type: Knowledge
@@ -383,9 +355,12 @@ Teaches the AI **concepts and patterns**.
 ```typescript
 interface KnowledgeComponent {
   type?: "knowledge"; // Required in components array, omitted in shorthand
+  id?: string; // Optional component ID for URI addressing
+  tags?: string[]; // Optional component-level tags for categorization
   explanation: string; // High-level overview
+  principles?: string[]; // References to activate latent model knowledge
   concepts?: Concept[]; // Core concepts
-  examples?: Array<string | Example>; // Simple strings or full Example objects
+  examples?: Array<string | Example>; // Illustrative examples (strings or full Example objects)
   patterns?: Pattern[]; // Design patterns
 }
 ```
@@ -393,21 +368,24 @@ interface KnowledgeComponent {
 **Fields**:
 
 - `type` (conditional): Required when used in `components` array, omitted when using shorthand `knowledge` property
+- `id` (optional): Component identifier for URI addressing (e.g., `"theory"`, `"examples"`)
+- `tags` (optional): Array of lowercase keywords for component-level categorization (e.g., `["advanced", "tutorial"]`)
 - `explanation` (required): High-level conceptual overview
 - `concepts` (optional): Core concepts to understand
-- `examples` (optional): Simple strings or full Example objects for concrete code/text examples
+- `examples` (optional): Concrete code/text examples
 - `patterns` (optional): Design patterns and best practices
 
 ### 2.3. The `metadata` Block
 
-| Key           | Type          | Required? | Description                                       |
-| :------------ | :------------ | :-------- | :------------------------------------------------ |
-| `name`        | String        | Yes       | Human-readable, Title Case name                   |
-| `description` | String        | Yes       | Concise, single-sentence summary                  |
-| `semantic`    | String        | No        | Override for auto-generated semantic search text  |
-| `tags`        | Array[String] | No        | Lowercase keywords for filtering                  |
-| `attribution` | Object        | No        | Attribution metadata (license, authors, homepage) |
-| `lifecycle`   | Object        | No        | Lifecycle metadata (deprecated, replacedBy)       |
+| Key           | Type          | Required? | Description                                        |
+| :------------ | :------------ | :-------- | :------------------------------------------------- |
+| `name`        | String        | Yes       | Human-readable, Title Case name                    |
+| `description` | String        | Yes       | Concise, single-sentence summary                   |
+| `semantic`    | String        | No        | Override for auto-generated semantic field         |
+| `tags`        | Array[String] | No        | Lowercase keywords for filtering                   |
+| `attribution` | Object        | No        | Nested object for license, authors, homepage       |
+| `deprecated`  | Boolean       | No        | Flag indicating if the module is deprecated        |
+| `replacedBy`  | String        | No        | Module ID of successor (requires deprecated: true) |
 
 #### `name`
 
@@ -428,9 +406,9 @@ interface KnowledgeComponent {
 #### `semantic`
 
 - **Type**: `String`
-- **Required**: No
-- **Purpose**: Override for auto-generated semantic search text. If omitted, build tools generate it automatically.
-- **Build-time behavior**: When not provided, build tools SHOULD generate semantic text by concatenating:
+- **Required**: No (auto-generated at build time)
+- **Purpose**: Override for auto-generated semantic field. When omitted, build tools generate this field automatically.
+- **Build-time behavior**: When not provided, the semantic field is generated by concatenating:
   ```typescript
   const generatedSemantic = [
     module.metadata.name,
@@ -443,8 +421,9 @@ interface KnowledgeComponent {
     .filter(Boolean)
     .join(" ");
   ```
-- **Constraints**:
-  - If provided, SHOULD be a complete paragraph
+- **When to override**: Only provide this field when the auto-generated content is insufficient for your search/discovery needs.
+- **Constraints** (when provided):
+  - SHOULD be a complete paragraph
   - SHOULD include relevant keywords, synonyms, technical details
   - Optimized for `all-mpnet-base-v2` embedding model
 - **Example**: `"TDD, test-driven development, red-green-refactor, unit testing, test-first development, quality assurance, regression prevention"`
@@ -468,7 +447,7 @@ interface KnowledgeComponent {
 
 #### `attribution`
 
-Optional object for attribution and legal clarity.
+Nested object for attribution and legal clarity.
 
 ```typescript
 interface Attribution {
@@ -478,43 +457,95 @@ interface Attribution {
 }
 ```
 
-**Example:**
+**Example**:
 
 ```typescript
-attribution: {
-  license: 'MIT',
-  authors: ['Jane Doe <jane@example.com>'],
-  homepage: 'https://github.com/example/module'
+metadata: {
+  name: "My Module",
+  description: "...",
+  attribution: {
+    license: "MIT",
+    authors: ["Jane Doe <jane@example.com>"],
+    homepage: "https://github.com/example/my-module"
+  }
 }
 ```
 
-#### `lifecycle`
+#### `deprecated`
 
-Optional object for lifecycle management.
+- **Type**: `Boolean`
+- **Required**: No
+- **Purpose**: Flag indicating if the module is deprecated
+- **Example**: `deprecated: true`
+
+#### `replacedBy`
+
+- **Type**: `String`
+- **Required**: No
+- **Purpose**: Module ID of the successor module
+- **Constraints**:
+  - MUST be a valid module ID format
+  - MUST NOT be present unless `deprecated: true`
+- **Example**: `replacedBy: "new-module-id"`
+
+**Example**:
 
 ```typescript
-interface Lifecycle {
-  deprecated?: boolean; // Deprecation flag
-  replacedBy?: string; // ID of successor module
-}
-```
-
-**Constraints:**
-
-- `replacedBy` MUST NOT be present unless `deprecated: true`
-
-**Example:**
-
-```typescript
-lifecycle: {
+metadata: {
+  name: "Legacy Module",
+  description: "...",
   deprecated: true,
-  replacedBy: 'new-module-id'
+  replacedBy: "new-module-id"
 }
 ```
 
-## 3. Directive Types
+## 3. The Runtime Architecture
 
-### 3.1. ProcessStep
+UMS v2.2 introduces a distinction between the **Authoring Schema** (what humans write) and the **Runtime Schema** (what machines read).
+
+### 3.1. The 5 Atomic Primitives
+
+The compiler transforms source components into the following runtime primitives, stored individually in the Vector Database:
+
+| Primitive Type    | Source Field              | Function             | Agentic Role          |
+| :---------------- | :------------------------ | :------------------- | :-------------------- |
+| **Procedure**     | `Instruction.process`     | Algorithms & Steps   | Worker Agent          |
+| **Policy**        | `Instruction.constraints` | Rules & Boundaries   | System/Supervisor     |
+| **Evaluation**    | `Instruction.criteria`    | Verification Logic   | Critic/QA Agent       |
+| **Concept**       | `Knowledge.concepts`      | Definitions & Theory | Tutor/Latent Patching |
+| **Demonstration** | `Knowledge.examples`      | Few-Shot Examples    | Behavior Steering     |
+
+## 4. The Runtime URI Scheme
+
+UMS v2.2 defines a Uniform Resource Identifier (URI) scheme for referencing specific primitives within the distributed graph.
+
+**Format**: `ums://{module-id}#{component-id}/{primitive-type}`
+
+### 4.1. Segments
+
+1.  **Protocol**: `ums://`
+2.  **Authority**: `{module-id}` (The `id` defined in the module header)
+3.  **Fragment**: `#{component-id}/{primitive-type}`
+    - `{component-id}`: The explicit ID of the component object (e.g., `deploy`, `maintenance`).
+    - `{primitive-type}`: `procedure`, `policy`, `evaluation`, `concept`, `demonstration`, or `reference`.
+
+### 4.2. Examples
+
+- **Entire Module**: `ums://infra/postgres`
+- **Specific Procedure**: `ums://infra/postgres#deploy/procedure`
+- **Specific Policy**: `ums://infra/postgres#maintenance/policy`
+
+## 5. Shared Components (`.component.ts`)
+
+To support reusability without polluting the vector index with duplicates, v2.2 formalizes the `.component.ts` file type.
+
+- **Extension**: `.component.ts`
+- **Export**: Must export a `Component` object (Instruction or Knowledge).
+- **Indexing**: These files are **NOT** indexed directly. They exist solely to be imported and composed into `.module.ts` files.
+
+## 6. Directive Types
+
+### 6.1. ProcessStep
 
 ```typescript
 type ProcessStep =
@@ -554,28 +585,28 @@ process: [
 ];
 ```
 
-### 3.2. Constraint
+### 6.2. Constraint
 
-Constraints can be simple strings, objects with notes, or grouped collections.
+A constraint can be a simple string, an object with notes, or a group of related constraints.
 
 ```typescript
-// Simple constraint object
+// Individual constraint types
 interface ConstraintObject {
   rule: string; // The constraint rule. Use RFC 2119 keywords (MUST, SHOULD, MAY) for severity.
   notes?: string[]; // Optional notes for examples, rationale, or clarification.
 }
 
-// Grouped constraints (avoids per-item category duplication)
+// Grouped constraints (replaces per-item category field)
 interface ConstraintGroup {
-  group: string; // Group name renders as ### heading
-  rules: Array<string | ConstraintObject>;
+  group: string; // Group name (renders as ### heading)
+  rules: Array<string | ConstraintObject>; // Constraints within this group
 }
 
-// Combined type for constraints array
+// Union type for constraints array
 type ConstraintEntry = string | ConstraintObject | ConstraintGroup;
 ```
 
-**Simple Example (most common):**
+**Simple Example (90% of cases):**
 
 ```typescript
 constraints: [
@@ -622,8 +653,8 @@ constraints: [
   {
     group: "Performance",
     rules: [
-      "SHOULD cache expensive queries",
-      "MUST use pagination for large datasets",
+      "Response times SHOULD be under 100ms",
+      "MUST implement pagination for list endpoints",
     ],
   },
 ];
@@ -640,7 +671,7 @@ export const SECURITY_CONSTRAINTS: ConstraintGroup = {
 
 // my-module.module.ts
 import { SECURITY_CONSTRAINTS } from "../shared/constraints/security.ts";
-constraints: [SECURITY_CONSTRAINTS, "Other constraint"];
+constraints: [SECURITY_CONSTRAINTS, "Additional constraint"];
 ```
 
 **Authoring Guidelines:**
@@ -662,48 +693,34 @@ For notes:
 
 **See:** [ADR 0006](../architecture/adr/0006-simplify-constraint-structure.md) for detailed rationale.
 
-### 3.3. Criterion
+### 6.3. Criterion
 
-Criteria can be simple strings, objects with notes, or grouped collections.
+A criterion can be a simple string, an object with notes, or a group of related criteria.
 
 ```typescript
-// Simple criterion object
+// Individual criterion types
 interface CriterionObject {
   item: string; // The verification criterion
   notes?: string[]; // Optional test instructions, expected results, verification steps
 }
 
-// Grouped criteria (avoids per-item category duplication)
+// Grouped criteria (replaces per-item category field)
 interface CriterionGroup {
-  group: string; // Group name renders as ### heading
-  items: Array<string | CriterionObject>;
+  group: string; // Group name (renders as ### heading)
+  items: Array<string | CriterionObject>; // Criteria within this group
 }
 
-// Combined type for criteria array
+// Union type for criteria array
 type CriterionEntry = string | CriterionObject | CriterionGroup;
 ```
 
-**Simple Example (most common):**
+**Simple Example (90% of cases):**
 
 ```typescript
 criteria: [
   "All endpoints return proper status codes",
   "API responses match documented schemas",
   "Error handling covers common edge cases",
-];
-```
-
-**Example with Notes:**
-
-```typescript
-criteria: [
-  {
-    item: "Rate limiting prevents abuse",
-    notes: [
-      "Test: Send 100 requests in 1 minute using same API key",
-      "Expected: Receive 429 Too Many Requests after limit",
-    ],
-  },
 ];
 ```
 
@@ -724,11 +741,39 @@ criteria: [
   },
   {
     group: "Performance",
+    items: ["Response times under 100ms", "Database queries optimized"],
+  },
+];
+```
+
+**Example with Test Details:**
+
+```typescript
+criteria: [
+  {
+    group: "Security",
     items: [
-      "Response times under 100ms",
+      {
+        item: "Rate limiting prevents abuse",
+        notes: [
+          "Test: Send 100 requests in 1 minute using same API key",
+          "Expected: Receive 429 Too Many Requests after limit",
+          "Verify: Rate limit headers present (X-RateLimit-Limit, X-RateLimit-Remaining)",
+          "See RFC 6585 section 4 for 429 status code specification",
+        ],
+      },
+    ],
+  },
+  {
+    group: "Performance",
+    items: [
       {
         item: "Database queries optimized",
-        notes: ["Verify: All queries use indexes"],
+        notes: [
+          "Test: Run EXPLAIN on all queries",
+          "Verify: All queries use indexes",
+          "Verify: No N+1 query patterns",
+        ],
       },
     ],
   },
@@ -751,23 +796,23 @@ For notes:
 - Include external references (RFCs, standards, guidelines)
 - Use template literals for multi-line test scenarios
 
-**Rendering:** Categories render as `### Category` subheadings. Criteria with notes are bolded, with notes as bulleted sub-items.
+**Rendering:** Groups render as `### Group` subheadings. Criteria with notes are bolded, with notes as bulleted sub-items.
 
 **See:** [ADR 0007](../architecture/adr/0007-simplify-criterion-structure.md) for detailed rationale.
 
-### 3.4. Concept
+### 6.4. Concept
 
 ```typescript
 interface Concept {
   name: string; // Concept name
   description: string; // Detailed explanation
   rationale?: string; // Why this matters
-  examples?: Array<string | Example>; // Simple strings or full Example objects
+  examples?: Array<string | Example>; // Examples (strings or full Example objects)
   tradeoffs?: string[]; // Pros and cons
 }
 ```
 
-**Example**:
+**Example with string examples**:
 
 ```typescript
 concepts: [
@@ -776,21 +821,38 @@ concepts: [
     description: "URLs represent resources (things), not actions",
     rationale: "Resources are stable; operations change",
     examples: [
-      "GET /users/123 (resource: user)", // Simple string
+      "GET /users/123 (resource: user)",
       "GET /getUser?id=123 (action: get)",
+    ],
+  },
+];
+```
+
+**Example with full Example objects**:
+
+```typescript
+concepts: [
+  {
+    name: "Repository Pattern",
+    description: "Abstract data access behind a repository interface",
+    rationale: "Decouples business logic from data storage",
+    examples: [
+      "Simple query: UserRepository.findById(id)",
       {
-        // Full Example object
-        title: "User Resource",
-        rationale: "Shows REST resource pattern",
-        language: "http",
-        snippet: "GET /users/123",
+        title: "Repository Implementation",
+        rationale: "Shows interface-based abstraction",
+        language: "typescript",
+        snippet: `interface UserRepository {
+  findById(id: string): Promise<User>;
+  save(user: User): Promise<void>;
+}`,
       },
     ],
   },
 ];
 ```
 
-### 3.5. Example
+### 6.5. Example
 
 ```typescript
 interface Example {
@@ -821,7 +883,7 @@ examples: [
 ];
 ```
 
-### 3.6. Pattern
+### 6.6. Pattern
 
 ```typescript
 interface Pattern {
@@ -830,11 +892,25 @@ interface Pattern {
   description: string; // How it works
   advantages?: string[];
   disadvantages?: string[];
-  examples?: Array<string | Example>; // Simple strings or full Example objects
+  examples?: Array<string | Example>; // Examples (strings or full Example objects)
 }
 ```
 
-**Example**:
+**Example without examples**:
+
+```typescript
+patterns: [
+  {
+    name: "Repository Pattern",
+    useCase: "Abstract data access layer",
+    description: "Encapsulate data access logic in repository classes",
+    advantages: ["Testable in isolation", "Centralized data access logic"],
+    disadvantages: ["Additional abstraction layer"],
+  },
+];
+```
+
+**Example with examples**:
 
 ```typescript
 patterns: [
@@ -845,15 +921,14 @@ patterns: [
     advantages: ["Testable in isolation", "Centralized data access logic"],
     disadvantages: ["Additional abstraction layer"],
     examples: [
-      "UserRepository.findById(id)", // Simple string
+      "UserRepository.findById(id)",
       {
-        // Full Example object
-        title: "User Repository Interface",
-        rationale: "Defines the contract for user data access",
+        title: "Repository Interface",
+        rationale: "Shows the abstraction boundary",
         language: "typescript",
-        snippet: `interface UserRepository {
-  findById(id: string): Promise<User | null>;
-  save(user: User): Promise<User>;
+        snippet: `interface Repository<T> {
+  findById(id: string): Promise<T>;
+  save(entity: T): Promise<void>;
 }`,
       },
     ],
@@ -961,16 +1036,14 @@ The **Standard Library** is a curated collection of reusable modules that provid
 ### 5.2. Configuration File (`modules.config.yml`)
 
 ```yaml
-# Global conflict resolution strategy (applies to all paths)
-conflictStrategy: "error" # "error" | "warn" | "replace"
-
 localModulePaths:
   - path: "./company-standards"
+    onConflict: "error" # Fail on collision
   - path: "./project-overrides"
+    onConflict: "replace" # Override existing
   - path: "./experimental"
+    onConflict: "warn" # Warn and keep original
 ```
-
-**Note**: Conflict resolution is configured globally via `conflictStrategy`. Per-path conflict resolution was considered but deferred to simplify configuration.
 
 ### 5.3. Conflict Resolution Strategies
 
@@ -1012,8 +1085,78 @@ The build process:
 3. Renders components to Markdown in order
 4. Produces single `.md` prompt file
 5. Emits build report (`.build.json`)
+6. Optionally generates `.d.ts` type definitions (see 6.4)
 
-### 6.2. Markdown Rendering Rules
+### 6.2. Type Definition Generation (New in v2.2)
+
+Build tools SHOULD generate TypeScript declaration files (`.d.ts`) for published modules to improve developer experience.
+
+**Purpose:**
+
+- Enable IDE autocomplete when importing modules in persona files
+- Provide type checking for module composition
+- Support refactoring and rename operations
+- Document module APIs programmatically
+
+**Generated Structure:**
+
+```typescript
+// my-module.module.d.ts (generated)
+import type { Module } from "ums-lib";
+
+/**
+ * REST API Design Best Practices
+ *
+ * Design clean, intuitive REST APIs following industry standards
+ */
+export declare const myModule: Module;
+```
+
+**Usage in Persona Files:**
+
+```typescript
+// persona.persona.ts
+import type { Persona } from "ums-lib";
+import { myModule } from "./modules/my-module.module.js";
+
+export default {
+  id: "my-persona",
+  // ... metadata
+  modules: [
+    myModule.id, // IDE autocomplete works!
+    // Type checking ensures module exists
+  ],
+} satisfies Persona;
+```
+
+**Build Tool Requirements:**
+
+1. **Generation Trigger**: Build tools SHOULD generate `.d.ts` files when:
+   - Publishing modules to a registry
+   - Building a module library for distribution
+   - Explicitly requested via CLI flag (e.g., `--emit-declarations`)
+
+2. **Output Location**: Type definitions SHOULD be co-located with source files:
+   - Source: `./modules/my-module.module.ts`
+   - Declaration: `./modules/my-module.module.d.ts`
+
+3. **Content**: Declarations SHOULD include:
+   - Module export with correct camelCase name
+   - JSDoc comments from `metadata.name` and `metadata.description`
+   - Proper import types from `ums-lib`
+
+4. **TypeScript Config**: When generating, use:
+   ```json
+   {
+     "compilerOptions": {
+       "declaration": true,
+       "emitDeclarationOnly": true,
+       "declarationMap": true
+     }
+   }
+   ```
+
+### 6.3. Markdown Rendering Rules
 
 Components are rendered to Markdown as follows:
 
@@ -1070,7 +1213,7 @@ _Why_: {rationale}
 
 ```````
 
-### 6.3. Detailed Rendering Specifications
+### 6.4. Detailed Rendering Specifications
 
 This section provides precise rendering specifications for v2.1 simplified structures (ProcessStep, Constraint, Criterion with notes/categories).
 
@@ -1939,8 +2082,8 @@ See `docs/typescript-minimal-implementation-roadmap.md` for implementation detai
 
 ---
 
-**Specification Version**: 2.1.0
+**Specification Version**: 2.2.0
 **Status**: Draft
 **Last Updated**: 2025-01-15
-**Changes from v2.0**: Simplified ProcessStep interface (see ADR 0005)
+**Changes from v2.1**: Atomic Primitives, URI Scheme, Compiler Architecture.
 ```````

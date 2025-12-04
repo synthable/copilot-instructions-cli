@@ -6,7 +6,7 @@ The Unified Module System (UMS) v2.0 is a specification for a data-centric, modu
 
 ### 1.1. Key Features
 
-- **Component-Based Architecture**: Modules are composed of reusable component blocks (Instruction, Knowledge, Data)
+- **Component-Based Architecture**: Modules are composed of reusable component blocks (Instruction, Knowledge)
 - **TypeScript-First**: Native TypeScript support with full IDE integration, type safety, and refactoring capabilities
 - **Flexible Structure**: Components define structure naturally without rigid contracts
 - **Explicit Capabilities**: Module capabilities are declared as top-level metadata
@@ -45,9 +45,8 @@ A valid module for v2.0 MUST contain the following top-level keys:
 | `components`     | Array[Component]     | No\*      | Component blocks (see 2.2)                        |
 | `instruction`    | InstructionComponent | No\*      | Shorthand for single instruction component        |
 | `knowledge`      | KnowledgeComponent   | No\*      | Shorthand for single knowledge component          |
-| `data`           | DataComponent        | No\*      | Shorthand for single data component               |
 
-\* At least one of `components`, `instruction`, `knowledge`, or `data` MUST be present.
+\* At least one of `components`, `instruction`, or `knowledge` MUST be present.
 
 #### `id`
 
@@ -189,11 +188,10 @@ export const systemsThinking: Module = { ... };
 
 ### 2.2. Component Architecture
 
-UMS v2.0 uses a **component-based architecture** where modules are composed of three types of components:
+UMS v2.0 uses a **component-based architecture** where modules are composed of two types of components:
 
 1. **Instruction Component**: Tells the AI what to do
 2. **Knowledge Component**: Teaches the AI concepts and patterns
-3. **Data Component**: Provides reference information
 
 Modules can include components in two ways:
 
@@ -270,28 +268,6 @@ interface KnowledgeComponent {
 - `concepts` (optional): Core concepts to understand
 - `examples` (optional): Concrete code/text examples
 - `patterns` (optional): Design patterns and best practices
-
-#### Component Type: Data
-
-Provides **reference information**.
-
-```typescript
-interface DataComponent {
-  type: "data";
-  metadata?: ComponentMetadata;
-  data: {
-    format: string; // Media type (json, yaml, xml, etc.)
-    description?: string; // What this data represents
-    value: unknown; // The actual data
-  };
-}
-```
-
-**Fields**:
-
-- `format` (required): Data format/media type (e.g., `"json"`, `"yaml"`, `"xml"`)
-- `description` (optional): Human-readable description
-- `value` (required): The actual data content
 
 ### 2.3. The `metadata` Block
 
@@ -810,19 +786,6 @@ _Why_: {rationale}
 
 ````
 
-#### Data Component
-
-```markdown
-## Data
-
-{description}
-
-```{format}
-{value}
-````
-
-````
-
 ## 7. The Build Report
 
 For every successful build operation, implementations MUST generate a `.build.json` file alongside the output prompt.
@@ -1207,32 +1170,6 @@ app.post('/v1/users', async (req, res) => {
         ],
       },
     },
-
-    {
-      type: ComponentType.Data,
-      data: {
-        format: 'json',
-        description: 'HTTP Status Code Quick Reference',
-        value: {
-          success: {
-            200: 'OK - Request succeeded',
-            201: 'Created - Resource created',
-            204: 'No Content - Success, no body',
-          },
-          client_errors: {
-            400: 'Bad Request - Validation error',
-            401: 'Unauthorized - Authentication required',
-            403: 'Forbidden - Not authorized',
-            404: "Not Found - Resource doesn't exist",
-          },
-          server_errors: {
-            500: 'Internal Server Error - Server error',
-            502: 'Bad Gateway - Upstream error',
-            503: 'Service Unavailable - Temporary unavailability',
-          },
-        },
-      },
-    },
   ],
 };
 ```
@@ -1244,7 +1181,7 @@ Complete TypeScript type definitions are maintained in the implementation reposi
 **Key Types**:
 
 - `Module`: Root module interface
-- `InstructionComponent`, `KnowledgeComponent`, `DataComponent`: Component types
+- `InstructionComponent`, `KnowledgeComponent`: Component types
 - `ProcessStep`, `Constraint`, `Criterion`: Instruction directive types
 - `Concept`, `Example`, `Pattern`: Knowledge directive types
 - `ModuleMetadata`, `QualityMetadata`, `ModuleRelationships`: Metadata types
