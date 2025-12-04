@@ -74,7 +74,7 @@ describe('error-formatting', () => {
       const result = formatError(ctx);
 
       expect(result).toBe(
-        '[ERROR] validate: specification compliance - invalid format (follow the specification)\n  Reference: UMS v2.0 Section 4.2'
+        '[ERROR] validate: specification compliance - invalid format (follow the specification)\n  Reference: UMS v2.2 Section 4.2'
       );
     });
 
@@ -92,7 +92,7 @@ describe('error-formatting', () => {
       const result = formatError(ctx);
 
       expect(result).toBe(
-        '[ERROR] build: module processing - validation failed (check the documentation)\n  File: /modules/test.module.yml\n  Key path: frontmatter.schema\n  Reference: UMS v2.0 Section 3.1'
+        '[ERROR] build: module processing - validation failed (check the documentation)\n  File: /modules/test.module.yml\n  Key path: frontmatter.schema\n  Reference: UMS v2.2 Section 3.1'
       );
     });
 
@@ -185,7 +185,7 @@ describe('error-formatting', () => {
       );
 
       expect(result).toBe(
-        '[ERROR] validate: validation failed - invalid format (follow specification)\n  File: /modules/test.module.yml\n  Reference: UMS v2.0 Section 4.1'
+        '[ERROR] validate: validation failed - invalid format (follow specification)\n  File: /modules/test.module.yml\n  Reference: UMS v2.2 Section 4.1'
       );
     });
 
@@ -200,7 +200,7 @@ describe('error-formatting', () => {
       );
 
       expect(result).toBe(
-        '[ERROR] build: validation failed - schema violation (fix schema)\n  File: /modules/test.module.yml\n  Key path: metadata.description\n  Reference: UMS v2.0 Section 3.2'
+        '[ERROR] build: validation failed - schema violation (fix schema)\n  File: /modules/test.module.yml\n  Key path: metadata.description\n  Reference: UMS v2.2 Section 3.2'
       );
     });
   });
@@ -399,7 +399,9 @@ describe('error-formatting', () => {
       it('should return formatted wrong schema version message', () => {
         const result = SCHEMA_VALIDATION_ERRORS.wrongSchemaVersion('0.5');
 
-        expect(result).toBe("Schema version must be '2.0', got '0.5'");
+        expect(result).toBe(
+          "Schema version must be '2.0', '2.1', or '2.2', got '0.5'"
+        );
       });
     });
 

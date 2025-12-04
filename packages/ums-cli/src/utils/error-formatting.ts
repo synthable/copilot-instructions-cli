@@ -40,7 +40,7 @@ export function formatError(ctx: ErrorContext): string {
   }
 
   if (ctx.sectionReference) {
-    message += `\n  Reference: UMS v2.0 ${ctx.sectionReference}`;
+    message += `\n  Reference: UMS v2.2 ${ctx.sectionReference}`;
   }
 
   return message;
@@ -160,7 +160,7 @@ export const SCHEMA_VALIDATION_ERRORS = {
     `Field '${field}' must be ${expected}, got ${actual}`,
 
   wrongSchemaVersion: (actual: string): string =>
-    `Schema version must be '2.0', got '${actual}'`,
+    `Schema version must be '2.0', '2.1', or '2.2', got '${actual}'`,
 
   undeclaredDirective: (directive: string, declared: string[]): string =>
     `Directive '${directive}' is not declared. Declared directives: ${declared.join(', ')}`,
