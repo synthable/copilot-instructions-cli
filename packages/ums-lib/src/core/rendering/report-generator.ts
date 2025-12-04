@@ -11,7 +11,6 @@ import type {
   BuildReport,
   BuildReportGroup,
   BuildReportModule,
-  CompositionEvent,
   ModuleSource,
 } from '../../types/index.js';
 
@@ -21,8 +20,6 @@ import type {
 export interface ModuleReportMetadata {
   /** The source of the module (standard library or local path) */
   source: ModuleSource;
-  /** Composition history if this module was replaced or merged */
-  composedFrom?: CompositionEvent[];
 }
 
 /**
@@ -82,11 +79,6 @@ export function generateBuildReport(
 
         if (replacedByModule) {
           reportModule.replacedBy = replacedByModule;
-        }
-
-        // Add composition history if present
-        if (metadata?.composedFrom && metadata.composedFrom.length > 0) {
-          reportModule.composedFrom = metadata.composedFrom;
         }
 
         reportModules.push(reportModule);

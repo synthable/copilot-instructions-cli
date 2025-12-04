@@ -60,7 +60,6 @@ export {
 
 // Build Report Types - build process reporting
 export {
-  type CompositionEvent,
   type BuildReportModule,
   type BuildReportGroup,
   type BuildReport,

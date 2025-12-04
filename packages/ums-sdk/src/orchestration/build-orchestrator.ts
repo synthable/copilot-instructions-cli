@@ -3,7 +3,6 @@
  * Part of the UMS SDK v1.0
  */
 
-import { createHash } from 'node:crypto';
 import {
   ModuleRegistry,
   resolvePersonaModules,
@@ -12,7 +11,6 @@ import {
   type Module,
   type ModuleSource,
   type ModuleReportMetadata,
-  type CompositionEvent,
 } from 'ums-lib';
 import { PersonaLoader } from '../loaders/persona-loader.js';
 import { ModuleLoader } from '../loaders/module-loader.js';
@@ -32,7 +30,6 @@ const SOURCE_TYPE_LOCAL = 'local' as const;
 const MODULES_PATH_SEPARATOR = '/modules/';
 const FALLBACK_LOCAL_PATH = 'local';
 const DEFAULT_CONFLICT_STRATEGY = 'error';
-const STANDARD_LIBRARY_LABEL = 'Standard Library';
 
 /**
  * BuildOrchestrator - Orchestrates the complete build workflow
@@ -173,18 +170,14 @@ export class BuildOrchestrator {
   }
 
   /**
-   * Build module metadata for build report (sources and composition history)
+   * Build module metadata for build report (sources)
    * @param modules - Array of resolved modules
-   * @param registry - Module registry with conflict information
    * @param moduleSources - Map of module IDs to their sources
-   * @param moduleFileContents - Map of module IDs to file contents for digest
    * @returns Map of module IDs to report metadata
    */
   private buildModuleMetadata(
     modules: Module[],
-    registry: ModuleRegistry,
-    moduleSources: Map<string, ModuleSource>,
-    moduleFileContents: Map<string, string>
+    moduleSources: Map<string, ModuleSource>
   ): Map<string, ModuleReportMetadata> {
     const moduleMetadata = new Map<string, ModuleReportMetadata>();
 
@@ -194,37 +187,7 @@ export class BuildOrchestrator {
         path: FALLBACK_LOCAL_PATH,
       };
 
-      // Check for composition history (conflicts that were resolved)
-      const conflicts = registry.getConflicts(module.id);
-      let composedFrom: CompositionEvent[] | undefined;
-
-      if (conflicts && conflicts.length > 1) {
-        // Build composition history from conflict entries
-        composedFrom = conflicts.map((entry, index) => {
-          const entryContent = moduleFileContents.get(entry.module.id) ?? '';
-          const entryDigest = entryContent
-            ? `sha256:${createHash('sha256').update(entryContent).digest('hex')}`
-            : '';
-
-          return {
-            id: entry.module.id,
-            version: entry.module.version,
-            source:
-              entry.source.type === SOURCE_TYPE_STANDARD
-                ? STANDARD_LIBRARY_LABEL
-                : entry.source.path,
-            digest: entryDigest,
-            // First entry is 'base', subsequent entries are 'replace'
-            strategy: index === 0 ? ('base' as const) : ('replace' as const),
-          };
-        });
-      }
-
-      const metadata: ModuleReportMetadata = { source };
-      if (composedFrom) {
-        metadata.composedFrom = composedFrom;
-      }
-      moduleMetadata.set(module.id, metadata);
+      moduleMetadata.set(module.id, { source });
     }
 
     return moduleMetadata;
@@ -252,18 +215,13 @@ export class BuildOrchestrator {
     const { modules, moduleFilePaths, moduleSources } =
       await this.discoverModules(config, options);
 
-    // Step 4: Build module registry
+    // Step 4: Build module registry (for conflict handling)
     // Priority: BuildOptions > config file > default 'error'
     const conflictStrategy =
       options.conflictStrategy ??
       config.conflictStrategy ??
       DEFAULT_CONFLICT_STRATEGY;
-    const registry = this.buildRegistry(
-      modules,
-      moduleSources,
-      conflictStrategy,
-      warnings
-    );
+    this.buildRegistry(modules, moduleSources, conflictStrategy, warnings);
 
     // Step 5: Resolve persona modules
     const resolutionResult = resolvePersonaModules(persona, modules);
@@ -281,12 +239,10 @@ export class BuildOrchestrator {
       warnings
     );
 
-    // Step 8: Build module metadata for report (sources and composition history)
+    // Step 8: Build module metadata for report (sources)
     const moduleMetadata = this.buildModuleMetadata(
       resolutionResult.modules,
-      registry,
-      moduleSources,
-      moduleFileContents
+      moduleSources
     );
 
     // Step 9: Generate build report with digests and metadata

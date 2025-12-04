@@ -1,27 +1,8 @@
 /**
  * @file Build report types for UMS v2.1.
  * @description Defines structures for build process reporting and metadata.
+ * @note CompositionEvent was removed in v2.1 (vestigial after ModuleRelationships removal)
  */
-
-// #region Composition Event
-
-/**
- * A composition event representing a module replacement or merge operation.
- */
-export interface CompositionEvent {
-  /** The ID of the module. */
-  id: string;
-  /** The version of the module. */
-  version: string;
-  /** The source of the module. */
-  source: string;
-  /** The SHA-256 digest of the module content. */
-  digest: string;
-  /** The composition strategy used (base or replace). */
-  strategy: 'base' | 'replace';
-}
-
-// #endregion
 
 // #region Build Report Module
 
@@ -43,8 +24,6 @@ export interface BuildReportModule {
   deprecated: boolean;
   /** The ID of a successor module, if this module is deprecated. */
   replacedBy?: string;
-  /** Optional composition history if this module was replaced or merged. */
-  composedFrom?: CompositionEvent[];
 }
 
 // #endregion
