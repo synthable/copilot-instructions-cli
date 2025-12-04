@@ -24,7 +24,7 @@ UMS v3.0 is a **major architectural evolution** that introduces breaking changes
 ✅ **Added**:
 
 - Foundation component with `principles` and `patterns`
-- 8 atomic primitive types (Principle, Pattern, Procedure, Policy, Evaluation, Concept, Demonstration, Reference)
+- 7 atomic primitive types (Principle, Pattern, Procedure, Policy, Evaluation, Concept, Demonstration)
 - URI addressing scheme (mandatory)
 - Layered Cake assembler
 - Dual runtime support (CLI static + MCP dynamic)

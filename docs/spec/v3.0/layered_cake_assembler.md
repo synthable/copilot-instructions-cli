@@ -261,7 +261,7 @@ function assemblePrompt(primitives: Primitive[]): AssembledPrompt {
   // Step 2: Sort within each zone
   const sorted = {
     zone0: sortZone0(grouped.zone0), // Policy → Principle
-    zone1: sortZone1(grouped.zone1), // Pattern → Concept → Reference
+    zone1: sortZone1(grouped.zone1), // Pattern → Concept
     zone2: sortZone2(grouped.zone2), // Procedure → Evaluation
     zone3: sortZone3(grouped.zone3), // Demonstration
   };

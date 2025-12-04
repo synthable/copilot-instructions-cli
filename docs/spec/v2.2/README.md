@@ -18,7 +18,7 @@ This directory contains the specification for UMS v2.2, a non-breaking enhanceme
    - Components can now be individually identified and tagged
 
 2. **Runtime Preparation**
-   - Documented 6 atomic primitive types (Procedure, Policy, Evaluation, Concept, Demonstration, Reference)
+   - Documented 5 atomic primitive types (Procedure, Policy, Evaluation, Concept, Demonstration)
    - Build tools MAY optionally compile to primitives for vector search
    - URI addressing scheme documented for forward compatibility
 

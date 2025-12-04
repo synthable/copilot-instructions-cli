@@ -10,8 +10,8 @@
    - Enables component-level identification without changing module structure
 
 2. **Runtime Preparation** (Optional Features)
-   - Build tools MAY compile modules into 6 atomic primitive types
-   - Primitives: `Procedure`, `Policy`, `Evaluation`, `Concept`, `Demonstration`, `Reference`
+   - Build tools MAY compile modules into 5 atomic primitive types
+   - Primitives: `Procedure`, `Policy`, `Evaluation`, `Concept`, `Demonstration`
    - URI addressing scheme prepared for forward compatibility
    - Enables advanced tooling like vector search and RAG retrieval
 

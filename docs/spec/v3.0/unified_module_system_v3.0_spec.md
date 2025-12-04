@@ -39,7 +39,7 @@
 6. **Layered Cake Assembler (Default)**
    - Primitives assembled into 4 zones based on LLM attention mechanics
    - Zone 0 (Constitution): Policies + Principles
-   - Zone 1 (Context): Patterns + Concepts + References
+   - Zone 1 (Context): Patterns + Concepts
    - Zone 2 (Action): Procedures + Evaluations
    - Zone 3 (Steering): Demonstrations
 
@@ -412,7 +412,7 @@ The assembler sorts primitives into 4 zones optimized for LLM attention mechanic
 │ ZONE 0: Constitution (Top)          │  ← Policies + Principles
 │ Sets global governance & rules      │
 ├─────────────────────────────────────┤
-│ ZONE 1: Context (Upper-Middle)      │  ← Patterns + Concepts + References
+│ ZONE 1: Context (Upper-Middle)      │  ← Patterns + Concepts
 │ Loads definitions & architecture    │
 ├─────────────────────────────────────┤
 │ ZONE 2: Action (Lower-Middle)       │  ← Procedures + Evaluations
