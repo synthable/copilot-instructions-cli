@@ -38,7 +38,11 @@ export {
 export { moduleIdToExportName } from './utils/transforms.js';
 
 // Export constants (for CLI and SDK layers)
-export { MODULE_ID_REGEX, UMS_SCHEMA_VERSION } from './constants.js';
+export {
+  MODULE_ID_REGEX,
+  COMPONENT_ID_REGEX,
+  UMS_SCHEMA_VERSION,
+} from './constants.js';
 
 // Export configuration types (for CLI layer)
 export type { ModuleConfig } from './adapters/index.js';

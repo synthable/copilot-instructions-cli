@@ -7,6 +7,7 @@ import { resolve, join } from 'node:path';
 import { existsSync } from 'node:fs';
 import type { Module } from 'ums-lib';
 import { ModuleDiscovery } from './module-discovery.js';
+import type { DiscoveredModule } from '../types/index.js';
 
 /**
  * Default standard library location
@@ -34,6 +35,15 @@ export class StandardLibrary {
    * @returns Array of standard modules
    */
   async discoverStandard(): Promise<Module[]> {
+    const discovered = await this.discoverStandardWithFilePaths();
+    return discovered.map(d => d.module);
+  }
+
+  /**
+   * Discover all standard library modules with file paths
+   * @returns Array of discovered modules with file paths
+   */
+  async discoverStandardWithFilePaths(): Promise<DiscoveredModule[]> {
     const path = this.getStandardLibraryPath();
 
     // Check if standard library exists
@@ -67,12 +77,23 @@ export class StandardLibrary {
    * @returns true if module is in standard library
    *
    * Note: Uses file-based heuristic - checks if module file exists in standard library path.
-   * This is a simple implementation that works for most cases.
+   * Handles both direct paths and /modules/ subdirectory structure for consistency
+   * with ModuleDiscovery.discoverInSinglePath().
    */
   isStandardModule(moduleId: string): boolean {
-    // Check if module file exists in standard library path
-    const standardModulePath = join(this.standardPath, `${moduleId}.module.ts`);
-    return existsSync(standardModulePath);
+    // Check direct path first
+    const directPath = join(this.standardPath, `${moduleId}.module.ts`);
+    if (existsSync(directPath)) {
+      return true;
+    }
+
+    // Also check /modules/ subdirectory (consistent with ModuleDiscovery logic)
+    const modulesSubdirPath = join(
+      this.standardPath,
+      'modules',
+      `${moduleId}.module.ts`
+    );
+    return existsSync(modulesSubdirPath);
   }
 
   /**

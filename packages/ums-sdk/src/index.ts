@@ -117,6 +117,8 @@ export type {
   SDKValidationWarning,
   ListOptions,
   ModuleInfo,
+  DiscoveredModule,
+  GeneratedDeclarationResult,
 } from './types/index.js';
 
 // ===== TIER 4: SDK-SPECIFIC ERRORS =====

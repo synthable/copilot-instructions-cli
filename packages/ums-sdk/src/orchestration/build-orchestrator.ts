@@ -19,7 +19,20 @@ import { ModuleLoader } from '../loaders/module-loader.js';
 import { ConfigManager } from '../loaders/config-loader.js';
 import { ModuleDiscovery } from '../discovery/module-discovery.js';
 import { StandardLibrary } from '../discovery/standard-library.js';
-import type { BuildOptions, BuildResult } from '../types/index.js';
+import { generateDeclarations } from '../generation/declaration-generator.js';
+import type {
+  BuildOptions,
+  BuildResult,
+  GeneratedDeclarationResult,
+} from '../types/index.js';
+
+// Constants for source types and path handling
+const SOURCE_TYPE_STANDARD = 'standard' as const;
+const SOURCE_TYPE_LOCAL = 'local' as const;
+const MODULES_PATH_SEPARATOR = '/modules/';
+const FALLBACK_LOCAL_PATH = 'local';
+const DEFAULT_CONFLICT_STRATEGY = 'error';
+const STANDARD_LIBRARY_LABEL = 'Standard Library';
 
 /**
  * BuildOrchestrator - Orchestrates the complete build workflow
@@ -37,6 +50,184 @@ export class BuildOrchestrator {
     this.configManager = new ConfigManager();
     this.moduleDiscovery = new ModuleDiscovery();
     this.standardLibrary = new StandardLibrary();
+  }
+
+  /**
+   * Discover modules from standard library and local paths
+   * @param config - Configuration with local module paths
+   * @param options - Build options for controlling standard library inclusion
+   * @returns Discovered modules with their file paths and sources
+   */
+  private async discoverModules(
+    config: Awaited<ReturnType<ConfigManager['load']>>,
+    options: BuildOptions
+  ): Promise<{
+    modules: Module[];
+    moduleFilePaths: Map<string, string>;
+    moduleSources: Map<string, ModuleSource>;
+  }> {
+    const modules: Module[] = [];
+    const moduleFilePaths = new Map<string, string>();
+    const moduleSources = new Map<string, ModuleSource>();
+
+    // Load standard library if enabled
+    if (options.includeStandard !== false) {
+      const standardDiscovered =
+        await this.standardLibrary.discoverStandardWithFilePaths();
+      for (const { module, filePath } of standardDiscovered) {
+        modules.push(module);
+        moduleFilePaths.set(module.id, filePath);
+        moduleSources.set(module.id, {
+          type: SOURCE_TYPE_STANDARD,
+          path: this.standardLibrary.getStandardLibraryPath(),
+        });
+      }
+    }
+
+    // Load local modules from config
+    if (config.localModulePaths.length > 0) {
+      const localDiscovered =
+        await this.moduleDiscovery.discoverWithFilePaths(config);
+      for (const { module, filePath } of localDiscovered) {
+        modules.push(module);
+        moduleFilePaths.set(module.id, filePath);
+        // Get the local path from the file path
+        const localPath =
+          filePath.split(MODULES_PATH_SEPARATOR)[0] || FALLBACK_LOCAL_PATH;
+        moduleSources.set(module.id, {
+          type: SOURCE_TYPE_LOCAL,
+          path: localPath,
+        });
+      }
+    }
+
+    return { modules, moduleFilePaths, moduleSources };
+  }
+
+  /**
+   * Build module registry with conflict handling
+   * @param modules - Array of modules to register
+   * @param moduleSources - Map of module IDs to their sources
+   * @param conflictStrategy - Strategy for handling conflicts
+   * @param warnings - Array to collect warnings
+   * @returns Module registry
+   */
+  private buildRegistry(
+    modules: Module[],
+    moduleSources: Map<string, ModuleSource>,
+    conflictStrategy: 'error' | 'warn' | 'replace',
+    warnings: string[]
+  ): ModuleRegistry {
+    const registry = new ModuleRegistry(conflictStrategy);
+
+    for (const module of modules) {
+      try {
+        const source = moduleSources.get(module.id) ?? {
+          type: SOURCE_TYPE_LOCAL,
+          path: FALLBACK_LOCAL_PATH,
+        };
+        registry.add(module, source);
+      } catch (error) {
+        // If conflict strategy is 'warn', collect warnings
+        if (conflictStrategy === 'warn' && error instanceof Error) {
+          warnings.push(error.message);
+        } else {
+          throw error;
+        }
+      }
+    }
+
+    return registry;
+  }
+
+  /**
+   * Load raw file contents for modules (for digest computation)
+   * @param modules - Array of modules to load content for
+   * @param moduleFilePaths - Map of module IDs to file paths
+   * @param warnings - Array to collect warnings
+   * @returns Map of module IDs to file contents
+   */
+  private async loadModuleContents(
+    modules: Module[],
+    moduleFilePaths: Map<string, string>,
+    warnings: string[]
+  ): Promise<Map<string, string>> {
+    const moduleFileContents = new Map<string, string>();
+
+    for (const module of modules) {
+      const filePath = moduleFilePaths.get(module.id);
+      if (filePath) {
+        try {
+          const content = await this.moduleLoader.loadRawContent(filePath);
+          moduleFileContents.set(module.id, content);
+        } catch (error) {
+          // Non-fatal: digest will be empty for this module
+          warnings.push(
+            `Failed to load content for digest: ${module.id} - ${error instanceof Error ? error.message : String(error)}`
+          );
+        }
+      }
+    }
+
+    return moduleFileContents;
+  }
+
+  /**
+   * Build module metadata for build report (sources and composition history)
+   * @param modules - Array of resolved modules
+   * @param registry - Module registry with conflict information
+   * @param moduleSources - Map of module IDs to their sources
+   * @param moduleFileContents - Map of module IDs to file contents for digest
+   * @returns Map of module IDs to report metadata
+   */
+  private buildModuleMetadata(
+    modules: Module[],
+    registry: ModuleRegistry,
+    moduleSources: Map<string, ModuleSource>,
+    moduleFileContents: Map<string, string>
+  ): Map<string, ModuleReportMetadata> {
+    const moduleMetadata = new Map<string, ModuleReportMetadata>();
+
+    for (const module of modules) {
+      const source = moduleSources.get(module.id) ?? {
+        type: SOURCE_TYPE_LOCAL,
+        path: FALLBACK_LOCAL_PATH,
+      };
+
+      // Check for composition history (conflicts that were resolved)
+      const conflicts = registry.getConflicts(module.id);
+      let composedFrom: CompositionEvent[] | undefined;
+
+      if (conflicts && conflicts.length > 1) {
+        // Build composition history from conflict entries
+        composedFrom = conflicts.map((entry, index) => {
+          const entryContent = moduleFileContents.get(entry.module.id) ?? '';
+          const entryDigest = entryContent
+            ? `sha256:${createHash('sha256').update(entryContent).digest('hex')}`
+            : '';
+
+          return {
+            id: entry.module.id,
+            version: entry.module.version,
+            source:
+              entry.source.type === SOURCE_TYPE_STANDARD
+                ? STANDARD_LIBRARY_LABEL
+                : entry.source.path,
+            digest: entryDigest,
+            // First entry is 'base', subsequent entries are 'replace'
+            strategy: index === 0 ? ('base' as const) : ('replace' as const),
+          };
+        });
+      }
+
+      const metadata: ModuleReportMetadata = { source };
+      if (composedFrom) {
+        metadata.composedFrom = composedFrom;
+      }
+      moduleMetadata.set(module.id, metadata);
+    }
+
+    return moduleMetadata;
   }
 
   /**
@@ -58,62 +249,21 @@ export class BuildOrchestrator {
     const config = await this.configManager.load(options.configPath);
 
     // Step 3: Discover modules with file paths (for digest computation)
-    const modules: Module[] = [];
-    const moduleFilePaths = new Map<string, string>(); // module ID -> file path
-    const moduleSources = new Map<string, ModuleSource>(); // module ID -> source
-
-    // Load standard library if enabled
-    if (options.includeStandard !== false) {
-      const standardDiscovered =
-        await this.standardLibrary.discoverStandardWithFilePaths();
-      for (const { module, filePath } of standardDiscovered) {
-        modules.push(module);
-        moduleFilePaths.set(module.id, filePath);
-        moduleSources.set(module.id, {
-          type: 'standard',
-          path: this.standardLibrary.getStandardLibraryPath(),
-        });
-      }
-    }
-
-    // Load local modules from config
-    if (config.localModulePaths.length > 0) {
-      const localDiscovered =
-        await this.moduleDiscovery.discoverWithFilePaths(config);
-      for (const { module, filePath } of localDiscovered) {
-        modules.push(module);
-        moduleFilePaths.set(module.id, filePath);
-        // Get the local path from the file path
-        const localPath = filePath.split('/modules/')[0] || 'local';
-        moduleSources.set(module.id, {
-          type: 'local',
-          path: localPath,
-        });
-      }
-    }
+    const { modules, moduleFilePaths, moduleSources } =
+      await this.discoverModules(config, options);
 
     // Step 4: Build module registry
     // Priority: BuildOptions > config file > default 'error'
     const conflictStrategy =
-      options.conflictStrategy ?? config.conflictStrategy ?? 'error';
-    const registry = new ModuleRegistry(conflictStrategy);
-
-    for (const module of modules) {
-      try {
-        const source = moduleSources.get(module.id) ?? {
-          type: 'local' as const,
-          path: 'local',
-        };
-        registry.add(module, source);
-      } catch (error) {
-        // If conflict strategy is 'warn', collect warnings
-        if (conflictStrategy === 'warn' && error instanceof Error) {
-          warnings.push(error.message);
-        } else {
-          throw error;
-        }
-      }
-    }
+      options.conflictStrategy ??
+      config.conflictStrategy ??
+      DEFAULT_CONFLICT_STRATEGY;
+    const registry = this.buildRegistry(
+      modules,
+      moduleSources,
+      conflictStrategy,
+      warnings
+    );
 
     // Step 5: Resolve persona modules
     const resolutionResult = resolvePersonaModules(persona, modules);
@@ -125,62 +275,19 @@ export class BuildOrchestrator {
     const markdown = renderMarkdown(persona, resolutionResult.modules);
 
     // Step 7: Load raw file contents for resolved modules (for digest computation)
-    const moduleFileContents = new Map<string, string>();
-    for (const module of resolutionResult.modules) {
-      const filePath = moduleFilePaths.get(module.id);
-      if (filePath) {
-        try {
-          const content = await this.moduleLoader.loadRawContent(filePath);
-          moduleFileContents.set(module.id, content);
-        } catch (error) {
-          // Non-fatal: digest will be empty for this module
-          warnings.push(
-            `Failed to load content for digest: ${module.id} - ${error instanceof Error ? error.message : String(error)}`
-          );
-        }
-      }
-    }
+    const moduleFileContents = await this.loadModuleContents(
+      resolutionResult.modules,
+      moduleFilePaths,
+      warnings
+    );
 
     // Step 8: Build module metadata for report (sources and composition history)
-    const moduleMetadata = new Map<string, ModuleReportMetadata>();
-    for (const module of resolutionResult.modules) {
-      const source = moduleSources.get(module.id) ?? {
-        type: 'local' as const,
-        path: 'local',
-      };
-
-      // Check for composition history (conflicts that were resolved)
-      const conflicts = registry.getConflicts(module.id);
-      let composedFrom: CompositionEvent[] | undefined;
-
-      if (conflicts && conflicts.length > 1) {
-        // Build composition history from conflict entries
-        composedFrom = conflicts.map((entry, index) => {
-          const entryContent = moduleFileContents.get(entry.module.id) ?? '';
-          const entryDigest = entryContent
-            ? `sha256:${createHash('sha256').update(entryContent).digest('hex')}`
-            : '';
-
-          return {
-            id: entry.module.id,
-            version: entry.module.version,
-            source:
-              entry.source.type === 'standard'
-                ? 'Standard Library'
-                : entry.source.path,
-            digest: entryDigest,
-            // First entry is 'base', subsequent entries are 'replace'
-            strategy: index === 0 ? ('base' as const) : ('replace' as const),
-          };
-        });
-      }
-
-      const metadata: ModuleReportMetadata = { source };
-      if (composedFrom) {
-        metadata.composedFrom = composedFrom;
-      }
-      moduleMetadata.set(module.id, metadata);
-    }
+    const moduleMetadata = this.buildModuleMetadata(
+      resolutionResult.modules,
+      registry,
+      moduleSources,
+      moduleFileContents
+    );
 
     // Step 9: Generate build report with digests and metadata
     const buildReport = generateBuildReport(
@@ -190,12 +297,26 @@ export class BuildOrchestrator {
       moduleMetadata
     );
 
+    // Step 10: Generate declarations if requested (v2.2)
+    let declarations: GeneratedDeclarationResult[] | undefined;
+    if (options.emitDeclarations) {
+      const modulesWithPaths = resolutionResult.modules.map(module => ({
+        module,
+        sourcePath: moduleFilePaths.get(module.id) ?? `${module.id}.module.ts`,
+      }));
+
+      declarations = generateDeclarations(modulesWithPaths, {
+        includeJSDoc: true,
+      });
+    }
+
     return {
       markdown,
       persona,
       modules: resolutionResult.modules,
       buildReport,
       warnings,
+      ...(declarations && { declarations }),
     };
   }
 }

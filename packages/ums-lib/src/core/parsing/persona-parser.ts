@@ -33,9 +33,13 @@ export function parsePersona(obj: unknown): Persona {
       'Persona missing or invalid required field: name'
     );
   }
-  if (persona.schemaVersion !== '2.0' && persona.schemaVersion !== '2.1') {
+  if (
+    persona.schemaVersion !== '2.0' &&
+    persona.schemaVersion !== '2.1' &&
+    persona.schemaVersion !== '2.2'
+  ) {
     throw new PersonaParseError(
-      `Persona schemaVersion must be "2.0" or "2.1", but found "${persona.schemaVersion}"`
+      `Persona schemaVersion must be "2.0", "2.1", or "2.2", but found "${persona.schemaVersion}"`
     );
   }
   if (typeof persona.version !== 'string') {
@@ -48,9 +52,10 @@ export function parsePersona(obj: unknown): Persona {
       'Persona missing or invalid required field: description'
     );
   }
-  if (typeof persona.semantic !== 'string') {
+  // semantic is optional per UMS v2.1 spec - only validate type if present
+  if (persona.semantic !== undefined && typeof persona.semantic !== 'string') {
     throw new PersonaParseError(
-      'Persona missing or invalid required field: semantic'
+      'Persona field semantic must be a string if provided'
     );
   }
   if (!Array.isArray(persona.modules)) {

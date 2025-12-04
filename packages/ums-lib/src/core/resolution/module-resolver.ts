@@ -53,9 +53,11 @@ export function resolveModules(
       modules.push(module);
 
       // Check for deprecation warnings
-      if (module.metadata.deprecated) {
-        const warning = module.metadata.replacedBy
-          ? `Module '${moduleId}' is deprecated and has been replaced by '${module.metadata.replacedBy}'. Please update your persona file.`
+      const isDeprecated = module.metadata.deprecated;
+      const replacedByModule = module.metadata.replacedBy;
+      if (isDeprecated) {
+        const warning = replacedByModule
+          ? `Module '${moduleId}' is deprecated and has been replaced by '${replacedByModule}'. Please update your persona file.`
           : `Module '${moduleId}' is deprecated. This module may be removed in a future version.`;
         warnings.push(warning);
       }
