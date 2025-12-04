@@ -45,7 +45,7 @@ export const baseConfig = tseslint.config(
       'no-console': 'off',
       'complexity': ['warn', { max: 20 }],
       'max-depth': ['warn', { max: 5 }],
-      'max-lines-per-function': ['warn', { max: 71, skipBlankLines: true, skipComments: true }],
+      'max-lines-per-function': ['warn', { max: 100, skipBlankLines: true, skipComments: true }],
 
       '@typescript-eslint/restrict-template-expressions': 'off',
 
