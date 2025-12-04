@@ -9,17 +9,14 @@ import {
   renderComponent,
   renderInstructionComponent,
   renderKnowledgeComponent,
-  renderDataComponent,
   renderConcept,
   renderExample,
   renderPattern,
-  inferLanguageFromFormat,
 } from './markdown-renderer.js';
 import type {
   Module,
   Persona,
   InstructionComponent,
-  DataComponent,
   Concept,
   Example,
   Pattern,
@@ -108,27 +105,6 @@ const mockKnowledgeModule: Module = {
   },
 };
 
-const mockDataModule: Module = {
-  id: 'data/config/defaults',
-  version: '1.0',
-  schemaVersion: '2.0',
-  capabilities: ['configuration'],
-  cognitiveLevel: 2,
-  metadata: {
-    name: 'Default Configuration',
-    description: 'Default system configuration',
-    semantic: 'Configuration data',
-  },
-  data: {
-    type: ComponentType.Data,
-    data: {
-      format: 'json',
-      value: { timeout: 5000, retries: 3 },
-      description: 'Default system settings',
-    },
-  },
-};
-
 const mockPersona: Persona = {
   id: 'test-persona',
   name: 'Test Persona',
@@ -141,7 +117,6 @@ const mockPersona: Persona = {
   modules: [
     'foundation/logic/deductive-reasoning',
     'principle/patterns/observer',
-    'data/config/defaults',
   ],
 };
 
@@ -158,7 +133,7 @@ const mockPersonaWithGroups: Persona = {
     { group: 'Foundation', ids: ['foundation/logic/deductive-reasoning'] },
     {
       group: 'Patterns',
-      ids: ['principle/patterns/observer', 'data/config/defaults'],
+      ids: ['principle/patterns/observer'],
     },
   ],
 };
@@ -355,30 +330,6 @@ describe('renderer', () => {
     });
   });
 
-  describe('renderDataComponent', () => {
-    it('should render data with JSON format', () => {
-      const result = renderDataComponent(mockDataModule.data!);
-
-      expect(result).toContain('## Data\n\nDefault system settings');
-      expect(result).toContain('```json');
-      expect(result).toContain('"timeout"');
-      expect(result).toContain('"retries"');
-    });
-
-    it('should handle string values', () => {
-      const component: DataComponent = {
-        type: ComponentType.Data,
-        data: {
-          format: 'yaml',
-          value: 'key: value',
-        },
-      };
-      const result = renderDataComponent(component);
-
-      expect(result).toContain('```yaml\nkey: value\n```');
-    });
-  });
-
   describe('renderConcept', () => {
     it('should render concept with all fields', () => {
       const concept: Concept = {
@@ -478,26 +429,6 @@ describe('renderer', () => {
     });
   });
 
-  describe('inferLanguageFromFormat', () => {
-    it('should infer correct language from formats', () => {
-      expect(inferLanguageFromFormat('json')).toBe('json');
-      expect(inferLanguageFromFormat('yaml')).toBe('yaml');
-      expect(inferLanguageFromFormat('javascript')).toBe('javascript');
-      expect(inferLanguageFromFormat('ts')).toBe('typescript');
-      expect(inferLanguageFromFormat('py')).toBe('python');
-    });
-
-    it('should return empty string for unknown formats', () => {
-      expect(inferLanguageFromFormat('unknown')).toBe('');
-      expect(inferLanguageFromFormat('custom')).toBe('');
-    });
-
-    it('should be case-insensitive', () => {
-      expect(inferLanguageFromFormat('JSON')).toBe('json');
-      expect(inferLanguageFromFormat('TypeScript')).toBe('typescript');
-    });
-  });
-
   describe('renderModule', () => {
     it('should render module with instruction shorthand', () => {
       const result = renderModule(mockInstructionModule);
@@ -510,21 +441,11 @@ describe('renderer', () => {
       expect(result).toContain('## Explanation');
       expect(result).toContain('Observer pattern');
     });
-
-    it('should render module with data shorthand', () => {
-      const result = renderModule(mockDataModule);
-      expect(result).toContain('## Data');
-      expect(result).toContain('```json');
-    });
   });
 
   describe('renderMarkdown', () => {
     it('should render complete persona with identity', () => {
-      const modules = [
-        mockInstructionModule,
-        mockKnowledgeModule,
-        mockDataModule,
-      ];
+      const modules = [mockInstructionModule, mockKnowledgeModule];
       const result = renderMarkdown(mockPersona, modules);
 
       expect(result).toContain('## Identity\n');
@@ -542,11 +463,7 @@ describe('renderer', () => {
         ...mockPersona,
         identity: '',
       };
-      const modules = [
-        mockInstructionModule,
-        mockKnowledgeModule,
-        mockDataModule,
-      ];
+      const modules = [mockInstructionModule, mockKnowledgeModule];
       const result = renderMarkdown(personaWithoutIdentity, modules);
 
       expect(result).not.toContain('## Identity');
@@ -554,11 +471,7 @@ describe('renderer', () => {
     });
 
     it('should render groups with headings', () => {
-      const modules = [
-        mockInstructionModule,
-        mockKnowledgeModule,
-        mockDataModule,
-      ];
+      const modules = [mockInstructionModule, mockKnowledgeModule];
       const result = renderMarkdown(mockPersonaWithGroups, modules);
 
       expect(result).toContain('# Foundation\n');
@@ -566,11 +479,7 @@ describe('renderer', () => {
     });
 
     it('should add attribution when enabled', () => {
-      const modules = [
-        mockInstructionModule,
-        mockKnowledgeModule,
-        mockDataModule,
-      ];
+      const modules = [mockInstructionModule, mockKnowledgeModule];
       const result = renderMarkdown(mockPersonaWithGroups, modules);
 
       expect(result).toContain(
@@ -579,11 +488,7 @@ describe('renderer', () => {
     });
 
     it('should handle string module entries', () => {
-      const modules = [
-        mockInstructionModule,
-        mockKnowledgeModule,
-        mockDataModule,
-      ];
+      const modules = [mockInstructionModule, mockKnowledgeModule];
       const result = renderMarkdown(mockPersona, modules);
 
       expect(result).toContain('## Purpose');
@@ -598,9 +503,6 @@ describe('renderer', () => {
 
       const knowledge = renderComponent(mockKnowledgeModule.knowledge!);
       expect(knowledge).toContain('## Explanation');
-
-      const data = renderComponent(mockDataModule.data!);
-      expect(data).toContain('## Data');
     });
   });
 });

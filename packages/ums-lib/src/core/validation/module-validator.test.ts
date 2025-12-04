@@ -139,30 +139,6 @@ describe('validateModule - edge cases', () => {
       expect(result.warnings[0].path).toBe('components');
     });
 
-    it('should warn when both components array and shorthand data exist', () => {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { instruction: _instruction, ...baseWithoutInstruction } =
-        baseModule;
-      const module: Module = {
-        ...baseWithoutInstruction,
-        components: [
-          {
-            type: ComponentType.Data,
-            data: { format: 'json', value: { test: true } },
-          },
-        ],
-        data: {
-          type: ComponentType.Data,
-          data: { format: 'json', value: { other: true } },
-        },
-      };
-
-      const result = validateModule(module);
-
-      expect(result.valid).toBe(true);
-      expect(result.warnings).toHaveLength(1);
-    });
-
     it('should warn when components array and multiple shorthands exist', () => {
       const module: Module = {
         ...baseModule,
@@ -305,29 +281,6 @@ describe('validateModule - edge cases', () => {
       expect(result.errors).toHaveLength(1);
       expect(result.errors[0].message).toContain('mutually exclusive');
     });
-
-    it('should error when all three shorthand components exist', () => {
-      const module: Module = {
-        ...baseModule,
-        instruction: {
-          type: ComponentType.Instruction,
-          instruction: { purpose: 'Instruction' },
-        },
-        knowledge: {
-          type: ComponentType.Knowledge,
-          knowledge: { explanation: 'Knowledge' },
-        },
-        data: {
-          type: ComponentType.Data,
-          data: { format: 'json', value: {} },
-        },
-      };
-
-      const result = validateModule(module);
-
-      expect(result.valid).toBe(false);
-      expect(result.errors).toHaveLength(1);
-    });
   });
 
   describe('module ID format validation', () => {
@@ -413,6 +366,283 @@ describe('validateModule - edge cases', () => {
       const result = validateModule(module);
 
       expect(result.valid).toBe(true);
+    });
+  });
+
+  describe('component metadata validation (v2.2)', () => {
+    describe('component id validation', () => {
+      it('should allow valid component id on shorthand instruction', () => {
+        const module: Module = {
+          ...baseModule,
+          instruction: {
+            type: ComponentType.Instruction,
+            id: 'deploy-steps',
+            instruction: {
+              purpose: 'Test purpose',
+            },
+          },
+        };
+        const result = validateModule(module);
+        expect(result.valid).toBe(true);
+      });
+
+      it('should allow valid component id with numbers', () => {
+        const module: Module = {
+          ...baseModule,
+          instruction: {
+            type: ComponentType.Instruction,
+            id: 'step1-validation',
+            instruction: {
+              purpose: 'Test purpose',
+            },
+          },
+        };
+        const result = validateModule(module);
+        expect(result.valid).toBe(true);
+      });
+
+      it('should error on invalid component id with uppercase', () => {
+        const module: Module = {
+          ...baseModule,
+          instruction: {
+            type: ComponentType.Instruction,
+            id: 'Deploy-Steps',
+            instruction: {
+              purpose: 'Test purpose',
+            },
+          },
+        };
+        const result = validateModule(module);
+        expect(result.valid).toBe(false);
+        expect(result.errors[0].message).toContain(
+          'Invalid component id format'
+        );
+        expect(result.errors[0].path).toBe('instruction.id');
+      });
+
+      it('should error on component id with underscores', () => {
+        const module: Module = {
+          ...baseModule,
+          instruction: {
+            type: ComponentType.Instruction,
+            id: 'deploy_steps',
+            instruction: {
+              purpose: 'Test purpose',
+            },
+          },
+        };
+        const result = validateModule(module);
+        expect(result.valid).toBe(false);
+        expect(result.errors[0].message).toContain(
+          'Invalid component id format'
+        );
+      });
+
+      it('should error on component id starting with hyphen', () => {
+        const module: Module = {
+          ...baseModule,
+          instruction: {
+            type: ComponentType.Instruction,
+            id: '-deploy',
+            instruction: {
+              purpose: 'Test purpose',
+            },
+          },
+        };
+        const result = validateModule(module);
+        expect(result.valid).toBe(false);
+        expect(result.errors[0].message).toContain(
+          'Invalid component id format'
+        );
+      });
+
+      it('should allow component id in components array', () => {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { instruction: _instruction, ...baseWithoutInstruction } =
+          baseModule;
+        const module: Module = {
+          ...baseWithoutInstruction,
+          components: [
+            {
+              type: ComponentType.Instruction,
+              id: 'main-process',
+              instruction: { purpose: 'From components' },
+            },
+          ],
+        };
+        const result = validateModule(module);
+        expect(result.valid).toBe(true);
+      });
+
+      it('should error on invalid component id in components array', () => {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { instruction: _instruction, ...baseWithoutInstruction } =
+          baseModule;
+        const module: Module = {
+          ...baseWithoutInstruction,
+          components: [
+            {
+              type: ComponentType.Instruction,
+              id: 'INVALID_ID',
+              instruction: { purpose: 'From components' },
+            },
+          ],
+        };
+        const result = validateModule(module);
+        expect(result.valid).toBe(false);
+        expect(result.errors[0].message).toContain(
+          'Invalid component id format'
+        );
+        expect(result.errors[0].path).toBe('components[0].id');
+      });
+
+      it('should allow knowledge component with id', () => {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { instruction: _instruction, ...baseWithoutInstruction } =
+          baseModule;
+        const module: Module = {
+          ...baseWithoutInstruction,
+          knowledge: {
+            type: ComponentType.Knowledge,
+            id: 'core-concepts',
+            knowledge: { explanation: 'Explanation' },
+          },
+        };
+        const result = validateModule(module);
+        expect(result.valid).toBe(true);
+      });
+    });
+
+    describe('component tags validation', () => {
+      it('should allow valid lowercase tags on shorthand instruction', () => {
+        const module: Module = {
+          ...baseModule,
+          instruction: {
+            type: ComponentType.Instruction,
+            tags: ['production', 'critical'],
+            instruction: {
+              purpose: 'Test purpose',
+            },
+          },
+        };
+        const result = validateModule(module);
+        expect(result.valid).toBe(true);
+      });
+
+      it('should allow kebab-case tags', () => {
+        const module: Module = {
+          ...baseModule,
+          instruction: {
+            type: ComponentType.Instruction,
+            tags: ['high-priority', 'must-have'],
+            instruction: {
+              purpose: 'Test purpose',
+            },
+          },
+        };
+        const result = validateModule(module);
+        expect(result.valid).toBe(true);
+      });
+
+      it('should error on non-lowercase component tags', () => {
+        const module: Module = {
+          ...baseModule,
+          instruction: {
+            type: ComponentType.Instruction,
+            tags: ['production', 'CRITICAL'],
+            instruction: {
+              purpose: 'Test purpose',
+            },
+          },
+        };
+        const result = validateModule(module);
+        expect(result.valid).toBe(false);
+        expect(result.errors[0].message).toContain('lowercase');
+        expect(result.errors[0].path).toBe('instruction.tags');
+      });
+
+      it('should error on mixed-case component tags', () => {
+        const module: Module = {
+          ...baseModule,
+          instruction: {
+            type: ComponentType.Instruction,
+            tags: ['Production', 'Critical'],
+            instruction: {
+              purpose: 'Test purpose',
+            },
+          },
+        };
+        const result = validateModule(module);
+        expect(result.valid).toBe(false);
+        expect(result.errors[0].message).toContain('lowercase');
+      });
+
+      it('should allow tags on knowledge component', () => {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { instruction: _instruction, ...baseWithoutInstruction } =
+          baseModule;
+        const module: Module = {
+          ...baseWithoutInstruction,
+          knowledge: {
+            type: ComponentType.Knowledge,
+            tags: ['advanced', 'tutorial'],
+            knowledge: { explanation: 'Explanation' },
+          },
+        };
+        const result = validateModule(module);
+        expect(result.valid).toBe(true);
+      });
+
+      it('should validate tags in components array', () => {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { instruction: _instruction, ...baseWithoutInstruction } =
+          baseModule;
+        const module: Module = {
+          ...baseWithoutInstruction,
+          components: [
+            {
+              type: ComponentType.Instruction,
+              tags: ['INVALID', 'Tags'],
+              instruction: { purpose: 'From components' },
+            },
+          ],
+        };
+        const result = validateModule(module);
+        expect(result.valid).toBe(false);
+        expect(result.errors[0].message).toContain('lowercase');
+        expect(result.errors[0].path).toBe('components[0].tags');
+      });
+
+      it('should allow empty tags array', () => {
+        const module: Module = {
+          ...baseModule,
+          instruction: {
+            type: ComponentType.Instruction,
+            tags: [],
+            instruction: {
+              purpose: 'Test purpose',
+            },
+          },
+        };
+        const result = validateModule(module);
+        expect(result.valid).toBe(true);
+      });
+
+      it('should allow component with both id and tags', () => {
+        const module: Module = {
+          ...baseModule,
+          instruction: {
+            type: ComponentType.Instruction,
+            id: 'main-process',
+            tags: ['critical', 'v2'],
+            instruction: {
+              purpose: 'Test purpose',
+            },
+          },
+        };
+        const result = validateModule(module);
+        expect(result.valid).toBe(true);
+      });
     });
   });
 });

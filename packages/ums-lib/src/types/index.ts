@@ -153,8 +153,6 @@ export interface Module {
   instruction?: InstructionComponent;
   /** Shorthand for a single knowledge component. Mutually exclusive with `components`. */
   knowledge?: KnowledgeComponent;
-  /** Shorthand for a single data component. Mutually exclusive with `components`. */
-  data?: DataComponent;
 }
 
 /**
@@ -191,7 +189,6 @@ export interface ModuleMetadata {
 export enum ComponentType {
   Instruction = 'instruction',
   Knowledge = 'knowledge',
-  Data = 'data',
 }
 
 /**
@@ -200,6 +197,18 @@ export enum ComponentType {
 export interface InstructionComponent {
   /** The type of the component. */
   type: ComponentType.Instruction;
+  /**
+   * Optional component identifier for URI addressing (v2.2 feature).
+   * Enables precise targeting of components within modules using URIs.
+   * @example 'security-checklist', 'validation-steps'
+   */
+  id?: string;
+  /**
+   * Optional component-level tags for categorization (v2.2 feature).
+   * Allows fine-grained classification and filtering of components.
+   * @example ['api', 'validation'], ['security', 'authentication']
+   */
+  tags?: string[];
   /** Optional metadata for the component. */
   metadata?: ComponentMetadata;
   /** The instructional content. */
@@ -322,6 +331,18 @@ export type Criterion =
 export interface KnowledgeComponent {
   /** The type of the component. */
   type: ComponentType.Knowledge;
+  /**
+   * Optional component identifier for URI addressing (v2.2 feature).
+   * Enables precise targeting of components within modules using URIs.
+   * @example 'architecture-concepts', 'design-patterns'
+   */
+  id?: string;
+  /**
+   * Optional component-level tags for categorization (v2.2 feature).
+   * Allows fine-grained classification and filtering of components.
+   * @example ['architecture', 'patterns'], ['theory', 'best-practices']
+   */
+  tags?: string[];
   /** Optional metadata for the component. */
   metadata?: ComponentMetadata;
   /** The knowledge content. */
@@ -386,28 +407,21 @@ export interface Pattern {
 }
 
 /**
- * A component that provides structured data.
- */
-export interface DataComponent {
-  /** The type of the component. */
-  type: ComponentType.Data;
-  /** Optional metadata for the component. */
-  metadata?: ComponentMetadata;
-  /** The data content. */
-  data: {
-    /** The format of the data (e.g., "json", "yaml", "xml"). */
-    format: string;
-    /** The structured data, as a string or a typed object. */
-    value: unknown;
-    /** A description of the data's purpose and format. */
-    description?: string;
-  };
-}
-
-/**
  * Optional metadata for a component.
  */
 export interface ComponentMetadata {
+  /**
+   * Optional component identifier for URI addressing (v2.2 feature).
+   * Enables precise targeting of components within modules using URIs.
+   * @example 'error-handling', 'validation-logic'
+   */
+  id?: string;
+  /**
+   * Optional component-level tags for categorization (v2.2 feature).
+   * Allows fine-grained classification and filtering of components.
+   * @example ['testing', 'validation'], ['core', 'utility']
+   */
+  tags?: string[];
   /** The purpose of the component. */
   purpose?: string;
   /** The context in which the component is applicable. */
@@ -417,10 +431,7 @@ export interface ComponentMetadata {
 /**
  * A union type for all possible components.
  */
-export type Component =
-  | InstructionComponent
-  | KnowledgeComponent
-  | DataComponent;
+export type Component = InstructionComponent | KnowledgeComponent;
 
 // #endregion
 
@@ -617,6 +628,52 @@ export interface BuildReportModule {
   replacedBy?: string;
   /** Optional composition history if this module was replaced or merged. */
   composedFrom?: CompositionEvent[];
+}
+
+// #endregion
+
+// #region Atomic Primitive Types (UMS v2.2 Section 3.1)
+
+/**
+ * The 5 atomic primitive types that modules can be compiled into for vector search.
+ * These represent the runtime primitives stored in the Vector Database.
+ * @since UMS v2.2
+ */
+export enum PrimitiveType {
+  /** Algorithms & Steps - from Instruction.process */
+  Procedure = 'procedure',
+  /** Rules & Boundaries - from Instruction.constraints */
+  Policy = 'policy',
+  /** Verification Logic - from Instruction.criteria */
+  Evaluation = 'evaluation',
+  /** Definitions & Theory - from Knowledge.concepts */
+  Concept = 'concept',
+  /** Few-Shot Examples - from Knowledge.examples */
+  Demonstration = 'demonstration',
+}
+
+/**
+ * A compiled atomic primitive for vector storage and retrieval.
+ * @since UMS v2.2
+ */
+export interface AtomicPrimitive {
+  /** The primitive type */
+  type: PrimitiveType;
+  /** The source module ID */
+  moduleId: string;
+  /** The source component ID (if specified) */
+  componentId?: string;
+  /** The URI for this primitive */
+  uri: string;
+  /** The content of the primitive */
+  content: unknown;
+  /** Optional metadata for the primitive */
+  metadata?: {
+    /** Index within the source array (for process steps, constraints, etc.) */
+    index?: number;
+    /** Original field name in the source component */
+    sourceField: string;
+  };
 }
 
 // #endregion

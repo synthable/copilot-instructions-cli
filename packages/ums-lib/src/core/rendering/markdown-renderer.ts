@@ -9,7 +9,6 @@ import type {
   Component,
   InstructionComponent,
   KnowledgeComponent,
-  DataComponent,
   Example,
   Pattern,
   Concept,
@@ -84,8 +83,6 @@ export function renderModule(module: Module): string {
     sections.push(renderInstructionComponent(module.instruction));
   } else if (module.knowledge) {
     sections.push(renderKnowledgeComponent(module.knowledge));
-  } else if (module.data) {
-    sections.push(renderDataComponent(module.data));
   } else if (module.components) {
     // Render multiple components
     for (const component of module.components) {
@@ -105,11 +102,9 @@ export function renderComponent(component: Component): string {
   // Use discriminated union with ComponentType enum for type-safe matching
   if (component.type === ComponentType.Instruction) {
     return renderInstructionComponent(component);
-  } else if (component.type === ComponentType.Knowledge) {
-    return renderKnowledgeComponent(component);
   } else {
-    // Must be Data component (type system guarantees this)
-    return renderDataComponent(component);
+    // Must be Knowledge component (type system guarantees this)
+    return renderKnowledgeComponent(component);
   }
 }
 
@@ -413,69 +408,4 @@ export function renderPattern(pattern: Pattern): string {
   }
 
   return sections.join('\n');
-}
-
-/**
- * Renders a data component to Markdown
- * @param component - The data component
- * @returns Rendered data content
- */
-export function renderDataComponent(component: DataComponent): string {
-  const sections: string[] = [];
-  const { data } = component;
-
-  if (data.description) {
-    sections.push(`## Data\n\n${data.description}\n`);
-  } else {
-    sections.push('## Data\n');
-  }
-
-  // Infer language from format
-  const language = inferLanguageFromFormat(data.format);
-  const value =
-    typeof data.value === 'string'
-      ? data.value
-      : JSON.stringify(data.value, null, 2);
-  const codeBlock = language
-    ? `\`\`\`${language}\n${value}\n\`\`\``
-    : `\`\`\`\n${value}\n\`\`\``;
-
-  sections.push(`${codeBlock}\n`);
-
-  return sections.join('\n');
-}
-
-/**
- * Infers code block language from format string
- * @param format - The format string (e.g., "json", "yaml", "xml")
- * @returns Language identifier for code block syntax highlighting
- */
-export function inferLanguageFromFormat(format: string): string {
-  const formatMap: Record<string, string> = {
-    json: 'json',
-    yaml: 'yaml',
-    yml: 'yaml',
-    xml: 'xml',
-    html: 'html',
-    css: 'css',
-    javascript: 'javascript',
-    js: 'javascript',
-    typescript: 'typescript',
-    ts: 'typescript',
-    python: 'python',
-    py: 'python',
-    java: 'java',
-    csharp: 'csharp',
-    'c#': 'csharp',
-    go: 'go',
-    rust: 'rust',
-    markdown: 'markdown',
-    md: 'markdown',
-    bash: 'bash',
-    sh: 'bash',
-    shell: 'bash',
-    toml: 'toml',
-  };
-
-  return formatMap[format.toLowerCase()] || '';
 }

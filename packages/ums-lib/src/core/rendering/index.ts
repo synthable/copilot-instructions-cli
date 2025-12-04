@@ -9,11 +9,9 @@ export {
   renderComponent,
   renderInstructionComponent,
   renderKnowledgeComponent,
-  renderDataComponent,
   renderConcept,
   renderExample,
   renderPattern,
-  inferLanguageFromFormat,
 } from './markdown-renderer.js';
 
 export {

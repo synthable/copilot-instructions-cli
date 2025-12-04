@@ -28,7 +28,6 @@ export type {
   ModuleMetadata,
   InstructionComponent,
   KnowledgeComponent,
-  DataComponent,
   Component,
   // Module details
   ProcessStep,
@@ -77,6 +76,14 @@ export { buildPersona, validateAll, listModules } from './api/index.js';
 // ===== TIER 2: I/O OPERATIONS (Advanced) =====
 export { ModuleLoader, PersonaLoader, ConfigManager } from './loaders/index.js';
 export { ModuleDiscovery, StandardLibrary } from './discovery/index.js';
+
+// ===== TIER 2: GENERATION UTILITIES (Advanced) =====
+export {
+  generateDeclaration,
+  generateDeclarations,
+  type DeclarationGeneratorOptions,
+  type GeneratedDeclaration,
+} from './generation/index.js';
 
 // ===== TIER 3: DOMAIN UTILITIES (Common Needs) =====
 // Re-export commonly needed domain functions from ums-lib for application use
