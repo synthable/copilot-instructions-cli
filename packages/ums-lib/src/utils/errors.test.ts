@@ -474,7 +474,9 @@ describe('errors', () => {
         it('should return formatted wrong schema version message', () => {
           const result = SCHEMA_VALIDATION_ERRORS.wrongSchemaVersion('0.5');
 
-          expect(result).toBe("Invalid schema version '0.5', expected '1.0'");
+          expect(result).toBe(
+            "Invalid schema version '0.5', expected '1.0', '2.0', '2.1', or '2.2'"
+          );
         });
       });
 

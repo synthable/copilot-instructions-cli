@@ -1,6 +1,6 @@
 /**
- * UMS v2.0 Persona Validation
- * Implements persona validation per UMS v2.0 specification
+ * UMS v2.1 Persona Validation
+ * Implements persona validation per UMS v2.1 specification
  */
 
 import {
@@ -10,9 +10,11 @@ import {
   type Persona,
 } from '../../types/index.js';
 import { ValidationError as ValidationErrorClass } from '../../utils/errors.js';
-
-const SEMVER_REGEX =
-  /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/;
+import { SEMVER_REGEX, SUPPORTED_SCHEMA_VERSIONS } from '../../constants.js';
+import {
+  validateNonEmptyString,
+  validateStringArray,
+} from './module-validator.js';
 
 /**
  * Validates basic persona fields (id, name, version, schemaVersion)
@@ -21,41 +23,28 @@ function validatePersonaFields(
   persona: Persona,
   errors: ValidationError[]
 ): void {
-  // Validate id field exists and is non-empty
+  const section = 'Section 4.1';
+
+  // Validate required string fields
+  validateNonEmptyString(persona.id, 'id', 'Persona id', section, errors);
+  validateNonEmptyString(persona.name, 'name', 'Persona name', section, errors);
+  validateNonEmptyString(
+    persona.description,
+    'description',
+    'Persona description',
+    section,
+    errors
+  );
+
+  // Validate schema version using shared constant
   if (
-    !persona.id ||
-    typeof persona.id !== 'string' ||
-    persona.id.trim() === ''
+    !SUPPORTED_SCHEMA_VERSIONS.includes(
+      persona.schemaVersion as (typeof SUPPORTED_SCHEMA_VERSIONS)[number]
+    )
   ) {
     errors.push(
       new ValidationErrorClass(
-        'Persona must have a non-empty id field',
-        'id',
-        'Section 4.1'
-      )
-    );
-  }
-
-  // Validate name field exists and is non-empty
-  if (
-    !persona.name ||
-    typeof persona.name !== 'string' ||
-    persona.name.trim() === ''
-  ) {
-    errors.push(
-      new ValidationErrorClass(
-        'Persona must have a non-empty name field',
-        'name',
-        'Section 4.1'
-      )
-    );
-  }
-
-  // Validate schema version (v2.0 only)
-  if (persona.schemaVersion !== '2.0') {
-    errors.push(
-      new ValidationErrorClass(
-        `Invalid schema version: ${persona.schemaVersion}, expected '2.0'`,
+        `Invalid schema version: ${persona.schemaVersion}, expected one of: ${SUPPORTED_SCHEMA_VERSIONS.join(', ')}`,
         'schemaVersion',
         'Section 4'
       )
@@ -70,6 +59,72 @@ function validatePersonaFields(
         'version',
         'Section 4'
       )
+    );
+  }
+
+  // Validate semantic field type if present (optional in v2.1+)
+  if (persona.semantic !== undefined) {
+    if (typeof persona.semantic !== 'string') {
+      errors.push(
+        new ValidationErrorClass(
+          'Persona semantic field must be a string if provided',
+          'semantic',
+          section
+        )
+      );
+    } else if (persona.semantic.trim() === '') {
+      errors.push(
+        new ValidationErrorClass(
+          'Persona semantic field cannot be whitespace-only if provided',
+          'semantic',
+          section
+        )
+      );
+    }
+  }
+
+  // Validate tags array if present - must be lowercase strings
+  if (persona.tags !== undefined) {
+    if (!Array.isArray(persona.tags)) {
+      errors.push(
+        new ValidationErrorClass(
+          'Persona tags must be an array of strings',
+          'tags',
+          section
+        )
+      );
+    } else {
+      for (let i = 0; i < persona.tags.length; i++) {
+        const tag = persona.tags[i];
+        if (typeof tag !== 'string' || tag.trim() === '') {
+          errors.push(
+            new ValidationErrorClass(
+              `Tag at index ${i} must be a non-empty string`,
+              `tags[${i}]`,
+              section
+            )
+          );
+        } else if (tag !== tag.toLowerCase()) {
+          errors.push(
+            new ValidationErrorClass(
+              `Tag at index ${i} must be lowercase: ${tag}`,
+              `tags[${i}]`,
+              section
+            )
+          );
+        }
+      }
+    }
+  }
+
+  // Validate domains array if present
+  if (persona.domains !== undefined) {
+    validateStringArray(
+      persona.domains,
+      'domains',
+      'Persona domains',
+      section,
+      errors
     );
   }
 }
@@ -101,6 +156,20 @@ function validateModuleGroup(
   const moduleGroup = entry as { ids?: unknown };
   const moduleIds = moduleGroup.ids;
 
+  // Validate group name if present
+  const groupObj = entry as { group?: unknown; ids?: unknown };
+  if (groupObj.group !== undefined) {
+    if (typeof groupObj.group !== 'string' || groupObj.group.trim() === '') {
+      errors.push(
+        new ValidationErrorClass(
+          `Module group at index ${index} has an empty group name`,
+          `modules[${index}].group`,
+          'Section 4.2'
+        )
+      );
+    }
+  }
+
   if (!Array.isArray(moduleIds) || moduleIds.length === 0) {
     errors.push(
       new ValidationErrorClass(
@@ -110,7 +179,8 @@ function validateModuleGroup(
       )
     );
   } else {
-    // Check for duplicate module IDs
+    // Check for duplicate module IDs within this group
+    const groupIds = new Set<string>();
     for (const id of moduleIds) {
       if (typeof id !== 'string') {
         errors.push(
@@ -123,6 +193,19 @@ function validateModuleGroup(
         continue;
       }
 
+      // Check for duplicate within same group
+      if (groupIds.has(id)) {
+        errors.push(
+          new ValidationErrorClass(
+            `Duplicate module ID within group: ${id}`,
+            `modules[${index}].ids`,
+            'Section 4.2'
+          )
+        );
+      }
+      groupIds.add(id);
+
+      // Check for duplicate across groups
       if (allModuleIds.has(id)) {
         errors.push(
           new ValidationErrorClass(
