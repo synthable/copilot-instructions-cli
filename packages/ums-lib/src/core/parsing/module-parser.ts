@@ -31,9 +31,13 @@ export function parseModule(obj: unknown): Module {
   if (typeof module.id !== 'string') {
     throw new ModuleParseError('Module missing or invalid required field: id');
   }
-  if (module.schemaVersion !== '2.0' && module.schemaVersion !== '2.1') {
+  if (
+    module.schemaVersion !== '2.0' &&
+    module.schemaVersion !== '2.1' &&
+    module.schemaVersion !== '2.2'
+  ) {
     throw new ModuleParseError(
-      `Module schemaVersion must be "2.0" or "2.1", but found "${module.schemaVersion}"`
+      `Module schemaVersion must be "2.0", "2.1", or "2.2", but found "${module.schemaVersion}"`
     );
   }
   if (typeof module.version !== 'string') {
@@ -64,7 +68,7 @@ export function parseModule(obj: unknown): Module {
   // Validate that at least one component type is present
   const hasComponents =
     Array.isArray(module.components) && module.components.length > 0;
-  const hasShorthand = module.instruction ?? module.knowledge ?? module.data;
+  const hasShorthand = module.instruction ?? module.knowledge;
 
   if (!hasComponents && !hasShorthand) {
     throw new ModuleParseError(

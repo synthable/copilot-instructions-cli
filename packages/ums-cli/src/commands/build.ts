@@ -6,6 +6,8 @@
  * Uses SDK's buildPersona() for all build orchestration.
  */
 
+import { mkdir } from 'node:fs/promises';
+import { dirname, join, basename } from 'node:path';
 import chalk from 'chalk';
 import { handleError } from '../utils/error-handler.js';
 import { buildPersona } from 'ums-sdk';
@@ -22,13 +24,76 @@ export interface BuildOptions {
   output?: string;
   /** Enable verbose output */
   verbose?: boolean;
+  /** Emit TypeScript declaration files (.d.ts) for modules */
+  emitDeclarations?: boolean;
+}
+
+/**
+ * Write declaration files to declarations/ subdirectory
+ */
+async function writeDeclarationFiles(
+  declarations: { path: string; content: string }[],
+  outputPath: string,
+  verbose: boolean
+): Promise<void> {
+  const declarationsDir = join(dirname(outputPath), 'declarations');
+  await mkdir(declarationsDir, { recursive: true });
+
+  for (const decl of declarations) {
+    const declPath = join(declarationsDir, basename(decl.path));
+    await writeOutputFile(declPath, decl.content);
+    if (verbose) console.log(chalk.gray(`  Generated: ${declPath}`));
+  }
+  console.log(
+    chalk.green(`✓ Generated ${declarations.length} declaration files`)
+  );
+}
+
+/**
+ * Write build output files (markdown, report, declarations)
+ */
+async function writeBuildOutput(
+  result: Awaited<ReturnType<typeof buildPersona>>,
+  outputPath: string,
+  emitDeclarations: boolean,
+  verbose: boolean
+): Promise<void> {
+  // Write markdown file
+  await writeOutputFile(outputPath, result.markdown);
+  console.log(chalk.green(`✓ Persona instructions written to: ${outputPath}`));
+
+  // Write build report JSON file
+  const buildReportPath = outputPath.replace(/\.md$/, '.build.json');
+  await writeOutputFile(
+    buildReportPath,
+    JSON.stringify(result.buildReport, null, 2)
+  );
+  console.log(chalk.green(`✓ Build report written to: ${buildReportPath}`));
+
+  // Write declaration files (v2.2)
+  if (emitDeclarations && result.declarations?.length) {
+    await writeDeclarationFiles(result.declarations, outputPath, verbose);
+  }
+
+  if (verbose) {
+    console.log(
+      chalk.gray(
+        `[INFO] build: Generated ${result.markdown.length} characters of Markdown`
+      )
+    );
+  }
 }
 
 /**
  * Handles the 'build' command
  */
 export async function handleBuild(options: BuildOptions): Promise<void> {
-  const { persona: personaPath, output: outputPath, verbose } = options;
+  const {
+    persona: personaPath,
+    output: outputPath,
+    verbose,
+    emitDeclarations,
+  } = options;
   const progress = createBuildProgress('build', verbose);
 
   try {
@@ -45,6 +110,7 @@ export async function handleBuild(options: BuildOptions): Promise<void> {
     // Use SDK's buildPersona() for all orchestration
     const result = await buildPersona(personaPath, {
       includeStandard: true,
+      ...(emitDeclarations && { emitDeclarations }),
     });
 
     if (verbose) {
@@ -66,26 +132,17 @@ export async function handleBuild(options: BuildOptions): Promise<void> {
 
     // Generate output files
     if (outputPath) {
-      // Write markdown file
-      await writeOutputFile(outputPath, result.markdown);
-      console.log(
-        chalk.green(`✓ Persona instructions written to: ${outputPath}`)
-      );
-
-      // Write build report JSON file
-      const buildReportPath = outputPath.replace(/\.md$/, '.build.json');
-      await writeOutputFile(
-        buildReportPath,
-        JSON.stringify(result.buildReport, null, 2)
-      );
-      console.log(chalk.green(`✓ Build report written to: ${buildReportPath}`));
-
-      if (verbose) {
-        console.log(
-          chalk.gray(
-            `[INFO] build: Generated ${result.markdown.length} characters of Markdown`
-          )
+      try {
+        await writeBuildOutput(
+          result,
+          outputPath,
+          emitDeclarations ?? false,
+          verbose ?? false
         );
+      } catch (writeError) {
+        const errorMessage =
+          writeError instanceof Error ? writeError.message : String(writeError);
+        throw new Error(`Failed to write output files: ${errorMessage}`);
       }
     } else {
       // Write to stdout

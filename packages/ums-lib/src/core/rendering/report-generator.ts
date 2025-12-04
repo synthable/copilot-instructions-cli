@@ -11,7 +11,6 @@ import type {
   BuildReport,
   BuildReportGroup,
   BuildReportModule,
-  CompositionEvent,
   ModuleSource,
 } from '../../types/index.js';
 
@@ -21,8 +20,6 @@ import type {
 export interface ModuleReportMetadata {
   /** The source of the module (standard library or local path) */
   source: ModuleSource;
-  /** Composition history if this module was replaced or merged */
-  composedFrom?: CompositionEvent[];
 }
 
 /**
@@ -68,22 +65,20 @@ export function generateBuildReport(
             : metadata.source.path
           : 'Local';
 
+        const isDeprecated = module.metadata.deprecated ?? false;
+        const replacedByModule = module.metadata.replacedBy;
+
         const reportModule: BuildReportModule = {
           id: module.id,
           name: module.metadata.name,
           version: module.version,
           source,
           digest: moduleDigest ? `sha256:${moduleDigest}` : '',
-          deprecated: module.metadata.deprecated ?? false,
+          deprecated: isDeprecated,
         };
 
-        if (module.metadata.replacedBy) {
-          reportModule.replacedBy = module.metadata.replacedBy;
-        }
-
-        // Add composition history if present
-        if (metadata?.composedFrom && metadata.composedFrom.length > 0) {
-          reportModule.composedFrom = metadata.composedFrom;
+        if (replacedByModule) {
+          reportModule.replacedBy = replacedByModule;
         }
 
         reportModules.push(reportModule);
@@ -97,10 +92,11 @@ export function generateBuildReport(
   }
 
   // Generate SHA-256 digest of persona content
+  // Only include semantic if defined to maintain consistent digests
   const personaContent = JSON.stringify({
     name: persona.name,
     description: persona.description,
-    semantic: persona.semantic,
+    ...(persona.semantic !== undefined && { semantic: persona.semantic }),
     identity: persona.identity,
     modules: persona.modules,
   });
@@ -125,10 +121,11 @@ export function generateBuildReport(
  * @returns SHA-256 digest of persona content with sha256: prefix
  */
 export function generatePersonaDigest(persona: Persona): string {
+  // Only include semantic if defined to maintain consistent digests
   const personaContent = JSON.stringify({
     name: persona.name,
     description: persona.description,
-    semantic: persona.semantic,
+    ...(persona.semantic !== undefined && { semantic: persona.semantic }),
     identity: persona.identity,
     modules: persona.modules,
   });

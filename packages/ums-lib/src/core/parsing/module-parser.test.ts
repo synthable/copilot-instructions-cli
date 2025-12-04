@@ -86,33 +86,6 @@ describe('UMS v2.0 Module Validation', () => {
       expect(result.errors).toHaveLength(0);
     });
 
-    it('should validate a valid data module', () => {
-      const validModule: Module = {
-        id: 'technology/config/build-target-matrix',
-        version: '1.0.0',
-        schemaVersion: '2.0',
-        capabilities: ['data', 'configuration'],
-        cognitiveLevel: 2,
-        metadata: {
-          name: 'Build Target Matrix',
-          description: 'Provides a JSON matrix of supported build targets.',
-          semantic: 'Data block listing supported build targets and versions.',
-        },
-        data: {
-          type: ComponentType.Data,
-          data: {
-            format: 'json',
-            value: { targets: [{ name: 'linux-x64', node: '20.x' }] },
-            description: 'Supported build targets',
-          },
-        },
-      };
-
-      const result = validateModule(validModule);
-      expect(result.valid).toBe(true);
-      expect(result.errors).toHaveLength(0);
-    });
-
     it('should validate module with components array', () => {
       const validModule: Module = {
         id: 'principle/testing/comprehensive',

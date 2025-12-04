@@ -222,14 +222,6 @@ export const moduleName: Module = {
       examples?: [{ title: 'Example', rationale: 'What it shows', snippet: 'code', language: 'typescript' }],
       patterns?: [{ name: 'Pattern', useCase: 'When to use', description: 'How it works' }]
     }
-  },
-  data?: {
-    type: ComponentType.Data,
-    data: {
-      format: 'json',
-      value: { /* data */ },
-      description: 'What this represents'
-    }
   }
 };
 ```
@@ -238,7 +230,7 @@ export const moduleName: Module = {
 
 - TypeScript-first with full type safety
 - Named exports using camelCase transformation of module ID
-- Component-based architecture (Instruction, Knowledge, Data)
+- Component-based architecture (Instruction, Knowledge)
 - Cognitive hierarchy classification (0-6 levels)
 - Capabilities array for functional classification
 - Domain field for technology/field specificity
@@ -302,23 +294,27 @@ export default {
 ### Production Usage
 
 ```bash
-# Build a persona from configuration (UMS v2.0)
+# Build a persona from configuration
 ums build --persona ./personas/my-persona.persona.ts
 
 # Build with custom output
 ums build --persona ./personas/my-persona.persona.ts --output ./dist/my-persona.md
 
+# Build with TypeScript declaration files (v2.2)
+ums build --persona ./personas/my-persona.persona.ts --output ./dist/my-persona.md --emit-declarations
+
 # List all modules
 ums list
 
-# List modules by tier
-ums list --tier foundation
+# List modules by cognitive level
+ums list --level 0,1
+ums list --level UNIVERSAL_PATTERNS
 
 # Search for modules
 ums search "logic"
 
-# Search with tier filtering
-ums search "reasoning" --tier foundation
+# Search with level filtering
+ums search "reasoning" --level AXIOMS_AND_ETHICS
 
 # Validate all modules and personas
 ums validate
@@ -362,14 +358,17 @@ node packages/ums-cli/dist/index.js mcp start --transport stdio
 
 ## Module System Details
 
-### Four-Tier Waterfall Architecture
+### Seven-Tier Cognitive Hierarchy
 
-The system enforces strict layering during compilation:
+The system uses a cognitive hierarchy (levels 0-6) for organizing module content:
 
-1. **Foundation** (layers 0-5, validated in code but currently only 0-4 used): Universal cognitive frameworks and logic
-2. **Principle**: Technology-agnostic methodologies and patterns
-3. **Technology**: Specific tools, languages, and frameworks
-4. **Execution**: Step-by-step procedures and playbooks
+- **Level 0**: Axioms & Ethics - Universal truths, ethical bedrock, non-negotiable principles
+- **Level 1**: Reasoning Frameworks - How to think, analyze, and form judgments
+- **Level 2**: Universal Patterns - Cross-domain patterns and principles that apply broadly
+- **Level 3**: Domain-Specific Guidance - Field-specific but technology-agnostic best practices
+- **Level 4**: Procedures & Playbooks - Step-by-step instructions and actionable guides
+- **Level 5**: Specifications & Standards - Precise requirements, validation criteria, compliance rules
+- **Level 6**: Meta-Cognition - Self-reflection, process improvement, learning from experience
 
 This creates a logical hierarchy moving from abstract concepts to concrete actions, ensuring consistent AI reasoning patterns.
 

@@ -3,7 +3,12 @@
  * Part of the UMS SDK v1.0
  */
 
-import { validateModule, validatePersona, type Module } from 'ums-lib';
+import {
+  validateModule,
+  validatePersona,
+  type Module,
+  type ValidationResult,
+} from 'ums-lib';
 import { BuildOrchestrator } from '../orchestration/build-orchestrator.js';
 import { ConfigManager } from '../loaders/config-loader.js';
 import { ModuleDiscovery } from '../discovery/module-discovery.js';
@@ -20,6 +25,33 @@ import type {
   ModuleInfo,
   SDKValidationWarning,
 } from '../types/index.js';
+
+/**
+ * Helper function to collect validation results (errors and warnings)
+ * @param validation - The validation result from ums-lib
+ * @param id - The module or file identifier
+ * @param errors - Map to collect errors
+ * @param warnings - Map to collect warnings
+ */
+function collectValidationResults(
+  validation: ValidationResult,
+  id: string,
+  errors: Map<string, ValidationError[]>,
+  warnings: Map<string, SDKValidationWarning[]>
+): void {
+  if (!validation.valid) {
+    errors.set(id, validation.errors);
+  }
+
+  if (validation.warnings.length > 0) {
+    const sdkWarnings: SDKValidationWarning[] = validation.warnings.map(w => ({
+      code: 'VALIDATION_WARNING',
+      message: w.message,
+      path: w.path,
+    }));
+    warnings.set(id, sdkWarnings);
+  }
+}
 
 /**
  * Build a persona - complete workflow
@@ -72,9 +104,8 @@ export async function validateAll(
     const validation = validateModule(module);
     if (validation.valid) {
       validModules++;
-    } else {
-      errors.set(module.id, validation.errors);
     }
+    collectValidationResults(validation, module.id, errors, warnings);
   }
 
   // Validate personas if requested
@@ -102,9 +133,8 @@ export async function validateAll(
 
         if (validation.valid) {
           validPersonas++;
-        } else {
-          errors.set(filePath, validation.errors);
         }
+        collectValidationResults(validation, filePath, errors, warnings);
       } catch (error) {
         errors.set(filePath, [
           {
@@ -145,17 +175,27 @@ export async function listModules(
   // Load configuration
   const config = await configManager.load(options.configPath);
 
-  // Discover modules
+  // Discover modules, tracking file paths separately
   const modules: Module[] = [];
+  const filePathMap = new Map<string, string>();
 
   if (options.includeStandard !== false) {
-    const standardModules = await standardLibrary.discoverStandard();
-    modules.push(...standardModules);
+    modules.push(...(await standardLibrary.discoverStandard()));
   }
 
   if (config.localModulePaths.length > 0) {
-    const localModules = await moduleDiscovery.discover(config);
-    modules.push(...localModules);
+    try {
+      const discovered = await moduleDiscovery.discoverWithFilePaths(config);
+      for (const d of discovered) {
+        modules.push(d.module);
+        filePathMap.set(d.module.id, d.filePath);
+      }
+    } catch (error) {
+      // Log discovery error but don't fail the entire operation
+      console.warn(
+        `Failed to discover local modules: ${error instanceof Error ? error.message : String(error)}`
+      );
+    }
   }
 
   // Apply capability filter
@@ -185,7 +225,7 @@ export async function listModules(
       version: module.version,
       capabilities: module.capabilities,
       source: isStandard ? ('standard' as const) : ('local' as const),
-      filePath: isStandard ? undefined : module.id, // Placeholder
+      filePath: filePathMap.get(module.id),
     };
   });
 

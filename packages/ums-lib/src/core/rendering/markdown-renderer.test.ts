@@ -9,17 +9,14 @@ import {
   renderComponent,
   renderInstructionComponent,
   renderKnowledgeComponent,
-  renderDataComponent,
   renderConcept,
   renderExample,
   renderPattern,
-  inferLanguageFromFormat,
 } from './markdown-renderer.js';
 import type {
   Module,
   Persona,
   InstructionComponent,
-  DataComponent,
   Concept,
   Example,
   Pattern,
@@ -108,27 +105,6 @@ const mockKnowledgeModule: Module = {
   },
 };
 
-const mockDataModule: Module = {
-  id: 'data/config/defaults',
-  version: '1.0',
-  schemaVersion: '2.0',
-  capabilities: ['configuration'],
-  cognitiveLevel: 2,
-  metadata: {
-    name: 'Default Configuration',
-    description: 'Default system configuration',
-    semantic: 'Configuration data',
-  },
-  data: {
-    type: ComponentType.Data,
-    data: {
-      format: 'json',
-      value: { timeout: 5000, retries: 3 },
-      description: 'Default system settings',
-    },
-  },
-};
-
 const mockPersona: Persona = {
   id: 'test-persona',
   name: 'Test Persona',
@@ -141,7 +117,6 @@ const mockPersona: Persona = {
   modules: [
     'foundation/logic/deductive-reasoning',
     'principle/patterns/observer',
-    'data/config/defaults',
   ],
 };
 
@@ -158,7 +133,7 @@ const mockPersonaWithGroups: Persona = {
     { group: 'Foundation', ids: ['foundation/logic/deductive-reasoning'] },
     {
       group: 'Patterns',
-      ids: ['principle/patterns/observer', 'data/config/defaults'],
+      ids: ['principle/patterns/observer'],
     },
   ],
 };
@@ -170,16 +145,17 @@ describe('renderer', () => {
         mockInstructionModule.instruction!
       );
 
+      expect(result).toContain('## Instructions\n');
       expect(result).toContain(
-        '## Purpose\n\nApply deductive reasoning principles'
+        '**Purpose**: Apply deductive reasoning principles'
       );
-      expect(result).toContain('## Process\n');
+      expect(result).toContain('### Process\n');
       expect(result).toContain('1. Start with general statements');
-      expect(result).toContain('## Principles\n');
+      expect(result).toContain('### Principles\n');
       expect(result).toContain('- Always verify premises');
-      expect(result).toContain('## Constraints\n');
+      expect(result).toContain('### Constraints\n');
       expect(result).toContain('- Never assume unproven premises');
-      expect(result).toContain('## Criteria\n');
+      expect(result).toContain('### Criteria\n');
       expect(result).toContain('- [ ] All steps are logically valid');
     });
 
@@ -220,7 +196,7 @@ describe('renderer', () => {
       };
       const result = renderInstructionComponent(component);
 
-      expect(result).toContain('## Constraints\n');
+      expect(result).toContain('### Constraints\n');
       expect(result).toContain(
         '- **URLs MUST use plural nouns for collections**'
       );
@@ -256,14 +232,14 @@ describe('renderer', () => {
       };
       const result = renderInstructionComponent(component);
 
-      expect(result).toContain('## Criteria\n');
+      expect(result).toContain('### Criteria\n');
       expect(result).toContain('- [ ] All tests pass before deployment');
-      expect(result).toContain('### Security\n');
+      expect(result).toContain('#### Security\n');
       expect(result).toContain('- [ ] All endpoints MUST use HTTPS');
       expect(result).toContain(
         '- [ ] Authentication required for protected resources'
       );
-      expect(result).toContain('### Performance\n');
+      expect(result).toContain('#### Performance\n');
       expect(result).toContain('- [ ] Response times under 100ms');
     });
 
@@ -287,7 +263,7 @@ describe('renderer', () => {
       };
       const result = renderInstructionComponent(component);
 
-      expect(result).toContain('## Criteria\n');
+      expect(result).toContain('### Criteria\n');
       expect(result).toContain('- [ ] **Rate limiting prevents abuse**');
       expect(result).toContain('  - Test: Send 100 requests in 1 minute');
       expect(result).toContain('  - Expected: Receive 429 Too Many Requests');
@@ -326,17 +302,160 @@ describe('renderer', () => {
       };
       const result = renderInstructionComponent(component);
 
-      expect(result).toContain('## Criteria\n');
+      expect(result).toContain('### Criteria\n');
       expect(result).toContain('- [ ] All tests pass');
-      expect(result).toContain('### Security\n');
+      expect(result).toContain('#### Security\n');
       expect(result).toContain('- [ ] **Rate limiting prevents abuse**');
       expect(result).toContain('  - Test: Send 100 requests in 1 minute');
       expect(result).toContain('- [ ] All endpoints use HTTPS');
-      expect(result).toContain('### Performance\n');
+      expect(result).toContain('#### Performance\n');
       expect(result).toContain('- [ ] **Response times under 100ms**');
       expect(result).toContain(
         '  - Test: Measure average response time over 100 requests'
       );
+    });
+
+    it('should handle ConstraintGroup with grouped rules', () => {
+      const component: InstructionComponent = {
+        type: ComponentType.Instruction,
+        instruction: {
+          purpose: 'Test purpose',
+          constraints: [
+            'All code MUST be reviewed',
+            {
+              group: 'Security',
+              rules: [
+                'MUST use HTTPS',
+                'MUST validate input',
+                {
+                  rule: 'MUST NOT log secrets',
+                  notes: ['Good: { userId }', 'Bad: { password }'],
+                },
+              ],
+            },
+            {
+              group: 'Performance',
+              rules: ['SHOULD cache expensive queries', 'MUST use pagination'],
+            },
+          ],
+        },
+      };
+      const result = renderInstructionComponent(component);
+
+      expect(result).toContain('### Constraints\n');
+      // Ungrouped constraint
+      expect(result).toContain('- All code MUST be reviewed');
+      // Security group
+      expect(result).toContain('#### Security\n');
+      expect(result).toContain('- MUST use HTTPS');
+      expect(result).toContain('- MUST validate input');
+      expect(result).toContain('- **MUST NOT log secrets**');
+      expect(result).toContain('  - Good: { userId }');
+      expect(result).toContain('  - Bad: { password }');
+      // Performance group
+      expect(result).toContain('#### Performance\n');
+      expect(result).toContain('- SHOULD cache expensive queries');
+      expect(result).toContain('- MUST use pagination');
+    });
+
+    it('should handle CriterionGroup with grouped items', () => {
+      const component: InstructionComponent = {
+        type: ComponentType.Instruction,
+        instruction: {
+          purpose: 'Test purpose',
+          criteria: [
+            'All tests pass',
+            {
+              group: 'Security',
+              items: [
+                'HTTPS enforced',
+                {
+                  item: 'Rate limiting active',
+                  notes: ['Test: 100 req/min', 'Expected: 429 after limit'],
+                },
+              ],
+            },
+            {
+              group: 'Performance',
+              items: [
+                'Response times under 100ms',
+                {
+                  item: 'Database queries optimized',
+                  notes: ['Verify: All queries use indexes'],
+                },
+              ],
+            },
+          ],
+        },
+      };
+      const result = renderInstructionComponent(component);
+
+      expect(result).toContain('### Criteria\n');
+      // Ungrouped criterion
+      expect(result).toContain('- [ ] All tests pass');
+      // Security group
+      expect(result).toContain('#### Security\n');
+      expect(result).toContain('- [ ] HTTPS enforced');
+      expect(result).toContain('- [ ] **Rate limiting active**');
+      expect(result).toContain('  - Test: 100 req/min');
+      expect(result).toContain('  - Expected: 429 after limit');
+      // Performance group
+      expect(result).toContain('#### Performance\n');
+      expect(result).toContain('- [ ] Response times under 100ms');
+      expect(result).toContain('- [ ] **Database queries optimized**');
+      expect(result).toContain('  - Verify: All queries use indexes');
+    });
+
+    it('should handle mixed ConstraintGroup and individual constraints', () => {
+      const component: InstructionComponent = {
+        type: ComponentType.Instruction,
+        instruction: {
+          purpose: 'Test purpose',
+          constraints: [
+            'First ungrouped constraint',
+            { group: 'Group A', rules: ['Rule 1', 'Rule 2'] },
+            'Second ungrouped constraint',
+            { group: 'Group B', rules: ['Rule 3'] },
+          ],
+        },
+      };
+      const result = renderInstructionComponent(component);
+
+      expect(result).toContain('- First ungrouped constraint');
+      expect(result).toContain('#### Group A\n');
+      expect(result).toContain('- Rule 1');
+      expect(result).toContain('- Rule 2');
+      expect(result).toContain('- Second ungrouped constraint');
+      expect(result).toContain('#### Group B\n');
+      expect(result).toContain('- Rule 3');
+    });
+
+    it('should handle mixed CriterionGroup and individual criteria with categories', () => {
+      const component: InstructionComponent = {
+        type: ComponentType.Instruction,
+        instruction: {
+          purpose: 'Test purpose',
+          criteria: [
+            'Ungrouped criterion',
+            { item: 'Categorized item', category: 'Category A' },
+            {
+              group: 'Explicit Group',
+              items: ['Group item 1', 'Group item 2'],
+            },
+          ],
+        },
+      };
+      const result = renderInstructionComponent(component);
+
+      // Uncategorized first
+      expect(result).toContain('- [ ] Ungrouped criterion');
+      // Per-item category
+      expect(result).toContain('#### Category A\n');
+      expect(result).toContain('- [ ] Categorized item');
+      // Explicit group
+      expect(result).toContain('#### Explicit Group\n');
+      expect(result).toContain('- [ ] Group item 1');
+      expect(result).toContain('- [ ] Group item 2');
     });
   });
 
@@ -344,38 +463,15 @@ describe('renderer', () => {
     it('should render knowledge with all fields', () => {
       const result = renderKnowledgeComponent(mockKnowledgeModule.knowledge!);
 
-      expect(result).toContain('## Explanation\n\nThe Observer pattern');
-      expect(result).toContain('## Concepts\n');
+      expect(result).toContain('## Knowledge\n');
+      expect(result).toContain('The Observer pattern');
+      expect(result).toContain('### Key Concepts\n');
       expect(result).toContain('#### Concept: Subject\n');
-      expect(result).toContain('## Examples\n');
+      expect(result).toContain('### Examples\n');
       expect(result).toContain('#### Example: Basic Observer\n');
       expect(result).toContain('**Rationale:** Simple implementation');
-      expect(result).toContain('## Patterns\n');
+      expect(result).toContain('### Patterns\n');
       expect(result).toContain('#### Pattern: Push vs Pull\n');
-    });
-  });
-
-  describe('renderDataComponent', () => {
-    it('should render data with JSON format', () => {
-      const result = renderDataComponent(mockDataModule.data!);
-
-      expect(result).toContain('## Data\n\nDefault system settings');
-      expect(result).toContain('```json');
-      expect(result).toContain('"timeout"');
-      expect(result).toContain('"retries"');
-    });
-
-    it('should handle string values', () => {
-      const component: DataComponent = {
-        type: ComponentType.Data,
-        data: {
-          format: 'yaml',
-          value: 'key: value',
-        },
-      };
-      const result = renderDataComponent(component);
-
-      expect(result).toContain('```yaml\nkey: value\n```');
     });
   });
 
@@ -478,63 +574,37 @@ describe('renderer', () => {
     });
   });
 
-  describe('inferLanguageFromFormat', () => {
-    it('should infer correct language from formats', () => {
-      expect(inferLanguageFromFormat('json')).toBe('json');
-      expect(inferLanguageFromFormat('yaml')).toBe('yaml');
-      expect(inferLanguageFromFormat('javascript')).toBe('javascript');
-      expect(inferLanguageFromFormat('ts')).toBe('typescript');
-      expect(inferLanguageFromFormat('py')).toBe('python');
-    });
-
-    it('should return empty string for unknown formats', () => {
-      expect(inferLanguageFromFormat('unknown')).toBe('');
-      expect(inferLanguageFromFormat('custom')).toBe('');
-    });
-
-    it('should be case-insensitive', () => {
-      expect(inferLanguageFromFormat('JSON')).toBe('json');
-      expect(inferLanguageFromFormat('TypeScript')).toBe('typescript');
-    });
-  });
-
   describe('renderModule', () => {
     it('should render module with instruction shorthand', () => {
       const result = renderModule(mockInstructionModule);
-      expect(result).toContain('## Purpose');
-      expect(result).toContain('Apply deductive reasoning principles');
+      expect(result).toContain('## Instructions');
+      expect(result).toContain(
+        '**Purpose**: Apply deductive reasoning principles'
+      );
     });
 
     it('should render module with knowledge shorthand', () => {
       const result = renderModule(mockKnowledgeModule);
-      expect(result).toContain('## Explanation');
+      expect(result).toContain('## Knowledge');
       expect(result).toContain('Observer pattern');
-    });
-
-    it('should render module with data shorthand', () => {
-      const result = renderModule(mockDataModule);
-      expect(result).toContain('## Data');
-      expect(result).toContain('```json');
     });
   });
 
   describe('renderMarkdown', () => {
     it('should render complete persona with identity', () => {
-      const modules = [
-        mockInstructionModule,
-        mockKnowledgeModule,
-        mockDataModule,
-      ];
+      const modules = [mockInstructionModule, mockKnowledgeModule];
       const result = renderMarkdown(mockPersona, modules);
 
       expect(result).toContain('## Identity\n');
       expect(result).toContain(
         'I am a test persona focused on quality and logic.'
       );
+      expect(result).toContain('## Instructions\n');
       expect(result).toContain(
-        '## Purpose\n\nApply deductive reasoning principles'
+        '**Purpose**: Apply deductive reasoning principles'
       );
-      expect(result).toContain('## Explanation\n\nThe Observer pattern');
+      expect(result).toContain('## Knowledge\n');
+      expect(result).toContain('The Observer pattern');
     });
 
     it('should handle persona without identity', () => {
@@ -542,23 +612,15 @@ describe('renderer', () => {
         ...mockPersona,
         identity: '',
       };
-      const modules = [
-        mockInstructionModule,
-        mockKnowledgeModule,
-        mockDataModule,
-      ];
+      const modules = [mockInstructionModule, mockKnowledgeModule];
       const result = renderMarkdown(personaWithoutIdentity, modules);
 
       expect(result).not.toContain('## Identity');
-      expect(result).toContain('## Purpose');
+      expect(result).toContain('## Instructions');
     });
 
     it('should render groups with headings', () => {
-      const modules = [
-        mockInstructionModule,
-        mockKnowledgeModule,
-        mockDataModule,
-      ];
+      const modules = [mockInstructionModule, mockKnowledgeModule];
       const result = renderMarkdown(mockPersonaWithGroups, modules);
 
       expect(result).toContain('# Foundation\n');
@@ -566,11 +628,7 @@ describe('renderer', () => {
     });
 
     it('should add attribution when enabled', () => {
-      const modules = [
-        mockInstructionModule,
-        mockKnowledgeModule,
-        mockDataModule,
-      ];
+      const modules = [mockInstructionModule, mockKnowledgeModule];
       const result = renderMarkdown(mockPersonaWithGroups, modules);
 
       expect(result).toContain(
@@ -579,14 +637,10 @@ describe('renderer', () => {
     });
 
     it('should handle string module entries', () => {
-      const modules = [
-        mockInstructionModule,
-        mockKnowledgeModule,
-        mockDataModule,
-      ];
+      const modules = [mockInstructionModule, mockKnowledgeModule];
       const result = renderMarkdown(mockPersona, modules);
 
-      expect(result).toContain('## Purpose');
+      expect(result).toContain('## Instructions');
       expect(result).not.toContain('[Attribution:'); // attribution is false
     });
   });
@@ -594,13 +648,10 @@ describe('renderer', () => {
   describe('renderComponent', () => {
     it('should dispatch to correct renderer based on type', () => {
       const instruction = renderComponent(mockInstructionModule.instruction!);
-      expect(instruction).toContain('## Purpose');
+      expect(instruction).toContain('## Instructions');
 
       const knowledge = renderComponent(mockKnowledgeModule.knowledge!);
-      expect(knowledge).toContain('## Explanation');
-
-      const data = renderComponent(mockDataModule.data!);
-      expect(data).toContain('## Data');
+      expect(knowledge).toContain('## Knowledge');
     });
   });
 });

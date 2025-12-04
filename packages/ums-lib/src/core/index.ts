@@ -17,3 +17,6 @@ export * from './rendering/index.js';
 
 // Registry domain - Conflict-aware registry (Phase 2)
 export * from './registry/index.js';
+
+// URI domain - UMS v2.2 URI scheme utilities
+export * from './uri/index.js';

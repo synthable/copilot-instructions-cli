@@ -9,14 +9,41 @@ import type {
   Component,
   InstructionComponent,
   KnowledgeComponent,
-  DataComponent,
   Example,
   Pattern,
   Concept,
   ProcessStep,
+  Constraint,
+  ConstraintObject,
   Criterion,
+  CriterionObject,
+  CriterionGroup,
 } from '../../types/index.js';
-import { ComponentType } from '../../types/index.js';
+import {
+  ComponentType,
+  isConstraintGroup,
+  isCriterionGroup,
+} from '../../types/index.js';
+
+/**
+ * Renders an array of notes as indented sub-bullets
+ * @param notes - Array of note strings
+ * @param indent - Number of spaces for indentation (default: 2)
+ * @returns Formatted markdown for notes
+ */
+function renderNotes(notes: string[], indent = 2): string {
+  const indentStr = ' '.repeat(indent);
+  return notes.map(note => `${indentStr}- ${note}`).join('\n');
+}
+
+/**
+ * Renders an array of strings as a bullet list
+ * @param items - Array of strings
+ * @returns Formatted markdown bullet list
+ */
+function renderBulletList(items: string[]): string {
+  return items.map(item => `- ${item}`).join('\n');
+}
 
 /**
  * Renders a complete persona with modules to Markdown
@@ -84,8 +111,6 @@ export function renderModule(module: Module): string {
     sections.push(renderInstructionComponent(module.instruction));
   } else if (module.knowledge) {
     sections.push(renderKnowledgeComponent(module.knowledge));
-  } else if (module.data) {
-    sections.push(renderDataComponent(module.data));
   } else if (module.components) {
     // Render multiple components
     for (const component of module.components) {
@@ -105,11 +130,9 @@ export function renderComponent(component: Component): string {
   // Use discriminated union with ComponentType enum for type-safe matching
   if (component.type === ComponentType.Instruction) {
     return renderInstructionComponent(component);
-  } else if (component.type === ComponentType.Knowledge) {
-    return renderKnowledgeComponent(component);
   } else {
-    // Must be Data component (type system guarantees this)
-    return renderDataComponent(component);
+    // Must be Knowledge component (type system guarantees this)
+    return renderKnowledgeComponent(component);
   }
 }
 
@@ -132,11 +155,50 @@ export function renderProcessStep(
   let stepText = `${index + 1}. **${step.step}**`;
 
   if (step.notes && step.notes.length > 0) {
-    const notesList = step.notes.map(note => `   - ${note}`).join('\n');
-    stepText += `\n${notesList}`;
+    stepText += `\n${renderNotes(step.notes, 3)}`;
   }
 
   return stepText;
+}
+
+/**
+ * Renders a single constraint item (string or ConstraintObject)
+ * @param constraint - The constraint to render
+ * @returns Formatted markdown for the constraint
+ */
+function renderConstraintItem(constraint: string | ConstraintObject): string {
+  if (typeof constraint === 'string') {
+    return `- ${constraint}`;
+  }
+  let text = `- **${constraint.rule}**`;
+  if (constraint.notes && constraint.notes.length > 0) {
+    text += `\n${renderNotes(constraint.notes)}`;
+  }
+  return text;
+}
+
+/**
+ * Renders constraints with optional grouping (v2.1)
+ * @param constraints - Array of constraints (strings, ConstraintObject, or ConstraintGroup)
+ * @returns Formatted markdown for all constraints
+ */
+export function renderConstraints(constraints: Constraint[]): string {
+  const sections: string[] = [];
+
+  for (const constraint of constraints) {
+    if (isConstraintGroup(constraint)) {
+      // Grouped constraints with subheading (H4 under ### Constraints)
+      sections.push(`#### ${constraint.group}\n`);
+      const groupItems = constraint.rules.map(rule =>
+        renderConstraintItem(rule)
+      );
+      sections.push(groupItems.join('\n\n'));
+    } else {
+      sections.push(renderConstraintItem(constraint));
+    }
+  }
+
+  return sections.join('\n\n');
 }
 
 /**
@@ -150,14 +212,17 @@ export function renderInstructionComponent(
   const sections: string[] = [];
   const { instruction } = component;
 
-  // Purpose
+  // Parent heading
+  sections.push('## Instructions\n');
+
+  // Purpose (inline bold label)
   if (instruction.purpose) {
-    sections.push(`## Purpose\n\n${instruction.purpose}\n`);
+    sections.push(`**Purpose**: ${instruction.purpose}\n`);
   }
 
   // Process
   if (instruction.process && instruction.process.length > 0) {
-    sections.push('## Process\n');
+    sections.push('### Process\n');
     const steps = instruction.process.map((step, index) =>
       renderProcessStep(step, index)
     );
@@ -166,34 +231,20 @@ export function renderInstructionComponent(
 
   // Constraints
   if (instruction.constraints && instruction.constraints.length > 0) {
-    sections.push('## Constraints\n');
-    const constraints = instruction.constraints.map(constraint => {
-      if (typeof constraint === 'string') {
-        return `- ${constraint}`;
-      }
-      // Constraint with notes
-      let text = `- **${constraint.rule}**`;
-      if (constraint.notes && constraint.notes.length > 0) {
-        const notesList = constraint.notes
-          .map(note => `  - ${note}`)
-          .join('\n');
-        text += `\n${notesList}`;
-      }
-      return text;
-    });
-    sections.push(constraints.join('\n\n') + '\n');
+    sections.push('### Constraints\n');
+    sections.push(renderConstraints(instruction.constraints) + '\n');
   }
 
   // Principles
   if (instruction.principles && instruction.principles.length > 0) {
-    sections.push('## Principles\n');
+    sections.push('### Principles\n');
     const principles = instruction.principles.map(p => `- ${p}`);
     sections.push(principles.join('\n') + '\n');
   }
 
-  // Criteria (v2.1 with category grouping and notes)
+  // Criteria
   if (instruction.criteria && instruction.criteria.length > 0) {
-    sections.push('## Criteria\n');
+    sections.push('### Criteria\n');
     sections.push(renderCriteria(instruction.criteria) + '\n');
   }
 
@@ -202,24 +253,39 @@ export function renderInstructionComponent(
 
 /**
  * Renders criteria with category grouping (v2.1)
- * @param criteria - Array of criteria (strings or Criterion objects)
+ * Supports both per-item category (CriterionObject.category) and explicit groups (CriterionGroup)
+ * @param criteria - Array of criteria (strings, CriterionObject, or CriterionGroup)
  * @returns Formatted markdown for all criteria
  */
-export function renderCriteria(criteria: (string | Criterion)[]): string {
-  // Group criteria by category
-  const uncategorized: (string | Criterion)[] = [];
-  const categorized = new Map<string, (string | Criterion)[]>();
+export function renderCriteria(criteria: Criterion[]): string {
+  // Separate explicit groups from individual items
+  const explicitGroups: CriterionGroup[] = [];
+  const individualItems: (string | CriterionObject)[] = [];
 
   for (const criterion of criteria) {
-    if (typeof criterion === 'string' || !criterion.category) {
-      uncategorized.push(criterion);
+    if (isCriterionGroup(criterion)) {
+      explicitGroups.push(criterion);
     } else {
-      let categoryArray = categorized.get(criterion.category);
+      individualItems.push(criterion);
+    }
+  }
+
+  // Group individual items by category (for CriterionObject.category support)
+  const uncategorized: (string | CriterionObject)[] = [];
+  const categorized = new Map<string, (string | CriterionObject)[]>();
+
+  for (const item of individualItems) {
+    if (typeof item === 'string') {
+      uncategorized.push(item);
+    } else if (item.category) {
+      let categoryArray = categorized.get(item.category);
       if (!categoryArray) {
         categoryArray = [];
-        categorized.set(criterion.category, categoryArray);
+        categorized.set(item.category, categoryArray);
       }
-      categoryArray.push(criterion);
+      categoryArray.push(item);
+    } else {
+      uncategorized.push(item);
     }
   }
 
@@ -231,22 +297,31 @@ export function renderCriteria(criteria: (string | Criterion)[]): string {
     sections.push(items.join('\n\n'));
   }
 
-  // Render categorized groups with subheadings
-  Array.from(categorized.entries()).forEach(([category, items]) => {
-    sections.push(`### ${category}\n`);
+  // Render per-item categorized groups with subheadings (H4 under ### Criteria)
+  for (const [category, items] of categorized) {
+    sections.push(`#### ${category}\n`);
     const renderedItems = items.map(c => renderCriterionItem(c));
     sections.push(renderedItems.join('\n\n'));
-  });
+  }
+
+  // Render explicit CriterionGroup entries (H4 under ### Criteria)
+  for (const group of explicitGroups) {
+    sections.push(`#### ${group.group}\n`);
+    const renderedItems = group.items.map(item => renderCriterionItem(item));
+    sections.push(renderedItems.join('\n\n'));
+  }
 
   return sections.join('\n\n');
 }
 
 /**
  * Renders a single criterion item (v2.1 simplified format)
- * @param criterion - The criterion (string or Criterion object)
+ * @param criterion - The criterion (string or CriterionObject)
  * @returns Formatted markdown for the criterion
  */
-export function renderCriterionItem(criterion: string | Criterion): string {
+export function renderCriterionItem(
+  criterion: string | CriterionObject
+): string {
   // Handle simple string criteria
   if (typeof criterion === 'string') {
     return `- [ ] ${criterion}`;
@@ -255,8 +330,7 @@ export function renderCriterionItem(criterion: string | Criterion): string {
   // Handle object with notes
   if (criterion.notes && criterion.notes.length > 0) {
     let text = `- [ ] **${criterion.item}**`;
-    const notesList = criterion.notes.map(note => `  - ${note}`).join('\n');
-    text += `\n${notesList}`;
+    text += `\n${renderNotes(criterion.notes)}`;
     return text;
   }
 
@@ -275,14 +349,15 @@ export function renderKnowledgeComponent(
   const sections: string[] = [];
   const { knowledge } = component;
 
-  // Explanation
+  // Parent heading with explanation
+  sections.push('## Knowledge\n');
   if (knowledge.explanation) {
-    sections.push(`## Explanation\n\n${knowledge.explanation}\n`);
+    sections.push(`${knowledge.explanation}\n`);
   }
 
   // Concepts
   if (knowledge.concepts && knowledge.concepts.length > 0) {
-    sections.push('## Concepts\n');
+    sections.push('### Key Concepts\n');
     for (const concept of knowledge.concepts) {
       sections.push(renderConcept(concept));
     }
@@ -290,7 +365,7 @@ export function renderKnowledgeComponent(
 
   // Examples
   if (knowledge.examples && knowledge.examples.length > 0) {
-    sections.push('## Examples\n');
+    sections.push('### Examples\n');
     for (const example of knowledge.examples) {
       sections.push(renderExample(example));
     }
@@ -298,7 +373,7 @@ export function renderKnowledgeComponent(
 
   // Patterns
   if (knowledge.patterns && knowledge.patterns.length > 0) {
-    sections.push('## Patterns\n');
+    sections.push('### Patterns\n');
     for (const pattern of knowledge.patterns) {
       sections.push(renderPattern(pattern));
     }
@@ -322,20 +397,22 @@ export function renderConcept(concept: Concept): string {
     sections.push(`**Rationale:** ${concept.rationale}\n`);
   }
 
-  // Per spec 6.3.4: examples come before trade-offs
+  // Per spec 6.3.4: examples come before trade-offs (can be strings or Example objects)
   if (concept.examples && concept.examples.length > 0) {
     sections.push('**Examples:**\n');
     for (const example of concept.examples) {
-      sections.push(`- ${example}`);
+      if (typeof example === 'string') {
+        sections.push(`- ${example}`);
+      } else {
+        sections.push(renderExample(example));
+      }
     }
     sections.push('');
   }
 
   if (concept.tradeoffs && concept.tradeoffs.length > 0) {
     sections.push('**Trade-offs:**\n');
-    for (const tradeoff of concept.tradeoffs) {
-      sections.push(`- ${tradeoff}`);
-    }
+    sections.push(renderBulletList(concept.tradeoffs));
     sections.push('');
   }
 
@@ -394,88 +471,28 @@ export function renderPattern(pattern: Pattern): string {
 
   if (pattern.advantages && pattern.advantages.length > 0) {
     sections.push('**Advantages:**\n');
-    for (const advantage of pattern.advantages) {
-      sections.push(`- ${advantage}`);
-    }
+    sections.push(renderBulletList(pattern.advantages));
     sections.push('');
   }
 
   if (pattern.disadvantages && pattern.disadvantages.length > 0) {
     sections.push('**Disadvantages:**\n');
-    for (const disadvantage of pattern.disadvantages) {
-      sections.push(`- ${disadvantage}`);
+    sections.push(renderBulletList(pattern.disadvantages));
+    sections.push('');
+  }
+
+  // Render examples (v2.1: plural, can be strings or Example objects)
+  if (pattern.examples && pattern.examples.length > 0) {
+    sections.push('**Examples:**\n');
+    for (const example of pattern.examples) {
+      if (typeof example === 'string') {
+        sections.push(`- ${example}`);
+      } else {
+        sections.push(renderExample(example));
+      }
     }
     sections.push('');
   }
 
-  if (pattern.example) {
-    sections.push(renderExample(pattern.example));
-  }
-
   return sections.join('\n');
-}
-
-/**
- * Renders a data component to Markdown
- * @param component - The data component
- * @returns Rendered data content
- */
-export function renderDataComponent(component: DataComponent): string {
-  const sections: string[] = [];
-  const { data } = component;
-
-  if (data.description) {
-    sections.push(`## Data\n\n${data.description}\n`);
-  } else {
-    sections.push('## Data\n');
-  }
-
-  // Infer language from format
-  const language = inferLanguageFromFormat(data.format);
-  const value =
-    typeof data.value === 'string'
-      ? data.value
-      : JSON.stringify(data.value, null, 2);
-  const codeBlock = language
-    ? `\`\`\`${language}\n${value}\n\`\`\``
-    : `\`\`\`\n${value}\n\`\`\``;
-
-  sections.push(`${codeBlock}\n`);
-
-  return sections.join('\n');
-}
-
-/**
- * Infers code block language from format string
- * @param format - The format string (e.g., "json", "yaml", "xml")
- * @returns Language identifier for code block syntax highlighting
- */
-export function inferLanguageFromFormat(format: string): string {
-  const formatMap: Record<string, string> = {
-    json: 'json',
-    yaml: 'yaml',
-    yml: 'yaml',
-    xml: 'xml',
-    html: 'html',
-    css: 'css',
-    javascript: 'javascript',
-    js: 'javascript',
-    typescript: 'typescript',
-    ts: 'typescript',
-    python: 'python',
-    py: 'python',
-    java: 'java',
-    csharp: 'csharp',
-    'c#': 'csharp',
-    go: 'go',
-    rust: 'rust',
-    markdown: 'markdown',
-    md: 'markdown',
-    bash: 'bash',
-    sh: 'bash',
-    shell: 'bash',
-    toml: 'toml',
-  };
-
-  return formatMap[format.toLowerCase()] || '';
 }

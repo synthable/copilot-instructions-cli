@@ -30,15 +30,9 @@ export class UMSError extends Error {
     super(message);
     this.name = 'UMSError';
     this.code = code;
-    if (context !== undefined) {
-      this.context = context;
-    }
-    if (location !== undefined) {
-      this.location = location;
-    }
-    if (specSection !== undefined) {
-      this.specSection = specSection;
-    }
+    if (context !== undefined) this.context = context;
+    if (location !== undefined) this.location = location;
+    if (specSection !== undefined) this.specSection = specSection;
   }
 }
 
@@ -59,12 +53,8 @@ export class UMSValidationError extends UMSError {
   ) {
     super(message, 'VALIDATION_ERROR', context, location, specSection);
     this.name = 'UMSValidationError';
-    if (path !== undefined) {
-      this.path = path;
-    }
-    if (section !== undefined) {
-      this.section = section;
-    }
+    if (path !== undefined) this.path = path;
+    if (section !== undefined) this.section = section;
   }
 }
 
@@ -89,9 +79,7 @@ export class ModuleLoadError extends UMSError {
       specSection
     );
     this.name = 'ModuleLoadError';
-    if (filePath !== undefined) {
-      this.filePath = filePath;
-    }
+    if (filePath !== undefined) this.filePath = filePath;
   }
 }
 
@@ -116,9 +104,7 @@ export class PersonaLoadError extends UMSError {
       specSection
     );
     this.name = 'PersonaLoadError';
-    if (filePath !== undefined) {
-      this.filePath = filePath;
-    }
+    if (filePath !== undefined) this.filePath = filePath;
   }
 }
 
@@ -204,7 +190,7 @@ export const SCHEMA_VALIDATION_ERRORS = {
   invalidEnumValue: (field: string, value: string, validValues: string[]) =>
     `Invalid value '${value}' for ${field}. Valid values: ${validValues.join(', ')}`,
   wrongSchemaVersion: (version: string) =>
-    `Invalid schema version '${version}', expected '1.0'`,
+    `Invalid schema version '${version}', expected '1.0', '2.0', '2.1', or '2.2'`,
   invalidShape: (shape: string, validShapes: string[]) =>
     `Invalid shape '${shape}'. Valid shapes: ${validShapes.join(', ')}`,
   undeclaredDirective: (directive: string, declared: string[]) =>
@@ -213,4 +199,57 @@ export const SCHEMA_VALIDATION_ERRORS = {
     `Missing required directive: ${directive}`,
   invalidDirectiveType: (directive: string, expected: string, actual: string) =>
     `Directive '${directive}' expected ${expected}, got ${actual}`,
+} as const;
+
+/**
+ * Standardized validation error message templates
+ * These ensure consistent error messaging across the codebase
+ */
+export const VALIDATION_MESSAGES = {
+  // Field requirement messages
+  requiredNonEmptyString: (field: string) =>
+    `${field} must be a non-empty string`,
+  requiredNonEmptyField: (field: string, parent: string) =>
+    `${parent} must have a non-empty ${field} field`,
+  cannotBeEmpty: (field: string) => `${field} cannot be empty`,
+  missingRequiredField: (field: string) => `Missing required field: ${field}`,
+
+  // Array validation messages
+  mustBeArray: (field: string) => `${field} must be an array`,
+  mustBeArrayOfStrings: (field: string) =>
+    `${field} must be an array of strings`,
+  cannotBeEmptyArray: (field: string) => `${field} cannot be empty`,
+  mustHaveNonEmptyArray: (field: string, parent: string) =>
+    `${parent} must have a non-empty ${field} array`,
+
+  // Indexed field messages
+  indexedMustBeString: (field: string, index: number) =>
+    `${field}[${index}] must be a string`,
+  indexedCannotBeEmpty: (field: string, index: number) =>
+    `${field}[${index}] cannot be empty`,
+  indexedMustBeNonEmptyString: (field: string, index: number) =>
+    `${field} at index ${index} must be a non-empty string`,
+
+  // Component-specific messages
+  mustBeObject: (itemName: string) => `${itemName} must be an object`,
+  mustBeStringOrObject: (itemName: string, fields: string) =>
+    `${itemName} must be a string or an object with ${fields}`,
+  cannotBeEmptyString: (itemName: string) =>
+    `${itemName} cannot be an empty string`,
+  cannotBeWhitespaceOnly: (field: string) =>
+    `${field} cannot be whitespace-only`,
+
+  // Type validation
+  mustBeType: (field: string, expectedType: string) =>
+    `${field} must be ${expectedType}`,
+  invalidType: (field: string, expected: string, actual: string) =>
+    `${field} expected ${expected}, got ${actual}`,
+
+  // Format validation
+  invalidFormat: (field: string, value: string, format: string) =>
+    `Invalid ${field} format: ${value}. ${format}`,
+  mustBeLowercase: (field: string, values: string[]) =>
+    `${field} must be lowercase: ${values.join(', ')}`,
+  mustMatchPattern: (field: string, pattern: string) =>
+    `${field} must match pattern: ${pattern}`,
 } as const;

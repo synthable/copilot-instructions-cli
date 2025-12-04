@@ -16,14 +16,14 @@
 - **Component interfaces**: Removed nested duplication and `ComponentMetadata`. Components now have a flat structure with direct property access.
   - Before: `instruction: { type: ..., instruction: { purpose: ... } }`
   - After: `instruction: { type?: ..., purpose: ... }`
-  - Applies to all three component types: Instruction, Knowledge, Data
+  - Applies to both component types: Instruction and Knowledge
 - **ProcessStep**: Now `string | {step: string, notes?: string[]}` (removed complex validation/conditional fields).
 - **Constraint**: Now `string | {rule: string, notes?: string[]}` (use RFC 2119 keywords in rule text for severity).
 - **Criterion**: Now `string | {item: string, category?: string, notes?: string[]}` (use RFC 2119 keywords in item text for priority).
 
 ### Clarifications
 
-- **Component `type` field**: When using shorthand properties (`instruction`, `knowledge`, `data`), the `type` field is **not required** and should be omitted. The property name provides implicit type discrimination. The `type` field is only required when components are defined in the `components` array.
+- **Component `type` field**: When using shorthand properties (`instruction`, `knowledge`), the `type` field is **not required** and should be omitted. The property name provides implicit type discrimination. The `type` field is only required when components are defined in the `components` array.
 
 See Architecture Decision Records (ADRs) in `docs/architecture/adr/` for detailed rationale and migration guidance.
 
@@ -124,7 +124,7 @@ The Unified Module System (UMS) v2.1 is a specification for a data-centric, modu
 
 ### 1.1. Key Features
 
-- **Component-Based Architecture**: Modules are composed of reusable component blocks (Instruction, Knowledge, Data)
+- **Component-Based Architecture**: Modules are composed of reusable component blocks (Instruction, Knowledge)
 - **TypeScript-First**: Native TypeScript support with full IDE integration, type safety, and refactoring capabilities
 - **Flexible Structure**: Components define structure naturally without rigid contracts
 - **Explicit Capabilities**: Module capabilities are declared as top-level metadata
@@ -163,9 +163,8 @@ A valid module for v2.1 MUST contain the following top-level keys:
 | `components`     | Array[Component]     | No\*      | Component blocks (see 2.2)                        |
 | `instruction`    | InstructionComponent | No\*      | Shorthand for instruction component               |
 | `knowledge`      | KnowledgeComponent   | No\*      | Shorthand for knowledge component                 |
-| `data`           | DataComponent        | No\*      | Shorthand for data component                      |
 
-\* At least one of `components`, `instruction`, `knowledge`, or `data` MUST be present. Shorthand properties can be combined (e.g., both `instruction` and `knowledge`).
+\* At least one of `components`, `instruction`, or `knowledge` MUST be present. Shorthand properties can be combined (e.g., both `instruction` and `knowledge`).
 
 #### `id`
 
@@ -258,9 +257,9 @@ A valid module for v2.1 MUST contain the following top-level keys:
 
 ### 2.1.1. TypeScript Module Export Requirements
 
-All module files MUST export a module object using a **named export** that matches a camelCase transformation of the module ID's final segment.
+Module files MUST export exactly one Module object. The export name is a **convention**, not a requirement—the module's `id` field is the source of truth for identification.
 
-**Export Naming Convention**:
+**Export Naming Convention** (recommended):
 
 - Take the final segment of the module ID (after the last `/`)
 - Transform kebab-case to camelCase
@@ -269,17 +268,17 @@ All module files MUST export a module object using a **named export** that match
 **Examples**:
 
 ```typescript
-// error-handling.module.ts
-// Module ID: "error-handling"
-export const errorHandling: Module = { ... };
+// All valid for module ID "error-handling"
+export const errorHandling: Module = { id: "error-handling", ... };
+export const errorHandlingModule: Module = { id: "error-handling", ... };
 
-// test-driven-development.module.ts
-// Module ID: "principle/testing/test-driven-development"
-export const testDrivenDevelopment: Module = { ... };
+// Valid: co-export shared arrays alongside the module
+export const SECURITY_CONSTRAINTS: ConstraintGroup = { ... };
+export const myModule: Module = { id: "my-module", ... };
 
-// systems-thinking.module.ts
-// Module ID: "foundation/reasoning/systems-thinking"
-export const systemsThinking: Module = { ... };
+// INVALID: multiple Module exports (use separate files)
+export const v1: Module = { ... };
+export const v2: Module = { ... };  // ❌ Use separate files
 ```
 
 **Rationale**: Named exports enable:
@@ -291,17 +290,16 @@ export const systemsThinking: Module = { ... };
 
 **Validation**: Build tools MUST verify that:
 
-1. The module file exports exactly one named export
+1. The module file exports exactly one Module object
 2. The export conforms to the `Module` interface
-3. The exported object's `id` field matches the expected module ID
+3. Additional exports (shared arrays, types, helpers) are permitted
 
 ### 2.2. Component Architecture
 
-UMS v2.1 uses a **component-based architecture** where modules are composed of three types of components:
+UMS v2.1 uses a **component-based architecture** where modules are composed of two types of components:
 
 1. **Instruction Component**: Tells the AI what to do
 2. **Knowledge Component**: Teaches the AI concepts and patterns
-3. **Data Component**: Provides reference information
 
 Modules can include components in two ways:
 
@@ -343,16 +341,12 @@ instruction: {
 knowledge: {
   explanation: "...",
   concepts: [...]
-},
-data: {
-  format: "json",
-  value: { ... }
 }
 ```
 
 **Rules:**
 
-- Shorthand properties (`instruction`, `knowledge`, `data`) can be combined
+- Shorthand properties (`instruction`, `knowledge`) can be combined
 - The `type` field is **implicit** from the property name and should be omitted
 - If `components` array is used, the `type` field is **required** for discrimination
 - If `components` array is present, it takes precedence over shorthand properties
@@ -391,7 +385,7 @@ interface KnowledgeComponent {
   type?: "knowledge"; // Required in components array, omitted in shorthand
   explanation: string; // High-level overview
   concepts?: Concept[]; // Core concepts
-  examples?: Example[]; // Illustrative examples
+  examples?: Array<string | Example>; // Simple strings or full Example objects
   patterns?: Pattern[]; // Design patterns
 }
 ```
@@ -401,42 +395,19 @@ interface KnowledgeComponent {
 - `type` (conditional): Required when used in `components` array, omitted when using shorthand `knowledge` property
 - `explanation` (required): High-level conceptual overview
 - `concepts` (optional): Core concepts to understand
-- `examples` (optional): Concrete code/text examples
+- `examples` (optional): Simple strings or full Example objects for concrete code/text examples
 - `patterns` (optional): Design patterns and best practices
-
-#### Component Type: Data
-
-Provides **reference information**.
-
-```typescript
-interface DataComponent {
-  type?: "data"; // Required in components array, omitted in shorthand
-  format: string; // Media type (json, yaml, xml, etc.)
-  description?: string; // What this data represents
-  value: unknown; // The actual data
-}
-```
-
-**Fields**:
-
-- `type` (conditional): Required when used in `components` array, omitted when using shorthand `data` property
-- `format` (required): Data format/media type (e.g., `"json"`, `"yaml"`, `"xml"`)
-- `description` (optional): Human-readable description
-- `value` (required): The actual data content
 
 ### 2.3. The `metadata` Block
 
-| Key           | Type          | Required? | Description                                 |
-| :------------ | :------------ | :-------- | :------------------------------------------ |
-| `name`        | String        | Yes       | Human-readable, Title Case name             |
-| `description` | String        | Yes       | Concise, single-sentence summary            |
-| `semantic`    | String        | Yes       | Dense, keyword-rich paragraph for AI search |
-| `tags`        | Array[String] | No        | Lowercase keywords for filtering            |
-| `license`     | String        | No        | SPDX license identifier                     |
-| `authors`     | Array[String] | No        | Primary authors or maintainers              |
-| `homepage`    | String        | No        | URL to source repository or docs            |
-| `deprecated`  | Boolean       | No        | Deprecation flag                            |
-| `replacedBy`  | String        | No        | ID of successor module                      |
+| Key           | Type          | Required? | Description                                       |
+| :------------ | :------------ | :-------- | :------------------------------------------------ |
+| `name`        | String        | Yes       | Human-readable, Title Case name                   |
+| `description` | String        | Yes       | Concise, single-sentence summary                  |
+| `semantic`    | String        | No        | Override for auto-generated semantic search text  |
+| `tags`        | Array[String] | No        | Lowercase keywords for filtering                  |
+| `attribution` | Object        | No        | Attribution metadata (license, authors, homepage) |
+| `lifecycle`   | Object        | No        | Lifecycle metadata (deprecated, replacedBy)       |
 
 #### `name`
 
@@ -457,10 +428,23 @@ interface DataComponent {
 #### `semantic`
 
 - **Type**: `String`
-- **Required**: Yes
-- **Purpose**: Detailed, semantically rich paragraph for vector embedding and semantic search
+- **Required**: No
+- **Purpose**: Override for auto-generated semantic search text. If omitted, build tools generate it automatically.
+- **Build-time behavior**: When not provided, build tools SHOULD generate semantic text by concatenating:
+  ```typescript
+  const generatedSemantic = [
+    module.metadata.name,
+    module.metadata.description,
+    module.capabilities.join(", "),
+    module.metadata.tags?.join(", ") ?? "",
+    module.instruction?.purpose ?? "",
+    module.knowledge?.explanation ?? "",
+  ]
+    .filter(Boolean)
+    .join(" ");
+  ```
 - **Constraints**:
-  - MUST be a complete paragraph
+  - If provided, SHOULD be a complete paragraph
   - SHOULD include relevant keywords, synonyms, technical details
   - Optimized for `all-mpnet-base-v2` embedding model
 - **Example**: `"TDD, test-driven development, red-green-refactor, unit testing, test-first development, quality assurance, regression prevention"`
@@ -482,21 +466,51 @@ interface DataComponent {
   - Use `cognitiveLevel` for **abstraction level** (0-6 hierarchy)
   - Use `tags` for **patterns, keywords, and additional descriptors**.
 
-#### `license`, `authors`, `homepage`
+#### `attribution`
 
-Standard metadata fields for attribution and legal clarity.
+Optional object for attribution and legal clarity.
 
-- `license`: SPDX license identifier (e.g., `"MIT"`, `"Apache-2.0"`)
-- `authors`: Array of `"Name <email>"` strings
-- `homepage`: Valid URL to source repository or documentation
+```typescript
+interface Attribution {
+  license?: string; // SPDX license identifier (e.g., "MIT", "Apache-2.0")
+  authors?: string[]; // Array of "Name <email>" strings
+  homepage?: string; // Valid URL to source repository or documentation
+}
+```
 
-#### `deprecated`, `replacedBy`
+**Example:**
 
-Lifecycle management fields.
+```typescript
+attribution: {
+  license: 'MIT',
+  authors: ['Jane Doe <jane@example.com>'],
+  homepage: 'https://github.com/example/module'
+}
+```
 
-- `deprecated`: Boolean flag indicating deprecation
-- `replacedBy`: MUST be a valid module ID
+#### `lifecycle`
+
+Optional object for lifecycle management.
+
+```typescript
+interface Lifecycle {
+  deprecated?: boolean; // Deprecation flag
+  replacedBy?: string; // ID of successor module
+}
+```
+
+**Constraints:**
+
 - `replacedBy` MUST NOT be present unless `deprecated: true`
+
+**Example:**
+
+```typescript
+lifecycle: {
+  deprecated: true,
+  replacedBy: 'new-module-id'
+}
+```
 
 ## 3. Directive Types
 
@@ -542,18 +556,26 @@ process: [
 
 ### 3.2. Constraint
 
-A constraint can be a simple string or an object with optional notes for elaboration.
+Constraints can be simple strings, objects with notes, or grouped collections.
 
 ```typescript
-type Constraint =
-  | string
-  | {
-      rule: string; // The constraint rule. Use RFC 2119 keywords (MUST, SHOULD, MAY) for severity.
-      notes?: string[]; // Optional notes for examples, rationale, or clarification.
-    };
+// Simple constraint object
+interface ConstraintObject {
+  rule: string; // The constraint rule. Use RFC 2119 keywords (MUST, SHOULD, MAY) for severity.
+  notes?: string[]; // Optional notes for examples, rationale, or clarification.
+}
+
+// Grouped constraints (avoids per-item category duplication)
+interface ConstraintGroup {
+  group: string; // Group name renders as ### heading
+  rules: Array<string | ConstraintObject>;
+}
+
+// Combined type for constraints array
+type ConstraintEntry = string | ConstraintObject | ConstraintGroup;
 ```
 
-**Simple Example (90% of cases):**
+**Simple Example (most common):**
 
 ```typescript
 constraints: [
@@ -563,7 +585,7 @@ constraints: [
 ];
 ```
 
-**Example with Notes (10% of cases):**
+**Example with Notes:**
 
 ```typescript
 constraints: [
@@ -575,16 +597,50 @@ constraints: [
       "Rationale: REST conventions require resource-based URLs",
     ],
   },
+];
+```
+
+**Example with Groups:**
+
+```typescript
+constraints: [
+  // Ungrouped constraints
+  "All code MUST be reviewed",
+
+  // Grouped constraints (no per-item category duplication)
   {
-    rule: "All API responses MUST include proper HTTP status codes",
-    notes: [
-      "2xx for success (200 OK, 201 Created, 204 No Content)",
-      "4xx for client errors (400 Bad Request, 404 Not Found)",
-      "5xx for server errors (500 Internal Server Error)",
-      "See RFC 7231 for complete status code definitions",
+    group: "Security",
+    rules: [
+      "MUST use HTTPS",
+      "MUST validate input",
+      {
+        rule: "MUST NOT log secrets",
+        notes: ["Good: { userId }", "Bad: { password }"],
+      },
+    ],
+  },
+  {
+    group: "Performance",
+    rules: [
+      "SHOULD cache expensive queries",
+      "MUST use pagination for large datasets",
     ],
   },
 ];
+```
+
+**Reusable Groups via Import:**
+
+```typescript
+// shared/constraints/security.ts
+export const SECURITY_CONSTRAINTS: ConstraintGroup = {
+  group: "Security",
+  rules: ["MUST use HTTPS", "MUST validate input"],
+};
+
+// my-module.module.ts
+import { SECURITY_CONSTRAINTS } from "../shared/constraints/security.ts";
+constraints: [SECURITY_CONSTRAINTS, "Other constraint"];
 ```
 
 **Authoring Guidelines:**
@@ -608,19 +664,26 @@ For notes:
 
 ### 3.3. Criterion
 
-A criterion can be a simple string or an object with optional category and notes for elaboration.
+Criteria can be simple strings, objects with notes, or grouped collections.
 
 ```typescript
-type Criterion =
-  | string
-  | {
-      item: string; // The verification criterion
-      category?: string; // Optional grouping (renders as subheadings)
-      notes?: string[]; // Optional test instructions, expected results, verification steps
-    };
+// Simple criterion object
+interface CriterionObject {
+  item: string; // The verification criterion
+  notes?: string[]; // Optional test instructions, expected results, verification steps
+}
+
+// Grouped criteria (avoids per-item category duplication)
+interface CriterionGroup {
+  group: string; // Group name renders as ### heading
+  items: Array<string | CriterionObject>;
+}
+
+// Combined type for criteria array
+type CriterionEntry = string | CriterionObject | CriterionGroup;
 ```
 
-**Simple Example (90% of cases):**
+**Simple Example (most common):**
 
 ```typescript
 criteria: [
@@ -630,53 +693,43 @@ criteria: [
 ];
 ```
 
-**Example with Categories:**
-
-```typescript
-criteria: [
-  // Uncategorized
-  "All tests pass before deployment",
-  "Documentation is complete",
-
-  // Security category
-  {
-    item: "All endpoints use HTTPS",
-    category: "Security",
-  },
-  {
-    item: "Authentication required for protected resources",
-    category: "Security",
-  },
-
-  // Performance category
-  {
-    item: "Response times under 100ms",
-    category: "Performance",
-  },
-];
-```
-
-**Example with Test Details:**
+**Example with Notes:**
 
 ```typescript
 criteria: [
   {
     item: "Rate limiting prevents abuse",
-    category: "Security",
     notes: [
       "Test: Send 100 requests in 1 minute using same API key",
       "Expected: Receive 429 Too Many Requests after limit",
-      "Verify: Rate limit headers present (X-RateLimit-Limit, X-RateLimit-Remaining)",
-      "See RFC 6585 section 4 for 429 status code specification",
+    ],
+  },
+];
+```
+
+**Example with Groups:**
+
+```typescript
+criteria: [
+  // Ungrouped criteria
+  "All tests pass",
+
+  // Grouped criteria (no per-item category duplication)
+  {
+    group: "Security",
+    items: [
+      "HTTPS enforced",
+      { item: "Rate limiting active", notes: ["Test: 100 req/min"] },
     ],
   },
   {
-    item: "Database queries optimized",
-    category: "Performance",
-    notes: [
-      "Test: Run EXPLAIN on all queries",
-      "Verify: All queries use indexes",
-      "Verify: No N+1 query patterns",
+    group: "Performance",
+    items: [
+      "Response times under 100ms",
+      {
+        item: "Database queries optimized",
+        notes: ["Verify: All queries use indexes"],
+      },
     ],
   },
 ];
@@ -709,7 +762,7 @@ interface Concept {
   name: string; // Concept name
   description: string; // Detailed explanation
   rationale?: string; // Why this matters
-  examples?: string[]; // Examples
+  examples?: Array<string | Example>; // Simple strings or full Example objects
   tradeoffs?: string[]; // Pros and cons
 }
 ```
@@ -723,8 +776,15 @@ concepts: [
     description: "URLs represent resources (things), not actions",
     rationale: "Resources are stable; operations change",
     examples: [
-      "GET /users/123 (resource: user)",
+      "GET /users/123 (resource: user)", // Simple string
       "GET /getUser?id=123 (action: get)",
+      {
+        // Full Example object
+        title: "User Resource",
+        rationale: "Shows REST resource pattern",
+        language: "http",
+        snippet: "GET /users/123",
+      },
     ],
   },
 ];
@@ -770,7 +830,7 @@ interface Pattern {
   description: string; // How it works
   advantages?: string[];
   disadvantages?: string[];
-  example?: Example;
+  examples?: Array<string | Example>; // Simple strings or full Example objects
 }
 ```
 
@@ -784,6 +844,19 @@ patterns: [
     description: "Encapsulate data access logic in repository classes",
     advantages: ["Testable in isolation", "Centralized data access logic"],
     disadvantages: ["Additional abstraction layer"],
+    examples: [
+      "UserRepository.findById(id)", // Simple string
+      {
+        // Full Example object
+        title: "User Repository Interface",
+        rationale: "Defines the contract for user data access",
+        language: "typescript",
+        snippet: `interface UserRepository {
+  findById(id: string): Promise<User | null>;
+  save(user: User): Promise<User>;
+}`,
+      },
+    ],
   },
 ];
 ```
@@ -888,14 +961,16 @@ The **Standard Library** is a curated collection of reusable modules that provid
 ### 5.2. Configuration File (`modules.config.yml`)
 
 ```yaml
+# Global conflict resolution strategy (applies to all paths)
+conflictStrategy: "error" # "error" | "warn" | "replace"
+
 localModulePaths:
   - path: "./company-standards"
-    onConflict: "error" # Fail on collision
   - path: "./project-overrides"
-    onConflict: "replace" # Override existing
   - path: "./experimental"
-    onConflict: "warn" # Warn and keep original
 ```
+
+**Note**: Conflict resolution is configured globally via `conflictStrategy`. Per-path conflict resolution was considered but deferred to simplify configuration.
 
 ### 5.3. Conflict Resolution Strategies
 
@@ -991,19 +1066,6 @@ _Why_: {rationale}
 ```{language}
 {code}
 ```
-````
-
-````
-
-#### Data Component
-
-```markdown
-## Data
-
-{description}
-
-```{format}
-{value}
 ````
 
 ```````
@@ -1590,15 +1652,6 @@ interface ResolvedModule {
   version: string; // Module version
   source: string; // Source label (e.g., "Standard Library")
   digest: string; // SHA-256 of module file
-  composedFrom?: CompositionEvent[]; // If replaced/merged
-}
-
-interface CompositionEvent {
-  id: string; // Module ID
-  version: string; // Version
-  source: string; // Source label
-  digest: string; // Content digest
-  strategy: 'base' | 'replace'; // Composition strategy
 }
 ```
 
@@ -1630,23 +1683,7 @@ interface CompositionEvent {
           "id": "principle/testing/test-driven-development",
           "version": "2.0.0",
           "source": "./company-standards",
-          "digest": "sha256:ghi789...",
-          "composedFrom": [
-            {
-              "id": "principle/testing/test-driven-development",
-              "version": "1.0.0",
-              "source": "Standard Library",
-              "digest": "sha256:jkl012...",
-              "strategy": "base"
-            },
-            {
-              "id": "principle/testing/test-driven-development",
-              "version": "2.0.0",
-              "source": "./company-standards",
-              "digest": "sha256:ghi789...",
-              "strategy": "replace"
-            }
-          ]
+          "digest": "sha256:ghi789..."
         }
       ]
     }
@@ -1881,30 +1918,6 @@ app.post('/v1/users', async (req, res) => {
         },
       ],
     },
-
-    {
-      type: ComponentType.Data,
-      format: 'json',
-      description: 'HTTP Status Code Quick Reference',
-      value: {
-        success: {
-          200: 'OK - Request succeeded',
-          201: 'Created - Resource created',
-          204: 'No Content - Success, no body',
-        },
-        client_errors: {
-          400: 'Bad Request - Validation error',
-          401: 'Unauthorized - Authentication required',
-          403: 'Forbidden - Not authorized',
-          404: "Not Found - Resource doesn't exist",
-        },
-        server_errors: {
-          500: 'Internal Server Error - Server error',
-          502: 'Bad Gateway - Upstream error',
-          503: 'Service Unavailable - Temporary unavailability',
-        },
-      },
-    },
   ],
 };
 ```
@@ -1916,7 +1929,7 @@ Complete TypeScript type definitions are maintained in the implementation reposi
 **Key Types**:
 
 - `Module`: Root module interface
-- `InstructionComponent`, `KnowledgeComponent`, `DataComponent`: Component types
+- `InstructionComponent`, `KnowledgeComponent`: Component types
 - `ProcessStep`, `Constraint`, `Criterion`: Instruction directive types
 - `Concept`, `Example`, `Pattern`: Knowledge directive types
 - `ModuleMetadata`: Metadata types

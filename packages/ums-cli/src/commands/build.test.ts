@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { mkdir } from 'node:fs/promises';
 import { writeOutputFile } from '../utils/file-operations.js';
 import { handleBuild } from './build.js';
 import type * as UmsSdk from 'ums-sdk';
@@ -9,6 +10,11 @@ import {
   type Module,
   type BuildReport,
 } from 'ums-sdk';
+
+// Mock node:fs/promises
+vi.mock('node:fs/promises', () => ({
+  mkdir: vi.fn(),
+}));
 
 // Mock dependencies
 vi.mock('chalk', () => ({
@@ -294,5 +300,201 @@ describe('build command', () => {
     );
 
     mockConsoleLog.mockRestore();
+  });
+
+  describe('emit-declarations flag (v2.2)', () => {
+    const mockMkdir = vi.mocked(mkdir);
+
+    beforeEach(() => {
+      mockMkdir.mockResolvedValue(undefined);
+    });
+
+    it('should pass emitDeclarations to SDK when flag is set', async () => {
+      // Arrange
+      const options = {
+        persona: 'test.persona.ts',
+        output: 'output.md',
+        verbose: false,
+        emitDeclarations: true,
+      };
+
+      // Act
+      await handleBuild(options);
+
+      // Assert
+      expect(mockBuildPersona).toHaveBeenCalledWith('test.persona.ts', {
+        includeStandard: true,
+        emitDeclarations: true,
+      });
+    });
+
+    it('should not pass emitDeclarations when flag is false', async () => {
+      // Arrange
+      const options = {
+        persona: 'test.persona.ts',
+        output: 'output.md',
+        verbose: false,
+        emitDeclarations: false,
+      };
+
+      // Act
+      await handleBuild(options);
+
+      // Assert
+      expect(mockBuildPersona).toHaveBeenCalledWith('test.persona.ts', {
+        includeStandard: true,
+      });
+    });
+
+    it('should write declaration files to declarations/ subdirectory', async () => {
+      // Arrange
+      const mockDeclarations = [
+        {
+          path: '/path/to/module1.module.d.ts',
+          content: 'declare const module1: Module;',
+        },
+        {
+          path: '/path/to/module2.module.d.ts',
+          content: 'declare const module2: Module;',
+        },
+      ];
+
+      const resultWithDeclarations: BuildResult = {
+        markdown: '# Test Persona',
+        persona: mockPersona,
+        modules: mockModules,
+        buildReport: mockBuildReport,
+        warnings: [],
+        declarations: mockDeclarations,
+      };
+
+      mockBuildPersona.mockResolvedValue(resultWithDeclarations);
+
+      const options = {
+        persona: 'test.persona.ts',
+        output: '/output/persona.md',
+        verbose: false,
+        emitDeclarations: true,
+      };
+
+      // Act
+      await handleBuild(options);
+
+      // Assert
+      expect(mockMkdir).toHaveBeenCalledWith('/output/declarations', {
+        recursive: true,
+      });
+      expect(mockWriteOutputFile).toHaveBeenCalledWith(
+        '/output/declarations/module1.module.d.ts',
+        'declare const module1: Module;'
+      );
+      expect(mockWriteOutputFile).toHaveBeenCalledWith(
+        '/output/declarations/module2.module.d.ts',
+        'declare const module2: Module;'
+      );
+    });
+
+    it('should not write declarations when emitDeclarations is false', async () => {
+      // Arrange
+      const options = {
+        persona: 'test.persona.ts',
+        output: '/output/persona.md',
+        verbose: false,
+        emitDeclarations: false,
+      };
+
+      // Act
+      await handleBuild(options);
+
+      // Assert - should only write markdown and build report, not declarations
+      expect(mockWriteOutputFile).toHaveBeenCalledTimes(2);
+      expect(mockMkdir).not.toHaveBeenCalled();
+    });
+
+    it('should not write declarations when no output path specified', async () => {
+      // Arrange
+      const mockDeclarations = [
+        {
+          path: '/path/to/module1.module.d.ts',
+          content: 'declare const module1: Module;',
+        },
+      ];
+
+      const resultWithDeclarations: BuildResult = {
+        markdown: '# Test Persona',
+        persona: mockPersona,
+        modules: mockModules,
+        buildReport: mockBuildReport,
+        warnings: [],
+        declarations: mockDeclarations,
+      };
+
+      mockBuildPersona.mockResolvedValue(resultWithDeclarations);
+
+      const mockConsoleLog = vi
+        .spyOn(console, 'log')
+        .mockImplementation(() => {});
+
+      const options = {
+        persona: 'test.persona.ts',
+        verbose: false,
+        emitDeclarations: true,
+        // No output - writes to stdout
+      };
+
+      // Act
+      await handleBuild(options);
+
+      // Assert - declarations not written when no output path
+      expect(mockMkdir).not.toHaveBeenCalled();
+      expect(mockWriteOutputFile).not.toHaveBeenCalled();
+
+      mockConsoleLog.mockRestore();
+    });
+
+    it('should log generated declaration files in verbose mode', async () => {
+      // Arrange
+      const mockDeclarations = [
+        {
+          path: '/path/to/module1.module.d.ts',
+          content: 'declare const module1: Module;',
+        },
+      ];
+
+      const resultWithDeclarations: BuildResult = {
+        markdown: '# Test Persona',
+        persona: mockPersona,
+        modules: mockModules,
+        buildReport: mockBuildReport,
+        warnings: [],
+        declarations: mockDeclarations,
+      };
+
+      mockBuildPersona.mockResolvedValue(resultWithDeclarations);
+
+      const mockConsoleLog = vi
+        .spyOn(console, 'log')
+        .mockImplementation(() => {});
+
+      const options = {
+        persona: 'test.persona.ts',
+        output: '/output/persona.md',
+        verbose: true,
+        emitDeclarations: true,
+      };
+
+      // Act
+      await handleBuild(options);
+
+      // Assert
+      expect(mockConsoleLog).toHaveBeenCalledWith(
+        expect.stringContaining('Generated:')
+      );
+      expect(mockConsoleLog).toHaveBeenCalledWith(
+        expect.stringContaining('declaration files')
+      );
+
+      mockConsoleLog.mockRestore();
+    });
   });
 });

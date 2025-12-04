@@ -4,12 +4,12 @@
  *
  * Responsibilities:
  * - File I/O (loading TypeScript files with tsx)
- * - Export extraction (finding correct named export)
+ * - Export extraction (finding Module export, flexible naming per v2.1)
  * - Error wrapping (adding file path context to ums-lib errors)
  *
  * Delegates to ums-lib for:
  * - Parsing (structure validation, type checking)
- * - Validation (UMS v2.0 spec compliance)
+ * - Validation (UMS v2.0/v2.1 spec compliance)
  */
 
 import { readFile } from 'node:fs/promises';
@@ -25,6 +25,27 @@ import {
   ModuleNotFoundError,
   InvalidExportError,
 } from '../errors/index.js';
+import { checkFileExists } from '../utils/file-utils.js';
+
+/**
+ * Checks if an object looks like a UMS Module (duck typing).
+ * Used for flexible export discovery per v2.1 spec.
+ */
+function looksLikeModule(obj: unknown): boolean {
+  if (!obj || typeof obj !== 'object' || Array.isArray(obj)) {
+    return false;
+  }
+  const candidate = obj as Record<string, unknown>;
+  // Check for required Module fields
+  return (
+    typeof candidate.id === 'string' &&
+    typeof candidate.schemaVersion === 'string' &&
+    typeof candidate.version === 'string' &&
+    Array.isArray(candidate.capabilities) &&
+    typeof candidate.metadata === 'object' &&
+    candidate.metadata !== null
+  );
+}
 
 /**
  * ModuleLoader - Loads and validates TypeScript module files
@@ -42,7 +63,7 @@ export class ModuleLoader {
   async loadModule(filePath: string, moduleId: string): Promise<Module> {
     try {
       // Check file exists
-      await this.checkFileExists(filePath);
+      await checkFileExists(filePath);
 
       // Convert file path to file URL for dynamic import
       const fileUrl = pathToFileURL(filePath).href;
@@ -50,17 +71,39 @@ export class ModuleLoader {
       // Dynamically import the TypeScript file (tsx handles compilation)
       const moduleExports = (await import(fileUrl)) as Record<string, unknown>;
 
-      // Calculate expected export name from module ID
-      const exportName = moduleIdToExportName(moduleId);
+      // Calculate expected export name from module ID (v2.0 convention)
+      const conventionalName = moduleIdToExportName(moduleId);
 
-      // Extract the module object from exports
-      const moduleObject = moduleExports[exportName];
+      // Per v2.1 spec: export name is convention, not requirement
+      // First try conventional name, then scan for any Module export
+      let moduleObject = moduleExports[conventionalName];
 
       if (!moduleObject) {
+        // Scan all exports for Module-shaped objects
         const availableExports = Object.keys(moduleExports).filter(
           key => key !== '__esModule'
         );
-        throw new InvalidExportError(filePath, exportName, availableExports);
+        const moduleExportEntries = availableExports
+          .map(key => ({ key, value: moduleExports[key] }))
+          .filter(entry => looksLikeModule(entry.value));
+
+        if (moduleExportEntries.length === 0) {
+          throw new InvalidExportError(
+            filePath,
+            conventionalName,
+            availableExports
+          );
+        }
+
+        if (moduleExportEntries.length > 1) {
+          throw new ModuleLoadError(
+            `Multiple Module exports found: ${moduleExportEntries.map(e => e.key).join(', ')}. ` +
+              'Module files must export exactly one Module object.',
+            filePath
+          );
+        }
+
+        moduleObject = moduleExportEntries[0].value;
       }
 
       // Delegate to ums-lib for parsing (structure validation, type checking)
@@ -129,24 +172,6 @@ export class ModuleLoader {
         `Failed to read file: ${error instanceof Error ? error.message : String(error)}`,
         filePath
       );
-    }
-  }
-
-  /**
-   * Check if a file exists
-   * @private
-   */
-  private async checkFileExists(filePath: string): Promise<void> {
-    try {
-      await readFile(filePath, 'utf-8');
-    } catch (error) {
-      if (error && typeof error === 'object' && 'code' in error) {
-        const nodeError = error as NodeJS.ErrnoException;
-        if (nodeError.code === 'ENOENT') {
-          throw new ModuleNotFoundError(filePath);
-        }
-      }
-      throw error;
     }
   }
 }

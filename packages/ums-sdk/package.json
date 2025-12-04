@@ -46,6 +46,7 @@
   },
   "dependencies": {
     "glob": "^11.0.3",
+    "tsx": "^4.20.6",
     "ums-lib": "^1.0.0",
     "yaml": "^2.6.0"
   },
@@ -56,9 +57,6 @@
     "typescript": {
       "optional": true
     }
-  },
-  "optionalDependencies": {
-    "tsx": "^4.20.6"
   },
   "files": [
     "dist",

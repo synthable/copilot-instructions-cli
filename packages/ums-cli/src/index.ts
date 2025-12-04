@@ -35,6 +35,10 @@ program
   )
   .option('-o, --output <file>', 'Specify the output file for the build')
   .option('-v, --verbose', 'Enable verbose output')
+  .option(
+    '-e, --emit-declarations',
+    'Emit TypeScript declaration files (.d.ts) for modules'
+  )
   .addHelpText(
     'after',
     `  Examples:
@@ -49,6 +53,7 @@ program
       persona?: string;
       output?: string;
       verbose?: boolean;
+      emitDeclarations?: boolean;
     }) => {
       if (!options.persona) {
         console.error('Error: --persona <file> is required');
@@ -56,11 +61,13 @@ program
       }
 
       const verbose = options.verbose ?? false;
+      const emitDeclarations = options.emitDeclarations ?? false;
 
       await handleBuild({
         persona: options.persona,
         ...(options.output && { output: options.output }),
         verbose,
+        emitDeclarations,
       });
     }
   );

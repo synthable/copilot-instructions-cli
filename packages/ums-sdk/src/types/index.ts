@@ -55,6 +55,19 @@ export interface BuildOptions {
 
   /** Include standard library modules (default: true) */
   includeStandard?: boolean;
+
+  /** Emit TypeScript declaration files (.d.ts) for modules (default: false) */
+  emitDeclarations?: boolean;
+}
+
+/**
+ * Generated declaration file content
+ */
+export interface GeneratedDeclarationResult {
+  /** The path for the .d.ts file */
+  path: string;
+  /** The declaration file content */
+  content: string;
 }
 
 /**
@@ -75,6 +88,9 @@ export interface BuildResult {
 
   /** Warnings generated during build */
   warnings: string[];
+
+  /** Generated TypeScript declaration files (when emitDeclarations is true) */
+  declarations?: GeneratedDeclarationResult[];
 }
 
 /**
@@ -138,6 +154,17 @@ export interface ListOptions {
 
   /** Filter by tag */
   tag?: string;
+}
+
+/**
+ * Discovered module with its file path (for digest computation)
+ */
+export interface DiscoveredModule {
+  /** The loaded module */
+  module: Module;
+
+  /** Absolute file path to the module source */
+  filePath: string;
 }
 
 /**

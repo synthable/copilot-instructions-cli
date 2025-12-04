@@ -12,10 +12,10 @@
  * - Validation (UMS v2.0 spec compliance)
  */
 
-import { readFile } from 'node:fs/promises';
 import { pathToFileURL } from 'node:url';
 import { parsePersona, validatePersona, type Persona } from 'ums-lib';
 import { ModuleLoadError, ModuleNotFoundError } from '../errors/index.js';
+import { checkFileExists } from '../utils/file-utils.js';
 
 /**
  * PersonaLoader - Loads and validates TypeScript persona files
@@ -31,7 +31,7 @@ export class PersonaLoader {
   async loadPersona(filePath: string): Promise<Persona> {
     try {
       // Check file exists
-      await this.checkFileExists(filePath);
+      await checkFileExists(filePath);
 
       // Convert file path to file URL for dynamic import
       const fileUrl = pathToFileURL(filePath).href;
@@ -96,24 +96,6 @@ export class PersonaLoader {
         );
       }
 
-      throw error;
-    }
-  }
-
-  /**
-   * Check if a file exists
-   * @private
-   */
-  private async checkFileExists(filePath: string): Promise<void> {
-    try {
-      await readFile(filePath, 'utf-8');
-    } catch (error) {
-      if (error && typeof error === 'object' && 'code' in error) {
-        const nodeError = error as NodeJS.ErrnoException;
-        if (nodeError.code === 'ENOENT') {
-          throw new ModuleNotFoundError(filePath);
-        }
-      }
       throw error;
     }
   }

@@ -139,30 +139,6 @@ describe('validateModule - edge cases', () => {
       expect(result.warnings[0].path).toBe('components');
     });
 
-    it('should warn when both components array and shorthand data exist', () => {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { instruction: _instruction, ...baseWithoutInstruction } =
-        baseModule;
-      const module: Module = {
-        ...baseWithoutInstruction,
-        components: [
-          {
-            type: ComponentType.Data,
-            data: { format: 'json', value: { test: true } },
-          },
-        ],
-        data: {
-          type: ComponentType.Data,
-          data: { format: 'json', value: { other: true } },
-        },
-      };
-
-      const result = validateModule(module);
-
-      expect(result.valid).toBe(true);
-      expect(result.warnings).toHaveLength(1);
-    });
-
     it('should warn when components array and multiple shorthands exist', () => {
       const module: Module = {
         ...baseModule,
@@ -283,6 +259,66 @@ describe('validateModule - edge cases', () => {
       );
       expect(tagErrors).toHaveLength(0);
     });
+
+    it('should error on whitespace-only tags', () => {
+      const module: Module = {
+        ...baseModule,
+        metadata: {
+          ...baseModule.metadata,
+          tags: ['valid', '   ', 'another-valid'],
+        },
+      };
+
+      const result = validateModule(module);
+
+      expect(result.valid).toBe(false);
+      expect(result.errors.length).toBeGreaterThan(0);
+      const whitespaceErrors = result.errors.filter(e =>
+        e.message.includes('whitespace-only')
+      );
+      expect(whitespaceErrors.length).toBe(1);
+      expect(whitespaceErrors[0].path).toBe('metadata.tags[1]');
+    });
+  });
+
+  describe('metadata.semantic validation', () => {
+    it('should warn on whitespace-only semantic', () => {
+      const module: Module = {
+        ...baseModule,
+        metadata: {
+          ...baseModule.metadata,
+          semantic: '   ',
+        },
+      };
+
+      const result = validateModule(module);
+
+      expect(result.valid).toBe(true);
+      expect(result.warnings.length).toBeGreaterThan(0);
+      const semanticWarnings = result.warnings.filter(w =>
+        w.message.includes('whitespace-only')
+      );
+      expect(semanticWarnings.length).toBe(1);
+      expect(semanticWarnings[0].path).toBe('metadata.semantic');
+    });
+
+    it('should allow valid semantic', () => {
+      const module: Module = {
+        ...baseModule,
+        metadata: {
+          ...baseModule.metadata,
+          semantic: 'Valid semantic description',
+        },
+      };
+
+      const result = validateModule(module);
+
+      expect(result.valid).toBe(true);
+      const semanticWarnings = result.warnings.filter(w =>
+        w.message.includes('whitespace-only')
+      );
+      expect(semanticWarnings).toHaveLength(0);
+    });
   });
 
   describe('multiple shorthand components', () => {
@@ -304,29 +340,6 @@ describe('validateModule - edge cases', () => {
       expect(result.valid).toBe(false);
       expect(result.errors).toHaveLength(1);
       expect(result.errors[0].message).toContain('mutually exclusive');
-    });
-
-    it('should error when all three shorthand components exist', () => {
-      const module: Module = {
-        ...baseModule,
-        instruction: {
-          type: ComponentType.Instruction,
-          instruction: { purpose: 'Instruction' },
-        },
-        knowledge: {
-          type: ComponentType.Knowledge,
-          knowledge: { explanation: 'Knowledge' },
-        },
-        data: {
-          type: ComponentType.Data,
-          data: { format: 'json', value: {} },
-        },
-      };
-
-      const result = validateModule(module);
-
-      expect(result.valid).toBe(false);
-      expect(result.errors).toHaveLength(1);
     });
   });
 
@@ -413,6 +426,1028 @@ describe('validateModule - edge cases', () => {
       const result = validateModule(module);
 
       expect(result.valid).toBe(true);
+    });
+  });
+
+  describe('component metadata validation (v2.2)', () => {
+    describe('component id validation', () => {
+      it('should allow valid component id on shorthand instruction', () => {
+        const module: Module = {
+          ...baseModule,
+          instruction: {
+            type: ComponentType.Instruction,
+            id: 'deploy-steps',
+            instruction: {
+              purpose: 'Test purpose',
+            },
+          },
+        };
+        const result = validateModule(module);
+        expect(result.valid).toBe(true);
+      });
+
+      it('should allow valid component id with numbers', () => {
+        const module: Module = {
+          ...baseModule,
+          instruction: {
+            type: ComponentType.Instruction,
+            id: 'step1-validation',
+            instruction: {
+              purpose: 'Test purpose',
+            },
+          },
+        };
+        const result = validateModule(module);
+        expect(result.valid).toBe(true);
+      });
+
+      it('should error on invalid component id with uppercase', () => {
+        const module: Module = {
+          ...baseModule,
+          instruction: {
+            type: ComponentType.Instruction,
+            id: 'Deploy-Steps',
+            instruction: {
+              purpose: 'Test purpose',
+            },
+          },
+        };
+        const result = validateModule(module);
+        expect(result.valid).toBe(false);
+        expect(result.errors[0].message).toContain(
+          'Invalid component id format'
+        );
+        expect(result.errors[0].path).toBe('instruction.id');
+      });
+
+      it('should error on component id with underscores', () => {
+        const module: Module = {
+          ...baseModule,
+          instruction: {
+            type: ComponentType.Instruction,
+            id: 'deploy_steps',
+            instruction: {
+              purpose: 'Test purpose',
+            },
+          },
+        };
+        const result = validateModule(module);
+        expect(result.valid).toBe(false);
+        expect(result.errors[0].message).toContain(
+          'Invalid component id format'
+        );
+      });
+
+      it('should error on component id starting with hyphen', () => {
+        const module: Module = {
+          ...baseModule,
+          instruction: {
+            type: ComponentType.Instruction,
+            id: '-deploy',
+            instruction: {
+              purpose: 'Test purpose',
+            },
+          },
+        };
+        const result = validateModule(module);
+        expect(result.valid).toBe(false);
+        expect(result.errors[0].message).toContain(
+          'Invalid component id format'
+        );
+      });
+
+      it('should allow component id in components array', () => {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { instruction: _instruction, ...baseWithoutInstruction } =
+          baseModule;
+        const module: Module = {
+          ...baseWithoutInstruction,
+          components: [
+            {
+              type: ComponentType.Instruction,
+              id: 'main-process',
+              instruction: { purpose: 'From components' },
+            },
+          ],
+        };
+        const result = validateModule(module);
+        expect(result.valid).toBe(true);
+      });
+
+      it('should error on invalid component id in components array', () => {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { instruction: _instruction, ...baseWithoutInstruction } =
+          baseModule;
+        const module: Module = {
+          ...baseWithoutInstruction,
+          components: [
+            {
+              type: ComponentType.Instruction,
+              id: 'INVALID_ID',
+              instruction: { purpose: 'From components' },
+            },
+          ],
+        };
+        const result = validateModule(module);
+        expect(result.valid).toBe(false);
+        expect(result.errors[0].message).toContain(
+          'Invalid component id format'
+        );
+        expect(result.errors[0].path).toBe('components[0].id');
+      });
+
+      it('should allow knowledge component with id', () => {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { instruction: _instruction, ...baseWithoutInstruction } =
+          baseModule;
+        const module: Module = {
+          ...baseWithoutInstruction,
+          knowledge: {
+            type: ComponentType.Knowledge,
+            id: 'core-concepts',
+            knowledge: { explanation: 'Explanation' },
+          },
+        };
+        const result = validateModule(module);
+        expect(result.valid).toBe(true);
+      });
+    });
+
+    describe('component tags validation', () => {
+      it('should allow valid lowercase tags on shorthand instruction', () => {
+        const module: Module = {
+          ...baseModule,
+          instruction: {
+            type: ComponentType.Instruction,
+            tags: ['production', 'critical'],
+            instruction: {
+              purpose: 'Test purpose',
+            },
+          },
+        };
+        const result = validateModule(module);
+        expect(result.valid).toBe(true);
+      });
+
+      it('should allow kebab-case tags', () => {
+        const module: Module = {
+          ...baseModule,
+          instruction: {
+            type: ComponentType.Instruction,
+            tags: ['high-priority', 'must-have'],
+            instruction: {
+              purpose: 'Test purpose',
+            },
+          },
+        };
+        const result = validateModule(module);
+        expect(result.valid).toBe(true);
+      });
+
+      it('should error on non-lowercase component tags', () => {
+        const module: Module = {
+          ...baseModule,
+          instruction: {
+            type: ComponentType.Instruction,
+            tags: ['production', 'CRITICAL'],
+            instruction: {
+              purpose: 'Test purpose',
+            },
+          },
+        };
+        const result = validateModule(module);
+        expect(result.valid).toBe(false);
+        expect(result.errors[0].message).toContain('lowercase');
+        expect(result.errors[0].path).toBe('instruction.tags');
+      });
+
+      it('should error on mixed-case component tags', () => {
+        const module: Module = {
+          ...baseModule,
+          instruction: {
+            type: ComponentType.Instruction,
+            tags: ['Production', 'Critical'],
+            instruction: {
+              purpose: 'Test purpose',
+            },
+          },
+        };
+        const result = validateModule(module);
+        expect(result.valid).toBe(false);
+        expect(result.errors[0].message).toContain('lowercase');
+      });
+
+      it('should allow tags on knowledge component', () => {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { instruction: _instruction, ...baseWithoutInstruction } =
+          baseModule;
+        const module: Module = {
+          ...baseWithoutInstruction,
+          knowledge: {
+            type: ComponentType.Knowledge,
+            tags: ['advanced', 'tutorial'],
+            knowledge: { explanation: 'Explanation' },
+          },
+        };
+        const result = validateModule(module);
+        expect(result.valid).toBe(true);
+      });
+
+      it('should validate tags in components array', () => {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { instruction: _instruction, ...baseWithoutInstruction } =
+          baseModule;
+        const module: Module = {
+          ...baseWithoutInstruction,
+          components: [
+            {
+              type: ComponentType.Instruction,
+              tags: ['INVALID', 'Tags'],
+              instruction: { purpose: 'From components' },
+            },
+          ],
+        };
+        const result = validateModule(module);
+        expect(result.valid).toBe(false);
+        expect(result.errors[0].message).toContain('lowercase');
+        expect(result.errors[0].path).toBe('components[0].tags');
+      });
+
+      it('should allow empty tags array', () => {
+        const module: Module = {
+          ...baseModule,
+          instruction: {
+            type: ComponentType.Instruction,
+            tags: [],
+            instruction: {
+              purpose: 'Test purpose',
+            },
+          },
+        };
+        const result = validateModule(module);
+        expect(result.valid).toBe(true);
+      });
+
+      it('should allow component with both id and tags', () => {
+        const module: Module = {
+          ...baseModule,
+          instruction: {
+            type: ComponentType.Instruction,
+            id: 'main-process',
+            tags: ['critical', 'v2'],
+            instruction: {
+              purpose: 'Test purpose',
+            },
+          },
+        };
+        const result = validateModule(module);
+        expect(result.valid).toBe(true);
+      });
+    });
+  });
+
+  describe('directive validation (v2.1)', () => {
+    describe('ProcessStep validation', () => {
+      it('should accept string process steps', () => {
+        const module: Module = {
+          ...baseModule,
+          instruction: {
+            type: ComponentType.Instruction,
+            instruction: {
+              purpose: 'Test',
+              process: ['Step 1', 'Step 2', 'Step 3'],
+            },
+          },
+        };
+        const result = validateModule(module);
+        expect(result.valid).toBe(true);
+      });
+
+      it('should accept ProcessStep objects with notes', () => {
+        const module: Module = {
+          ...baseModule,
+          instruction: {
+            type: ComponentType.Instruction,
+            instruction: {
+              purpose: 'Test',
+              process: [
+                { step: 'Configure environment', notes: ['Check env vars'] },
+                { step: 'Run tests' },
+              ],
+            },
+          },
+        };
+        const result = validateModule(module);
+        expect(result.valid).toBe(true);
+      });
+
+      it('should error on ProcessStep with empty step', () => {
+        const module: Module = {
+          ...baseModule,
+          instruction: {
+            type: ComponentType.Instruction,
+            instruction: {
+              purpose: 'Test',
+              process: [{ step: '', notes: ['note'] }],
+            },
+          },
+        };
+        const result = validateModule(module);
+        expect(result.valid).toBe(false);
+        expect(result.errors[0].message).toContain('cannot be empty');
+      });
+
+      it('should error on empty string process step', () => {
+        const module: Module = {
+          ...baseModule,
+          instruction: {
+            type: ComponentType.Instruction,
+            instruction: {
+              purpose: 'Test',
+              process: ['Valid step', ''],
+            },
+          },
+        };
+        const result = validateModule(module);
+        expect(result.valid).toBe(false);
+        expect(result.errors[0].message).toContain('empty');
+      });
+
+      it('should error on ProcessStep with empty string in notes array', () => {
+        const module: Module = {
+          ...baseModule,
+          instruction: {
+            type: ComponentType.Instruction,
+            instruction: {
+              purpose: 'Test',
+              process: [
+                {
+                  step: 'Valid step',
+                  notes: ['Valid note', '', 'Another note'],
+                },
+              ],
+            },
+          },
+        };
+        const result = validateModule(module);
+        expect(result.valid).toBe(false);
+        expect(result.errors[0].message).toContain('notes[1] cannot be empty');
+      });
+
+      it('should error on ProcessStep with whitespace-only string in notes array', () => {
+        const module: Module = {
+          ...baseModule,
+          instruction: {
+            type: ComponentType.Instruction,
+            instruction: {
+              purpose: 'Test',
+              process: [{ step: 'Valid step', notes: ['Valid note', '   '] }],
+            },
+          },
+        };
+        const result = validateModule(module);
+        expect(result.valid).toBe(false);
+        expect(result.errors[0].message).toContain('notes[1] cannot be empty');
+      });
+    });
+
+    describe('Constraint validation', () => {
+      it('should accept string constraints', () => {
+        const module: Module = {
+          ...baseModule,
+          instruction: {
+            type: ComponentType.Instruction,
+            instruction: {
+              purpose: 'Test',
+              constraints: ['MUST do X', 'SHOULD do Y'],
+            },
+          },
+        };
+        const result = validateModule(module);
+        expect(result.valid).toBe(true);
+      });
+
+      it('should accept ConstraintObject with notes', () => {
+        const module: Module = {
+          ...baseModule,
+          instruction: {
+            type: ComponentType.Instruction,
+            instruction: {
+              purpose: 'Test',
+              constraints: [
+                {
+                  rule: 'MUST validate input',
+                  notes: ['Use zod', 'Check types'],
+                },
+              ],
+            },
+          },
+        };
+        const result = validateModule(module);
+        expect(result.valid).toBe(true);
+      });
+
+      it('should accept ConstraintGroup', () => {
+        const module: Module = {
+          ...baseModule,
+          instruction: {
+            type: ComponentType.Instruction,
+            instruction: {
+              purpose: 'Test',
+              constraints: [
+                {
+                  group: 'Security',
+                  rules: [
+                    'MUST sanitize',
+                    { rule: 'MUST encrypt', notes: ['AES-256'] },
+                  ],
+                },
+              ],
+            },
+          },
+        };
+        const result = validateModule(module);
+        expect(result.valid).toBe(true);
+      });
+
+      it('should error on empty constraint string', () => {
+        const module: Module = {
+          ...baseModule,
+          instruction: {
+            type: ComponentType.Instruction,
+            instruction: {
+              purpose: 'Test',
+              constraints: ['Valid', ''],
+            },
+          },
+        };
+        const result = validateModule(module);
+        expect(result.valid).toBe(false);
+        expect(result.errors[0].message).toContain('empty');
+      });
+
+      it('should error on ConstraintGroup with empty group name', () => {
+        const module: Module = {
+          ...baseModule,
+          instruction: {
+            type: ComponentType.Instruction,
+            instruction: {
+              purpose: 'Test',
+              constraints: [{ group: '', rules: ['Rule 1'] }],
+            },
+          },
+        };
+        const result = validateModule(module);
+        expect(result.valid).toBe(false);
+        expect(result.errors[0].message).toContain('non-empty');
+      });
+
+      it('should error on ConstraintObject with empty string in notes array', () => {
+        const module: Module = {
+          ...baseModule,
+          instruction: {
+            type: ComponentType.Instruction,
+            instruction: {
+              purpose: 'Test',
+              constraints: [
+                { rule: 'MUST validate', notes: ['Valid note', ''] },
+              ],
+            },
+          },
+        };
+        const result = validateModule(module);
+        expect(result.valid).toBe(false);
+        expect(result.errors[0].message).toContain('notes[1] cannot be empty');
+      });
+
+      it('should error on ConstraintObject with whitespace-only string in notes array', () => {
+        const module: Module = {
+          ...baseModule,
+          instruction: {
+            type: ComponentType.Instruction,
+            instruction: {
+              purpose: 'Test',
+              constraints: [{ rule: 'MUST validate', notes: ['  \t  '] }],
+            },
+          },
+        };
+        const result = validateModule(module);
+        expect(result.valid).toBe(false);
+        expect(result.errors[0].message).toContain('notes[0] cannot be empty');
+      });
+    });
+
+    describe('Criterion validation', () => {
+      it('should accept string criteria', () => {
+        const module: Module = {
+          ...baseModule,
+          instruction: {
+            type: ComponentType.Instruction,
+            instruction: {
+              purpose: 'Test',
+              criteria: ['Tests pass', 'No lint errors'],
+            },
+          },
+        };
+        const result = validateModule(module);
+        expect(result.valid).toBe(true);
+      });
+
+      it('should accept CriterionObject with category', () => {
+        const module: Module = {
+          ...baseModule,
+          instruction: {
+            type: ComponentType.Instruction,
+            instruction: {
+              purpose: 'Test',
+              criteria: [
+                {
+                  item: 'Coverage > 80%',
+                  category: 'Quality',
+                  notes: ['Check CI'],
+                },
+              ],
+            },
+          },
+        };
+        const result = validateModule(module);
+        expect(result.valid).toBe(true);
+      });
+
+      it('should accept CriterionGroup', () => {
+        const module: Module = {
+          ...baseModule,
+          instruction: {
+            type: ComponentType.Instruction,
+            instruction: {
+              purpose: 'Test',
+              criteria: [
+                {
+                  group: 'Performance',
+                  items: [
+                    'Load time < 2s',
+                    { item: 'FCP < 1s', notes: ['Lighthouse'] },
+                  ],
+                },
+              ],
+            },
+          },
+        };
+        const result = validateModule(module);
+        expect(result.valid).toBe(true);
+      });
+
+      it('should error on empty criterion string', () => {
+        const module: Module = {
+          ...baseModule,
+          instruction: {
+            type: ComponentType.Instruction,
+            instruction: {
+              purpose: 'Test',
+              criteria: ['Valid', ''],
+            },
+          },
+        };
+        const result = validateModule(module);
+        expect(result.valid).toBe(false);
+        expect(result.errors[0].message).toContain('empty');
+      });
+
+      it('should error on CriterionGroup with empty group name', () => {
+        const module: Module = {
+          ...baseModule,
+          instruction: {
+            type: ComponentType.Instruction,
+            instruction: {
+              purpose: 'Test',
+              criteria: [{ group: '', items: ['Item 1'] }],
+            },
+          },
+        };
+        const result = validateModule(module);
+        expect(result.valid).toBe(false);
+        expect(result.errors[0].message).toContain('non-empty');
+      });
+
+      it('should error on CriterionObject with empty string in notes array', () => {
+        const module: Module = {
+          ...baseModule,
+          instruction: {
+            type: ComponentType.Instruction,
+            instruction: {
+              purpose: 'Test',
+              criteria: [{ item: 'Coverage > 80%', notes: ['Valid note', ''] }],
+            },
+          },
+        };
+        const result = validateModule(module);
+        expect(result.valid).toBe(false);
+        expect(result.errors[0].message).toContain('notes[1] cannot be empty');
+      });
+
+      it('should error on CriterionObject with whitespace-only string in notes array', () => {
+        const module: Module = {
+          ...baseModule,
+          instruction: {
+            type: ComponentType.Instruction,
+            instruction: {
+              purpose: 'Test',
+              criteria: [{ item: 'Coverage > 80%', notes: ['\n\t'] }],
+            },
+          },
+        };
+        const result = validateModule(module);
+        expect(result.valid).toBe(false);
+        expect(result.errors[0].message).toContain('notes[0] cannot be empty');
+      });
+    });
+
+    describe('Knowledge content validation', () => {
+      it('should accept valid concepts', () => {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { instruction: _instruction, ...base } = baseModule;
+        const module: Module = {
+          ...base,
+          knowledge: {
+            type: ComponentType.Knowledge,
+            knowledge: {
+              explanation: 'Overview',
+              concepts: [
+                { name: 'DRY', description: 'Do not repeat yourself' },
+              ],
+            },
+          },
+        };
+        const result = validateModule(module);
+        expect(result.valid).toBe(true);
+      });
+
+      it('should error on concept with empty name', () => {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { instruction: _instruction, ...base } = baseModule;
+        const module: Module = {
+          ...base,
+          knowledge: {
+            type: ComponentType.Knowledge,
+            knowledge: {
+              explanation: 'Overview',
+              concepts: [{ name: '', description: 'Description' }],
+            },
+          },
+        };
+        const result = validateModule(module);
+        expect(result.valid).toBe(false);
+        expect(result.errors[0].message).toContain('non-empty');
+      });
+
+      it('should accept valid examples', () => {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { instruction: _instruction, ...base } = baseModule;
+        const module: Module = {
+          ...base,
+          knowledge: {
+            type: ComponentType.Knowledge,
+            knowledge: {
+              explanation: 'Overview',
+              examples: [
+                { title: 'Basic', rationale: 'Shows usage', snippet: 'code' },
+              ],
+            },
+          },
+        };
+        const result = validateModule(module);
+        expect(result.valid).toBe(true);
+      });
+
+      it('should error on example with empty title', () => {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { instruction: _instruction, ...base } = baseModule;
+        const module: Module = {
+          ...base,
+          knowledge: {
+            type: ComponentType.Knowledge,
+            knowledge: {
+              explanation: 'Overview',
+              examples: [
+                { title: '', rationale: 'Shows usage', snippet: 'code' },
+              ],
+            },
+          },
+        };
+        const result = validateModule(module);
+        expect(result.valid).toBe(false);
+        expect(result.errors[0].message).toContain('non-empty');
+      });
+
+      it('should accept valid patterns', () => {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { instruction: _instruction, ...base } = baseModule;
+        const module: Module = {
+          ...base,
+          knowledge: {
+            type: ComponentType.Knowledge,
+            knowledge: {
+              explanation: 'Overview',
+              patterns: [
+                {
+                  name: 'Singleton',
+                  useCase: 'Single instance',
+                  description: 'One object',
+                },
+              ],
+            },
+          },
+        };
+        const result = validateModule(module);
+        expect(result.valid).toBe(true);
+      });
+
+      it('should error on pattern with empty name', () => {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { instruction: _instruction, ...base } = baseModule;
+        const module: Module = {
+          ...base,
+          knowledge: {
+            type: ComponentType.Knowledge,
+            knowledge: {
+              explanation: 'Overview',
+              patterns: [
+                { name: '', useCase: 'Use case', description: 'Desc' },
+              ],
+            },
+          },
+        };
+        const result = validateModule(module);
+        expect(result.valid).toBe(false);
+        expect(result.errors[0].message).toContain('non-empty');
+      });
+    });
+
+    describe('Concept.examples validation', () => {
+      it('should accept concept with string examples', () => {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { instruction: _instruction, ...base } = baseModule;
+        const module: Module = {
+          ...base,
+          knowledge: {
+            type: ComponentType.Knowledge,
+            knowledge: {
+              explanation: 'Overview',
+              concepts: [
+                {
+                  name: 'DRY',
+                  description: 'Do not repeat yourself',
+                  examples: ['Extract common logic into functions'],
+                },
+              ],
+            },
+          },
+        };
+        const result = validateModule(module);
+        expect(result.valid).toBe(true);
+      });
+
+      it('should accept concept with Example object examples', () => {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { instruction: _instruction, ...base } = baseModule;
+        const module: Module = {
+          ...base,
+          knowledge: {
+            type: ComponentType.Knowledge,
+            knowledge: {
+              explanation: 'Overview',
+              concepts: [
+                {
+                  name: 'DRY',
+                  description: 'Do not repeat yourself',
+                  examples: [
+                    {
+                      title: 'Function extraction',
+                      rationale: 'Shows DRY principle',
+                      snippet: 'function helper() {}',
+                    },
+                  ],
+                },
+              ],
+            },
+          },
+        };
+        const result = validateModule(module);
+        expect(result.valid).toBe(true);
+      });
+
+      it('should accept concept with mixed string and Example object examples', () => {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { instruction: _instruction, ...base } = baseModule;
+        const module: Module = {
+          ...base,
+          knowledge: {
+            type: ComponentType.Knowledge,
+            knowledge: {
+              explanation: 'Overview',
+              concepts: [
+                {
+                  name: 'DRY',
+                  description: 'Do not repeat yourself',
+                  examples: [
+                    'Simple string example',
+                    {
+                      title: 'Full example',
+                      rationale: 'Detailed',
+                      snippet: 'code here',
+                    },
+                  ],
+                },
+              ],
+            },
+          },
+        };
+        const result = validateModule(module);
+        expect(result.valid).toBe(true);
+      });
+
+      it('should error on concept with empty string example', () => {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { instruction: _instruction, ...base } = baseModule;
+        const module: Module = {
+          ...base,
+          knowledge: {
+            type: ComponentType.Knowledge,
+            knowledge: {
+              explanation: 'Overview',
+              concepts: [
+                {
+                  name: 'DRY',
+                  description: 'Do not repeat yourself',
+                  examples: [''],
+                },
+              ],
+            },
+          },
+        };
+        const result = validateModule(module);
+        expect(result.valid).toBe(false);
+        expect(result.errors[0].message).toContain('empty string');
+      });
+
+      it('should error on concept with invalid example object (missing title)', () => {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { instruction: _instruction, ...base } = baseModule;
+        const module: Module = {
+          ...base,
+          knowledge: {
+            type: ComponentType.Knowledge,
+            knowledge: {
+              explanation: 'Overview',
+              concepts: [
+                {
+                  name: 'DRY',
+                  description: 'Do not repeat yourself',
+                  // @ts-expect-error - testing invalid data
+                  examples: [{ rationale: 'Shows usage', snippet: 'code' }],
+                },
+              ],
+            },
+          },
+        };
+        const result = validateModule(module);
+        expect(result.valid).toBe(false);
+        expect(result.errors[0].message).toContain(
+          'string or an object with {title, rationale, snippet}'
+        );
+      });
+
+      it('should error on concept.examples that is not an array', () => {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { instruction: _instruction, ...base } = baseModule;
+        const module: Module = {
+          ...base,
+          knowledge: {
+            type: ComponentType.Knowledge,
+            knowledge: {
+              explanation: 'Overview',
+              concepts: [
+                {
+                  name: 'DRY',
+                  description: 'Do not repeat yourself',
+                  // @ts-expect-error - testing invalid data
+                  examples: 'not an array',
+                },
+              ],
+            },
+          },
+        };
+        const result = validateModule(module);
+        expect(result.valid).toBe(false);
+        expect(result.errors[0].message).toContain('must be an array');
+      });
+    });
+
+    describe('Pattern.examples validation', () => {
+      it('should accept pattern with string examples', () => {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { instruction: _instruction, ...base } = baseModule;
+        const module: Module = {
+          ...base,
+          knowledge: {
+            type: ComponentType.Knowledge,
+            knowledge: {
+              explanation: 'Overview',
+              patterns: [
+                {
+                  name: 'Singleton',
+                  useCase: 'Single instance needed',
+                  description: 'Ensures only one instance',
+                  examples: ['Database connection pool'],
+                },
+              ],
+            },
+          },
+        };
+        const result = validateModule(module);
+        expect(result.valid).toBe(true);
+      });
+
+      it('should accept pattern with Example object examples', () => {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { instruction: _instruction, ...base } = baseModule;
+        const module: Module = {
+          ...base,
+          knowledge: {
+            type: ComponentType.Knowledge,
+            knowledge: {
+              explanation: 'Overview',
+              patterns: [
+                {
+                  name: 'Singleton',
+                  useCase: 'Single instance needed',
+                  description: 'Ensures only one instance',
+                  examples: [
+                    {
+                      title: 'Logger singleton',
+                      rationale: 'Centralized logging',
+                      snippet: 'class Logger { static instance; }',
+                    },
+                  ],
+                },
+              ],
+            },
+          },
+        };
+        const result = validateModule(module);
+        expect(result.valid).toBe(true);
+      });
+
+      it('should error on pattern with empty string example', () => {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { instruction: _instruction, ...base } = baseModule;
+        const module: Module = {
+          ...base,
+          knowledge: {
+            type: ComponentType.Knowledge,
+            knowledge: {
+              explanation: 'Overview',
+              patterns: [
+                {
+                  name: 'Singleton',
+                  useCase: 'Single instance needed',
+                  description: 'Ensures only one instance',
+                  examples: ['  '],
+                },
+              ],
+            },
+          },
+        };
+        const result = validateModule(module);
+        expect(result.valid).toBe(false);
+        expect(result.errors[0].message).toContain('empty string');
+      });
+
+      it('should error on pattern.examples that is not an array', () => {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { instruction: _instruction, ...base } = baseModule;
+        const module: Module = {
+          ...base,
+          knowledge: {
+            type: ComponentType.Knowledge,
+            knowledge: {
+              explanation: 'Overview',
+              patterns: [
+                {
+                  name: 'Singleton',
+                  useCase: 'Single instance needed',
+                  description: 'Ensures only one instance',
+                  // @ts-expect-error - testing invalid data
+                  examples: 'not an array',
+                },
+              ],
+            },
+          },
+        };
+        const result = validateModule(module);
+        expect(result.valid).toBe(false);
+        expect(result.errors[0].message).toContain('must be an array');
+      });
     });
   });
 });

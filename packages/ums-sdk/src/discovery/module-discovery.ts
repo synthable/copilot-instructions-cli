@@ -8,7 +8,7 @@ import { glob } from 'glob';
 import type { Module } from 'ums-lib';
 import { ModuleLoader } from '../loaders/module-loader.js';
 import { DiscoveryError } from '../errors/index.js';
-import type { ModuleConfig } from '../types/index.js';
+import type { ModuleConfig, DiscoveredModule } from '../types/index.js';
 
 /**
  * ModuleDiscovery - Discovers and loads module files from the file system
@@ -27,41 +27,46 @@ export class ModuleDiscovery {
    * @throws DiscoveryError if discovery fails
    */
   async discover(config: ModuleConfig): Promise<Module[]> {
-    const modules: Module[] = [];
-
-    // Discover from each configured path separately to maintain base path context
-    for (const entry of config.localModulePaths) {
-      const basePath = resolve(entry.path);
-      const pathModules = await this.discoverInPath(basePath);
-      modules.push(...pathModules);
-    }
-
-    return modules;
+    const paths = config.localModulePaths.map(entry => resolve(entry.path));
+    const discovered = await this.discoverInPaths(paths);
+    return discovered.map(d => d.module);
   }
 
   /**
    * Discover modules in specific directories
    * @param paths - Array of directory paths
-   * @returns Array of loaded modules
+   * @returns Array of discovered modules with file paths
    */
-  async discoverInPaths(paths: string[]): Promise<Module[]> {
-    const modules: Module[] = [];
-
+  async discoverInPaths(paths: string[]): Promise<DiscoveredModule[]> {
+    const discovered: DiscoveredModule[] = [];
     for (const path of paths) {
-      const pathModules = await this.discoverInPath(path);
-      modules.push(...pathModules);
+      const pathDiscovered = await this.discoverInSinglePath(path);
+      discovered.push(...pathDiscovered);
     }
-
-    return modules;
+    return discovered;
   }
 
   /**
-   * Discover modules in a single directory
+   * Discover modules with their file paths (for digest computation)
+   * @param config - Configuration specifying paths
+   * @returns Array of discovered modules with file paths
+   */
+  async discoverWithFilePaths(
+    config: ModuleConfig
+  ): Promise<DiscoveredModule[]> {
+    const paths = config.localModulePaths.map(entry => resolve(entry.path));
+    return this.discoverInPaths(paths);
+  }
+
+  /**
+   * Discover modules in a single directory with file paths
    * @param basePath - Base directory path
-   * @returns Array of loaded modules
+   * @returns Array of discovered modules with file paths
    * @private
    */
-  private async discoverInPath(basePath: string): Promise<Module[]> {
+  private async discoverInSinglePath(
+    basePath: string
+  ): Promise<DiscoveredModule[]> {
     try {
       // Check if there's a 'modules/' subdirectory and use that as the search path
       const { existsSync } = await import('node:fs');
@@ -72,14 +77,14 @@ export class ModuleDiscovery {
       const filePaths = await this.findModuleFiles([searchPath]);
 
       // Load each module (skip failures with warnings)
-      const modules: Module[] = [];
+      const discovered: DiscoveredModule[] = [];
       const errors: string[] = [];
 
       for (const filePath of filePaths) {
         try {
           const moduleId = this.extractModuleId(filePath, searchPath);
           const module = await this.loader.loadModule(filePath, moduleId);
-          modules.push(module);
+          discovered.push({ module, filePath });
         } catch (error) {
           // Log error but continue discovery
           const message =
@@ -96,7 +101,7 @@ export class ModuleDiscovery {
         );
       }
 
-      return modules;
+      return discovered;
     } catch (error) {
       if (error instanceof Error) {
         throw new DiscoveryError(error.message, [basePath]);
@@ -122,6 +127,37 @@ export class ModuleDiscovery {
     }
 
     return allFiles;
+  }
+
+  /**
+   * Discover all .component.ts files in given paths
+   * Components are shared reusable pieces that can be imported into modules
+   * They are NOT indexed in the registry - they exist only for composition
+   * @param paths - Array of directory paths to search
+   * @returns Array of component file paths
+   */
+  async discoverComponents(paths: string[]): Promise<string[]> {
+    const COMPONENT_EXTENSIONS = ['.component.ts'];
+    const allFiles: string[] = [];
+
+    for (const path of paths) {
+      for (const extension of COMPONENT_EXTENSIONS) {
+        const pattern = join(path, '**', `*${extension}`);
+        const files = await glob(pattern, { nodir: true });
+        allFiles.push(...files);
+      }
+    }
+
+    return allFiles;
+  }
+
+  /**
+   * Check if a file path is a component file
+   * @param filePath - Path to check
+   * @returns true if file is a .component.ts file
+   */
+  isComponentFile(filePath: string): boolean {
+    return filePath.endsWith('.component.ts');
   }
 
   /**
