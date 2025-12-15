@@ -2,8 +2,6 @@
 
 A CLI tool for composing, managing, and building modular AI assistant instructions using the Unified Module System (UMS) v2.0 TypeScript format.
 
-> **Status:** the CLI is in the middle of a UMS v1 → v2 migration. The commands documented below reflect the currently implemented, TypeScript-first behaviors.
-
 **Package name**: `ums-cli`
 **Binary commands**: `copilot-instructions`, `ums`
 
@@ -22,19 +20,36 @@ Most commands expect module discovery to be configured through a `modules.config
 ### Build Instructions
 
 ```bash
-# Build from persona file
+# Build from persona file (outputs to stdout)
 copilot-instructions build --persona ./personas/my-persona.persona.ts
-# or: ums build --persona ./personas/my-persona.persona.ts
 
-# Build with custom output
+# Build with custom output file
 copilot-instructions build --persona ./personas/my-persona.persona.ts --output ./dist/instructions.md
+
+# Build with verbose output
+copilot-instructions build --persona ./personas/my-persona.persona.ts --output ./dist/instructions.md --verbose
+
+# Build with TypeScript declaration files
+copilot-instructions build --persona ./personas/my-persona.persona.ts --output ./dist/instructions.md --emit-declarations
 ```
 
-Requirements:
+**Options:**
+
+- `--persona, -p <file>` — Path to the persona configuration file (`.persona.ts`). **Required.**
+- `--output, -o <file>` — Specify the output file for the build. If omitted, outputs to stdout.
+- `--verbose, -v` — Enable verbose output with detailed progress.
+- `--emit-declarations, -e` — Emit TypeScript declaration files (`.d.ts`) for modules.
+
+**Output files (when `--output` is specified):**
+
+- `<output>.md` — The compiled persona instructions in Markdown format.
+- `<output>.build.json` — A JSON build report with metadata about the build.
+- `declarations/` — TypeScript declaration files (when `--emit-declarations` is used).
+
+**Requirements:**
 
 - The persona must be a TypeScript `.persona.ts` file that exports a UMS v2.0 `Persona` object.
-- All referenced modules must be discoverable through `modules.config.yml` (there is no implicit `instructions-modules/` fallback).
-- Standard input piping is **not** supported yet; pass `--persona` explicitly.
+- All referenced modules must be discoverable through `modules.config.yml`.
 
 ### List Modules
 
@@ -42,9 +57,10 @@ Requirements:
 # List all modules
 copilot-instructions list
 
-# Filter by cognitive level
+# Filter by cognitive level (numeric or enum name)
 copilot-instructions list --level 0
 copilot-instructions list --level 2,3
+copilot-instructions list --level UNIVERSAL_PATTERNS
 
 # Filter by capability
 copilot-instructions list --capability testing
@@ -55,12 +71,21 @@ copilot-instructions list --domain typescript
 
 # Filter by tags
 copilot-instructions list --tag best-practices
+copilot-instructions list --tag tdd
 
 # Combine multiple filters
 copilot-instructions list --level 2 --capability testing --domain typescript
 ```
 
-Lists modules resolved through `modules.config.yml` with optional filtering by cognitive level (0-6), capabilities, domain, or tags.
+**Options:**
+
+- `--level, -l <levels>` — Filter by cognitive level (numeric 0-6 or enum name, comma-separated).
+- `--capability, -c <capabilities>` — Filter by capabilities (comma-separated).
+- `--domain, -d <domains>` — Filter by domains (comma-separated).
+- `--tag, -t <tags>` — Filter by tags (comma-separated).
+- `--verbose, -v` — Enable verbose output.
+
+Lists modules resolved through `modules.config.yml` with optional filtering. Results are sorted by module name.
 
 ### Search Modules
 
@@ -75,52 +100,101 @@ copilot-instructions search "async" --domain typescript
 
 # Combine multiple filters
 copilot-instructions search "pattern" --level 2,3 --capability architecture
+copilot-instructions search "testing" --capability quality-assurance --tag tdd
 ```
 
-Performs a case-insensitive substring search across module metadata (name, description, semantic, tags) for all modules discovered via `modules.config.yml`. Supports filtering by cognitive level, capabilities, domain, and tags.
+**Options:**
+
+- `<query>` — Search query (required argument).
+- `--level, -l <levels>` — Filter by cognitive level (numeric or enum name, comma-separated).
+- `--capability, -c <capabilities>` — Filter by capabilities (comma-separated).
+- `--domain, -d <domains>` — Filter by domains (comma-separated).
+- `--tag, -t <tags>` — Filter by tags (comma-separated).
+- `--verbose, -v` — Enable verbose output.
+
+Performs a case-insensitive substring search across module metadata (name, description, and tags) for all modules discovered via `modules.config.yml`.
 
 ### Validate
 
 ```bash
-# Validation entry point (prints TypeScript guidance)
+# Validate all modules and personas
 copilot-instructions validate
 
-# Verbose mode (adds extra tips)
+# Validate a specific path
+copilot-instructions validate ./instructions-modules
+copilot-instructions validate ./personas/my-persona.persona.ts
+
+# Verbose mode (shows detailed validation steps and warnings)
 copilot-instructions validate --verbose
 ```
 
-At present the command emits instructions for running `tsc --noEmit`. Runtime validation for UMS v2.0 modules/personas is on the roadmap.
+**Options:**
+
+- `[path]` — Path to validate (file or directory). Defaults to current directory (`.`).
+- `--verbose, -v` — Enable verbose output with detailed validation steps.
+
+Performs runtime validation of UMS v2.0 modules and personas, checking:
+
+- Module structure and required fields
+- Persona composition and module references
+- UMS v2.0 specification compliance
+
+Displays a summary of valid/invalid modules and personas, with detailed error messages for any failures.
 
 ### Inspect Registry
 
 ```bash
-# Inspect registry summary
+# Inspect registry overview
 copilot-instructions inspect
 
-# Show only conflicts
+# Show only modules with conflicts
 copilot-instructions inspect --conflicts-only
 
-# Inspect a single module ID
+# Show registry sources summary
+copilot-instructions inspect --sources
+
+# Inspect a specific module
 copilot-instructions inspect --module-id foundation/design/user-centric-thinking
 
-# Emit JSON for tooling
+# Output as JSON for tooling
 copilot-instructions inspect --format json
+
+# Verbose mode with additional details
+copilot-instructions inspect --verbose
 ```
 
-Provides visibility into the module registry created from discovery, including conflict diagnostics and source annotations.
+**Options:**
+
+- `--module-id, -m <id>` — Inspect a specific module for conflicts.
+- `--conflicts-only, -c` — Show only modules with conflicts.
+- `--sources, -s` — Show registry sources summary.
+- `--format, -f <format>` — Output format: `table` (default) or `json`.
+- `--verbose, -v` — Enable verbose output with detailed information.
+
+Provides visibility into the module registry created from discovery, including:
+
+- Registry overview (total modules, entries, conflicts, sources)
+- Conflict diagnostics with source annotations
+- Resolution strategy results
 
 ### MCP Development Helpers
 
-The `mcp` command group wraps developer utilities for the MCP server bundled with this repository:
+> **Note:** MCP commands are currently stubs and not yet implemented. They are placeholders for future MCP server integration.
 
 ```bash
 copilot-instructions mcp start --transport stdio
+copilot-instructions mcp start --transport http --debug
 copilot-instructions mcp test --verbose
 copilot-instructions mcp validate-config
 copilot-instructions mcp list-tools
 ```
 
-These commands are primarily used when iterating on the MCP server in `packages/ums-mcp`.
+**Available subcommands:**
+
+- `mcp start` — Start the MCP server (options: `--transport <stdio|http|sse>`, `--debug`, `--verbose`).
+- `mcp test` — Test MCP server with sample requests.
+- `mcp validate-config` — Validate Claude Desktop MCP configuration.
+- `mcp list-tools` — List available MCP tools.
 
 ## Configuration
 
@@ -129,29 +203,31 @@ The CLI resolves modules exclusively through `modules.config.yml`. A minimal exa
 ```yaml
 conflictStrategy: warn
 localModulePaths:
-    - path: ./instructions-modules-v2
-        onConflict: replace
-    - path: ./overrides
+  - path: ./instruct-modules-v2
+    onConflict: replace
+  - path: ./overrides
 ```
 
-- Omit `conflictStrategy` to default to `error`.
-- Each `localModulePaths` entry must point to a directory containing `.module.ts` files.
-- Paths are resolved relative to the current working directory.
-- Standard-library modules are not loaded automatically; include them explicitly if needed.
+- `conflictStrategy` — How to handle module conflicts globally (`error` or `warn`). Defaults to `error`.
+- `localModulePaths` — Array of module directories to discover.
+  - `path` — Directory containing `.module.ts` files.
+  - `onConflict` — Override strategy for this path (`replace`, `skip`, etc.).
+
+Paths are resolved relative to the current working directory.
 
 ## Features
 
 - ✅ **TypeScript-first builds**: Render UMS v2.0 personas by composing `.module.ts` files
 - ✅ **Config-driven discovery**: Load modules via `modules.config.yml` with conflict strategies
+- ✅ **Runtime validation**: Validate modules and personas against UMS v2.0 specification
 - ✅ **Registry inspection**: Diagnose conflicts and sources with `inspect`
-- ✅ **MCP tooling**: Run and probe the bundled MCP server from the CLI
-- ⚠️ **Validation via TypeScript**: Use `tsc --noEmit`; dedicated runtime validation is still on the roadmap
+- ✅ **Flexible filtering**: Filter modules by cognitive level, capability, domain, or tags
+- ⚠️ **MCP tooling**: MCP server commands are stubs (not yet implemented)
 
 ### Limitations
 
-- Standard input builds are not yet supported—always supply `--persona`.
-- Module discovery currently ignores implicit standard libraries; configure every path explicitly.
-- Runtime validation for UMS v2.0 modules/personas is pending future iterations.
+- Standard input (stdin) builds are not supported—always supply `--persona`.
+- Module discovery requires explicit configuration via `modules.config.yml`.
 
 ## Project Structure
 
@@ -160,7 +236,7 @@ The CLI expects this directory structure:
 ```
 your-project/
 ├── modules.config.yml             # Discovery configuration (required)
-├── instruct-modules-v2/           # One or more module directories listed in config
+├── instruct-modules-v2/           # Module directories listed in config
 │   ├── modules/                   # Organized by domain/category
 │   │   ├── communication/
 │   │   ├── testing/
@@ -170,11 +246,11 @@ your-project/
     └── my-persona.persona.ts
 ```
 
-Modules are organized by domain and category rather than rigid tiers. Use the `cognitiveLevel` field (0-6) to indicate abstraction level.
+Modules are organized by domain and category. Use the `cognitiveLevel` field to indicate abstraction level.
 
 ## Dependencies
 
-This CLI uses the `ums-lib` library for all UMS operations, ensuring consistency and reusability.
+This CLI uses the `ums-sdk` library for module discovery, building, and validation.
 
 ## License
 
