@@ -13,7 +13,6 @@
  */
 
 import { readFile } from 'node:fs/promises';
-import { pathToFileURL } from 'node:url';
 import {
   moduleIdToExportName,
   parseModule,
@@ -25,7 +24,8 @@ import {
   ModuleNotFoundError,
   InvalidExportError,
 } from '../errors/index.js';
-import { checkFileExists } from '../utils/file-utils.js';
+import { checkFileExists, isFileNotFoundError } from '../utils/file-utils.js';
+import { filePathToUrl, formatValidationErrors } from './loader-utils.js';
 
 /**
  * Checks if an object looks like a UMS Module (duck typing).
@@ -66,7 +66,7 @@ export class ModuleLoader {
       await checkFileExists(filePath);
 
       // Convert file path to file URL for dynamic import
-      const fileUrl = pathToFileURL(filePath).href;
+      const fileUrl = filePathToUrl(filePath);
 
       // Dynamically import the TypeScript file (tsx handles compilation)
       const moduleExports = (await import(fileUrl)) as Record<string, unknown>;
@@ -120,11 +120,8 @@ export class ModuleLoader {
       // Delegate to ums-lib for full UMS v2.0 spec validation
       const validation = validateModule(parsedModule);
       if (!validation.valid) {
-        const errorMessages = validation.errors
-          .map(e => `${e.path ?? 'module'}: ${e.message}`)
-          .join('; ');
         throw new ModuleLoadError(
-          `Module validation failed: ${errorMessages}`,
+          `Module validation failed: ${formatValidationErrors(validation)}`,
           filePath
         );
       }
@@ -162,11 +159,8 @@ export class ModuleLoader {
     try {
       return await readFile(filePath, 'utf-8');
     } catch (error) {
-      if (error && typeof error === 'object' && 'code' in error) {
-        const nodeError = error as NodeJS.ErrnoException;
-        if (nodeError.code === 'ENOENT') {
-          throw new ModuleNotFoundError(filePath);
-        }
+      if (isFileNotFoundError(error)) {
+        throw new ModuleNotFoundError(filePath);
       }
       throw new ModuleLoadError(
         `Failed to read file: ${error instanceof Error ? error.message : String(error)}`,
