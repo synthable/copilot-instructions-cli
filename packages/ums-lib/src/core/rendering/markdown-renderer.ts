@@ -148,26 +148,25 @@ export function renderInstructionComponent(
   component: InstructionComponent
 ): string {
   const sections: string[] = [];
-  const { instruction } = component;
 
   // Purpose
-  if (instruction.purpose) {
-    sections.push(`## Purpose\n\n${instruction.purpose}\n`);
+  if (component.purpose) {
+    sections.push(`## Purpose\n\n${component.purpose}\n`);
   }
 
   // Process
-  if (instruction.process && instruction.process.length > 0) {
+  if (component.process && component.process.length > 0) {
     sections.push('## Process\n');
-    const steps = instruction.process.map((step, index) =>
+    const steps = component.process.map((step, index) =>
       renderProcessStep(step, index)
     );
     sections.push(steps.join('\n') + '\n');
   }
 
   // Constraints
-  if (instruction.constraints && instruction.constraints.length > 0) {
+  if (component.constraints && component.constraints.length > 0) {
     sections.push('## Constraints\n');
-    const constraints = instruction.constraints.map(constraint => {
+    const constraints = component.constraints.map(constraint => {
       if (typeof constraint === 'string') {
         return `- ${constraint}`;
       }
@@ -185,16 +184,16 @@ export function renderInstructionComponent(
   }
 
   // Principles
-  if (instruction.principles && instruction.principles.length > 0) {
+  if (component.principles && component.principles.length > 0) {
     sections.push('## Principles\n');
-    const principles = instruction.principles.map(p => `- ${p}`);
+    const principles = component.principles.map(p => `- ${p}`);
     sections.push(principles.join('\n') + '\n');
   }
 
   // Criteria (v2.1 with category grouping and notes)
-  if (instruction.criteria && instruction.criteria.length > 0) {
+  if (component.criteria && component.criteria.length > 0) {
     sections.push('## Criteria\n');
-    sections.push(renderCriteria(instruction.criteria) + '\n');
+    sections.push(renderCriteria(component.criteria) + '\n');
   }
 
   return sections.join('\n');
@@ -273,33 +272,32 @@ export function renderKnowledgeComponent(
   component: KnowledgeComponent
 ): string {
   const sections: string[] = [];
-  const { knowledge } = component;
 
   // Explanation
-  if (knowledge.explanation) {
-    sections.push(`## Explanation\n\n${knowledge.explanation}\n`);
+  if (component.explanation) {
+    sections.push(`## Explanation\n\n${component.explanation}\n`);
   }
 
   // Concepts
-  if (knowledge.concepts && knowledge.concepts.length > 0) {
+  if (component.concepts && component.concepts.length > 0) {
     sections.push('## Concepts\n');
-    for (const concept of knowledge.concepts) {
+    for (const concept of component.concepts) {
       sections.push(renderConcept(concept));
     }
   }
 
   // Examples
-  if (knowledge.examples && knowledge.examples.length > 0) {
+  if (component.examples && component.examples.length > 0) {
     sections.push('## Examples\n');
-    for (const example of knowledge.examples) {
+    for (const example of component.examples) {
       sections.push(renderExample(example));
     }
   }
 
   // Patterns
-  if (knowledge.patterns && knowledge.patterns.length > 0) {
+  if (component.patterns && component.patterns.length > 0) {
     sections.push('## Patterns\n');
-    for (const pattern of knowledge.patterns) {
+    for (const pattern of component.patterns) {
       sections.push(renderPattern(pattern));
     }
   }
@@ -422,20 +420,19 @@ export function renderPattern(pattern: Pattern): string {
  */
 export function renderDataComponent(component: DataComponent): string {
   const sections: string[] = [];
-  const { data } = component;
 
-  if (data.description) {
-    sections.push(`## Data\n\n${data.description}\n`);
+  if (component.description) {
+    sections.push(`## Data\n\n${component.description}\n`);
   } else {
     sections.push('## Data\n');
   }
 
   // Infer language from format
-  const language = inferLanguageFromFormat(data.format);
+  const language = inferLanguageFromFormat(component.format);
   const value =
-    typeof data.value === 'string'
-      ? data.value
-      : JSON.stringify(data.value, null, 2);
+    typeof component.value === 'string'
+      ? component.value
+      : JSON.stringify(component.value, null, 2);
   const codeBlock = language
     ? `\`\`\`${language}\n${value}\n\`\`\``
     : `\`\`\`\n${value}\n\`\`\``;

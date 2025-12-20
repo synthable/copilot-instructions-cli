@@ -40,23 +40,21 @@ const mockInstructionModule: Module = {
   },
   instruction: {
     type: ComponentType.Instruction,
-    instruction: {
-      purpose: 'Apply deductive reasoning principles',
-      process: [
-        'Start with general statements',
-        'Apply logical rules',
-        'Reach specific conclusions',
-      ],
-      principles: ['Always verify premises', 'Use sound logical inference'],
-      constraints: [
-        'Never assume unproven premises',
-        'Maintain logical consistency',
-      ],
-      criteria: [
-        'All steps are logically valid',
-        'Conclusions follow from premises',
-      ],
-    },
+    purpose: 'Apply deductive reasoning principles',
+    process: [
+      'Start with general statements',
+      'Apply logical rules',
+      'Reach specific conclusions',
+    ],
+    principles: ['Always verify premises', 'Use sound logical inference'],
+    constraints: [
+      'Never assume unproven premises',
+      'Maintain logical consistency',
+    ],
+    criteria: [
+      'All steps are logically valid',
+      'Conclusions follow from premises',
+    ],
   },
 };
 
@@ -73,38 +71,36 @@ const mockKnowledgeModule: Module = {
   },
   knowledge: {
     type: ComponentType.Knowledge,
-    knowledge: {
-      explanation:
-        'The Observer pattern defines a one-to-many dependency between objects.',
-      concepts: [
-        {
-          name: 'Subject',
-          description: 'The object being observed',
-          rationale: 'Centralizes state management',
-          examples: ['Event emitters', 'Observables'],
-        },
-      ],
-      examples: [
-        {
-          title: 'Basic Observer',
-          rationale: 'Simple implementation',
-          snippet: 'subject.subscribe(observer);',
-          language: 'javascript',
-        },
-      ],
-      patterns: [
-        {
-          name: 'Push vs Pull',
-          useCase: 'Data notification strategy',
-          description: 'Choose between pushing data or pulling on notification',
-          advantages: ['Push: immediate updates', 'Pull: lazy evaluation'],
-          disadvantages: [
-            'Push: unnecessary updates',
-            'Pull: additional calls',
-          ],
-        },
-      ],
-    },
+    explanation:
+      'The Observer pattern defines a one-to-many dependency between objects.',
+    concepts: [
+      {
+        name: 'Subject',
+        description: 'The object being observed',
+        rationale: 'Centralizes state management',
+        examples: ['Event emitters', 'Observables'],
+      },
+    ],
+    examples: [
+      {
+        title: 'Basic Observer',
+        rationale: 'Simple implementation',
+        snippet: 'subject.subscribe(observer);',
+        language: 'javascript',
+      },
+    ],
+    patterns: [
+      {
+        name: 'Push vs Pull',
+        useCase: 'Data notification strategy',
+        description: 'Choose between pushing data or pulling on notification',
+        advantages: ['Push: immediate updates', 'Pull: lazy evaluation'],
+        disadvantages: [
+          'Push: unnecessary updates',
+          'Pull: additional calls',
+        ],
+      },
+    ],
   },
 };
 
@@ -121,11 +117,9 @@ const mockDataModule: Module = {
   },
   data: {
     type: ComponentType.Data,
-    data: {
-      format: 'json',
-      value: { timeout: 5000, retries: 3 },
-      description: 'Default system settings',
-    },
+    format: 'json',
+    value: { timeout: 5000, retries: 3 },
+    description: 'Default system settings',
   },
 };
 
@@ -186,13 +180,11 @@ describe('renderer', () => {
     it('should handle detailed process steps', () => {
       const component: InstructionComponent = {
         type: ComponentType.Instruction,
-        instruction: {
-          purpose: 'Test purpose',
-          process: [
-            { step: 'First step', notes: ['Additional details'] },
-            'Simple step',
-          ],
-        },
+        purpose: 'Test purpose',
+        process: [
+          { step: 'First step', notes: ['Additional details'] },
+          'Simple step',
+        ],
       };
       const result = renderInstructionComponent(component);
 
@@ -203,20 +195,18 @@ describe('renderer', () => {
     it('should handle constraints with notes', () => {
       const component: InstructionComponent = {
         type: ComponentType.Instruction,
-        instruction: {
-          purpose: 'Test purpose',
-          constraints: [
-            {
-              rule: 'URLs MUST use plural nouns for collections',
-              notes: [
-                'Good: /users, /users/123, /orders',
-                'Bad: /user, /getUser, /createOrder',
-                'Rationale: REST conventions require resource-based URLs',
-              ],
-            },
-            'Simple constraint without notes',
-          ],
-        },
+        purpose: 'Test purpose',
+        constraints: [
+          {
+            rule: 'URLs MUST use plural nouns for collections',
+            notes: [
+              'Good: /users, /users/123, /orders',
+              'Bad: /user, /getUser, /createOrder',
+              'Rationale: REST conventions require resource-based URLs',
+            ],
+          },
+          'Simple constraint without notes',
+        ],
       };
       const result = renderInstructionComponent(component);
 
@@ -235,9 +225,8 @@ describe('renderer', () => {
     it('should handle criteria with categories', () => {
       const component: InstructionComponent = {
         type: ComponentType.Instruction,
-        instruction: {
-          purpose: 'Test purpose',
-          criteria: [
+        purpose: 'Test purpose',
+        criteria: [
             'All tests pass before deployment',
             {
               item: 'All endpoints MUST use HTTPS',
@@ -252,7 +241,6 @@ describe('renderer', () => {
               category: 'Performance',
             },
           ],
-        },
       };
       const result = renderInstructionComponent(component);
 
@@ -270,9 +258,8 @@ describe('renderer', () => {
     it('should handle criteria with notes', () => {
       const component: InstructionComponent = {
         type: ComponentType.Instruction,
-        instruction: {
-          purpose: 'Test purpose',
-          criteria: [
+        purpose: 'Test purpose',
+        criteria: [
             {
               item: 'Rate limiting prevents abuse',
               notes: [
@@ -283,7 +270,6 @@ describe('renderer', () => {
             },
             'Simple criterion without notes',
           ],
-        },
       };
       const result = renderInstructionComponent(component);
 
@@ -300,9 +286,8 @@ describe('renderer', () => {
     it('should handle criteria with categories and notes', () => {
       const component: InstructionComponent = {
         type: ComponentType.Instruction,
-        instruction: {
-          purpose: 'Test purpose',
-          criteria: [
+        purpose: 'Test purpose',
+        criteria: [
             'All tests pass',
             {
               item: 'Rate limiting prevents abuse',
@@ -322,7 +307,6 @@ describe('renderer', () => {
               notes: ['Test: Measure average response time over 100 requests'],
             },
           ],
-        },
       };
       const result = renderInstructionComponent(component);
 
@@ -368,10 +352,8 @@ describe('renderer', () => {
     it('should handle string values', () => {
       const component: DataComponent = {
         type: ComponentType.Data,
-        data: {
-          format: 'yaml',
-          value: 'key: value',
-        },
+        format: 'yaml',
+        value: 'key: value',
       };
       const result = renderDataComponent(component);
 

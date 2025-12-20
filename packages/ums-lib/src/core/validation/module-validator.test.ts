@@ -21,9 +21,7 @@ describe('validateModule - edge cases', () => {
     },
     instruction: {
       type: ComponentType.Instruction,
-      instruction: {
-        purpose: 'Test purpose',
-      },
+      purpose: 'Test purpose',
     },
   };
 
@@ -93,12 +91,12 @@ describe('validateModule - edge cases', () => {
         components: [
           {
             type: ComponentType.Instruction,
-            instruction: { purpose: 'From components' },
+            purpose: 'From components',
           },
         ],
         instruction: {
           type: ComponentType.Instruction,
-          instruction: { purpose: 'From shorthand' },
+          purpose: 'From shorthand',
         },
       };
 
@@ -123,12 +121,12 @@ describe('validateModule - edge cases', () => {
         components: [
           {
             type: ComponentType.Knowledge,
-            knowledge: { explanation: 'From components' },
+            explanation: 'From components',
           },
         ],
         knowledge: {
           type: ComponentType.Knowledge,
-          knowledge: { explanation: 'From shorthand' },
+          explanation: 'From shorthand',
         },
       };
 
@@ -148,12 +146,14 @@ describe('validateModule - edge cases', () => {
         components: [
           {
             type: ComponentType.Data,
-            data: { format: 'json', value: { test: true } },
+            format: 'json',
+            value: { test: true },
           },
         ],
         data: {
           type: ComponentType.Data,
-          data: { format: 'json', value: { other: true } },
+          format: 'json',
+          value: { other: true },
         },
       };
 
@@ -169,16 +169,16 @@ describe('validateModule - edge cases', () => {
         components: [
           {
             type: ComponentType.Instruction,
-            instruction: { purpose: 'From components' },
+            purpose: 'From components',
           },
         ],
         instruction: {
           type: ComponentType.Instruction,
-          instruction: { purpose: 'From shorthand instruction' },
+          purpose: 'From shorthand instruction',
         },
         knowledge: {
           type: ComponentType.Knowledge,
-          knowledge: { explanation: 'From shorthand knowledge' },
+          explanation: 'From shorthand knowledge',
         },
       };
 
@@ -291,11 +291,11 @@ describe('validateModule - edge cases', () => {
         ...baseModule,
         instruction: {
           type: ComponentType.Instruction,
-          instruction: { purpose: 'Instruction' },
+          purpose: 'Instruction',
         },
         knowledge: {
           type: ComponentType.Knowledge,
-          knowledge: { explanation: 'Knowledge' },
+          explanation: 'Knowledge',
         },
       };
 
@@ -311,15 +311,16 @@ describe('validateModule - edge cases', () => {
         ...baseModule,
         instruction: {
           type: ComponentType.Instruction,
-          instruction: { purpose: 'Instruction' },
+          purpose: 'Instruction',
         },
         knowledge: {
           type: ComponentType.Knowledge,
-          knowledge: { explanation: 'Knowledge' },
+          explanation: 'Knowledge',
         },
         data: {
           type: ComponentType.Data,
-          data: { format: 'json', value: {} },
+          format: 'json',
+          value: {},
         },
       };
 

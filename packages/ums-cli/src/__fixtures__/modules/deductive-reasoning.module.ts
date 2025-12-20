@@ -21,19 +21,17 @@ export const deductiveReasoning: Module = {
   },
   instruction: {
     type: ComponentType.Instruction,
-    instruction: {
-      purpose: 'Apply deductive reasoning to derive valid conclusions',
-      principles: [
-        'Reason from general premises to specific conclusions',
-        'Ensure validity of argument structure',
-        'Verify soundness of premises',
-      ],
-      process: [
-        'Identify the premises',
-        'Determine the logical structure',
-        'Apply inference rules',
-        'Derive the conclusion',
-      ],
-    },
+    purpose: 'Apply deductive reasoning to derive valid conclusions',
+    principles: [
+      'Reason from general premises to specific conclusions',
+      'Ensure validity of argument structure',
+      'Verify soundness of premises',
+    ],
+    process: [
+      'Identify the premises',
+      'Determine the logical structure',
+      'Apply inference rules',
+      'Derive the conclusion',
+    ],
   },
 };

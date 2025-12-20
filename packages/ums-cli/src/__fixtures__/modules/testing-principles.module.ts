@@ -21,22 +21,20 @@ export const testingPrinciples: Module = {
   },
   instruction: {
     type: ComponentType.Instruction,
-    instruction: {
-      purpose: 'Apply systematic testing principles for quality assurance',
-      principles: [
-        'Test early and test often',
-        'Write tests before implementation',
-        'Maintain comprehensive test coverage',
-        'Automate testing processes',
-      ],
-      constraints: [
-        {
-          rule: 'All public APIs MUST have unit tests',
-        },
-        {
-          rule: 'Test coverage SHOULD exceed 80%',
-        },
-      ],
-    },
+    purpose: 'Apply systematic testing principles for quality assurance',
+    principles: [
+      'Test early and test often',
+      'Write tests before implementation',
+      'Maintain comprehensive test coverage',
+      'Automate testing processes',
+    ],
+    constraints: [
+      {
+        rule: 'All public APIs MUST have unit tests',
+      },
+      {
+        rule: 'Test coverage SHOULD exceed 80%',
+      },
+    ],
   },
 };

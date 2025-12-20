@@ -21,20 +21,18 @@ export const errorHandling: Module = {
   },
   instruction: {
     type: ComponentType.Instruction,
-    instruction: {
-      purpose: 'Implement robust error handling and recovery',
-      principles: [
-        'Never swallow errors silently',
-        'Log errors with context',
-        'Recover gracefully when possible',
-        'Use typed error classes',
-      ],
-      process: [
-        'Identify potential error points',
-        'Implement try-catch blocks',
-        'Log errors appropriately',
-        'Handle or propagate errors',
-      ],
-    },
+    purpose: 'Implement robust error handling and recovery',
+    principles: [
+      'Never swallow errors silently',
+      'Log errors with context',
+      'Recover gracefully when possible',
+      'Use typed error classes',
+    ],
+    process: [
+      'Identify potential error points',
+      'Implement try-catch blocks',
+      'Log errors appropriately',
+      'Handle or propagate errors',
+    ],
   },
 };

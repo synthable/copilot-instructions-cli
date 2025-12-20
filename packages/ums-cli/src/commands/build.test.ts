@@ -92,10 +92,8 @@ describe('build command', () => {
       },
       instruction: {
         type: 'instruction',
-        instruction: {
-          purpose: 'Test goal',
-          process: ['Step 1', 'Step 2'],
-        },
+        purpose: 'Test goal',
+        process: ['Step 1', 'Step 2'],
       },
     } as Module,
     {
@@ -110,9 +108,7 @@ describe('build command', () => {
       },
       instruction: {
         type: 'instruction',
-        instruction: {
-          purpose: 'Test specification',
-        },
+        purpose: 'Test specification',
       },
     } as Module,
   ];

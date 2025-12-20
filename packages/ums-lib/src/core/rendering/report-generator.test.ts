@@ -140,9 +140,7 @@ describe('generateBuildReport', () => {
     },
     instruction: {
       type: ComponentType.Instruction,
-      instruction: {
-        purpose: 'Test purpose',
-      },
+      purpose: 'Test purpose',
     },
   };
 

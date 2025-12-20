@@ -200,21 +200,30 @@ export enum ComponentType {
 export interface InstructionComponent {
   /** The type of the component. */
   type: ComponentType.Instruction;
+  /**
+   * Optional component identifier for URI addressing.
+   * Enables precise targeting of components within modules.
+   * @example 'security-checklist', 'validation-steps'
+   */
+  id?: string;
+  /**
+   * Optional component-level tags for categorization.
+   * Allows fine-grained classification and filtering of components.
+   * @example ['api', 'validation'], ['security', 'authentication']
+   */
+  tags?: string[];
   /** Optional metadata for the component. */
   metadata?: ComponentMetadata;
-  /** The instructional content. */
-  instruction: {
-    /** A clear statement of the component's purpose. */
-    purpose: string;
-    /** An ordered list of steps to follow. */
-    process?: (string | ProcessStep)[];
-    /** A list of non-negotiable rules or boundaries. */
-    constraints?: (string | Constraint)[];
-    /** A list of guiding principles or heuristics. */
-    principles?: string[];
-    /** A checklist for verifying successful completion. */
-    criteria?: (string | Criterion)[];
-  };
+  /** A clear statement of the component's purpose. */
+  purpose: string;
+  /** An ordered list of steps to follow. */
+  process?: (string | ProcessStep)[];
+  /** A list of non-negotiable rules or boundaries. */
+  constraints?: (string | Constraint)[];
+  /** A list of guiding principles or heuristics. */
+  principles?: string[];
+  /** A checklist for verifying successful completion. */
+  criteria?: (string | Criterion)[];
 }
 
 /**
@@ -322,19 +331,28 @@ export type Criterion =
 export interface KnowledgeComponent {
   /** The type of the component. */
   type: ComponentType.Knowledge;
+  /**
+   * Optional component identifier for URI addressing.
+   * Enables precise targeting of components within modules.
+   * @example 'core-concepts', 'design-patterns'
+   */
+  id?: string;
+  /**
+   * Optional component-level tags for categorization.
+   * Allows fine-grained classification and filtering of components.
+   * @example ['architecture', 'design'], ['performance', 'optimization']
+   */
+  tags?: string[];
   /** Optional metadata for the component. */
   metadata?: ComponentMetadata;
-  /** The knowledge content. */
-  knowledge: {
-    /** A detailed explanation of the topic. */
-    explanation: string;
-    /** A list of key concepts with definitions and rationales. */
-    concepts?: Concept[];
-    /** A list of illustrative examples. */
-    examples?: Example[];
-    /** A list of common anti-patterns or pitfalls to avoid. */
-    patterns?: Pattern[];
-  };
+  /** A detailed explanation of the topic. */
+  explanation: string;
+  /** A list of key concepts with definitions and rationales. */
+  concepts?: Concept[];
+  /** A list of illustrative examples. */
+  examples?: Example[];
+  /** A list of common anti-patterns or pitfalls to avoid. */
+  patterns?: Pattern[];
 }
 
 /**
@@ -391,17 +409,26 @@ export interface Pattern {
 export interface DataComponent {
   /** The type of the component. */
   type: ComponentType.Data;
+  /**
+   * Optional component identifier for URI addressing.
+   * Enables precise targeting of components within modules.
+   * @example 'config-schema', 'api-reference'
+   */
+  id?: string;
+  /**
+   * Optional component-level tags for categorization.
+   * Allows fine-grained classification and filtering of components.
+   * @example ['configuration', 'schema'], ['api', 'reference']
+   */
+  tags?: string[];
   /** Optional metadata for the component. */
   metadata?: ComponentMetadata;
-  /** The data content. */
-  data: {
-    /** The format of the data (e.g., "json", "yaml", "xml"). */
-    format: string;
-    /** The structured data, as a string or a typed object. */
-    value: unknown;
-    /** A description of the data's purpose and format. */
-    description?: string;
-  };
+  /** The format of the data (e.g., "json", "yaml", "xml"). */
+  format: string;
+  /** The structured data, as a string or a typed object. */
+  value: unknown;
+  /** A description of the data's purpose and format. */
+  description?: string;
 }
 
 /**

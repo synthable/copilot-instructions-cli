@@ -24,18 +24,16 @@ describe('UMS v2.0 Module Validation', () => {
         },
         instruction: {
           type: ComponentType.Instruction,
-          instruction: {
-            purpose:
-              'Define mandatory rules to ensure each component addresses a single responsibility.',
-            constraints: [
-              'Components MUST encapsulate a single responsibility.',
-              'Dependencies MUST flow in one direction.',
-            ],
-            principles: [
-              'Identify distinct concerns',
-              'Separate interface from implementation',
-            ],
-          },
+          purpose:
+            'Define mandatory rules to ensure each component addresses a single responsibility.',
+          constraints: [
+            'Components MUST encapsulate a single responsibility.',
+            'Dependencies MUST flow in one direction.',
+          ],
+          principles: [
+            'Identify distinct concerns',
+            'Separate interface from implementation',
+          ],
         },
       };
 
@@ -59,25 +57,23 @@ describe('UMS v2.0 Module Validation', () => {
         },
         knowledge: {
           type: ComponentType.Knowledge,
-          knowledge: {
-            explanation:
-              'The Observer pattern defines a one-to-many dependency between objects.',
-            concepts: [
-              {
-                name: 'Subject',
-                description: 'The object being observed',
-                rationale: 'Centralizes state management',
-              },
-            ],
-            examples: [
-              {
-                title: 'Basic Observer',
-                rationale: 'Simple implementation',
-                snippet: 'subject.subscribe(observer);',
-                language: 'javascript',
-              },
-            ],
-          },
+          explanation:
+            'The Observer pattern defines a one-to-many dependency between objects.',
+          concepts: [
+            {
+              name: 'Subject',
+              description: 'The object being observed',
+              rationale: 'Centralizes state management',
+            },
+          ],
+          examples: [
+            {
+              title: 'Basic Observer',
+              rationale: 'Simple implementation',
+              snippet: 'subject.subscribe(observer);',
+              language: 'javascript',
+            },
+          ],
         },
       };
 
@@ -100,11 +96,9 @@ describe('UMS v2.0 Module Validation', () => {
         },
         data: {
           type: ComponentType.Data,
-          data: {
-            format: 'json',
-            value: { targets: [{ name: 'linux-x64', node: '20.x' }] },
-            description: 'Supported build targets',
-          },
+          format: 'json',
+          value: { targets: [{ name: 'linux-x64', node: '20.x' }] },
+          description: 'Supported build targets',
         },
       };
 
@@ -128,22 +122,18 @@ describe('UMS v2.0 Module Validation', () => {
         components: [
           {
             type: ComponentType.Instruction,
-            instruction: {
-              purpose: 'Ensure comprehensive test coverage',
-              process: ['Write unit tests', 'Write integration tests'],
-            },
+            purpose: 'Ensure comprehensive test coverage',
+            process: ['Write unit tests', 'Write integration tests'],
           },
           {
             type: ComponentType.Knowledge,
-            knowledge: {
-              explanation: 'Testing pyramid concept',
-              concepts: [
-                {
-                  name: 'Test Pyramid',
-                  description: 'More unit tests, fewer E2E tests',
-                },
-              ],
-            },
+            explanation: 'Testing pyramid concept',
+            concepts: [
+              {
+                name: 'Test Pyramid',
+                description: 'More unit tests, fewer E2E tests',
+              },
+            ],
           },
         ],
       };
@@ -167,9 +157,7 @@ describe('UMS v2.0 Module Validation', () => {
         },
         instruction: {
           type: ComponentType.Instruction,
-          instruction: {
-            purpose: 'Test purpose',
-          },
+          purpose: 'Test purpose',
         },
       } as Module;
 
@@ -196,9 +184,7 @@ describe('UMS v2.0 Module Validation', () => {
         },
         instruction: {
           type: ComponentType.Instruction,
-          instruction: {
-            purpose: 'Test purpose',
-          },
+          purpose: 'Test purpose',
         },
       } as Module;
 
@@ -224,9 +210,7 @@ describe('UMS v2.0 Module Validation', () => {
         },
         instruction: {
           type: ComponentType.Instruction,
-          instruction: {
-            purpose: 'Test purpose',
-          },
+          purpose: 'Test purpose',
         },
       } as Module;
 
@@ -287,11 +271,11 @@ describe('UMS v2.0 Module Validation', () => {
         },
         instruction: {
           type: ComponentType.Instruction,
-          instruction: { purpose: 'Test' },
+          purpose: 'Test',
         },
         knowledge: {
           type: ComponentType.Knowledge,
-          knowledge: { explanation: 'Test' },
+          explanation: 'Test',
         },
       } as unknown as Module;
 
@@ -318,10 +302,8 @@ describe('UMS v2.0 Module Validation', () => {
         },
         instruction: {
           type: ComponentType.Instruction,
-          instruction: {
-            purpose: 'Old refactoring approach',
-            process: ['Old step 1', 'Old step 2'],
-          },
+          purpose: 'Old refactoring approach',
+          process: ['Old step 1', 'Old step 2'],
         },
       };
 
@@ -352,10 +334,8 @@ describe('UMS v2.0 Module Validation', () => {
         },
         instruction: {
           type: ComponentType.Instruction,
-          instruction: {
-            purpose: 'Test purpose',
-            process: ['Test step'],
-          },
+          purpose: 'Test purpose',
+          process: ['Test step'],
         },
       };
 
@@ -382,10 +362,8 @@ describe('UMS v2.0 Module Validation', () => {
         },
         instruction: {
           type: ComponentType.Instruction,
-          instruction: {
-            purpose: 'Test purpose',
-            process: ['Test step'],
-          },
+          purpose: 'Test purpose',
+          process: ['Test step'],
         },
       };
 
@@ -411,9 +389,7 @@ describe('UMS v2.0 Module Validation', () => {
         },
         instruction: {
           type: ComponentType.Instruction,
-          instruction: {
-            purpose: 'Test purpose',
-          },
+          purpose: 'Test purpose',
         },
       };
 
@@ -439,9 +415,7 @@ describe('UMS v2.0 Module Validation', () => {
         },
         instruction: {
           type: ComponentType.Instruction,
-          instruction: {
-            purpose: 'Test purpose',
-          },
+          purpose: 'Test purpose',
         },
       } as Module;
 
@@ -465,9 +439,7 @@ describe('UMS v2.0 Module Validation', () => {
         },
         instruction: {
           type: ComponentType.Instruction,
-          instruction: {
-            purpose: 'Test purpose',
-          },
+          purpose: 'Test purpose',
         },
       };
 
@@ -490,31 +462,29 @@ describe('UMS v2.0 Module Validation', () => {
         },
         instruction: {
           type: ComponentType.Instruction,
-          instruction: {
-            purpose: 'Ensure comprehensive test coverage',
-            process: [
-              'Write unit tests',
-              {
-                step: 'Write integration tests',
-                notes: ['Focus on API contracts'],
-              },
-            ],
-            constraints: [
-              'All tests MUST pass before deployment',
-              {
-                rule: 'Coverage MUST exceed 80%',
-                notes: ['Use nyc or vitest coverage tools'],
-              },
-            ],
-            principles: ['Test early and often', 'Write tests first'],
-            criteria: [
-              'All critical paths covered',
-              {
-                item: 'Performance tests MUST be included',
-                category: 'Testing',
-              },
-            ],
-          },
+          purpose: 'Ensure comprehensive test coverage',
+          process: [
+            'Write unit tests',
+            {
+              step: 'Write integration tests',
+              notes: ['Focus on API contracts'],
+            },
+          ],
+          constraints: [
+            'All tests MUST pass before deployment',
+            {
+              rule: 'Coverage MUST exceed 80%',
+              notes: ['Use nyc or vitest coverage tools'],
+            },
+          ],
+          principles: ['Test early and often', 'Write tests first'],
+          criteria: [
+            'All critical paths covered',
+            {
+              item: 'Performance tests MUST be included',
+              category: 'Testing',
+            },
+          ],
         },
       };
 
