@@ -9,7 +9,12 @@ import { ModuleNotFoundError } from '../errors/index.js';
  * Type guard to check if an error is a NodeJS ErrnoException
  */
 function isNodeError(error: unknown): error is NodeJS.ErrnoException {
-  return error !== null && typeof error === 'object' && 'code' in error;
+  return (
+    error !== null &&
+    typeof error === 'object' &&
+    'code' in error &&
+    typeof (error as { code: unknown }).code === 'string'
+  );
 }
 
 /**

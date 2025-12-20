@@ -30,6 +30,11 @@ describe('file-utils', () => {
       expect(isFileNotFoundError(error)).toBe(false);
     });
 
+    it('should return false for errors with non-string code property', () => {
+      const error = Object.assign(new Error('Error'), { code: 123 });
+      expect(isFileNotFoundError(error)).toBe(false);
+    });
+
     it('should return false for null', () => {
       expect(isFileNotFoundError(null)).toBe(false);
     });
