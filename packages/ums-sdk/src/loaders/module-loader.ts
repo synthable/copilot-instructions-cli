@@ -121,7 +121,7 @@ export class ModuleLoader {
       const validation = validateModule(parsedModule);
       if (!validation.valid) {
         throw new ModuleLoadError(
-          `Module validation failed: ${formatValidationErrors(validation)}`,
+          `Module validation failed: ${formatValidationErrors(validation, 'module')}`,
           filePath
         );
       }
