@@ -12,27 +12,38 @@ import { join } from 'path';
 import { glob } from 'glob';
 
 /**
- * Reads a persona file and returns its content as a string
+ * Extracts error message from unknown error type
  */
-export async function readPersonaFile(path: string): Promise<string> {
+function getErrorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : String(error);
+}
+
+/**
+ * Generic file read operation with error handling
+ */
+async function readFileWithContext(
+  path: string,
+  context: string
+): Promise<string> {
   try {
     return await readFileAsync(path, 'utf-8');
   } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    throw new Error(`Failed to read persona file '${path}': ${message}`);
+    throw new Error(`Failed to read ${context} '${path}': ${getErrorMessage(error)}`);
   }
+}
+
+/**
+ * Reads a persona file and returns its content as a string
+ */
+export async function readPersonaFile(path: string): Promise<string> {
+  return readFileWithContext(path, 'persona file');
 }
 
 /**
  * Reads a module file and returns its content as a string
  */
 export async function readModuleFile(path: string): Promise<string> {
-  try {
-    return await readFileAsync(path, 'utf-8');
-  } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    throw new Error(`Failed to read module file '${path}': ${message}`);
-  }
+  return readFileWithContext(path, 'module file');
 }
 
 /**
@@ -45,8 +56,7 @@ export async function writeOutputFile(
   try {
     await writeFileAsync(path, content, 'utf-8');
   } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    throw new Error(`Failed to write output file '${path}': ${message}`);
+    throw new Error(`Failed to write output file '${path}': ${getErrorMessage(error)}`);
   }
 }
 
@@ -66,9 +76,8 @@ export async function discoverModuleFiles(paths: string[]): Promise<string[]> {
         allFiles.push(...files);
       }
     } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
       throw new Error(
-        `Failed to discover modules in path '${path}': ${message}`
+        `Failed to discover modules in path '${path}': ${getErrorMessage(error)}`
       );
     }
   }

@@ -12,10 +12,10 @@
  * - Validation (UMS v2.0 spec compliance)
  */
 
-import { pathToFileURL } from 'node:url';
 import { parsePersona, validatePersona, type Persona } from 'ums-lib';
 import { ModuleLoadError, ModuleNotFoundError } from '../errors/index.js';
 import { checkFileExists } from '../utils/file-utils.js';
+import { filePathToUrl, formatValidationErrors } from './loader-utils.js';
 
 /**
  * PersonaLoader - Loads and validates TypeScript persona files
@@ -34,7 +34,7 @@ export class PersonaLoader {
       await checkFileExists(filePath);
 
       // Convert file path to file URL for dynamic import
-      const fileUrl = pathToFileURL(filePath).href;
+      const fileUrl = filePathToUrl(filePath);
 
       // Dynamically import the TypeScript file
       const personaExports = (await import(fileUrl)) as Record<string, unknown>;
@@ -69,11 +69,8 @@ export class PersonaLoader {
       // Delegate to ums-lib for full UMS v2.0 spec validation
       const validation = validatePersona(parsedPersona);
       if (!validation.valid) {
-        const errorMessages = validation.errors
-          .map(e => `${e.path ?? 'persona'}: ${e.message}`)
-          .join('; ');
         throw new ModuleLoadError(
-          `Persona validation failed: ${errorMessages}`,
+          `Persona validation failed: ${formatValidationErrors(validation, 'persona')}`,
           filePath
         );
       }
