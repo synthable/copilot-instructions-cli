@@ -9,12 +9,22 @@
   },
   "author": "synthable",
   "license": "GPL-3.0-or-later",
-  "description": "MCP server for UMS v2.0 - AI assistant integration",
+  "description": "MCP server for UMS v2.0 - AI assistant integration for module discovery and persona building",
   "scripts": {
     "build": "tsc --build --incremental --pretty",
-    "clean": "rm -rf dist"
+    "clean": "rm -rf dist",
+    "start": "node dist/index.js",
+    "dev": "tsx watch src/index.ts",
+    "test": "vitest run --run",
+    "test:coverage": "vitest run --coverage",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "ums-sdk": "^1.0.0"
+    "@modelcontextprotocol/sdk": "^1.11.0",
+    "ums-sdk": "^1.0.0",
+    "zod": "^3.24.0"
+  },
+  "devDependencies": {
+    "tsx": "^4.20.6"
   }
 }
